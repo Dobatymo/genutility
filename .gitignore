@@ -1,0 +1,25 @@
+*.bak
+unicode_categories.pkl
+upload.bat
+
+testfiles/
+testtemp/
+others/
+
+__pycache__/
+*.py[cod]
+*.egg-info
+build/
+dist/
+
+# C extensions
+*.so
+*.o
+*.exe
+*.dll
+
+# codeblocks
+*.layout
+*.depend
+bin/
+obj/

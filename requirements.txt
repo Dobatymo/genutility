@@ -1,0 +1,19 @@
+future
+
+aiohttp
+bencode.py # bencode
+ctypes-windows-sdk
+flask
+netifaces
+nltk
+opencv-python # cv2
+orderedset
+PyPDF2
+pypiwin32 # win32evtlog, winerror
+rhash
+toml
+unidecode
+werkzeug
+wmi
+wxasync
+wxPython # wx

@@ -1,0 +1,9 @@
+﻿[MASTER]
+jobs=4
+
+[FORMAT]
+indent-string=\t
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable=missing-docstring,line-too-long,bad-continuation,invalid-name,multiple-imports,useless-object-inheritance,wrong-import-order
