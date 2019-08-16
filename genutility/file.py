@@ -1,13 +1,19 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from io import open, TextIOBase, SEEK_SET, SEEK_END
+import os.path
+from sys import version_info
+from io import open, TextIOWrapper, TextIOBase, RawIOBase, BufferedIOBase, SEEK_SET, SEEK_END
 from typing import TYPE_CHECKING
 
 from .iter import iter_equal, consume, resizer
 from .math import PosInfInt
+from .ops import logical_xor, logical_implication
+
+if __debug__:
+	from .compat import gzip, bz2
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Optional, IO
+	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
@@ -54,6 +60,72 @@ def truncate_file(path, size):
 	with open(path, "r+b") as fp:
 		fp.truncate(size)
 
+def wrap_text(bf, mode, encoding, errors, newline):
+	if "t" in mode:
+		return TextIOWrapper(bf, encoding, errors, newline)
+	return bf
+
+def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9):
+	# type: (str, str, Optional[str], Optional[str], Optional[str]) -> IO
+
+	"""
+	`compresslevel`: 0-9, 0: no compression, 1: least, 9: highest compression
+	"""
+
+	is_text = "t" in mode
+	is_binary = "b" in mode
+
+	assert logical_xor(is_text, is_binary), "Explicit text or binary mode required: {}".format(mode)
+	assert logical_implication(is_binary, encoding is None and errors is None)
+
+	if is_text:
+		encoding = encoding or "utf-8"
+		errors = errors or "strict"
+
+	ext = os.path.splitext(file)[1].lower()
+	if ext == '.gz':
+		from .compat import gzip
+		return gzip.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
+
+	elif ext == '.bz2':
+		from .compat import bz2
+		return bz2.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
+
+	elif ext == '.zip':
+		assert archive_file, "archive_file must be specified"
+		from zipfile import ZipFile
+
+		newmode = "".join(set(mode) - {"t", "b"})
+
+		with ZipFile(file, newmode) as zf: # note: even if the outer zip file is closed, the inner file can still be read apparently
+			if version_info >= (3, 6):
+				bf = zf.open(archive_file, newmode, force_zip64=True)
+			else:
+				bf = zf.open(archive_file, newmode)
+
+		return wrap_text(bf, mode, encoding, errors, newline)
+
+	return open(file, mode, encoding=encoding, errors=errors, newline=newline)
+
+class PathOrBinaryIO(object):
+
+	def __init__(self, fname, mode="rb", close=False):
+		# type: (Union[str, BinaryIO],  str, str, str, Optional[str], bool) -> None
+
+		if isinstance(fname, (RawIOBase, BufferedIOBase)):
+			self._close = close
+			self.fp = fname
+		else:
+			self._close = True
+			self.fp = copen(fname, mode)
+
+	def __enter__(self):
+		return self.fp
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if self._close:
+			self.fp.close()
+
 class PathOrTextIO(object):
 
 	def __init__(self, fname, mode="rt", encoding="utf-8", errors="strict", newline=None, close=False):
@@ -64,7 +136,7 @@ class PathOrTextIO(object):
 			self.fp = fname
 		else:
 			self.close = True
-			self.fp = open(fname, mode, encoding=encoding, errors=errors, newline=newline)
+			self.fp = copen(fname, mode, encoding=encoding, errors=errors, newline=newline)
 
 	def __enter__(self):
 		return self.fp
