@@ -7,7 +7,7 @@ from itertools import chain
 from genutility.test import MyTestCase, parametrize
 from genutility.iter import (product_range_repeat, every_n, any_in_common, split, remove_all_dupes,
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
-	pairwise, resizer, filternone, all_equal, advance, batch, empty)
+	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys)
 
 try:
 	from unittest import mock
@@ -277,6 +277,37 @@ class IterTest(MyTestCase):
 	def test_iter_equal(self, its, truth):
 		result = iter_equal(*its)
 		self.assertEqual(truth, result)
+
+	@parametrize(
+		([], []),
+		([1, 2, 1], [2, 1]),
+		([2, 1, 2], [2, 2]),
+		([1, 2, 3], [3]),
+		([3, 2, 1], [3, 2, 1]),
+	)
+	def test_asc_peaks(self, it, truth):
+		result = asc_peaks(it)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		([1, 2, 3], [3]),
+		([3, 2, 1], [3]),
+		([1, 2, 3, 2, 1], [3]),
+		([3, 2, 1, 2, 3], [3, 3]),
+	)
+	def test_peaks(self, it, truth):
+		result = peaks(it)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		([1, 2, 3], [1]),
+		([3, 2, 1], [1]),
+		([1, 2, 3, 2, 1], [1, 1]),
+		([3, 2, 1, 2, 3], [1]),
+	)
+	def test_valleys(self, it, truth):
+		result = valleys(it)
+		self.assertIterEqual(truth, result)
 
 if __name__ == "__main__":
 	import unittest

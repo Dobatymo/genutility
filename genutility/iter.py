@@ -5,7 +5,7 @@ from builtins import zip, range
 
 import logging
 from collections import deque
-from itertools import groupby, chain, tee, islice, count, combinations, product as cross_product
+from itertools import groupby, chain, tee, islice, count, combinations, product
 from operator import add
 from types import GeneratorType
 from typing import TYPE_CHECKING
@@ -18,6 +18,65 @@ if TYPE_CHECKING:
 	T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
+def diffsgn(a, b):
+	# type: (Number, Number) -> int
+
+	""" Sign of the finite derivative.
+		Equal to `-cmp(a, b)` or `cmp(b, a).
+	"""
+
+	return (a < b) - (a > b)
+
+def asc_peaks(iterable):
+	# type: (Iterable[T], ) -> Iterator[T]
+
+	""" Yields ascending peaks from `iterable`. """
+
+	it = iter(iterable)
+	try:
+		cur = next(it)
+	except StopIteration:
+		return
+
+	for x in it:
+		if x < cur:
+			yield cur
+		cur = x
+	yield cur
+
+def extrema(iterable, first=None, last=None, derivatives={1, -1}):
+	it = iter(iterable)
+	old = next(it)
+	old_d = diffsgn(old, next(it))
+
+	if old_d == first:
+		yield old
+
+	for new in it:
+		new_d = diffsgn(old, new)
+		if new_d != old_d and old_d in derivatives:
+			yield old
+		old = new
+		old_d = new_d
+
+	if old_d == last:
+		yield old
+
+def peaks(it):
+	# type: (Iterable[T], ) -> Iterator[T]
+
+	""" Yields peaks of `it`. """
+
+	return extrema(it, -1, 1, {1})
+
+def valleys(it):
+	# type: (Iterable[T], ) -> Iterator[T]
+
+	""" Yields valleys of `it`. """
+
+	return extrema(it, 1, -1, {-1})
 
 def empty():
 	# type: () -> Iterator
@@ -263,7 +322,7 @@ def product_range_repeat(depth, args):
 		Can replace higher dimensional for-in-range loops.
 	"""
 
-	return cross_product(tuple(range(*args)), repeat=depth)
+	return product(tuple(range(*args)), repeat=depth)
 
 def powerset(it):
 	# type: (Iterable[T], ) -> Iterator[Tuple[T, ...]]
@@ -278,7 +337,7 @@ def any_in_common(a, b):
 
 	""" Tests if iterables `a` and `b` have any elements in common. """
 
-	return any(i == j for i, j in cross_product(a, b))
+	return any(i == j for i, j in product(a, b))
 
 # had cmp=b"\0" default before
 def all_equal_to(iterable, cmp):

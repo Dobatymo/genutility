@@ -11,6 +11,18 @@ if TYPE_CHECKING:
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
+def decompress(selectors, data, default):
+	# type: (np.ndarray[bool], np.ndarray[T], T) -> None
+
+	""" Same result as:
+		`np.array(list(genutility.iter.decompress(selectors, iter(data), default)))`
+		but faster
+	"""
+
+	out = np.full(len(selectors), default)
+	out[selectors] = data
+	return out
+
 def unblock(arr, n1, n2, axis1=-1, axis2=-2, blocksize=False):
 
 	""" Inverse of np.block.
