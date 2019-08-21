@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from future.utils import viewitems
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -9,6 +10,9 @@ if TYPE_CHECKING:
 	T = TypeVar("T")
 	U = TypeVar("U")
 	H = TypeVar("H", bound=Hashable)
+
+def hasvalues(d):
+	return {k:v for k, v in viewitems(d) if v}
 
 def itemgetter(it):
 	# type: (Iterable[T], ) -> Callable[[Iterable[Mapping[T, U]], Iterator[U]]
