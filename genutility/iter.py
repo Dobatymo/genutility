@@ -20,6 +20,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+def flatten(it):
+	# type: (Union[tuple, list], ) -> Iterator
+
+	for elm in it:
+		if isinstance(elm, (tuple, list)):
+			for i in flatten(elm):
+				yield i
+		else:
+			yield elm
+
 def diffsgn(a, b):
 	# type: (Number, Number) -> int
 
