@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.moves.itertools import zip_longest
-from builtins import zip, range
+from builtins import zip, map, range, reversed
 
 import logging
 from collections import deque
@@ -19,6 +19,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+def reversedzip(*its):
+	return zip(*map(reversed, its))
 
 def flatten(it):
 	# type: (Union[tuple, list], ) -> Iterator
