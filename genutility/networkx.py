@@ -1,6 +1,7 @@
+from itertools import chain
 from typing import TYPE_CHECKING
 
-from networkx import Graph
+from networkx import Graph, connected_components
 
 if TYPE_CHECKING:
 	import numpy as np
@@ -18,3 +19,7 @@ def complete_weighted_bipartite_graph(first, second, weights):
 			graph.add_edge(first[i], second[j], weight=weights[i][j])
 
 	return graph
+
+def connected_subgraph(graph, minsize=2):
+	nodelist = list(chain.from_iterable(comp for comp in connected_components(graph) if len(comp) >= minsize))
+	return graph.subgraph(nodelist)
