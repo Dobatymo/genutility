@@ -26,7 +26,7 @@ def histogram_2d(arr, levels):
 
 	assert len(arr.shape) >= 2
 
-	newshape = arr.shape[:-2] + (arr.shape[-2]*arr.shape[-1], )
+	newshape = arr.shape[:-2] + (arr.shape[-2] * arr.shape[-1], )
 	flattened = np.reshape(arr, newshape)
 	return np.apply_along_axis(np.bincount, -1, flattened, minlength=levels)
 
@@ -38,7 +38,7 @@ def block_histogram_2d(arr, bx, by, levels):
 		Output shape: [batch..., bx, by, levels]
 	"""
 
-	invx = arr.shape[-1] // bx # dimensions in unblock go from innerst to outerst
+	invx = arr.shape[-1] // bx  # dimensions in unblock go from innerst to outerst
 	invy = arr.shape[-2] // by
 	blocks = unblock(arr, invx, invy)
 	block_hists = histogram_1d(blocks, levels)

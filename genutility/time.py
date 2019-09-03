@@ -19,6 +19,43 @@ def iter_timer(it):
 	except StopIteration:
 		pass
 
+class DeltaTime(object):
+
+	__slots__ = ("start", "end")
+
+	def __init__(self):
+		# type: () -> None
+
+		self.start = None # type: Optional[float]
+		self.end = time()
+
+	def __iter__(self):
+		# type: () -> DeltaTime
+
+		return self
+
+	def __next__(self):
+		# type: () -> float
+
+		self.start, self.end = self.end, time()
+		return self.end - self.start
+
+	def get(self):
+		# type: () -> float
+
+		return time() - self.end
+
+	def reset(self):
+		# type: () -> None
+
+		self.end = time()
+
+	def get_reset(self):
+		# type: () -> float
+
+		self.start, self.end = self.end, time()
+		return self.end - self.start
+
 class PrintStatementTime(object):
 
 	__slots__ = ("tpl", "start")

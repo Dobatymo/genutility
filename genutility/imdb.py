@@ -2,6 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from io import open
 import csv
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Dict, Iterator
 
 def parse_imdb_csv(path):
 	# type: (str, ) -> Iterator[Dict[str, str]]
