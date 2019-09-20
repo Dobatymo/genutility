@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os, fcntl, signal
 
-from os_shared import _usagetuple
+from .os_shared import _usagetuple
 
 def _lock(fp, exclusive=True, block=False):
 	# type: (IO, bool, bool) -> None

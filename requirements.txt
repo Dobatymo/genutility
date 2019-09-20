@@ -1,19 +1,26 @@
 future
 
-aiohttp
+aiohttp; python_version >= '3.5'
 bencode.py # bencode
-ctypes-windows-sdk
+ctypes-windows-sdk; sys_platform == 'win32'
 flask
 netifaces
 nltk
 opencv-python # cv2
 orderedset
 PyPDF2
-pypiwin32 # win32evtlog, winerror
-rhash
+pypiwin32; sys_platform == 'win32' # win32evtlog, winerror
+rhash; sys_platform == 'win32'
 toml
 unidecode
 werkzeug
 wmi
-wxasync
-wxPython # wx
+
+#wxasync
+#wxPython # wx
+#pathlib2 # needed for wxpython at the moment
+
+typing; python_version < '3'
+scandir; python_version < '3'
+pathlib; python_version < '3'
+mock; python_version < '3'
