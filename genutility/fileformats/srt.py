@@ -30,7 +30,7 @@ def to_srt_time(t):
 	h, m = divmod(r, 60)
 	return "{:02d}:{:02d}:{:02d},{:03d}".format(int(h), int(m), int(s), int(ms))
 
-class Subtitle:
+class Subtitle(object):
 
 	def __init__(self):
 		self.num = 0
@@ -47,7 +47,7 @@ class Subtitle:
 	def append(self, line):
 		self.lines.append(line)
 
-class SRTFile:
+class SRTFile(object):
 
 	nl = "\n"
 	sep = " --> "
@@ -57,6 +57,7 @@ class SRTFile:
 		self.linenum = 0
 		self.sub_num = 0
 		self.fp = open(filename, mode, encoding=encoding, errors="replace")
+		self.overwrite_index = overwrite_index
 
 	def __enter__(self):
 		return self
@@ -70,15 +71,15 @@ class SRTFile:
 	def write_subtitle(self, subtitle):
 
 		start, end = subtitle.get_times()
-		if overwrite_index:
-			self.fp.write(str(self.sub_num) + nl)
+		if self.overwrite_index:
+			self.fp.write(str(self.sub_num) + self.nl)
 		else:
-			self.fp.write(str(subtitle.num) + nl)
-		self.fp.write(start + sep + end + nl)
+			self.fp.write(str(subtitle.num) + self.nl)
+		self.fp.write(start + self.sep + end + self.nl)
 		for line in subtitle.lines:
 			self.fp.write(line)
-			self.fp.write(nl)
-		self.fp.write(nl)
+			self.fp.write(self.nl)
+		self.fp.write(self.nl)
 		self.sub_num += 1
 
 	def read_line(self):

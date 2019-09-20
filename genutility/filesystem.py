@@ -259,7 +259,7 @@ def is_writeable(stats):
 	# type: (os.stat_result, ) -> bool
 	return stats.st_mode & stat.S_IWRITE
 
-def is_readable(stat):
+def is_readable(stats):
 	# type: (os.stat_result, ) -> bool
 	return stats.st_mode & stat.S_IREAD
 
@@ -404,7 +404,7 @@ def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
 	#rename all .ext to normal
 	for entry in scandir_rec(path, files=True, dirs=False, rec=rec, follow_symlinks=follow_symlinks):
 		filepath = entry.path
-		if filename.endswith(ext):
+		if entry.name.endswith(ext):
 			target = filepath[:-len(ext)]
 			try:
 				logger.info("Rename: %s -> %s", filepath, target)

@@ -8,7 +8,7 @@ import cv2
 from sklearn.cluster import MeanShift
 
 from .rand import rgb_colors
-from .math import degree_to_rad
+from .math import degree_to_rad, inf
 
 ## UNFINISHED
 ## BASED ON: Resizing by Symmetry-Summarization (2010)

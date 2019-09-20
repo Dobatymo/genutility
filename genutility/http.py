@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import map, str
-from future.moves.urllib import request, parse
+from future.moves.urllib import request
+from future.moves.urllib.parse import urlparse, urlsplit
 from future.moves.urllib.error import URLError
 
 import os, os.path, logging, gzip, errno, json
@@ -81,7 +82,7 @@ except ImportError:
 			return None
 
 def get_filename_from_url(url):
-	return os.path.split(parse.urlsplit(url).path)[1]
+	return os.path.split(urlsplit(url).path)[1]
 
 def get_filename_from_url_v2(url):
 	return urlparse(url)[2].split("/")[-1]
@@ -209,7 +210,7 @@ class URLRequest(object):
 				raise TimeOut("Timed out after {}s".format(self.timeout))
 
 	def _download(self, basepath, filename=None, fn_prio=None, overwrite=False, suffix=".partial", report=None):
-		# type: (str, Optional[str], Optional[Tuple[int, int, int, int]], bool, str, Optional[Callable[[int, int], None]) -> Tuple[Optional[int], str]
+		# type: (str, Optional[str], Optional[Tuple[int, int, int, int]], bool, str, Optional[Callable[[int, int], None]]) -> Tuple[Optional[int], str]
 
 		"""PermissionError: [WinError 32] Der Prozess kann nicht auf die Datei zugreifen,
 			da sie von einem anderen Prozess verwendet wird:

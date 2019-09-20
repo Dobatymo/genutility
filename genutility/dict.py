@@ -15,7 +15,7 @@ def hasvalues(d):
 	return {k:v for k, v in viewitems(d) if v}
 
 def itemgetter(it):
-	# type: (Iterable[T], ) -> Callable[[Iterable[Mapping[T, U]], Iterator[U]]
+	# type: (Iterable[T], ) -> Callable[[Mapping[T, U]], Iterator[U]]
 
 	""" Similar to `operator.itemgetter` except that it always expects and returns iterables.
 		Compare `mapmap`

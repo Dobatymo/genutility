@@ -8,17 +8,18 @@ from typing import TYPE_CHECKING
 
 from cwinsdk.shared.ehstorioctl import MAX_PATH
 from cwinsdk.shared.ntdef import PWSTR
-from cwinsdk.um.WinBase import STD_OUTPUT_HANDLE
 from cwinsdk.um.consoleapi import SetConsoleMode, GetConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
 from cwinsdk.um.consoleapi2 import CONSOLE_SCREEN_BUFFER_INFO, GetConsoleScreenBufferInfo
-from cwinsdk.um.fileapi import GetDiskFreeSpaceExW, GetVolumeInformationW, LockFileEx, UnlockFileEx
+from cwinsdk.um.fileapi import INVALID_FILE_ATTRIBUTES, GetDiskFreeSpaceExW, GetVolumeInformationW, LockFileEx, UnlockFileEx, GetFileAttributesW
 from cwinsdk.um.processenv import GetStdHandle
 from cwinsdk.um.combaseapi import CoTaskMemFree
 from cwinsdk.um.ShlObj_core import SHGetKnownFolderPath
 from cwinsdk.um.KnownFolders import FOLDERID_RoamingAppData
 from cwinsdk.um.minwinbase import LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY, OVERLAPPED
+from cwinsdk.um.WinBase import STD_OUTPUT_HANDLE
+from cwinsdk.um.winnt import FILE_ATTRIBUTE_REPARSE_POINT
 
-from .os_shared import _usagetuple, _volumeinfotuple, NoTerminal
+from .os_shared import _usagetuple, _volumeinfotuple
 
 if TYPE_CHECKING:
 	from typing import Tuple
@@ -133,23 +134,6 @@ def _disk_usage_windows(path):
 		TotalNumberOfBytes.value-FreeBytesAvailableToCaller.value,
 		FreeBytesAvailableToCaller.value
 	)
-
-def _get_terminal_size_windows():
-	# type: () -> Tuple[Tuple[int, int], Tuple[int, int]]
-
-	sbinfo = CONSOLE_SCREEN_BUFFER_INFO()
-	hconsole = get_stdout_handle()
-
-	if GetConsoleScreenBufferInfo(hconsole, byref(sbinfo)):
-		size_x = sbinfo.dwSize.X
-		size_y = sbinfo.dwSize.Y
-
-		window_x = sbinfo.srWindow.Right - sbinfo.srWindow.Left + 1
-		window_y = sbinfo.srWindow.Bottom - sbinfo.srWindow.Top + 1
-
-		return (size_x, size_y), (window_x, window_y)
-	else:
-		raise NoTerminal
 
 def _volume_info_windows(path):
 	# type: (str, ) -> _volumeinfotuple

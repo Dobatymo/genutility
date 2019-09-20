@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import sys, os, os.path
+import sys, os, os.path, logging
 
 from .filesystem import statsislink, isdir, extract_basic_stat_info
 

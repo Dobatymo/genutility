@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from builtins import map, range
-from future.utils import viewvalues
+from future.utils import viewvalues, raise_from
 
 from sys import version_info
 from functools import partial
@@ -17,6 +17,8 @@ from .exceptions import EmptyIterable
 if TYPE_CHECKING:
 	from typing import TypeVar, Comparable, Iterable, Tuple, Optional
 	C = TypeVar("C", bound=Comparable)
+
+inf = float("inf")
 
 def reciprocal(n):
 	return 1. / n

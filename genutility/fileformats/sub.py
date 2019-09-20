@@ -5,20 +5,21 @@ from io import open
 
 from ..exceptions import MalformedFile
 
-class Subtitle:
+class Subtitle(object):
 
 	def __init__(self, start, end, lines):
 		self.start = start
 		self.end = end
 		self.lines = lines
 
-class Sub:
+class Sub(object):
 	""" MicroDVD subtitle """
 
 	sep = "|"
 
-	def __init__(self, filename, mode="r", encoding="utf-8-sig"):
-		self.fp = open(infile, mode, encoding)
+	def __init__(self, path, mode="r", encoding="utf-8-sig"):
+		self.fp = open(path, mode, encoding)
+		self.current_line = 0
 
 	def __enter__(self):
 		return self
@@ -27,13 +28,14 @@ class Sub:
 		self.close()
 
 	def _readline(self):
-		line = next(self.fi).rstrip()
+		line = next(self.fp).rstrip()
+		self.current_line += 1
 
-		start, end, text = l.split("}", 2)
+		start, end, text = line.split("}", 2)
 		try:
 			start, end = int(start[1:]), int(end[1:])
 		except:
-			MalformedFile("Error in line {}: sub malformed: {}".format(i,l))
+			MalformedFile("Error in line {}: sub malformed: {}".format(self.current_line, line))
 
 		return Subtitle(start, end, text.split(self.sep))
 

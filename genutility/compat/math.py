@@ -40,6 +40,8 @@ try:
 	from math import dist
 except ImportError:
 
+	from math import sqrt
+
 	def dist(p, q):
 		return sqrt(sum((px - qx) ** 2. for px, qx in zip(p, q)))
 

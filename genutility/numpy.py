@@ -3,6 +3,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import range
 from typing import TYPE_CHECKING
 
+from future.utils import viewitems
+from collections import defaultdict
+
 import numpy as np
 
 if TYPE_CHECKING:
@@ -10,6 +13,44 @@ if TYPE_CHECKING:
 
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
+
+class UnboundedSparseMatrix(object):
+
+	def __init__(self, dtype=float):
+		self.dtype = dtype
+		self.zero = self.dtype(0)
+		self.m = dict()
+		self.cols = 0
+		self.rows = 0
+
+	def __getitem__(self, slice):
+		return self.m.get(slice, self.zero)
+
+	def __setitem__(self, slice, value):
+		c, r = slice
+		self.cols = max(self.cols, c+1)
+		self.rows = max(self.rows, r+1)
+		self.m[slice] = value
+
+	def todense(self):
+		ret = np.zeros((self.cols, self.rows), dtype=self.dtype)
+
+		for slice, value in viewitems(self.m):
+			ret[slice] = value
+
+		return ret
+
+def inf_matrix_power(pm):
+	w, v = np.linalg.eig(pm) # scipy.linalg.eig would probably by faster as it can return the left and right eigen vectors
+
+	if not np.isclose(w[0], 1.):
+		raise ValueError("The first eigenvalue is not none. Is this a right stochastic matrix?")
+
+	vi = np.linalg.inv(v)
+	d = np.zeros(m.shape[0], dtype=np.float)
+	d[0] = 1.
+
+	return v @ (np.diag(d) @ vi)
 
 def decompress(selectors, data, default):
 	# type: (np.ndarray[bool], np.ndarray[T], T) -> None

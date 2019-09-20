@@ -3,21 +3,32 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import platform
 from typing import TYPE_CHECKING
 
-from .os_shared import is_os_64bit, NoTerminal
+from .os_shared import is_os_64bit
 
 system = platform.system()
+
+def rename(func_name):
+
+	def decorator(func):
+		func.__name__ = func_name
+		return func
+
+	return decorator
 
 def _not_available(func_name):
 	# type: (str) -> None
 
-	raise OSError("{}() is not available for {}".format(func_name, system))
+	@rename(func_name)
+	def inner(*args, **kwargs):
+		raise OSError("{}() is not available for {}".format(func_name, system))
+
+	return inner
 
 if system == "Windows":
 
 	from .os_win import _lock as lock
 	from .os_win import _unlock as unlock
 	from .os_win import _disk_usage_windows as disk_usage
-	from .os_win import _get_terminal_size_windows as get_terminal_size
 	from .os_win import _volume_info_windows as volume_info
 	from .os_win import _filemanager_cmd_windows as filemanager_cmd
 	from .os_win import _get_appdata_dir as get_appdata_dir
@@ -30,7 +41,6 @@ elif system == "Linux":
 	from .os_posix import _lock as lock
 	from .os_posix import _unlock as unlock
 	from .os_posix import _disk_usage_posix as disk_usage
-	get_terminal_size = _not_available("get_terminal_size")
 	volume_info = _not_available("volume_info")
 	from .os_posix import _filemanager_cmd_posix as filemanager_cmd
 	get_appdata_dir = _not_available("get_appdata_dir")
@@ -43,7 +53,6 @@ elif system == "Darwin":
 	from .os_posix import _lock as lock
 	from .os_posix import _unlock as unlock
 	from .os_posix import _disk_usage_posix as disk_usage
-	get_terminal_size = _not_available("get_terminal_size")
 	volume_info = _not_available("volume_info")
 	from .os_mac import _filemanager_cmd_mac as filemanager_cmd
 	get_appdata_dir = _not_available("get_appdata_dir")
@@ -55,7 +64,6 @@ else:
 	lock = _not_available("lock")
 	unlock = _not_available("unlock")
 	disk_usage = _not_available("disk_usage")
-	get_terminal_size = _not_available("get_terminal_size")
 	volume_info = _not_available("volume_info")
 	filemanager_cmd = _not_available("filemanager_cmd")
 	get_appdata_dir = _not_available("get_appdata_dir")
@@ -66,7 +74,6 @@ else:
 lock.__doc__ = """ Locks access to the file (on Posix) or its contents (Windows). """
 unlock.__doc__ = """ Unlocks access to the file. """
 disk_usage.__doc__ = """ Returns (total, used, free) bytes on disk. """
-get_terminal_size.__doc__ = """ Returns the terminal buffer and window width and height. """
 volume_info.__doc__ = """ filesystem and name of the volume """
 filemanager_cmd.__doc__ = """ Returns a shell command that when executed starts the file manager of the OS. """
 get_appdata_dir.__doc__ = """ Returns the roaming appdata directory of the current user. """

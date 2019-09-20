@@ -6,6 +6,7 @@ from .twothree import FileNotFoundError
 from .compat.importlib.util import find_spec
 
 from .toml import read_toml
+from .json import read_json_schema
 from .os import get_appdata_dir
 
 if __debug__:
@@ -57,8 +58,8 @@ def load(name, json_schema=None):
 
 	from jsonschema import validate
 
-	if isinstance(schema, str):
-		schema = read_json_schema(schema)
+	if isinstance(json_schema, str):
+		json_schema = read_json_schema(json_schema)
 
-	validate(obj, schema)
+	validate(obj, json_schema)
 	return obj

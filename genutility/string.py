@@ -98,7 +98,7 @@ def replace_pairs(s, items):
 	return s
 
 def replace_pairs_bytes(s, items):
-	# type: (bytes, Dict[bytes, Optional[bytes]) -> bytes
+	# type: (bytes, Dict[bytes, Optional[bytes]]) -> bytes
 
 	frm = b"".join(k for k, v in iteritems(items) if v)
 	to = b"".join(v for k, v in iteritems(items) if v)
@@ -113,7 +113,7 @@ def replace_pairs_bytes(s, items):
 	return s.translate(table, delete)
 
 def replace_pairs_chars(s, items):
-	# type: (str, Dict[str, Optional[str]) -> str
+	# type: (str, Dict[str, Optional[str]]) -> str
 
 	if PY2:
 		# table = s.maketrans(items) # 'unicode' object has no attribute 'maketrans'

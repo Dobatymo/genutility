@@ -6,11 +6,10 @@ from future.utils import PY3
 import sys, logging
 from time import sleep
 
-from .os import get_terminal_size, NoTerminal
-
 try:
-	(_terminal_width, _), (_, _) = get_terminal_size()
-except NoTerminal:
+	from shutil import get_terminal_size
+	_terminal_width = get_terminal_size((80, 30)).columns
+except ImportError: # < Python 3.3
 	_terminal_width = 80
 
 def print_line(char="-", length=_terminal_width, file=None, flush=False):

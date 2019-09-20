@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import viewkeys, viewvalues
-from itertools import chain
+from itertools import chain, repeat
 
 def upsert(cursor, primary, values, table):
 	# type: (Cursor, dict, dict, str) -> bool

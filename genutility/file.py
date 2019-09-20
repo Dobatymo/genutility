@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
 def read_file(path, mode="b", encoding=None, errors=None):
-	# type: (str, str, Optional[str]) -> byte
+	# type: (str, str, Optional[str]) -> bytes
 
 	""" Reads and returns whole file. If content is not needed use consume_file()"""
 
@@ -42,7 +42,7 @@ def write_file(data, path, mode="wb", encoding=None, errors=None):
 
 def linefileiter(fin, check_last=True): # kinda unnecessary
 	last = None
-	for line in fr:
+	for line in fin:
 		yield line
 		last = line
 	assert last.endswith("\n"), "File does not end in newline: {}".format(last)

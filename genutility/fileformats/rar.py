@@ -37,7 +37,7 @@ class Rar(object):
 		"""archive: archive to work with, everything which is supported by winrar
 		executable: path/to/Rar.exe"""
 
-		self.exe = executable or windows_executable
+		self.exe = executable or self.windows_executable
 
 		if not os.path.isfile(self.exe):
 			raise ValueError("Invalid executable")
@@ -157,7 +157,7 @@ def create_rar_from_folder(path, dest_path=".", profile_setter_func=None, filter
 
 	root, dirname = os.path.split(path)
 
-	if dest_path is ".":
+	if dest_path == ".":
 		dest_path = root
 
 	cwd = os.getcwd()
@@ -180,7 +180,7 @@ def create_rar_from_folder(path, dest_path=".", profile_setter_func=None, filter
 def create_rar_from_file(path, dest_path=".", profile_setter_func=None, name_transform = lambda x:x):
 	root, dirname = os.path.split(path)
 
-	if dest_path is ".":
+	if dest_path == ".":
 		dest_path = root
 
 	cwd = os.getcwd()
