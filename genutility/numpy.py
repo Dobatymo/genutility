@@ -14,9 +14,44 @@ if TYPE_CHECKING:
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
+def tracelog(m):
+	""" Calcuates the sum of the logs of the diagonal elements (batchwise if neccessary)
+		m: [..., x, x]
+	"""
+
+	return np.sum(np.log(np.diagonal(m, axis1=-2, axis2=-1)), axis=-1)
+
+def shiftedexp(pvals):
+	# type: (np.ndarray, ) -> np.ndarray
+
+	""" Prevents overflow. Can be used if probabilities are normalized again later.
+	"""
+
+	return np.exp(pvals - np.max(pvals))
+
+class Sampler(object):
+
+	def __init__(self, cdf, psum):
+		self.cdf = cdf
+		self.psum = psum
+
+	def __call__(self):
+		rand = np.random.uniform(0, self.psum)
+		return np.searchsorted(self.cdf, rand, side="right")
+
+def sample_probabilities(pvals):
+	# type: (np.ndarray, ) -> Callable[[], int]
+
+	cdf = np.cumsum(pvals)
+	psum = np.sum(pvals)
+
+	return Sampler(cdf, psum)
+
 class UnboundedSparseMatrix(object):
 
 	def __init__(self, dtype=float):
+		# type: (type, ) -> None
+
 		self.dtype = dtype
 		self.zero = self.dtype(0)
 		self.m = dict()
@@ -24,21 +59,39 @@ class UnboundedSparseMatrix(object):
 		self.rows = 0
 
 	def __getitem__(self, slice):
+		# type: (tuple, ) -> T
+
 		return self.m.get(slice, self.zero)
 
 	def __setitem__(self, slice, value):
+		# type: (tuple, T) -> None
+
 		c, r = slice
 		self.cols = max(self.cols, c+1)
 		self.rows = max(self.rows, r+1)
 		self.m[slice] = value
 
 	def todense(self):
+		# type: () -> np.ndarray
+
 		ret = np.zeros((self.cols, self.rows), dtype=self.dtype)
 
 		for slice, value in viewitems(self.m):
 			ret[slice] = value
 
 		return ret
+
+def normalize(pvals):
+	# type: (np.ndarray, ) -> np.ndarray
+
+	return pvals / np.sum(pvals)
+
+def categorical(pvals):
+	# type: (np.ndarray, ) -> int
+
+	""" Requires normalized inputs: sum(pvals) ~= 1 """
+
+	return np.argmax(np.random.multinomial(1, pvals))
 
 def inf_matrix_power(pm):
 	w, v = np.linalg.eig(pm) # scipy.linalg.eig would probably by faster as it can return the left and right eigen vectors

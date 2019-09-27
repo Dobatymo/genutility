@@ -10,6 +10,24 @@ from .file import PathOrTextIO
 
 if TYPE_CHECKING:
 	from typing import Dict, TextIO, Union
+	from .gensim import KeyedVectors
+
+from nltk.tokenize import word_tokenize as tokenize
+
+def gensim_indexer(embeddings, doc):
+	# type: (KeyedVectors, str) -> Iterator[int]
+
+	for word in tokenize(doc):
+		try:
+			yield embeddings.vocab[word.lower()].index
+		except KeyError:
+			pass
+
+def batch_gensim_indexer(embeddings, docs):
+	# type: (KeyedVectors, Iterable[str]) -> Iterator[List[int]]
+
+	for doc in docs:
+		yield list(gensim_indexer(embeddings, doc))
 
 def load_freqs(fname, normalize=False, limit=None):
 	# type: (Union[str, TextIO], ) -> Dict[str, int]
