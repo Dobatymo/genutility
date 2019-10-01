@@ -11,10 +11,14 @@ if __debug__:
 
 class BuiltinEncoder(json.JSONEncoder):
 	def default(self, obj):
+		from datetime import date
+
 		if isinstance(obj, (set, frozenset)):
 			return tuple(obj)
 		elif isinstance(obj, complex):
 			return [obj.real, obj.imag]
+		elif isinstance(obj, date):
+			return obj.isoformat()
 
 		return json.JSONEncoder.default(self, obj)
 
