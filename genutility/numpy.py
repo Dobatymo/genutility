@@ -14,6 +14,21 @@ if TYPE_CHECKING:
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
+def batchtopk(probs, k=0, axis=-1):
+	# type: (np.ndarray, np.ndarray, int) -> np.ndarray
+
+	""" `probs` values ndarray
+		`k > 0` take the first k elements, `k < 0` take the last k elements, `k = 0` take all elements.
+		`axis` sorting and selection axis.
+	"""
+
+	assert axis == -1, "Only last axis supported atm"
+	assert len(probs.shape) > 1
+
+	indices = np.argsort(probs, axis=-1) # use argpartition?
+	probs = np.take_along_axis(probs, indices[...,k:], axis=-1)
+	return indices, probs
+
 def tracelog(m):
 	""" Calcuates the sum of the logs of the diagonal elements (batchwise if neccessary)
 		m: [..., x, x]
