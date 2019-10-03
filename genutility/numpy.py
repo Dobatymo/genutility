@@ -14,6 +14,17 @@ if TYPE_CHECKING:
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
+def issquare(A):
+	# type: (np.ndarray, ) -> bool
+
+	if len(A.shape) != 2:
+		return False
+
+	if A.shape[0] != A.shape[1]:
+		return False
+
+	return True
+
 def batchtopk(probs, k=0, axis=-1):
 	# type: (np.ndarray, np.ndarray, int) -> np.ndarray
 
