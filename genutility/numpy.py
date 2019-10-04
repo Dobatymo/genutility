@@ -129,7 +129,7 @@ def inf_matrix_power(pm):
 	d = np.zeros(m.shape[0], dtype=np.float)
 	d[0] = 1.
 
-	return v @ (np.diag(d) @ vi)
+	return np.matmul(v, np.matmul(np.diag(d), vi))
 
 def decompress(selectors, data, default):
 	# type: (np.ndarray[bool], np.ndarray[T], T) -> None

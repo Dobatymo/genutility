@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.utils import viewitems
+from future.utils import viewitems, PY2
 from math import factorial
 
 from genutility.test import MyTestCase, parametrize
@@ -11,7 +11,11 @@ class FactorialTest(MyTestCase):
 
 	def setUp(self):
 		with PrintStatementTime("Setup took {delta}s"):
-			x = (0, 1, 9, 10, 100, 99999, 999999, 9999999)
+			if PY2: # python 2 builtin factorial is much slower
+				x = (0, 1, 9, 10, 100, 99999)
+			else:
+				x = (0, 1, 9, 10, 100, 99999, 999999)
+
 			self.tests = {i: factorial(i) for i in x}
 
 	@parametrize(

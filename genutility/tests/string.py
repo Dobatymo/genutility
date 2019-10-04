@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.utils import iteritems
+from future.utils import viewitems
 from random import shuffle
 
 from genutility.test import MyTestCase, parametrize
@@ -20,7 +20,7 @@ class StringTest(MyTestCase):
 
 		for i in range(10):
 			shuffle(seq)
-			for (ci, lbu), truth in iteritems(truths):
+			for (ci, lbu), truth in viewitems(truths):
 				a = locale_sorted(seq, ci, lbu)
 				b = locale_sorted(reversed(seq), ci, lbu)
 				self.assertEqual(a, truth)

@@ -11,7 +11,7 @@ with open("README.md", "r", encoding="utf-8") as fr:
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.6",
+	version="0.0.7",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,
@@ -38,9 +38,9 @@ setup(
 		"pdf": ["PyPDF2"],
 		"tls": ["pycryptodome", "pyOpenSSL"],
 		"toml": ["toml"],
-		"ALL": ["aiohttp", "bencode.py", "ctypes-windows-sdk", "flask", "gensim", "netifaces", "nltk",
-			"orderedset", "pycryptodome", "pyOpenSSL", "PyPDF2", "pypiwin32", "rhash", "toml",
-			"unidecode", "werkzeug", "wmi", "wx"],
+		"ALL": ["aiohttp", "bencode.py", "ctypes-windows-sdk", "flask", "gensim", "msgpack",
+			"netifaces", "nltk", "orderedset", "pycryptodome", "pyOpenSSL", "PyPDF2", "pypiwin32",
+			"rhash", "toml", "unidecode", "werkzeug", "wmi", "wx"],
 	},
 	use_2to3=False
 )

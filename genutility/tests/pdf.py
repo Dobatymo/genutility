@@ -11,7 +11,7 @@ class PdfTest(MyTestCase):
 	)
 	def test_join_pdfs_in_folder(self, path, out):
 		with self.assertNoRaise():
-			join_pdfs_in_folder(path, out)
+			join_pdfs_in_folder(path, out, overwrite=True)
 		self.assertGreater(os.path.getsize(out), 10*1024)
 
 if __name__ == "__main__":

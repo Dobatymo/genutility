@@ -4,6 +4,7 @@ aiohttp; python_version >= '3.5'
 bencode.py # bencode
 ctypes-windows-sdk; sys_platform == 'win32'
 flask
+msgpack
 netifaces
 nltk
 opencv-python # cv2
@@ -18,9 +19,9 @@ wmi
 
 #wxasync
 #wxPython # wx
-#pathlib2 # needed for wxpython at the moment
 
 typing; python_version < '3'
 scandir; python_version < '3'
 pathlib; python_version < '3'
+pathlib2; python_version < '3'
 mock; python_version < '3'

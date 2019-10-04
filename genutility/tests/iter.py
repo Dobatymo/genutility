@@ -40,6 +40,8 @@ class IteratorWithException(object):
 		finally:
 			self.pos += 1
 
+	next = __next__
+
 def GeneratorWithException():
 	yield 1
 	raise ValueError("some error")

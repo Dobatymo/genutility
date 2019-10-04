@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import input
+import unittest, os
 import os.path
 
 from genutility.test import MyTestCase, parametrize
@@ -95,6 +96,7 @@ class TestTest(MyTestCase):
 				raise EOFError
 		self.assertFalse(os.path.exists(name))
 
+	@unittest.skipIf(not os.environ.get('INTERACTIVE'), "non-interactive mode")
 	def test_closeable_tempfile_ctrlc(self):
 		name = None
 		with self.assertRaises(KeyboardInterrupt):

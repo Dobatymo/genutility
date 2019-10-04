@@ -20,4 +20,4 @@ def write_toml(obj, path):
 	# type: (str, Any) -> None
 
 	with open(path, "w", encoding="utf-8") as fw:
-		toml.dump(obj, fw)
+		toml.dump(obj, fw) # note: older toml versions print the type for some reason....

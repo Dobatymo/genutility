@@ -1,13 +1,22 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from future.utils import PY2
 import platform
 from typing import TYPE_CHECKING
 
 from .os_shared import is_os_64bit
 
+if TYPE_CHECKING:
+	from typing import Callable
+	from builtins import str
+
 system = platform.system()
 
 def rename(func_name):
+	# type: (str, ) -> Callable
+
+	if PY2:
+		func_name = func_name.encode("ascii")
 
 	def decorator(func):
 		func.__name__ = func_name
