@@ -14,6 +14,9 @@ if TYPE_CHECKING:
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
+def normalized_choice(p_ind, p_prob):
+	return np.random.choice(p_ind, p=p_prob/np.sum(p_prob))
+
 def issquare(A):
 	# type: (np.ndarray, ) -> bool
 

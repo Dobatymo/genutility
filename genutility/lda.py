@@ -122,3 +122,18 @@ class LDABase(object):
 		num = self.nkt + self.β # [K, V]
 		denom = self.nk + self.βsum # [K]
 		return num / denom[:,None] # [K, V]
+
+	def _perplexity(self, docs):
+
+		θ = self.theta()
+		φ = self.phi()
+
+		num = 0
+		denom = 0
+
+		for m, doc in enumerate(docs):
+			for i, t in enumerate(doc):
+				num += np.log(np.inner(φ[:,t], θ[m]))
+			denom += len(doc)
+
+		return np.exp(-num / denom)

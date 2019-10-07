@@ -4,6 +4,7 @@ aiohttp; python_version >= '3.5'
 bencode.py # bencode
 ctypes-windows-sdk; sys_platform == 'win32'
 flask
+jsonschema
 msgpack
 netifaces
 nltk
@@ -20,8 +21,9 @@ wmi
 #wxasync
 #wxPython # wx
 
-typing; python_version < '3'
-scandir; python_version < '3'
+contextlib2; python_version < '3'
+mock; python_version < '3'
 pathlib; python_version < '3'
 pathlib2; python_version < '3'
-mock; python_version < '3'
+scandir; python_version < '3'
+typing; python_version < '3'

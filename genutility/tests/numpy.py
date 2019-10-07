@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from genutility.test import MyTestCase, parametrize
-from genutility.numpy import remove_color, unblock, decompress
+from genutility.numpy import remove_color, unblock, decompress, batchtopk
 
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
@@ -26,6 +26,16 @@ class NumpyTest(MyTestCase):
 		remove_color(img, ratio)
 		truth = np.array(truth)
 		self.assertTrue(np.array_equal(truth, img))
+
+	@parametrize(
+		([[1,2],[4,3]], 0, -1, [[1,2],[3,4]]),
+		([[1,2,3,4],[8,7,6,5],[9,10,11,12]], -2, -1, [[3,4],[7,8],[11,12]]),
+		#([[9,2,3,12],[5,6,7,4],[1,10,11,8]], -2, 0, [[5,9],[6,10],[7,11],[8,12]]),
+	)
+	def test_batchtopk(self, arr, k, axis, truth):
+		arr, truth = np.array(arr), np.array(truth)
+		indices, probs = batchtopk(arr, k, axis)
+		np.testing.assert_equal(truth, probs)
 
 	@parametrize(
 		([[1,2],[3,4]], 1, 1, [[1,2,3,4]]),
