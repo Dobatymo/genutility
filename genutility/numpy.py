@@ -43,7 +43,7 @@ def batchtopk(probs, k=0, axis=-1):
 	probs = np.take_along_axis(probs, indices[...,k:], axis=-1)
 	return indices, probs
 
-def tracelog(m):
+def logtrace(m):
 	""" Calcuates the sum of the logs of the diagonal elements (batchwise if neccessary)
 		m: [..., x, x]
 	"""
