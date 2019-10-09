@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
-def normalized_choice(p_ind, p_prob):
+def normalized_choice(p_ind, p_prob):  # is this neccessary? I think `np.random.choice` can handle unnormalized probabilities
 	return np.random.choice(p_ind, p=p_prob/np.sum(p_prob))
 
 def issquare(A):
@@ -60,9 +60,9 @@ def shiftedexp(pvals):
 
 class Sampler(object):
 
-	def __init__(self, cdf, psum):
+	def __init__(self, cdf):
 		self.cdf = cdf
-		self.psum = psum
+		self.psum = cdf[-1]
 
 	def __call__(self):
 		rand = np.random.uniform(0, self.psum)
@@ -71,10 +71,11 @@ class Sampler(object):
 def sample_probabilities(pvals):
 	# type: (np.ndarray, ) -> Callable[[], int]
 
-	cdf = np.cumsum(pvals)
-	psum = np.sum(pvals)
+	""" Sample from list of probabilities `pvals` with replacement.
+		The probabilities don't need to be normalized.
+	"""
 
-	return Sampler(cdf, psum)
+	return Sampler(np.cumsum(pvals))
 
 class UnboundedSparseMatrix(object):
 

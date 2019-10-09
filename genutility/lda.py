@@ -57,12 +57,12 @@ class LDABase(object):
 			Implementation Tutorial on Topic Modeling and Gibbs Sampling'
 		"""
 
-		left = (self.nmk[m,:] + self.α) # [K]
-		right = (self.nkt[:,t] + self.β[t]) / (self.nk + self.βsum) # [K]
+		left = (self.nmk[m, :] + self.α) # [K]
+		right = (self.nkt[:, t] + self.β[t]) / (self.nk[:] + self.βsum) # [K]
 		return left * right # [K]
 
-	def sample(self, m, t, k):
-		# type: (int, int, int) -> int
+	def sample(self, m, t, k=None):
+		# type: (int, int, Optional[int]) -> int
 
 		probs = self.calc_probs(m, t) # [K]
 		return categorical(normalize(probs))
