@@ -78,6 +78,8 @@ class LDABase(object):
 				self.add_counts(m, t, k)
 
 	def initialize_docs(self, docs):
+		# type: (List[List[int]], ) -> None
+
 		""" Set parameters based on input docs """
 
 		raise NotImplementedError
@@ -100,6 +102,8 @@ class LDABase(object):
 		raise NotImplementedError
 
 	def fit(self, docs, n_iter=10, verbose=False):
+		# type: (List[List[int]], int, bool) -> None
+
 		""" Fit LDA """
 
 		self.initialize_docs(docs)
@@ -110,20 +114,21 @@ class LDABase(object):
 				print("Step #{}, metric: {}".format(i, self.metric()))
 
 	def theta(self):
-		# type: () -> np.ndarray
+		# type: () -> float[M, K]
 
 		num = self.nmk + self.α # [M, K]
 		denom = self.nm + self.αsum # [M]
 		return num / denom[:,None] # [M, K]
 
 	def phi(self):
-		# type: () -> np.ndarray
+		# type: () -> float[K, V]
 
 		num = self.nkt + self.β # [K, V]
 		denom = self.nk + self.βsum # [K]
 		return num / denom[:,None] # [K, V]
 
 	def _perplexity(self, docs):
+		# type: () -> float
 
 		θ = self.theta()
 		φ = self.phi()
@@ -137,3 +142,8 @@ class LDABase(object):
 			denom += len(doc)
 
 		return np.exp(-num / denom)
+
+	def docs2topics(self):
+		# type: () -> int[M]
+
+		return np.argmax(self.theta(), axis=-1) # [M]
