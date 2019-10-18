@@ -66,7 +66,7 @@ def wrap_text(bf, mode, encoding, errors, newline):
 	return bf
 
 def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9):
-	# type: (str, str, Optional[str], Optional[str], Optional[str]) -> IO
+	# type: (str, str, Optional[str], Optional[str], Optional[str], Optional[str], int) -> IO
 
 	"""
 	`compresslevel`: 0-9, 0: no compression, 1: least, 9: highest compression
@@ -106,6 +106,49 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 		return wrap_text(bf, mode, encoding, errors, newline)
 
 	return open(file, mode, encoding=encoding, errors=errors, newline=newline)
+
+# was: OpenAndDeleteOnError, OpenFileRemoveOnException
+class OpenFileAndDeleteOnError(object):
+
+	""" Context manager which opens a file using the same arguments as `open`,
+		but deletes the file in case an exception occurs after opening.
+	"""
+
+	def __init__(self, file, mode="rt", encoding=None, errors=None, newline=None, compresslevel=9):
+	# type: (str, str, Optional[str], Optional[str], Optional[str], int) -> None
+
+		is_text = "t" in mode
+		is_binary = "b" in mode
+
+		assert logical_xor(is_text, is_binary), "Explicit text or binary mode required: {}".format(mode)
+		assert logical_implication(is_binary, encoding is None and errors is None)
+
+		if is_text:
+			encoding = encoding or "utf-8"
+			errors = errors or "strict"
+
+		self.file = file
+		self.mode = mode
+		self.encoding = encoding
+		self.errors = errors
+		self.newline = newline
+		self.compresslevel = compresslevel
+		self.fp = None # type: Optional[IO]
+
+	def __enter__(self):
+		# type: () -> IO
+
+		self.fp = copen(self.file, self.mode, None, self.encoding, self.errors, self.newline, self.compresslevel)
+		return self.fp
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		self.fp.close()
+		if exc_type:
+			# fixme: race condition
+			# use https://stackoverflow.com/a/3594593 and `ReOpenFile` on Windows
+			# or SetFileInformationByHandle
+			# see also: https://nullprogram.com/blog/2016/08/07/
+			os.remove(self.file)
 
 class PathOrBinaryIO(object):
 

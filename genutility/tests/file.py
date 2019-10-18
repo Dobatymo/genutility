@@ -1,7 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import tempfile, os.path
+
 from genutility.test import MyTestCase, parametrize
-from genutility.file import equal_files, is_all_byte
+from genutility.file import equal_files, is_all_byte, OpenFileAndDeleteOnError
 
 class FileTest(MyTestCase):
 
@@ -23,6 +25,18 @@ class FileTest(MyTestCase):
 		with open(path, "rb") as fr:
 			result = is_all_byte(fr, b"\0")
 			self.assertEqual(truth, result)
+
+	def test_OpenFileAndDeleteOnError(self):
+		path = os.path.join(tempfile.gettempdir(), "excepttest.tmp") # not super safe
+
+		with OpenFileAndDeleteOnError(path, "wb") as fw:
+			pass
+		self.assertEqual(os.path.isfile(path), True)
+
+		with self.assertRaises(RuntimeError):
+			with OpenFileAndDeleteOnError(path, "wb") as fw:
+				raise RuntimeError()
+		self.assertEqual(os.path.isfile(path), False)
 
 if __name__ == "__main__":
 	import unittest

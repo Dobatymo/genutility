@@ -14,20 +14,23 @@ if TYPE_CHECKING:
 
 from nltk.tokenize import word_tokenize as tokenize
 
-def gensim_indexer(embeddings, doc):
+def gensim_indexer(embeddings, doc, ignore=True):
 	# type: (KeyedVectors, str) -> Iterator[int]
 
 	for word in tokenize(doc):
 		try:
 			yield embeddings.vocab[word.lower()].index
 		except KeyError:
-			pass
+			if ignore:
+				pass
+			else:
+				raise
 
-def batch_gensim_indexer(embeddings, docs):
+def batch_gensim_indexer(embeddings, docs, ignore=True):
 	# type: (KeyedVectors, Iterable[str]) -> Iterator[List[int]]
 
 	for doc in docs:
-		yield list(gensim_indexer(embeddings, doc))
+		yield list(gensim_indexer(embeddings, doc, ignore))
 
 def load_freqs(fname, normalize=False, limit=None):
 	# type: (Union[str, TextIO], ) -> Dict[str, int]
