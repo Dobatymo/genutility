@@ -28,13 +28,17 @@ class NumpyTest(MyTestCase):
 		self.assertTrue(np.array_equal(truth, img))
 
 	@parametrize(
-		([[1,2],[4,3]], 0, -1, [[1,2],[3,4]]),
-		([[1,2,3,4],[8,7,6,5],[9,10,11,12]], -2, -1, [[3,4],[7,8],[11,12]]),
-		#([[9,2,3,12],[5,6,7,4],[1,10,11,8]], -2, 0, [[5,9],[6,10],[7,11],[8,12]]),
+		([[1,2],[4,3]], None, -1, False, [[1,2],[3,4]]),
+		([[1,2],[4,3]], None, -1, True, [[2,1],[4,3]]),
+		([[1,2,3,4],[8,7,6,5],[9,10,11,12]], 1, -1, False, [[1],[5],[9]]),
+		([[1,2,3,4],[8,7,6,5],[9,10,11,12]], 1, -1, True, [[4],[8],[12]]),
+		([[1,2,3,4],[8,7,6,5],[9,10,11,12]], 2, -1, False, [[1,2],[5,6],[9,10]]),
+		([[1,2,3,4],[8,7,6,5],[9,10,11,12]], 2, -1, True, [[4,3],[8,7],[12,11]]),
+		#([[9,2,3,12],[5,6,7,4],[1,10,11,8]], 2, 0, [[5,9],[6,10],[7,11],[8,12]]),
 	)
-	def test_batchtopk(self, arr, k, axis, truth):
+	def test_batchtopk(self, arr, k, axis, reverse, truth):
 		arr, truth = np.array(arr), np.array(truth)
-		indices, probs = batchtopk(arr, k, axis)
+		indices, probs = batchtopk(arr, k, axis, reverse)
 		np.testing.assert_equal(truth, probs)
 
 	@parametrize(

@@ -28,19 +28,27 @@ def issquare(A):
 
 	return True
 
-def batchtopk(probs, k=0, axis=-1):
+def batchtopk(probs, k=None, axis=-1, reverse=False):
 	# type: (np.ndarray, np.ndarray, int) -> np.ndarray
 
 	""" `probs` values ndarray
-		`k > 0` take the first k elements, `k < 0` take the last k elements, `k = 0` take all elements.
+		`k` take the smallest `k` elements, if `reverse` is False
+			and the largest `k` if `reverse` is True
 		`axis` sorting and selection axis.
 	"""
 
+	assert k is None or k > 0, "k must be larger than zero. Use None to chose all elements."
 	assert axis == -1, "Only last axis supported atm"
 	assert len(probs.shape) > 1
 
-	indices = np.argsort(probs, axis=-1) # use argpartition?
-	probs = np.take_along_axis(probs, indices[...,k:], axis=-1)
+	if reverse:
+		sign = -1
+	else:
+		sign = 1
+
+	indices = np.argsort(sign * probs, axis=-1) # use argpartition?
+	probs = np.take_along_axis(probs, indices[...,:k], axis=-1)
+
 	return indices, probs
 
 def logtrace(m):

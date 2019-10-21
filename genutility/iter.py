@@ -20,6 +20,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+def count_distinct(it):
+	# type: (Iterable[Any], ) -> int
+
+	return len(set(it))
+
 def reversedzip(*its):
 	return zip(*map(reversed, its))
 

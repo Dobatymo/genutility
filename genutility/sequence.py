@@ -10,6 +10,23 @@ from .func import identity
 if TYPE_CHECKING:
 	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple
 
+class LasyStringList(object):
+
+	def __init__(self, length):
+		self.length = length
+
+	def __getitem__(self, idx):
+		return str(idx)
+
+	def __len__(self):
+		return self.length
+
+	def __iter__(self):
+		return map(str, range(self.length))
+
+	def __contains__(self, idx):
+		return 0 <= idx < self.length
+
 def triangular(seq):
 	# type: (Sequence[T], ) -> Iterator[Tuple[T, T]]
 

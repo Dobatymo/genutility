@@ -29,7 +29,7 @@ class BatchLabelEncoder(object):
 
 	def reset(self):
 		# type: () -> None
-	
+
 		""" Initializes all mappings with empty containers. """
 
 		self.token2idx = {} # type: Dict[Any, int]
