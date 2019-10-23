@@ -4,6 +4,7 @@ from math import log2, exp
 from itertools import chain
 from collections import Counter
 from sys import stderr
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -12,6 +13,11 @@ from .datastructures import VariableRowMatrix
 from .encoder import BatchLabelEncoder
 from .iter import count_distinct
 from .sequence import LasyStringList
+
+if TYPE_CHECKING:
+	from typing import Any, Dict, Iterable
+	Documents = List[List[int]]
+	IterableDocuments = Iterable[Iterable[int]]
 
 # utils
 
@@ -32,30 +38,36 @@ def top_topics(id2word, term_topic_matrix, num_words=10, decimals=2):
 	for indices, probs in zip(indices_list, probs_list):
 		yield [(id2word[id], prob) for id, prob in zip(indices, probs)]
 
-def format_topics(topics):
-	# type: (Iterator[List[Tuple[str, float]]], ) -> str
+def format_topics(topics, linesep="\n", tokensep="\t"):
+	# type: (iterable[List[Tuple[str, float]]], ) -> str
 
 	buffer = []
 
 	for terms in topics:
-		buffer.append("\t".join("({},{})".format(term, prob) for term, prob in terms))
+		buffer.append(tokensep.join("({},{})".format(term, prob) for term, prob in terms))
 
-	return "\n".join(buffer)
+	return linesep.join(buffer)
 
 class LDADocument(object):
 
 	def __init__(self, words):
-		# type: (List[Any], ) -> None
+		# type: (List[int], ) -> None
 
 		self.words = words
 
 	def __iter__(self):
+		# type: () -> Iterator[int]
+
 		return iter(self.words)
 
 	def __len__(self):
+		# type: () -> int
+
 		return len(self.words)
 
 	def __repr__(self):
+		# type: () -> str
+
 		return "LDADocument({})".format(repr(self.words))
 
 class LDABase(object):
@@ -103,7 +115,7 @@ class LDABase(object):
 		self.nm = np.array(list(map(len, self.docs)), dtype=self.inttype) # [M] total document counts, not necessary for sampling, but useful for theta and phi calculation
 
 	def _initialize_topics(self, docs, topics):
-		# type: (Iterable[Iterable[int]], dict) -> None
+		# type: (IterableDocuments, Dict[Any, int]) -> None
 
 		for m, doc in enumerate(docs):
 			for i, t in enumerate(doc):
@@ -133,17 +145,19 @@ class LDABase(object):
 		right = (self.nkt[:, t] + self.β[t]) / (self.nk[:] + self.βsum) # [K]
 		return left * right # [K]
 
-	def sample(self, m, t, k=None):
-		# type: (int, int, Optional[int]) -> int
+	def sample(self, m, t):
+		# type: (int, int) -> int
 
 		probs = self.calc_probs(m, t) # [K]
 		return categorical(normalize(probs))
 
-	def sample_batch(self, m, t, k_select):
+	def sample_selected(self, m, t, k_select):
+		# type: (int, int, Any) -> int
+
 		raise NotImplementedError
 
 	def _sample_all(self, docs, topics):
-		# type: (Iterable[Iterable[int]], dict) -> None
+		# type: (IterableDocuments, Dict[Any, int]) -> None
 
 		from ferutility.utils import progress
 
@@ -162,6 +176,8 @@ class LDABase(object):
 		raise NotImplementedError
 
 	def initialize_topics(self): # step1
+		# type: () -> None
+
 		""" Initialize topics matrix """
 
 		raise NotImplementedError
@@ -210,7 +226,7 @@ class LDABase(object):
 		return num / denom[:,None] # [K, V]
 
 	def _perplexity(self, docs):
-		# type: () -> float
+		# type: (IterableDocuments, ) -> float
 
 		θ = self.theta()
 		φ = self.phi()
@@ -231,7 +247,7 @@ class LDABase(object):
 		return np.argmax(self.theta(), axis=-1) # [M]
 
 	def add_docs_encoded(self, docs, id2word=None, vocab_size=None):
-		# type: (List[List[int]], Optional[Dict[int, str]], Optional[int]) -> None
+		# type: (Documents, Optional[Dict[int, str]], Optional[int]) -> None
 
 		self.docs = docs
 		if id2word:
@@ -314,7 +330,7 @@ class LDA(LDABase):
 		self.nk = np.zeros((self.K, ), dtype=self.inttype) # [K] total topic counts
 
 	def initialize_docs(self):
-		# type: (List[List[int]], ) -> None
+		# type: () -> None
 
 		self._initialize_docs()
 		self.initialize_global()
@@ -348,20 +364,20 @@ class LDA(LDABase):
 
 	@staticmethod
 	def generate(theta, phi, doc_lens):
-		# type: (float[) -> Tuple[dict, dict]
+		# type: (float[K, V], float[M, K], Iterable[int]) -> Tuple[dict, dict]
 
 		z = {} # sparse
 		w = {} # sparse
 
 		for m, length in enumerate(doc_lens):
 			for i in range(length):
-				a = z[(m, i)] = categorical(theta[m]) # scalar # doc to topic
-				w[(m, i)] = categorical(phi[a]) # scalar # topic to word
+				k = z[(m, i)] = categorical(theta[m]) # scalar # doc to topic
+				w[(m, i)] = categorical(phi[k]) # scalar # topic to word
 
 		return z, w
 
 	def transform(self, doc_lens):
-		# type: (List[int], ) -> Tuple[dict, dict]
+		# type: (Iterable[int], ) -> Tuple[dict, dict]
 
 		return self.generate(self.theta(), self.phi(), doc_lens)
 
@@ -409,11 +425,13 @@ class LDATermWeight(LDABase):
 		self.inttype = np.int32
 
 	def _one(self, docs):
+		# type: (Any, ) -> int[M, V]
+
 		# return np.ones((self.M, self.V))
 		return np.broadcast_to(1, (self.M, self.V)) # is this slower for indexing later?
 
 	def _tf(self, docs):
-		# type: (Iterable[Iterable[int]], ) -> float[M, V]
+		# type: (IterableDocuments, ) -> float[M, V]
 
 		all_counts = Counter(chain.from_iterable(docs))
 		num_counts = sum(all_counts.values())
@@ -424,6 +442,8 @@ class LDATermWeight(LDABase):
 		return np.broadcast_to(tw, (self.M, self.V))
 
 	def _idf(self, docs):
+		# type: (IterableDocuments, ) -> float[M, V]
+
 		tw = np.zeros((self.V, ), dtype=self.floattype) # [V]
 
 		for doc in docs:
@@ -438,6 +458,8 @@ class LDATermWeight(LDABase):
 		raise NotImplementedError
 
 	def _pmi(self, docs):
+		# type: (IterableDocuments, ) -> float[M, V]
+
 		tw = np.zeros((self.M, self.V), dtype=self.floattype) # [M, V] term weights
 
 		all_counts = Counter(chain.from_iterable(docs))
@@ -451,14 +473,18 @@ class LDATermWeight(LDABase):
 		return tw
 
 	def _rand(self, docs):
+		# type: (Any, ) -> float[M, V]
+
 		return np.random.uniform(0, 1, (self.M, self.V)).astype(np.float32)
 
 	def initialize_global(self):
+		# type: () -> None
+
 		self.nkt = np.zeros((self.K, self.V), dtype=self.inttype) # [K, V] counts, same as np.sum(nmkt, axis=0)
 		self.nk = np.zeros((self.K, ), dtype=self.inttype) # [K] counts, same as np.sum(nkt, axis=-1) # [K]
 
 	def initialize_docs(self):
-		# type: (List[List[int]], ) -> None
+		# type: () -> None
 
 		self._initialize_docs()
 		self.initialize_global()
@@ -585,6 +611,8 @@ class LDATermWeight(LDABase):
 class LDAInfer(LDA):
 
 	def __init__(self, nkt, nk):
+		# type: (np.ndarray, np.ndarray) -> None
+
 		self.nkt = nkt
 		self.nk = nk
 
@@ -599,7 +627,7 @@ class LDAInfer(LDA):
 		self.nmk[m, k] -= 1
 
 	def initialize_docs(self):
-		# type: (List[List[int]], ) -> None
+		# type: () -> None
 
 		self.M = len(self.docs)
 		self.K, self.V = self.nkt.shape
