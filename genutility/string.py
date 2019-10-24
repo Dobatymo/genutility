@@ -1,15 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.utils import PY2, iteritems
+from builtins import map
+from future.utils import PY2, viewkeys, viewitems
 
+import re
 from itertools import chain
 from locale import strxfrm
+from functools import partial
 from typing import TYPE_CHECKING
 
 from .iter import switched_enumerate
 
 if TYPE_CHECKING:
-	from typing import Iterable, Tuple, Any, IO
+	from typing import Any, Dict, Iterable, Tuple, IO
 
 english_consonants = "bcdfghjklmnpqrstvwxz" # y?
 english_vowels = "aeiouy" # y?
@@ -42,6 +45,17 @@ def locale_sorted(seq, case_insensitive=True, lower_before_upper=True):
 			key = strxfrm
 
 	return sorted(seq, key=key)
+
+def build_multiple_replace(d, escape=True):
+	# type: (Dict[str, str], bool) -> Callable
+
+	if escape:
+		it = map(re.escape, viewkeys(d))
+	else:
+		it = viewkeys(d)
+
+	cp = re.compile("(" + "|".join(it) + ")")
+	return partial(cp.sub, lambda m: d[m.group(0)])
 
 def deunicode(s):
 	# type: (str, ) -> str
@@ -100,9 +114,9 @@ def replace_pairs(s, items):
 def replace_pairs_bytes(s, items):
 	# type: (bytes, Dict[bytes, Optional[bytes]]) -> bytes
 
-	frm = b"".join(k for k, v in iteritems(items) if v)
-	to = b"".join(v for k, v in iteritems(items) if v)
-	delete = b"".join(k for k, v in iteritems(items) if v is None)
+	frm = b"".join(k for k, v in viewitems(items) if v)
+	to = b"".join(v for k, v in viewitems(items) if v)
+	delete = b"".join(k for k, v in viewitems(items) if v is None)
 
 	if PY2:
 		import string
@@ -117,7 +131,7 @@ def replace_pairs_chars(s, items):
 
 	if PY2:
 		# table = s.maketrans(items) # 'unicode' object has no attribute 'maketrans'
-		table = {ord(k):v for k, v in iteritems(items)}
+		table = {ord(k):v for k, v in viewitems(items)}
 	else:
 		table = s.maketrans(items)
 

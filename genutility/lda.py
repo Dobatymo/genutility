@@ -13,6 +13,7 @@ from .datastructures import VariableRowMatrix
 from .encoder import BatchLabelEncoder
 from .iter import count_distinct
 from .sequence import LasyStringList
+from .object import cast
 
 if TYPE_CHECKING:
 	from typing import Any, Dict, Iterable
@@ -269,7 +270,7 @@ class LDABase(object):
 	def inferencer(self):
 		# type: () -> LDAInfer
 
-		return LDAInfer(self)
+		return cast(self, LDAInfer)
 
 class LDA(LDABase):
 
@@ -604,18 +605,11 @@ class LDATermWeight(LDABase):
 
 class LDAInfer(LDA):
 
-	def __init__(self, lda):
-		self.K = lda.K
-		self.V = lda.V
+	def __init__(self):
+		# type: () -> None
 
-		self.α = lda.α
-		self.β = lda.β
-		self.nkt_old = lda.nkt
-		self.nk_old = lda.nk
-
-		self.word_encoder = lda.word_encoder
-		self.inttype = lda.inttype
-
+		self.nkt_old = self.nkt
+		self.nk_old = self.nk
 		self.docs = []
 
 	def calc_probs(self, m, t):
