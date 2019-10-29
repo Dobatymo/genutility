@@ -40,7 +40,7 @@ def read_json(path, schema=None, object_hook=None):
 		`object_hook` is passed through to `json.load`.
 	"""
 
-	with open(path, "r", encoding="utf-8") as fr:
+	with copen(path, "rt", encoding="utf-8") as fr:
 		obj = json.load(fr, object_hook=object_hook)
 
 	if schema is None:
