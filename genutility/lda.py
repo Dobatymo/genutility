@@ -11,7 +11,7 @@ import numpy as np
 from .numpy import normalize, categorical, batchtopk
 from .datastructures import VariableRowMatrix
 from .encoder import BatchLabelEncoder
-from .iter import count_distinct
+from .iter import count_distinct, progress
 from .sequence import LasyStringList
 from .object import cast
 
@@ -113,7 +113,7 @@ class LDABase(object):
 	def _initialize_topics(self, docs, topics):
 		# type: (IterableDocuments, Dict[Any, int]) -> None
 
-		for m, doc in enumerate(docs):
+		for m, doc in enumerate(progress(docs, file=stderr)):
 			for i, t in enumerate(doc):
 				k = topics[m, i] = self.init_topic()
 				self.add_counts(m, t, k)
@@ -162,8 +162,6 @@ class LDABase(object):
 	def _sample_all(self, docs, topics):
 		# type: (IterableDocuments, Dict[Any, int]) -> None
 
-		from ferutility.utils import progress
-
 		for m, doc in enumerate(progress(docs, file=stderr)):
 			for i, t in enumerate(doc):
 				k = topics[m, i]
@@ -202,11 +200,12 @@ class LDABase(object):
 
 		""" Fit LDA """
 
-		assert self.docs
+		assert self.docs, "No documents added to model"
 
 		self.initialize()
 		self.initialize_docs()
 		self.initialize_topics()
+
 		for i in range(n_iter):
 			self.sample_all()
 			if verbose:

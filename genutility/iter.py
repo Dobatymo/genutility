@@ -3,10 +3,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.moves.itertools import zip_longest
 from builtins import zip, map, range, reversed
 
-import logging
+import sys, logging
 from collections import deque
 from itertools import groupby, chain, tee, islice, count, combinations, product
 from operator import add
+from time import time
 from types import GeneratorType
 from typing import TYPE_CHECKING
 
@@ -19,6 +20,53 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+def progress(it, length=None, refresh=1, file=sys.stdout):
+	# type: (Union[Iterable, Collection], Optional[int], float, Optional[TextIO]) -> Iterator
+
+	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
+
+	if length is None:
+		try:
+			length = len(it) # type: ignore # TypeError caught below
+		except TypeError:
+			pass
+
+	if length is not None:
+		lstr = "/{}".format(length)
+	else:
+		lstr = ""
+
+	last = start = time()
+	i = 0
+	for i, elm in enumerate(it):
+		yield elm
+		current = time()
+		if current - last > refresh:
+			last = current
+			duration = current-start
+			print("{}{}, running for {} seconds ({:0.2e}/s).".format(i, lstr, int(duration), i/duration), end="\r", file=file)
+	print("Finished {} in {} seconds.".format(i, int(last-start)), end="\r", file=file)
+
+class Progress(object):
+
+	""" Cannot create a decorator to do this to generic generators,
+		because attributes cannot be set on generator objects.
+	"""
+
+	def __init__(self, obj):
+		self.obj = obj
+
+	def __iter__(self):
+		return progress(self.obj)
+
+	def __len__(self):
+		# type: () -> int
+
+		""" Can raise a TypeError if underlying object does not support `len()`.
+		"""
+
+		return len(self.obj)
 
 def count_distinct(it):
 	# type: (Iterable[Any], ) -> int

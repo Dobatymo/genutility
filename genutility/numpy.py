@@ -28,6 +28,46 @@ def issquare(A):
 
 	return True
 
+def batch_vTAv(A, v):
+	# type: (float[B, X, X], float[B, X]) -> float[B]
+
+	""" Performs batched calculation of `v^T A v` transform.
+		Special case of bilinear form `x^T A y`
+	"""
+
+	""" Faster than
+		Av = np.matmul(A, v[...,:,None]) # [B, X, 1]
+		return np.matmul(v[...,None,:], Av).squeeze((-2, -1)) # [B]
+	"""
+
+	return np.einsum("...k,...kl,...l->...", v, A, v)
+
+# was: inner1d
+def batch_inner(a, b):
+	# type: (np.ndarray, np.ndarray) -> np.ndarray
+
+	""" Performs a batched inner product over the last dimension.
+		Replacement for deprecated `from numpy.core.umath_tests import inner1d`.
+		Shapes: (A, B), (A, B) -> (A, )
+	"""
+
+	if a.shape != b.shape:
+		raise ValueError("All dimensions have to be equal")
+
+	return np.einsum("...i,...i->...", a, b) # faster than np.sum(a * b, axis=-1)
+
+def batch_outer(a, b):
+	# type: (np.ndarray, np.ndarry) -> np.ndarray
+
+	""" Performs a batched outer product over the last dimension.
+		Shapes: (A, B), (A, C) -> (A, B, C)
+	"""
+
+	if a.shape[:-1] != b.shape[:-1]:
+		raise ValueError("All except the last dimension have to be equal")
+
+	return np.einsum("...i,...j->...ij", a, b) # slightly faster than np.multiply(a[...,:,None], b[...,None,:])
+
 def batchtopk(probs, k=None, axis=-1, reverse=False):
 	# type: (np.ndarray, np.ndarray, int) -> np.ndarray
 
