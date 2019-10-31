@@ -275,6 +275,8 @@ def _fibonacci(n):
 			b = c + d
 	return a, b
 
+#from .numba import opjit
+#@opjit() # doesn't support arbitrary large ints
 def _fibonacci_v2(n):
 	#see: https://stackoverflow.com/a/1526036
 	# 'Structure and Interpretation of Computer Programs' (SICP) ex 1.19
@@ -292,7 +294,7 @@ def _fibonacci_v2(n):
 			a = b*q + a*q + a*p
 			b = b*p + olda*q
 			n -= 1
-	yield a, b
+	return a, b
 
 def fibonacci(n):
 
@@ -410,3 +412,4 @@ if __name__ == "__main__":
 	import timeit
 	print(min(timeit.repeat(stmt="digitsum(111111)", setup="from __main__ import digitsum")))
 	print(min(timeit.repeat(stmt="digitsum_base(111111)", setup="from __main__ import digitsum_base")))
+	#print(min(timeit.repeat('_fibonacci_v2(999999999999999999999999999999999)', setup="from __main__ import _fibonacci_v2")))

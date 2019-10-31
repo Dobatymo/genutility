@@ -9,7 +9,7 @@ class LinearRegression(object):
 
 		assert len(X.shape) == 2
 
-		self.K = X.shape[1] + 1  # one dimension extra for the x^0 term
+		self.K = X.shape[1] + 1  # one extra dimension for the bias term
 		self.M = len(y)
 		self.y = y
 		self.α = alpha

@@ -1,12 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import range
+from future.utils import viewitems
+
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from future.utils import viewitems
-from collections import defaultdict
-
 import numpy as np
+
+from .numba import opjit
 
 if TYPE_CHECKING:
 	from typing import Iterator, Tuple
@@ -16,6 +18,83 @@ RGB_WHITE = (255, 255, 255)
 
 def normalized_choice(p_ind, p_prob):  # is this neccessary? I think `np.random.choice` can handle unnormalized probabilities
 	return np.random.choice(p_ind, p=p_prob/np.sum(p_prob))
+
+def is_rgb(img):
+	# type: (np.ndarray, ) -> bool
+
+	return len(img.shape) >= 1 and img.shape[-1] == 3
+
+#@opjit() np.errstate doesn't work in numba...
+def rgb_to_hsi(image):
+	# type: (np.ndarray, ) -> np.ndarray
+
+	""" Converts an array [..., channels] of RGB values to HSI color values (H in rad).
+		RGB values are assumed to be normalized to (0, 1).
+	"""
+
+	if not is_rgb(image):
+		raise ValueError("Input needs to be an array of RGB values")
+
+	r = image[...,0]
+	g = image[...,1]
+	b = image[...,2]
+
+	out = np.zeros_like(image)
+
+	#allequal = (img == img[:, :, 0, np.newaxis]).all(axis=-1)
+
+	with np.errstate(invalid="ignore"): 
+		tmp = (2.*r - g - b) / 2. / np.sqrt((r-g)**2 + (r-b)*(g-b)) # if r==g==b then 0/0
+
+		theta = np.arccos(np.clip(tmp, -1., +1.))
+
+		out[...,0] = np.where(b <= g, theta, 2*np.pi - theta) # H
+		out[...,2] = np.sum(image, axis=-1) / 3. # I
+		out[...,1] = 1 - np.amin(image, axis=-1) / out[...,2] # S if r==g==b==0 then 0/0
+
+	np.nan_to_num(out[...,0:2], copy=False)
+
+	return out
+
+#@opjit() np.dot with more than 2 dimensions is not supported...
+def rgb_to_ycbcr(image):
+	# type: (np.ndarray, ) -> np.ndarray
+
+	""" Converts an array [..., channels] of RGB values to Digital Y'CbCr (0-255).
+		RGB values are assumed to be normalized to (0, 1).
+		Don't forget to cast to uint8 for pillow.
+	"""
+
+
+	"""  from RGB (0-1).
+	"""
+
+	if not is_rgb(image):
+		raise ValueError("Input needs to be an array of RGB values")
+
+	m = np.array([
+		[+065.481, +128.553, +024.966],
+		[-037.797, -074.203, +112.000],
+		[+112.000, -093.786, -018.214],
+	])
+	a = np.array([16, 128, 128])
+
+	return np.dot(image, m.T) + a
+
+def random_triangular_matrix(size, lower=True):
+	# type: (int, bool) -> np.ndarray
+
+	""" Returns a triangular matrix with random value between 0 and 1 uniformly.
+	"""
+
+	a = np.random.uniform(0, 1, (size, size))
+	if lower:
+		ind = np.triu_indices(5, 1)
+	else:
+		ind = np.tril_indices(5, 1)
+	a[ind] = 0
+
+	return a
 
 def issquare(A):
 	# type: (np.ndarray, ) -> bool
@@ -238,15 +317,16 @@ def remove_color(img, ratio, neutral_color=RGB_WHITE):
 	sd = np.std(img, axis=-1)
 	img[sd > ratio*norm] = neutral_color
 
-def sliding_window_2d(image, window_size, step_size):
+#@opjit(cache=False) doesn't help a lot, because it's a generator
+def sliding_window_2d(image, window_size, step_size=(1, 1)):
 	# type: (np.ndarray, Tuple[int, int], Tuple[int, int]) -> Iterator[np.ndarray]
 
 	win_x, win_y = window_size
 	step_x, step_y = step_size
 	height, width = image.shape[0:2]
 
-	for y in range(0, height - win_y, step_y):
-		for x in range(0, width - win_x, step_x):
+	for y in range(0, height - win_y + 1, step_y):
+		for x in range(0, width - win_x + 1, step_x):
 			yield image[y:y + win_y, x:x + win_x, ...]
 
 def histogram_correlation(hist1, hist2):
@@ -264,3 +344,12 @@ def histogram_correlation(hist1, hist2):
 	num = np.sum(h1norm * h2norm, axis=-1)
 	denom = np.sqrt(np.sum(h1norm**2, axis=-1)*np.sum(h2norm**2, axis=-1))
 	return num / denom
+
+if __name__ == "__main__":
+	import timeit
+	from .numpy import random_triangular_matrix
+
+	image = np.random.randint(0, 255, (1000, 1000))
+
+	list(sliding_window_2d(image, (100, 100), (1, 1))) # warmup
+	print(min(timeit.repeat('list(sliding_window_2d(image, (100, 100), (1, 1)))', number=10, repeat=5, globals=globals())))

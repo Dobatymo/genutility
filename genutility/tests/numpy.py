@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from math import pi
+
 import numpy as np
 
 from genutility.test import MyTestCase, parametrize
-from genutility.numpy import remove_color, unblock, decompress, batchtopk
+from genutility.numpy import remove_color, unblock, decompress, batchtopk, sliding_window_2d, rgb_to_hsi
 
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
@@ -23,9 +25,31 @@ class NumpyTest(MyTestCase):
 	)
 	def test_remove_color(self, img, ratio, truth):
 		img = np.array(img)
-		remove_color(img, ratio)
+		remove_color(img, ratio) # inplace
 		truth = np.array(truth)
 		self.assertTrue(np.array_equal(truth, img))
+
+	@parametrize(
+		([0., 0., 0.], [0., 0., 0.]), #000000
+		([1., 1., 1.], [0., 0., 1.]), # #FFFFFF
+		([0.628, 0.643, 0.142], [np.radians(61.5), 0.699, 0.471]), #A0A424
+		([0.255, 0.104, 0.918], [np.radians(250.), 0.756, 0.426]), #411BEA
+	)
+	def test_rgb_to_hsi(self, img, truth):
+		""" See: https://en.wikipedia.org/wiki/HSL_and_HSV#Examples (H_2, S_HSI, I) """
+
+		img, truth = np.array(img), np.array(truth)
+		result = rgb_to_hsi(img)
+		self.assertTrue(np.allclose(truth, result, atol=0, rtol=1e-3), msg=str(result))
+
+	@parametrize(
+		([[0, 1], [2, 3]], (1, 1), (1, 1), [[[0]], [[1]], [[2]], [[3]]]),
+		(np.arange(9).reshape(3, 3), (2, 2), (1, 1), [[[0, 1], [3, 4]], [[1, 2], [4, 5]], [[3, 4], [6, 7]], [[4, 5], [7, 8]]]),
+	)
+	def test_sliding_window_2d(self, image, ws, ss, truth):
+		image, truth = np.array(image), np.array(truth)
+		result = np.array(list(sliding_window_2d(image, ws, ss)))
+		self.assertTrue(np.array_equal(truth, result))
 
 	@parametrize(
 		([[1,2],[4,3]], None, -1, False, [[1,2],[3,4]]),

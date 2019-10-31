@@ -26,6 +26,11 @@ def progress(it, length=None, refresh=1, file=sys.stdout):
 
 	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
 
+	""" todo: `from operator import length_hint`
+		Use `length_hint(it)` for a guess which might be better than nothing.
+		Can return 0.
+	"""
+
 	if length is None:
 		try:
 			length = len(it) # type: ignore # TypeError caught below

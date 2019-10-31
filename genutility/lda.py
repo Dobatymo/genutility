@@ -625,16 +625,6 @@ class LDAInfer(LDA):
 		self.nkt = np.zeros((self.K, self.V), dtype=self.inttype)
 		self.nk = np.zeros((self.K, ), dtype=self.inttype)
 
-	def initialize_docs(self):
-		# type: () -> None
-
-		self.M = len(self.docs)
-
-		self.nmk = np.zeros((self.M, self.K), dtype=self.inttype)
-		self.nm = np.array(list(map(len, self.docs)), dtype=self.inttype)
-
-		self.topics = {} # `z`, sparse document-word topics matrix (because rows can have different lengths)
-
 if __name__ == "__main__":
 	from sklearn.datasets import fetch_20newsgroups
 	from .pickle import cache
