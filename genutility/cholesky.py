@@ -39,6 +39,7 @@ def choldate(L, x, sign):
 
 if __name__ == "__main__":
 	import timeit
+	import numpy as np
 	from .numpy import random_triangular_matrix
 
 	size = 100

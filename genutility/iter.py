@@ -5,7 +5,7 @@ from builtins import zip, map, range, reversed
 
 import sys, logging
 from collections import deque
-from itertools import groupby, chain, tee, islice, count, combinations, product
+from itertools import groupby, chain, tee, islice, count, combinations, product, starmap, repeat
 from operator import add
 from time import time
 from types import GeneratorType
@@ -20,6 +20,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+def repeatfunc(func, times=None, *args):
+	# type: (Callable[[*Any], T], Optional[int], *any) -> Iterator[T]
+
+	""" Repeat calls to func with specified arguments.
+		Example:  repeatfunc(random.random)
+		See: https://docs.python.org/3/library/itertools.html#itertools-recipes
+	"""
+
+	if times is None:
+		return starmap(func, repeat(args))
+	return starmap(func, repeat(args, times))
 
 def progress(it, length=None, refresh=1, file=sys.stdout):
 	# type: (Union[Iterable, Collection], Optional[int], float, Optional[TextIO]) -> Iterator

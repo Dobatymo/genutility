@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import range
 from future.utils import viewitems
 
+from math import sqrt, exp
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -174,6 +175,10 @@ def logtrace(m):
 	""" Calcuates the sum of the logs of the diagonal elements (batchwise if neccessary)
 		m: [..., x, x]
 	"""
+	
+	""" note: performance cannot easily be improve by numba.
+		`np.diagonal` not supported by numba 0.46.0
+	"""
 
 	return np.sum(np.log(np.diagonal(m, axis1=-2, axis2=-1)), axis=-1)
 
@@ -187,13 +192,31 @@ def shiftedexp(pvals):
 
 class Sampler(object):
 
+	""" Sample from discrete CDF. """
+
 	def __init__(self, cdf):
 		self.cdf = cdf
 		self.psum = cdf[-1]
 
 	def __call__(self):
+		# type: (int, ) -> int
+
+		""" Sample one. """
+
 		rand = np.random.uniform(0, self.psum)
 		return np.searchsorted(self.cdf, rand, side="right")
+
+	def sample(self, n):
+		# type: (int, ) -> np.ndarray
+
+		""" Sample `n`. """
+
+		rands = np.random.uniform(0, self.psum, n)
+		return np.searchsorted(self.cdf, rands, side="right")
+
+	def pdf(self, n, minlength=None):
+		out = np.bincount(self.sample(n), minlength=minlength)
+		return out / n
 
 def sample_probabilities(pvals):
 	# type: (np.ndarray, ) -> Callable[[], int]
@@ -246,9 +269,64 @@ def normalize(pvals):
 def categorical(pvals):
 	# type: (np.ndarray, ) -> int
 
-	""" Requires normalized inputs: sum(pvals) ~= 1 """
+	""" Sample from the categorical distribution using `pvals`.
+		See: https://en.wikipedia.org/wiki/Categorical_distribution
+	"""
 
-	return np.argmax(np.random.multinomial(1, pvals))
+	return sample_probabilities(pvals)() # faster than: np.argmax(np.random.multinomial(1, normalize(pvals)))
+
+def population2cdf(population):
+	# type: (np.ndarray, ) -> np.ndarray
+
+	""" Convert a population (list of observations) to a CDF. """ 
+
+	population = np.sort(population)
+	return np.searchsorted(population, population, side='right') / len(population)
+
+def pmf2cdf(pdf):
+	# type: (np.ndarray, ) -> np.ndarray
+
+	""" Convert a discrete PDF into a discrete CDF. """
+
+	cdf = np.cumsum(pdf)
+	return cdf / cdf[-1]
+
+def _two_sample_kolmogorov_smirnov_same_length(cdf1, cdf2, n1, n2):
+	# note: yields different results as `scipy.stats.ks_2samp`
+	assert len(cdf1) == len(cdf2)
+
+	D = np.amax(np.abs(cdf1 - cdf2)) # K-S statistic
+	level = exp(-2 * (D / sqrt((n1 + n2) / (n1 * n2)))**2)
+	return D, level
+
+def _two_sample_kolmogorov_smirnov_population(p1, p2, alpha=0.05):
+	# note: yields different results as `scipy.stats.ks_2samp`
+	cdf1 = population2cdf(p1)
+	cdf2 = population2cdf(p2)
+
+	statistic, pvalue = _two_sample_kolmogorov_smirnov_same_length(cdf1, cdf2, len(cdf1), len(cdf2))
+	reject = pvalue < alpha
+	return statistic, pvalue, reject
+
+def _two_sample_kolmogorov_smirnov_pmf(pmf1, pmf2, alpha=0.05):
+	# note: yields different results as `scipy.stats.ks_2samp`
+	""" Tests the null hypothesis that both samples belong to the same distribution.
+		See: https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test#Two-sample_Kolmogorov%E2%80%93Smirnov_test
+	"""
+
+	cdf1 = np.cumsum(pmf1)
+	cdf2 = np.cumsum(pmf2)
+
+	n1 = cdf1[-1]
+	n2 = cdf2[-1]
+
+	# cannot be inplace because of type conversion
+	cdf1 = cdf1 / n1
+	cdf2 = cdf2 / n2
+
+	statistic, pvalue = _two_sample_kolmogorov_smirnov_same_length(cdf1, cdf2, n1, n2)
+	reject = pvalue < alpha
+	return statistic, pvalue, reject
 
 def inf_matrix_power(pm):
 	w, v = np.linalg.eig(pm) # scipy.linalg.eig would probably by faster as it can return the left and right eigen vectors
@@ -347,9 +425,28 @@ def histogram_correlation(hist1, hist2):
 
 if __name__ == "__main__":
 	import timeit
-	from .numpy import random_triangular_matrix
 
-	image = np.random.randint(0, 255, (1000, 1000))
+	#image = np.random.randint(0, 255, (1000, 1000))
+	#list(sliding_window_2d(image, (100, 100), (1, 1))) # warmup
+	#print(min(timeit.repeat('list(sliding_window_2d(image, (100, 100), (1, 1)))', number=10, repeat=5, globals=globals())))
 
-	list(sliding_window_2d(image, (100, 100), (1, 1))) # warmup
-	print(min(timeit.repeat('list(sliding_window_2d(image, (100, 100), (1, 1)))', number=10, repeat=5, globals=globals())))
+	def test_sample_probabilities(num_weights=100, num_samples=100000):
+
+		pvals = normalize(np.random.uniform(0, 1, num_weights))
+		a_sampler = sample_probabilities(pvals).pdf(num_samples)
+
+		assert np.allclose(x_pvals, pdf)
+
+	from unclog import logtrace as logtrace_cython, logtrace_batch as logtrace_batch_cython
+
+	a = np.random.uniform(0, 1, (100, 100)).astype(np.float64)
+	out = np.empty((), dtype=np.float64)
+
+	print(min(timeit.repeat('logtrace(a)', number=10000, globals=globals())))
+	print(min(timeit.repeat('logtrace_cython(a)', number=10000, globals=globals())))
+
+	a = np.random.uniform(0, 1, (100, 100, 100)).astype(np.float64)
+	out = np.empty(100, dtype=np.float64)
+
+	print(min(timeit.repeat('logtrace(a)', number=10000, globals=globals())))
+	print(min(timeit.repeat('logtrace_batch_cython(a, out)', number=10000, globals=globals())))

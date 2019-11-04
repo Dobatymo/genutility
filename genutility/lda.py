@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .numpy import normalize, categorical, batchtopk
+from .numpy import categorical, batchtopk
 from .datastructures import VariableRowMatrix
 from .encoder import BatchLabelEncoder
 from .iter import count_distinct, progress
@@ -107,9 +107,6 @@ class LDABase(object):
 		assert self.nkt.shape == (K, V)
 		assert self.nk.shape == (K, )
 
-		assert self.α.shape == (K, )
-		assert self.β.shape == (V, )
-
 	def _initialize_topics(self, docs, topics):
 		# type: (IterableDocuments, Dict[Any, int]) -> None
 
@@ -118,8 +115,8 @@ class LDABase(object):
 				k = topics[m, i] = self.init_topic()
 				self.add_counts(m, t, k)
 
-	def calc_probs(self, m, t):
-		# type: (int, int) -> float[K]
+	def calc_probs(self, m, t, k_select=slice(None)):
+		# type: (int, int, Indices) -> float[K]
 
 		# notes: np.sum(self.nkt, axis=-1) == self.nk
 		# notes: np.sum(self.nmk[m], axis=-1) == self.nm[m]
@@ -137,27 +134,15 @@ class LDABase(object):
 				on Topic Modeling and Gibbs Sampling'
 		"""
 
-		left = (self.nmk[m, :] + self.α) # [K]
-		right = (self.nkt[:, t] + self.β[t]) / (self.nk[:] + self.βsum) # [K]
-		return left * right # [K]
-
-	def calc_probs_selected(self, m, t, k_select):
-		# type: (int, int) -> float[K]
-
 		left = (self.nmk[m, k_select] + self.α) # [K]
-		right = (self.nkt[k_select, t] + self.β[t]) / (self.nk[k_select] + self.βsum) # [K]
+		right = (self.nkt[k_select, t] + self.β) / (self.nk[k_select] + self.βsum) # [K]
 		return left * right # [K]
 
 	def sample(self, m, t):
 		# type: (int, int) -> int
 
 		probs = self.calc_probs(m, t) # [K]
-		return categorical(normalize(probs))
-
-	def sample_selected(self, m, t, k_select):
-		# type: (int, int, Any) -> int
-
-		raise NotImplementedError
+		return categorical(probs)
 
 	def _sample_all(self, docs, topics):
 		# type: (IterableDocuments, Dict[Any, int]) -> None
@@ -166,7 +151,7 @@ class LDABase(object):
 			for i, t in enumerate(doc):
 				k = topics[m, i]
 				self.sub_counts(m, t, k)
-				k = topics[m, i] = self.sample(m, t, k) # sample new topics
+				k = topics[m, i] = self.sample(m, t) # sample new topics
 				self.add_counts(m, t, k)
 
 	def initialize(self):
@@ -223,7 +208,7 @@ class LDABase(object):
 
 		num = self.nkt + self.β # [K, V]
 		denom = self.nk + self.βsum # [K]
-		return num / denom[:,None] # [K, V]
+		return num / denom[:, None] # [K, V]
 
 	def _perplexity(self, docs):
 		# type: (IterableDocuments, ) -> float
@@ -236,7 +221,7 @@ class LDABase(object):
 
 		for m, doc in enumerate(docs):
 			for i, t in enumerate(doc):
-				num += np.log(np.inner(φ[:,t], θ[m]))
+				num += np.log(np.inner(φ[:, t], θ[m]))
 			denom += len(doc)
 
 		return exp(-num / denom)
@@ -281,7 +266,7 @@ class LDA(LDABase):
 		- Integrating Out Multinomial Parameters in Latent Dirichlet Allocation and Naive Bayes for Collapsed Gibbs Sampling (2010)
 	"""
 
-	def __init__(self, n_topics, alpha=1., beta=1.):
+	def __init__(self, n_topics, alpha=0.1, beta=0.01):
 		# type: (int, int, float, float) -> None
 
 		LDABase.__init__(self)
@@ -301,11 +286,11 @@ class LDA(LDABase):
 
 		self.V = self.word_encoder.num_labels
 
-		self.α = np.full(self.K, self.alpha / self.K) # [K] symmetric Dirichlet prior for document-topic distribution θ
-		self.β = np.full(self.V, self.beta / self.V) # [V] symmetric Dirichlet prior for topic-word distribution φ
+		self.α = self.alpha / self.K # symmetric Dirichlet prior for document-topic distribution θ
+		self.β = self.beta / self.V # symmetric Dirichlet prior for topic-word distribution φ
 
-		self.αsum = np.sum(self.α)
-		self.βsum = np.sum(self.β)
+		self.αsum = self.alpha
+		self.βsum = self.beta
 
 		self.nkt = np.zeros((self.K, self.V), dtype=self.inttype) # [K, V] topic-word counts
 		self.nk = np.zeros((self.K, ), dtype=self.inttype) # [K] total topic counts
@@ -376,7 +361,7 @@ class LDATermWeight(LDABase):
 			- "Assessing topic model relevance: Evaluation and informative priors" (2019)
 	"""
 
-	def __init__(self, n_topics, tws="PMI", alpha=1., beta=1.):
+	def __init__(self, n_topics, tws="PMI", alpha=0.1, beta=0.01):
 		# type: (int, int, str, float, float) -> None
 
 		""" tws: Term weighting scheme
@@ -467,11 +452,11 @@ class LDATermWeight(LDABase):
 
 		self.V = self.word_encoder.num_labels
 
-		self.α = np.full(self.K, self.alpha / self.K) # [K] symmetric Dirichlet prior for document-topic distribution θ
-		self.β = np.full(self.V, self.beta / self.V) # [V] symmetric Dirichlet prior for topic-word distribution φ
+		self.α = self.alpha / self.K # symmetric Dirichlet prior for document-topic distribution θ
+		self.β = self.beta / self.V # [V] symmetric Dirichlet prior for topic-word distribution φ
 
-		self.αsum = np.sum(self.α)
-		self.βsum = np.sum(self.β)
+		self.αsum = self.alpha
+		self.βsum = self.beta
 
 		self.nkt = np.zeros((self.K, self.V), dtype=self.inttype) # [K, V] counts, same as np.sum(nmkt, axis=0)
 		self.nk = np.zeros((self.K, ), dtype=self.inttype) # [K] counts, same as np.sum(nkt, axis=-1) # [K]
@@ -533,7 +518,7 @@ class LDATermWeight(LDABase):
 		# nkt: ld.numByTopicWord[tid, vid]
 
 		left = (self.wmk[m] + self.α) # [K]
-		right = (wkt[:] + self.β[t]) / (wk[:] + self.βsum) # [K]
+		right = (wkt[:] + self.β) / (wk[:] + self.βsum) # [K]
 		return left * right # [K]
 
 	"""
@@ -611,16 +596,20 @@ class LDAInfer(LDA):
 		self.nk_old = self.nk
 		self.docs = []
 
-	def calc_probs(self, m, t):
+	def calc_probs(self, m, t, k_select=slice(None)):
 		# type: (int, int) -> float[]
 
-		left = (self.nmk[m, :] + self.α) # [K]
-		right = (self.nkt[:, t] + self.nkt_old[:, t] + self.β) / (self.nk[:] + self.nk_old[:] + self.βsum) # [K]
+		left = (self.nmk[m, k_select] + self.α) # [K]
+		num = (self.nkt[k_select, t] + self.nkt_old[k_select, t] + self.β) # [K]
+		denom = (self.nk[k_select] + self.nk_old[k_select] + self.βsum) # [K]
 
-		return left * right # [K]
+		return left * num / denom # [K]
 
 	def initialize(self):
 		# type: () -> None
+
+		assert self.K > 0, "Number of topics must be larger than zero"
+		assert self.V > 0, "Vocabulary size must be larger than zero"
 
 		self.nkt = np.zeros((self.K, self.V), dtype=self.inttype)
 		self.nk = np.zeros((self.K, ), dtype=self.inttype)
