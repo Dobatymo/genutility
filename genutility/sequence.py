@@ -10,7 +10,7 @@ from .func import identity
 if TYPE_CHECKING:
 	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple
 
-class LasyStringList(object):
+class LazyStringList(object):
 
 	def __init__(self, length):
 		self.length = length

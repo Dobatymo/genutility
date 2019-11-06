@@ -11,24 +11,15 @@ import numpy as np
 from .numpy import categorical, batchtopk
 from .datastructures import VariableRowMatrix
 from .encoder import BatchLabelEncoder
-from .iter import count_distinct, progress
-from .sequence import LasyStringList
+from .iter import progress
 from .object import cast
 
 if TYPE_CHECKING:
 	from typing import Any, Dict, Iterable
-	Documents = List[List[int]]
+
+	RawDocument = List[int]
 	IterableDocuments = Iterable[Iterable[int]]
-
-# utils
-
-def mylen(obj):
-	from scipy.sparse import issparse
-
-	if issparse(obj):
-		return obj.shape[0]
-	else:
-		return len(obj)
+	TopicsMapping = MutableMapping[Tuple[int, int], int]
 
 def top_topics(id2word, term_topic_matrix, num_words=10, decimals=2):
 	# type: (Dict[int, str], float[K, V], int) -> Iterator[List[Tuple[str, float]]]
@@ -52,7 +43,7 @@ def format_topics(topics, linesep="\n", tokensep="\t"):
 class LDADocument(object):
 
 	def __init__(self, words):
-		# type: (List[int], ) -> None
+		# type: (RawDocument, ) -> None
 
 		self.words = words
 
@@ -73,10 +64,11 @@ class LDADocument(object):
 
 class LDABase(object):
 
-	def __init__(self):
+	def __init__(self, seed=None):
 		# type: () -> None
 
 		np.seterr(all="raise")
+		np.random.seed(seed)
 
 	def init_topic(self):
 		# type: () -> int
@@ -108,7 +100,7 @@ class LDABase(object):
 		assert self.nk.shape == (K, )
 
 	def _initialize_topics(self, docs, topics):
-		# type: (IterableDocuments, Dict[Any, int]) -> None
+		# type: (IterableDocuments, TopicsMapping) -> None
 
 		for m, doc in enumerate(progress(docs, file=stderr)):
 			for i, t in enumerate(doc):
@@ -145,7 +137,7 @@ class LDABase(object):
 		return categorical(probs)
 
 	def _sample_all(self, docs, topics):
-		# type: (IterableDocuments, Dict[Any, int]) -> None
+		# type: (IterableDocuments, TopicsMapping) -> None
 
 		for m, doc in enumerate(progress(docs, file=stderr)):
 			for i, t in enumerate(doc):
@@ -266,10 +258,10 @@ class LDA(LDABase):
 		- Integrating Out Multinomial Parameters in Latent Dirichlet Allocation and Naive Bayes for Collapsed Gibbs Sampling (2010)
 	"""
 
-	def __init__(self, n_topics, alpha=0.1, beta=0.01):
-		# type: (int, int, float, float) -> None
+	def __init__(self, n_topics, alpha=0.1, beta=0.01, seed=None):
+		# type: (int, float, float) -> None
 
-		LDABase.__init__(self)
+		LDABase.__init__(self, seed)
 
 		self.K = n_topics # number of topics
 
@@ -303,6 +295,7 @@ class LDA(LDABase):
 		self.nmk = np.zeros((self.M, self.K), dtype=self.inttype) # [M, K] document-topic counts
 		self.nm = np.array(list(map(len, self.docs)), dtype=self.inttype) # [M] total document counts, not necessary for sampling, but useful for theta and phi calculation
 
+		# note: VariableRowMatrix() is slower than a dict here for some reason
 		self.topics = {} # `z`, sparse document-word topics matrix (because rows can have different lengths)
 
 	def initialize_topics(self):
@@ -323,7 +316,7 @@ class LDA(LDABase):
 		return self._perplexity(self.docs)
 
 	def perplexity(self, docs):
-		# type: (Iterable[List[int]], ) -> float
+		# type: (IterableDocuments, ) -> float
 
 		return self._perplexity(docs)
 
@@ -362,7 +355,7 @@ class LDATermWeight(LDABase):
 	"""
 
 	def __init__(self, n_topics, tws="PMI", alpha=0.1, beta=0.01):
-		# type: (int, int, str, float, float) -> None
+		# type: (int, str, float, float) -> None
 
 		""" tws: Term weighting scheme
 			ONE: Consider every term equal (same as standard LDA)
@@ -418,7 +411,7 @@ class LDATermWeight(LDABase):
 
 		for doc in docs:
 			for token in set(doc):
-				tw[token] += 1
+				tw[token] += 1.
 
 		tw = np.log2(self.M / tw)
 
@@ -439,13 +432,13 @@ class LDATermWeight(LDABase):
 			for i, t in enumerate(doc):
 				tw[m, t] = -log2(doc_counts[t] / all_counts[t])
 
-		np.clip(tw, 0, None, out=tw)
+		np.clip(tw, 0., None, out=tw)
 		return tw
 
 	def _rand(self, docs):
 		# type: (Any, ) -> float[M, V]
 
-		return np.random.uniform(0, 1, (self.M, self.V)).astype(np.float32)
+		return np.random.uniform(0, 1, (self.M, self.V)).astype(self.floattype)
 
 	def initialize(self):
 		# type: () -> None
@@ -597,7 +590,7 @@ class LDAInfer(LDA):
 		self.docs = []
 
 	def calc_probs(self, m, t, k_select=slice(None)):
-		# type: (int, int) -> float[]
+		# type: (int, int, Indices) -> float[K]
 
 		left = (self.nmk[m, k_select] + self.α) # [K]
 		num = (self.nkt[k_select, t] + self.nkt_old[k_select, t] + self.β) # [K]
@@ -614,46 +607,38 @@ class LDAInfer(LDA):
 		self.nkt = np.zeros((self.K, self.V), dtype=self.inttype)
 		self.nk = np.zeros((self.K, ), dtype=self.inttype)
 
-if __name__ == "__main__":
+def test_lda_20():
 	from sklearn.datasets import fetch_20newsgroups
-	from .pickle import cache
 
 	ng = fetch_20newsgroups()
 
-	@cache("lda.init.p.gz")
-	def init_lda():
-		lda = LDA(n_topics=20)
+	lda = LDA(n_topics=20, seed=0)
 
-		for doc in ng.data:
-			lda.add_doc(doc)
+	for doc in ng.data[:1000]:
+		lda.add_doc(doc)
 
-		return lda
-
-	@cache("lda_tw.init.p.gz")
-	def init_lda_tw():
-		lda = LDATermWeight(n_topics=20)
-
-		for doc in ng.data:
-			lda.add_doc(doc)
-
-		return lda
-
-	debug_docs = [
-		[0, 6, 3, 9, 1, 5],
-		[9, 8, 8, 7, 1, 0],
-		[2, 4, 4, 5, 0, 1],
-	]
-
-	print("LDA")
-	lda = LDATermWeight(2, tws="RAND")
-	lda.add_docs_encoded()
-	lda.fit(10, docs=debug_docs, verbose=True)
-	lda.print_topics()
-
-	print("LDA")
-	lda = init_lda()
 	lda.fit(10, verbose=True)
 
-	print("LDATermWeight")
-	lda_tw = init_lda_tw()
-	lda.fit(2, verbose=True)
+	return lda
+
+def test_ldatw_20():
+	from sklearn.datasets import fetch_20newsgroups
+
+	ng = fetch_20newsgroups()
+
+	lda = LDATermWeight(n_topics=20)
+
+	for doc in ng.data[:1000]:
+		lda.add_doc(doc)
+
+	lda.fit(10, verbose=True)
+
+	return lda
+
+if __name__ == "__main__":
+	from genutility.time import PrintStatementTime
+
+	for i in range(3):
+		with PrintStatementTime():
+			test_lda_20()
+			#test_ldatw_20()
