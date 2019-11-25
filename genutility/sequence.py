@@ -8,23 +8,33 @@ from typing import TYPE_CHECKING
 from .func import identity
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple
+	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple, Sequence
 
 class LazyStringList(object):
 
 	def __init__(self, length):
+		# type: (int, ) -> None
+
 		self.length = length
 
 	def __getitem__(self, idx):
+		# type: (int, ) -> str
+
 		return str(idx)
 
 	def __len__(self):
+		# type: () -> int
+
 		return self.length
 
 	def __iter__(self):
+		# type: () -> Iterator[str]
+
 		return map(str, range(self.length))
 
 	def __contains__(self, idx):
+		# type: (int, ) -> bool
+
 		return 0 <= idx < self.length
 
 def triangular(seq):

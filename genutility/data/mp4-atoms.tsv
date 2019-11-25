@@ -1,0 +1,226 @@
+iso-code	container	ainf	Asset information to identify, license and play	DECE
+iso-code	container	avcn	AVC NAL Unit Storage Box	DECE
+iso-code	container	bloc	Base location and purchase location for license acquisition	DECE
+iso-code	container	bpcc	Bits per component	JPEG2000
+iso-code	container	buff	Buffering information	NALu Video
+iso-code	container	bxml	Binary XML container	ISO
+iso-code	container	ccid	OMA DRM Content ID	OMA DRM 2.1
+iso-code	container	cdef	type and ordering of the components within the codestream	JPEG2000
+iso-code	container	clip	Reserved	ISO
+iso-code	container	cmap	mapping between a palette and codestream components	JPEG2000
+iso-code	leaf	co64	64-bit chunk offset	ISO
+iso-code	container	coin	Content Information Box	DECE
+iso-code	container	colr	specifies the colourspace of the image	JPEG2000
+iso-code	container	crgn	Reserved	ISO
+iso-code	container	crhd	Reserved for ClockReferenceStream header	MP4v1
+iso-code	leaf	cslg	Composition to decode timeline mapping	ISO
+iso-code	container	ctab	Reserved	ISO
+iso-code	leaf	ctts	Composition time to sample	ISO
+iso-code	container	cvru	OMA DRM Cover URI	OMA DRM 2.1
+iso-code	container	dinf	Data information	ISO
+iso-code	leaf	dref	Data reference	ISO
+iso-code	container	dsgd	DVB Sample Group Description Box	DVB
+iso-code	container	dstg	DVB Sample to Group Box	DVB
+iso-code	container	edts	Edit lists	ISO
+iso-code	leaf	elst	Edit list	ISO
+iso-code	container	emsg	Event message	DASH
+iso-code	container	evti	Event information	ATSC 3.0
+iso-code	container	fdel	File delivery information (item info extension)	ISO
+iso-code	container	feci	FEC Informatiom	ISO
+iso-code	container	fecr	FEC Reservoir	ISO
+iso-code	container	fiin	FD Item Information	ISO
+iso-code	container	fire	File Reservoir	ISO
+iso-code	container	fpar	File Partition	ISO
+iso-code	leaf	free	Free space	ISO
+iso-code	container	frma	Original format box	ISO
+iso-code	leaf	ftyp	File type	ISO
+iso-code	container	gitn	Group ID to name	ISO
+iso-code	container	grpi	OMA DRM Group ID	OMA DRM 2.0
+iso-code	leaf	hdlr	Handler	ISO
+iso-code	leaf	hmhd	Hint media header	ISO
+iso-code	container	hpix	Hipix Rich Picture (user-data or meta-data)	Hipix
+iso-code	container	icnu	OMA DRM Icon URI	OMA DRM 2.0
+iso-code	container	ID32	ID3 version 2 container	id3v2
+iso-code	container	idat	Item data	ISO
+iso-code	container	ihdr	Image Header	JPEG2000
+iso-code	container	iinf	Item information	ISO
+iso-code	container	iloc	Item location	ISO
+iso-code	container	imap	Reserved	ISO
+iso-code	container	imif	IPMP Information box	ISO
+iso-code	container	infe	Item information entry	ISO
+iso-code	container	infu	OMA DRM Info URL	OMA DRM 2.0
+iso-code	leaf	iods	Object Descriptor container box	MP4v1
+iso-code	container	iphd	reserved for IPMP Stream header	MP4v1
+iso-code	container	ipmc	IPMP Control Box	ISO
+iso-code	container	ipro	Item protection	ISO
+iso-code	container	iref	Item reference	ISO
+iso-code	container	jP  	JPEG 2000 Signature	JPEG2000
+iso-code	container	jp2c	JPEG 2000 contiguous codestream	JPEG2000
+iso-code	container	jp2h	Header	JPEG2000
+iso-code	container	jp2i	intellectual property information	JPEG2000
+iso-code	container	kmat	Reserved	ISO
+iso-code	container	leva	Leval assignment	ISO
+iso-code	container	load	Reserved	ISO
+iso-code	container	loop	Looping behavior	WhatsApp
+iso-code	container	lrcu	OMA DRM Lyrics URI	OMA DRM 2.1
+iso-code	container	m7hd	Reserved for MPEG7Stream header	MP4v1
+iso-code	container	matt	Reserved	ISO
+iso-code	leaf	mdat	Media data container	ISO
+iso-code	leaf	mdhd	Media header, overall information about the media	ISO
+iso-code	container	mdia	Media information	ISO
+iso-code	container	mdri	Mutable DRM information	OMA DRM 2.0
+iso-code	container	meco	Metadata container	ISO
+iso-code	container	mehd	Movie extends header	ISO
+iso-code	container	mere	Metabox relation	ISO
+iso-code	leaf	meta	Metadata container	ISO
+iso-code	container	mfhd	Movie fragment header	ISO
+iso-code	container	mfra	Movie fragment random access	ISO
+iso-code	container	mfro	Movie fragment random access offset	ISO
+iso-code	container	minf	Media information container	ISO
+iso-code	container	mjhd	Reserved for MPEG-J Stream header	MP4v1
+iso-code	container	moof	Movie fragment	ISO
+iso-code	container	moov	Movie	ISO
+iso-code	container	mvcg	Multiview group	NALu Video
+iso-code	container	mvci	Multiview Information	NALu Video
+iso-code	container	mvex	Movie extends box	ISO
+iso-code	leaf	mvhd	Movie header	ISO
+iso-code	container	mvra	Multiview relation attribute	NALu Video
+iso-code	leaf	nmhd	Null media header	ISO
+iso-code	container	ochd	Reserved for ObjectContentInfoStream header	MP4v1
+iso-code	container	odaf	OMA DRM Access Unit Format	OMA DRM 2.0
+iso-code	container	odda	OMA DRM Content Object	OMA DRM 2.0
+iso-code	container	odhd	Reserved for ObjectDescriptorStream header	MP4v1
+iso-code	container	odhe	OMA DRM Discrete Media Headers	OMA DRM 2.0
+iso-code	container	odrb	OMA DRM Rights Object	OMA DRM 2.0
+iso-code	container	odrm	OMA DRM Container	OMA DRM 2.0
+iso-code	container	odtt	OMA DRM Transaction Tracking	OMA DRM 2.0
+iso-code	container	ohdr	OMA DRM Common headers	OMA DRM 2.0
+iso-code	container	padb	Padding bits	ISO
+iso-code	container	paen	Partition entry	ISO
+iso-code	container	pclr	palette which maps a single component in index space to a multiple- component image	JPEG2000
+iso-code	leaf	pdin	Progressive download information	ISO
+iso-code	container	pitm	Primary item reference	ISO
+iso-code	container	pnot	Reserved	ISO
+iso-code	container	prft	Producer reference time	ISO
+iso-code	container	pssh	Protection system specific header	ISO Common Encryption
+iso-code	container	res 	Resolution	JPEG2000
+iso-code	container	resc	Resolution captured	JPEG2000
+iso-code	container	resd	Resolution displayed	JPEG2000
+iso-code	container	rinf	Restricted information	ISO
+iso-code	container	saio	Sample auxiliary information offsets	ISO
+iso-code	container	saiz	Sample auxiliary information sizes	ISO
+iso-code	leaf	sbgp	Sample to group	ISO
+iso-code	container	schi	Scheme information	ISO
+iso-code	container	schm	Scheme type	ISO
+iso-code	container	sdep	Sample dependency	NALu Video
+iso-code	container	sdhd	Reserved for SceneDescriptionStream header	MP4v1
+iso-code	leaf	sdtp	Independent and Disposable Samples Box	ISO
+iso-code	container	sdvp	SD Profile Box	SDV
+iso-code	container	segr	File delivery session group	ISO
+iso-code	container	senc	Sample encryption data	ISO Common Encryption
+iso-code	leaf	sgpd	Sample group definition	ISO
+iso-code	container	sidx	Segment Index Box	3GPP
+iso-code	container	sinf	Protection scheme information	ISO
+iso-code	leaf	skip	Free space	ISO
+iso-code	leaf	smhd	Sound media header	ISO
+iso-code	container	srmb	System Renewability Message	DVB
+iso-code	container	srmc	System Renewability Message container	DVB
+iso-code	container	srpp	STRP Process	ISO
+iso-code	container	ssix	Sub-sample index	ISO
+iso-code	container	stbl	Sample table	ISO
+iso-code	leaf	stco	Sample table chunk offset 	ISO
+iso-code	container	stdp	Sample degradation priority	ISO
+iso-code	container	sthd	Subtitle Media Header Box	ISO
+iso-code	container	strd	Sub-track definition	ISO
+iso-code	container	stri	Sub-track information	ISO
+iso-code	leaf	stsc	Sample table sample-to-chunk	ISO
+iso-code	leaf	stsd	Sample descriptions	ISO
+iso-code	leaf	stsg	Sub-track sample grouping	ISO
+iso-code	leaf	stsh	Sample table shadow sync	ISO
+iso-code	leaf	stss	Sample table sync	ISO
+iso-code	leaf	stsz	Sample table sizes	ISO
+iso-code	leaf	stts	Sample table time-to-sample	ISO
+iso-code	container	styp	Segment type	3GPP
+iso-code	container	stz2	compact sample sizes (framing)	ISO
+iso-code	leaf	subs	Sub-sample information	ISO
+iso-code	container	swtc	Multiview Group Relation	NALu Video
+iso-code	container	tfad	Track fragment adjustment box	3GPP
+iso-code	container	tfdt	Track fragment decode time	ISO
+iso-code	container	tfhd	Track fragment header	ISO
+iso-code	container	tfma	Track fragment media adjustment box	3GPP
+iso-code	container	tfra	Track fragment radom access	ISO
+iso-code	container	tibr	Tier Bit rate	NALu Video
+iso-code	container	tiri	Tier Information	NALu Video
+iso-code	leaf	tkhd	Track header	ISO
+iso-code	container	traf	Track fragment	ISO
+iso-code	container	trak	Track	ISO
+iso-code	container	tref	Track reference	ISO
+iso-code	leaf	trex	Track extends defaults	ISO
+iso-code	leaf	trgr	Track grouping information	ISO
+iso-code	container	trik	Facilitates random access and trick play modes	DECE
+iso-code	container	trun	Track fragment run	ISO
+iso-code	leaf	udta	User-data	ISO
+iso-code	container	uinf	a tool by which a vendor may provide access to additional information associated with a UUID	JPEG2000
+iso-code	container	UITS	Unique Identifier Technology Solution	Universal Music Group
+iso-code	container	ulst	a list of UUID’s	JPEG2000
+iso-code	container	url 	URL	JPEG2000
+iso-code	leaf	uuid	user-extension box	ISO
+iso-code	leaf	vmhd	Video media header	ISO
+iso-code	container	vwdi	Multiview Scene Information	NALu Video
+iso-code	container	xml 	XML container	ISO
+iso-code	container	xml 	a tool by which vendors can add XML formatted information	JPEG2000
+userdata-code	container	albm	Album	3GPP
+userdata-code	container	alou	Album loudness	ISO
+userdata-code	container	angl	Angle	Apple
+userdata-code	container	auth	Author	3GPP
+userdata-code	container	clfn	Clip file name	Apple
+userdata-code	container	clid	Clip identifier	Apple
+userdata-code	container	clsf	Classification	3GPP
+userdata-code	container	cmid	Camera identifier	Apple
+userdata-code	container	cmnm	Camera name	Apple
+userdata-code	container	coll	Collection	3GPP
+userdata-code	leaf	cprt	Copyright	ISO
+userdata-code	container	date	Date and time	Apple
+userdata-code	container	dscp	Description	3GPP
+userdata-code	container	gnre	Genre	3GPP
+userdata-code	container	hinf	hint information	ISO
+userdata-code	container	hnti	Hint information	ISO
+userdata-code	container	hpix	Hipix Rich Picture (user-data or meta-data)	Hipix
+userdata-code	container	kywd	Keywords	3GPP
+userdata-code	container	loci	Location information	3GPP
+userdata-code	container	ludt	Loudness	ISO
+userdata-code	container	manu	Manufacturer	Apple
+userdata-code	container	modl	Model	Apple
+userdata-code	container	orie	Orientation	3GPP
+userdata-code	container	perf	Performer	3GPP
+userdata-code	container	reel	Reel	Apple
+userdata-code	container	rtng	Rating	3GPP
+userdata-code	container	scen	Scene	Apple
+userdata-code	container	shot	Shot	Apple
+userdata-code	container	slno	Serial number	Apple
+userdata-code	container	strk	Sub track	ISO
+userdata-code	container	thmb	Thumbnail	3GPP
+userdata-code	leaf	titl	Title	3GPP
+userdata-code	container	tlou	Track loudness	ISO
+userdata-code	container	tsel	Track selection	ISO
+userdata-code	container	tsel	Track selection	3GPP
+userdata-code	container	urat	User rating	3GPP
+userdata-code	container	yrrc	Year recorded	3GPP
+quicktime-code	container	albm	Album	3GPP
+quicktime-code	container	auth	Author	3GPP
+quicktime-code	container	clip	clipping region	QT
+quicktime-code	container	clsf	Classification	3GPP
+quicktime-code	container	crgn	Visual clipping region definition	QT
+quicktime-code	container	ctab	Track color-table	QT
+quicktime-code	container	dcfD	Marlin DCF Duration	OMArlin
+quicktime-code	container	elng	Extended Language	QT
+quicktime-code	container	imap	Input map	QT
+quicktime-code	container	kmat	Compressed visual track matte	QT
+quicktime-code	container	load	Track pre-load definitions	QT
+quicktime-code	container	matt	Visual track matte	QT
+quicktime-code	container	pnot	Preview container	QT
+quicktime-code	container	wide	Expansion space reservation	QT
+custom-code	container	SDLN	User-data XXX	Samsung
+custom-code	leaf	smrd	User-data XXX	Samsung
+custom-code	leaf	smta	User-data XXX	Samsung
+custom-code	leaf	beam	User-data XXX	WhatsApp

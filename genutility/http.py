@@ -10,13 +10,18 @@ from io import open
 from string import ascii_letters, digits
 from typing import TYPE_CHECKING
 
+from .twothree import FileExistsError
 from .file import copyfilelike, Tell
 from .iter import first_not_none
 from .filesystem import safe_filename
+from .exceptions import DownloadFailed
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Tuple
+	from typing import Callable, Optional, Tuple, Mapping
 	from http.cookiejar import CookieJar
+
+if __debug__:
+	import requests
 
 logger = logging.getLogger(__name__)
 
@@ -27,22 +32,26 @@ reserved = gen_delims + sub_delims
 unreserved = ascii_letters + digits + "-._~"
 valid_uri_characters = reserved + unreserved
 
-class ContentInvalidLength(Exception):
+class HTTPError(Exception):
+
+	def __init__(self, *args, **kwargs):
+		response = kwargs.pop("response", None)
+		Exception.__init__(self, *args, **kwargs)
+		self.response = response
+
+class ContentInvalidLength(HTTPError, DownloadFailed):
 
 	def __init__(self, path, expected, received):
-		Exception.__init__(self, path, expected, received)
+		HTTPError.__init__(self, path, expected, received)
 
-class TimeOut(Exception):
+class TimeOut(HTTPError, DownloadFailed):
 	pass
 
-class DownloadInterrupted(Exception):
+class DownloadInterrupted(HTTPError, DownloadFailed):
 	pass
 
-try:
-	FileExistsError
-except NameError:
-	class FileExistsError(IOError):
-		pass
+class NoRedirect(HTTPError):
+	pass
 
 try:
 	from email.utils import parsedate_to_datetime # new in 3.3
@@ -86,6 +95,9 @@ def get_filename_from_url(url):
 
 def get_filename_from_url_v2(url):
 	return urlparse(url)[2].split("/")[-1]
+
+def get_filename_from_url_v3(url):
+	return url.rstrip("/").rsplit("/", 1)[1]
 
 class URLRequestBuilder(object):
 
@@ -141,6 +153,22 @@ class FileLike(object):
 
 	def __exit__(self, exc_type, exc_value, traceback):
 		self.close()
+
+def get_redirect_url(url, headers=None):
+
+	import requests
+
+	r = requests.get(url, allow_redirects=False, headers=headers)
+	r.raise_for_status()
+
+	try:
+		if r.status_code in {301, 302, 303, 307, 308}:
+			return r.headers["Location"]
+		else:
+			raise NoRedirect("Unexpected status code: {}".format(r.status_code), response=r)
+
+	except KeyError: # Location not provided. is this really raised?
+		raise HTTPError("Location header not found", response=r)
 
 class URLRequest(object):
 
@@ -198,7 +226,7 @@ class URLRequest(object):
 			try:
 				return fp.read()
 			except URLError:
-				raise TimeOut("Timed out after {}s".format(self.timeout))
+				raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
 
 	def _json(self):
 		# type: () -> dict
@@ -207,7 +235,7 @@ class URLRequest(object):
 			try:
 				return json.load(fp)
 			except URLError:
-				raise TimeOut("Timed out after {}s".format(self.timeout))
+				raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
 
 	def _download(self, basepath, filename=None, fn_prio=None, overwrite=False, suffix=".partial", report=None):
 		# type: (str, Optional[str], Optional[Tuple[int, int, int, int]], bool, str, Optional[Callable[[int, int], None]]) -> Tuple[Optional[int], str]
@@ -260,7 +288,7 @@ class URLRequest(object):
 
 		except URLError:
 			logger.warning("Timeout after {}s at {}: {}".format(self.timeout, self.response.geturl(), self.headers))
-			raise TimeOut("Timed out after {}s".format(self.timeout))
+			raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
 
 		except ConnectionResetError as e:
 			logger.warning("Connection was reset during download: %s", str(e))

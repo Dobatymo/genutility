@@ -2,11 +2,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import win32evtlog, winerror
 import wmi
 
 from .math import NaN
+
+if TYPE_CHECKING:
+	from typing import Iterator
 
 logger = logging.getLogger(__name__)
 

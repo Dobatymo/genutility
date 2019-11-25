@@ -13,7 +13,8 @@ if __debug__:
 	from .compat import gzip, bz2
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO
+	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator
+	from pathlib import Path
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
@@ -39,6 +40,19 @@ def write_file(data, path, mode="wb", encoding=None, errors=None):
 
 	with open(path, mode, encoding=encoding, errors=errors) as fw:
 		fw.write(data)
+
+def read_or_raise(fin, size):
+	# type: (IO, int) -> Union[str, bytes]
+
+	""" Instead of returning a result smaller than `size` like `io.read()`,
+		it raises and EOFError.
+	"""
+
+	data = fin.read(size)
+	if len(data) != size:
+		raise EOFError
+
+	return data
 
 def linefileiter(fin, check_last=True): # kinda unnecessary
 	last = None
@@ -252,7 +266,7 @@ class LastLineFile(object):
 class Tell(object):
 
 	def __init__(self, fp):
-		# type: (FileLike, ) -> None
+		# type: (IO, ) -> None
 
 		try:
 			assert fp.seekable() == False

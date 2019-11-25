@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.utils import viewkeys
+from future.utils import viewkeys, viewitems
 from builtins import sum
 
 from itertools import islice
@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
-	from typing import Dict, TextIO, Union
+	from typing import Dict, TextIO, Union, Iterator, List
 	from .gensim import KeyedVectors
 
 from nltk.tokenize import word_tokenize as tokenize

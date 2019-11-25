@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from .exceptions import NoResult
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Optional, Tuple, Union
+	from typing import Any, Callable, Iterable, Optional, Tuple, Union, Iterator
 
 logger = logging.getLogger(__name__)
 

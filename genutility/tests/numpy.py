@@ -1,7 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from math import pi
-
 import numpy as np
 
 from genutility.test import MyTestCase, parametrize

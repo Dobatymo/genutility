@@ -347,6 +347,25 @@ def iter_except(iterator, exception_callbacks):
 			except KeyError:
 				raise e
 
+def list_except(it, catch=Exception):
+	# type: (Iterable[T], Union[Exception, Sequence[Exception]]) -> Tuple[Exception, List[T]]
+
+	""" Same as `list()` except in the case of an exception, the partial list which was collected
+		so far is returned. `catch` specifies which exeptions are caught. It can be an exception
+		or a tuple of exceptions.
+	"""
+
+	ret = [] # List[T]
+	exc = None # type: Optional[Exception]
+
+	try:
+		for i in it:
+			ret.append(i)
+	except catch as e:
+		exc = e
+
+	return exc, ret
+
 def iter_except_ignore(iterator, exceptions, logger=logger):
 	# type: (Iterator[T], Collection[Exception], Logger) -> Iterator[T]
 

@@ -41,10 +41,10 @@ def listdir_rec(directory, dirs=True, files=True, rec=True, abs_rel=0, link=True
 	1: abs path
 	2: rel path
 	3: filename only"""
-	
+
 	if type(rec) == bool and rec == True:
 		rec = -1
-	
+
 	try:
 		for i in os.listdir(directory):
 			next = os.path.join(directory, i)
@@ -61,7 +61,8 @@ def listdir_rec(directory, dirs=True, files=True, rec=True, abs_rel=0, link=True
 						yield path_abs_rel(next, directory, abs_rel) #path_abs_rel needed?
 			else:
 				if statsislink(stats):
-					raise NotImplemented("Directory links are not supported yet")
+					raise RuntimeError("Directory links are not supported yet")
+
 				if dirs:
 					if meta:
 						yield (path_abs_rel(next, directory, abs_rel), stats) #path_abs_rel needed?

@@ -4,7 +4,7 @@ import signal, logging, sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import TypeVar, Any, Iterable, Callable, Union
+	from typing import TypeVar, Any, Iterable, Callable, Union, Optional
 	from types import FrameType
 	if sys.version_info >= (3, 5):
 		from signal import Signals # pylint: disable=no-name-in-module

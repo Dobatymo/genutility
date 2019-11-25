@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+#don't do `from builtins import str`
 from setuptools import setup
 from io import open
 
@@ -24,6 +25,7 @@ setup(
 		"Topic :: Utilities",
 	],
 	packages=["genutility", "genutility/compat", "genutility/fileformats", "genutility/hardware", "genutility/twothree"],
+	package_data = {str("genutility"): ["data/*.tsv"]},
 	python_requires=">=2.7",
 	install_requires=[
 		"future",

@@ -50,6 +50,8 @@ def proc(hist, lambda_=200):
 	B = DS > lambda_
 	BC = np.mean(unpack(B, 2, 2), axis=-1) > delta # noqa: F821
 
+	raise RuntimeError("Unfinished")
+
 def test_scene_change_detection_histogram_correlation():
 	images = iter_video()
 	for score in scene_change_detection_histogram_correlation(images):

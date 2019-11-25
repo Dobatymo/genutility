@@ -22,10 +22,9 @@ if __debug__:
 	import unidecode
 
 if TYPE_CHECKING:
-	from typing import Union, Iterable, Iterator
+	from typing import Callable, Union, Iterable, Iterator, Optional
 	from pathlib import Path
-
-	MyDirEntryT = Union[os.DirEntry, SkippableDirEntry]
+	from os import DirEntry
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +131,9 @@ class SkippableDirEntry(object):
 	@path.setter
 	def path(self, path):
 		self._path = path
+
+if TYPE_CHECKING:
+	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
 
 def st_mode_to_str(st_mode):
 	# type: (int, ) -> str

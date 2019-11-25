@@ -1,16 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import json
+import logging, json
 from itertools import islice
 from typing import TYPE_CHECKING
 
 from .file import copen
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Optional, TextIO, Union
+	from typing import Any, Callable, Dict, Optional, TextIO, Union, Iterator
 
 if __debug__:
 	import jsonschema
+
+logger = logging.getLogger(__name__)
 
 class BuiltinEncoder(json.JSONEncoder):
 	def default(self, obj):
@@ -136,7 +138,8 @@ class json_lines(object):
 
 	def write(self, obj, skipkeys=False, ensure_ascii=False, check_circular=True, allow_nan=True,
 		cls=None, indent=None, separators=None, default=None, sort_keys=False, **kw):
-		# type: (Any, bool, bool, bool, bool, Optional[Callable], Optional[str], Optional[Tuple[str, str]], Optional[Callable], bool **Any) -> None
+		# type: (Any, bool, bool, bool, bool, Optional[Callable], Optional[str], Optional[Tuple[str, str]], Optional[Callable], bool, **Any) -> None
+
 		line = json.dumps(obj, skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular,
 			allow_nan=allow_nan, cls=cls, indent=indent, separators=separators, default=default, sort_keys=sort_keys,
 			**kw) + self.newline

@@ -1,14 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import map
-
-from itertools import chain
+from typing import TYPE_CHECKING
 
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
 from nltk.tokenize import word_tokenize
 
 from .func import identity
+
+if TYPE_CHECKING:
+	from typing import Iterable, Iterator, List, Any, Dict
 
 class BatchLabelEncoder(object):
 

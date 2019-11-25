@@ -5,21 +5,25 @@ from functools import wraps, reduce
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Callable, Any, TextIO
+	from typing import Callable, Any, TextIO, Iterable, Iterator
 
 def identity(x):
 	# type: (T, ) -> T
+
 	""" Identity function. """
 
 	return x
 
 def nop():
 	# type: () -> None
+
 	""" Function which does absolutely nothing (aka pass, noop). """
 
 	pass
 
 def compose_two(f, g):
+	# type: (Callable, Callable) -> Callable
+
 	""" compose_two(f, g) -> lambda x: f(g(x)) """
 
 	return lambda x: f(g(x))

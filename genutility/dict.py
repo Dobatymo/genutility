@@ -37,6 +37,15 @@ def subdictdefault(d, it, default=None):
 
 	return {key: d.get(key, default) for key in it}
 
+def update(d1, d2):
+	# type: (dict, dict) -> None
+
+	""" Same as `dict.update` except that `None` values are skipped. """
+
+	for k, v in viewitems(d2):
+		if v is not None:
+			d1[k] = v
+
 class keydefaultdict(defaultdict):
 
 	""" defaultdict which passes a key to the default factory. """

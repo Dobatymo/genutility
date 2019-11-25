@@ -5,6 +5,10 @@ from future.utils import PY3
 
 import sys, logging
 from time import sleep
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import IO
 
 try:
 	from shutil import get_terminal_size
@@ -42,7 +46,7 @@ def info_print(msg=None, args=tuple(), exception=None):
 
 if PY3:
 	def input_ex(s, file_out=sys.stdout, file_in=sys.stdin):
-		# type: (str, filelike, filelike) -> str
+		# type: (str, IO, IO) -> str
 
 		print(s, file=file_out, end="")
 		file_out.flush()
@@ -50,7 +54,7 @@ if PY3:
 
 else:
 	def input_ex(s, file_out=sys.stdout, file_in=sys.stdin):
-		# type: (str, filelike, filelike) -> str
+		# type: (str, IO, IO) -> str
 
 		print(s.encode(file_out.encoding, errors="replace"), file=file_out, end=b"")
 		return sys.stdin.readline().decode(file_in.encoding).rstrip("\n")

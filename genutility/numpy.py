@@ -12,7 +12,7 @@ import numpy as np
 from .numba import opjit
 
 if TYPE_CHECKING:
-	from typing import Iterator, Tuple
+	from typing import Iterator, Tuple, Callable
 
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
@@ -429,13 +429,6 @@ if __name__ == "__main__":
 	#image = np.random.randint(0, 255, (1000, 1000))
 	#list(sliding_window_2d(image, (100, 100), (1, 1))) # warmup
 	#print(min(timeit.repeat('list(sliding_window_2d(image, (100, 100), (1, 1)))', number=10, repeat=5, globals=globals())))
-
-	def test_sample_probabilities(num_weights=100, num_samples=100000):
-
-		pvals = normalize(np.random.uniform(0, 1, num_weights))
-		a_sampler = sample_probabilities(pvals).pdf(num_samples)
-
-		assert np.allclose(x_pvals, pdf)
 
 	from unclog import logtrace as logtrace_cython, logtrace_batch as logtrace_batch_cython
 

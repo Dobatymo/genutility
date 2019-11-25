@@ -1,6 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from datetime import datetime as _datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Optional
 
 try:
 	from datetime import timezone

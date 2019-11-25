@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path
+from typing import TYPE_CHECKING
 
 from .twothree import FileNotFoundError
 from .compat.importlib.util import find_spec
@@ -8,6 +9,9 @@ from .compat.importlib.util import find_spec
 from .toml import read_toml
 from .json import read_json_schema
 from .os import get_appdata_dir
+
+if TYPE_CHECKING:
+	from typing import Dict, Any, Optional, Union
 
 if __debug__:
 	import jsonschema

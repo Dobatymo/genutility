@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from .iter import switched_enumerate
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, Tuple, IO
+	from typing import Dict, Iterable, Tuple, Callable, Optional, Sequence
 
 english_consonants = "bcdfghjklmnpqrstvwxz" # y?
 english_vowels = "aeiouy" # y?

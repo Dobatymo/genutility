@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import map, range
 from future.utils import viewvalues, raise_from
 
-from sys import version_info
 from functools import partial
 from math import pi, factorial, sqrt
 from collections import defaultdict, Counter
@@ -36,6 +35,8 @@ def cosine_similarity(a, b):
 	return dot(a, b)/euclidic_norm(a)/euclidic_norm(b)
 
 def argmin(l, s=0, e=None):
+	# type: (Sequence[T], int, Optional[int]) -> T
+
 	if not l:
 		raise EmptyIterable()
 
@@ -47,6 +48,8 @@ def argmin(l, s=0, e=None):
 	return arg
 
 def argmax(l, s=0, e=None):
+	# type: (Sequence[T], int, Optional[int]) -> T
+
 	if not l:
 		raise EmptyIterable()
 
@@ -57,7 +60,7 @@ def argmax(l, s=0, e=None):
 			arg = i
 	return arg
 
-def argmax(iterable):
+def argmax_pair(iterable):
 	# type: (Iterable[Orderable], ) -> Tuple[int, Orderable]
 
 	it = iter(iterable)
@@ -72,7 +75,7 @@ def argmax(iterable):
 			arg = i
 			max = elm
 
-	return arg
+	return arg, max
 
 from itertools import count
 from operator import itemgetter

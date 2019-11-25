@@ -1,8 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from enum import Enum
+from typing import TYPE_CHECKING
 
-from genutility.func import identity
+from .func import identity
+
+if TYPE_CHECKING:
+	from typing import Any, Sequence, Callable
 
 class BisectRetVal(Enum):
 	Lower = -1

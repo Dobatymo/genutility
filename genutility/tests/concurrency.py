@@ -5,7 +5,7 @@ import time, threading
 
 from genutility.test import MyTestCase
 from genutility.time import MeasureTime, iter_timer
-from genutility.concurrency import ThreadPool, gather_all_unsorted, gather_all_unsorted, gather_any, NotThreadSafe
+from genutility.concurrency import ThreadPool, gather_all_unsorted, gather_any, NotThreadSafe
 
 class ConcurrencyTest(MyTestCase):
 
