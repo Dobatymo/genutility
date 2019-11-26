@@ -56,14 +56,33 @@ def read_json(path, schema=None, object_hook=None):
 	validate(obj, schema)
 	return obj
 
+def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None):
+	# type: (Any, str, Optional[Union[str, dict]], bool, Optional[str], bool, Optional[Callable]) -> None
+
+	""" Writes python object `obj` to `path` as json files and optionally validates the object
+		according to `schema`. The validation requires `jsonschema`.
+		The remaining optional parameters are passed through to `json.dump`.
+	"""
+
+	if schema:
+		from jsonschema import validate
+
+		if isinstance(schema, str):
+			schema = read_json_schema(schema)
+
+		validate(obj, schema)
+
+	with copen(path, "wt", encoding="utf-8") as fw:
+		json.dump(obj, fw, ensure_ascii=ensure_ascii, cls=cls, indent=indent, sort_keys=sort_keys, default=default)
+
 class json_lines(object):
 
 	""" Read and write files in the JSON Lines format (http://jsonlines.org).
 	"""
 
 	def __init__(self,
-		stream, doclose,
-		cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
+		stream, doclose, cls=None, object_hook=None, parse_float=None,
+		parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
 	):
 		# type: (TextIO, bool, Optional[json.JSONEncoder], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> None
 
@@ -108,7 +127,7 @@ class json_lines(object):
 		return json_lines(stream, False, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw)
 
 	def __enter__(self):
-		# type: () -> None
+		# type: () -> json_lines
 
 		return self
 

@@ -8,7 +8,7 @@ from time import sleep
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import IO
+	from typing import Any, IO, Optional
 
 try:
 	from shutil import get_terminal_size
@@ -22,8 +22,33 @@ def print_line(char="-", length=_terminal_width, file=None, flush=False):
 
 	print(char*length, end="", file=file, flush=flush)
 
+class PrintOnError(object):
+
+	""" A context manager which can be used to outout data
+		before an exception is printed by the python runtime.
+	"""
+
+	def __init__(self, *args, **kwargs):
+		# type: (*Any, **Any) -> None
+
+		""" All arguments are passed to the `print` function. """
+
+		self.args = args
+		self.kwargs = kwargs
+
+	def __enter__(self):
+		# type: () -> PrintOnError
+
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if exc_type:
+			print(*self.args, **self.kwargs)
+
 def safe_input(s, block=10):
-	""" makes sure ctrl-c on input() only raises KeyboardInterrupt and not EOFError+KeyboardInterrupt.
+	# type: (str, int) -> str
+
+	""" Makes sure ctrl-c on input() only raises KeyboardInterrupt and not EOFError+KeyboardInterrupt.
 		Waits at most `block` seconds to be sure.
 	"""
 
@@ -33,6 +58,8 @@ def safe_input(s, block=10):
 		sleep(block) # can be interrupted by KeyboardInterrupt
 
 def info_print(msg=None, args=tuple(), exception=None):
+	# type: (Optional[str], tuple, Exception) -> None
+
 	# not (msg or exception) this doesn't do anything
 
 	if exception and msg:

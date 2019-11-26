@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from sys import stdout
-from functools import wraps, reduce
+from functools import wraps, reduce, partial
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,6 +20,15 @@ def nop():
 	""" Function which does absolutely nothing (aka pass, noop). """
 
 	pass
+
+def partial_decorator(*args, **kwargs):
+	# type: (*Any, **Any) -> Callable
+
+	""" Same as `functools.partial` but applied as a decorator. """
+
+	def decorator(func):
+		return partial(func, *args, **kwargs)
+	return decorator
 
 def compose_two(f, g):
 	# type: (Callable, Callable) -> Callable

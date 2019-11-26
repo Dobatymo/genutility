@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 from builtins import chr
 from future.moves.itertools import zip_longest
-
-import os, stat, os.path, re, logging
+import os, stat, os.path, re, logging, shutil, errno
 from operator import attrgetter
 from fnmatch import fnmatch
 from typing import TYPE_CHECKING
@@ -12,7 +12,7 @@ try:
 except ImportError:
 	from scandir import scandir # backport
 
-from .file import equal_files
+from .file import equal_files, iterfilelike, FILE_IO_BUFFER_SIZE
 from .iter import is_empty
 from .os import islink, uncabspath
 from .ops import logical_implication
@@ -134,6 +134,31 @@ class SkippableDirEntry(object):
 
 if TYPE_CHECKING:
 	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
+
+def copy_file_generator(source, dest, buffer_size=FILE_IO_BUFFER_SIZE, overwrite_readonly=False):
+	# type: (str, str, int, bool) -> Iterator[None]
+
+	""" Partial file is not deleted if exception gets raised anywhere. """
+
+	try:
+		os.makedirs(os.path.dirname(dest))
+	except OSError as e:
+		if e.errno != errno.EEXIST:
+			raise
+
+	if overwrite_readonly:
+		try:
+			make_writeable(dest)
+		except OSError as e:
+			if e.errno != errno.ENOENT:
+				raise
+
+	with open(source, "rb") as src, open(dest, "wb") as dst:
+		for data in iterfilelike(src, buffer=buffer_size):
+			dst.write(data)
+			yield
+
+	shutil.copystat(source, dest)
 
 def st_mode_to_str(st_mode):
 	# type: (int, ) -> str

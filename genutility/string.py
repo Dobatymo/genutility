@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import map
+from builtins import map, zip
 from future.utils import PY2, viewkeys, viewitems
 
 import re
@@ -10,6 +10,7 @@ from functools import partial
 from typing import TYPE_CHECKING
 
 from .iter import switched_enumerate
+from .binary import encode_binary, decode_binary
 
 if TYPE_CHECKING:
 	from typing import Dict, Iterable, Tuple, Callable, Optional, Sequence
@@ -25,6 +26,16 @@ german_vowels = "aeiou"
 
 #def cycleright(s, start=0, end=-1): # bad
 #	return s[:start] + s[end] + s[start:end] + s[end+1:]
+
+def encode_case(s):
+	# type: (str, ) -> bytes
+
+	return encode_binary(c.isupper() for c in s)
+
+def decode_case(s, key):
+	# type: (str, bytes) -> str
+
+	return "".join(c.upper() if b else c for c, b in zip(s, decode_binary(key)))
 
 def tryint(obj):
 	try:
