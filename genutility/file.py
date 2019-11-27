@@ -164,6 +164,30 @@ class OpenFileAndDeleteOnError(object):
 			# see also: https://nullprogram.com/blog/2016/08/07/
 			os.remove(self.file)
 
+class OptionalWriteOnlyFile(object):
+
+	def __init__(self, path=None, mode="xb", encoding=None, compresslevel=9):
+		if path:
+			self.f = copen(path, mode, encoding=encoding, compresslevel=compresslevel)
+		else:
+			self.f = None
+
+	def __enter__(self):
+		if self.f:
+			return self.f
+		else:
+			return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if self.f:
+			self.f.close()
+
+	def write(self, data):
+		pass
+
+	def seek(self, offset, whence=None):
+		pass
+
 class PathOrBinaryIO(object):
 
 	def __init__(self, fname, mode="rb", close=False):

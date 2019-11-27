@@ -3,7 +3,7 @@ from builtins import map, range
 from future.utils import viewvalues, raise_from
 
 from functools import partial
-from math import pi, factorial, sqrt
+from math import pi, factorial, sqrt, log
 from collections import defaultdict, Counter
 from itertools import islice
 from operator import lt, gt, mul
@@ -30,6 +30,13 @@ def dot(a, b):
 
 def euclidic_norm(x):
 	return sqrt(sum(map(sqr, x)))
+
+def shannon_entropy(ps, base=2):
+	# type: (Iterable[float], int) -> float
+
+	""" Calculates the Shannon entropy for probabilities `ps` with `base` in pure Python. """
+
+	return -sum(p * log(p, base) for p in ps)
 
 def cosine_similarity(a, b):
 	return dot(a, b)/euclidic_norm(a)/euclidic_norm(b)

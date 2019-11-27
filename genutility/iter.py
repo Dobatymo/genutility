@@ -33,7 +33,27 @@ def repeatfunc(func, times=None, *args):
 		return starmap(func, repeat(args))
 	return starmap(func, repeat(args, times))
 
-def progress(it, length=None, refresh=1, file=sys.stdout, extra_info_callback=None):
+def progressdata(it, refresh=1, end="\r", file=sys.stdout):
+	# type: (Union[Iterable, Sequence], Optional[int], Number, Optional[IO[str]]) -> Iterable
+
+	last = start = time()
+	total = 0
+	try:
+		for elm in it:
+			yield elm
+			total += len(elm)
+			current = time()
+			if current - last > refresh:
+				last = current
+				duration = current-start
+				print("Read {}, running for {} seconds ({:0.2e}/s).".format(total, int(duration), total/duration), end="\r", file=file)
+	except KeyboardInterrupt:
+		print("Unsafely aborted after reading {} in {} seconds ({:0.2e}/s).".format(total, int(last-start), total/(last-start)), end=end, file=file)
+		raise
+	else:
+		print("Finished {} in {} seconds ({:0.2e}/s).".format(total, int(last-start), total/(last-start)), end=end, file=file)
+
+def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None):
 	# type: (Union[Iterable, Collection], Optional[int], float, Optional[TextIO], Callable) -> Iterator
 
 	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
@@ -67,7 +87,7 @@ def progress(it, length=None, refresh=1, file=sys.stdout, extra_info_callback=No
 			if extra_info_callback:
 				extra = " [{}]".format(extra_info_callback(i, length))
 			print("{}{}, running for {} seconds ({:0.2e}/s){}.".format(i, lstr, int(duration), i/duration, extra), end="\r", file=file)
-	print("Finished {} in {} seconds.".format(i, int(last-start)), end="\r", file=file)
+	print("Finished {} in {} seconds.".format(i, int(last-start)), end=end, file=file)
 
 class Progress(object):
 

@@ -20,6 +20,13 @@ RGB_WHITE = (255, 255, 255)
 def normalized_choice(p_ind, p_prob):  # is this neccessary? I think `np.random.choice` can handle unnormalized probabilities
 	return np.random.choice(p_ind, p=p_prob/np.sum(p_prob))
 
+def shannon_entropy(ps, base=2):
+	# type: (np.ndarray, int) -> float
+
+	""" Calculates the Shannon entropy for probabilities `ps` with `base`. """
+
+	return -np.sum(ps * np.log(ps) / np.log(base))
+
 def is_rgb(img):
 	# type: (np.ndarray, ) -> bool
 

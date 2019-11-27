@@ -4,45 +4,69 @@ from future.utils import viewkeys
 import json
 
 from genutility.http import URLRequest
+from genutility.ops import logical_xor
 
 class StreamWatcher(object):
 
 	def __init__(self, api):
 		self.api = api
-		self.followed = {name: False for name in api.get_followed()}
+		self.followed_names = api.get_followed()
+		self.followed_online = {userid: False for userid in viewkeys(self.followed_names)}
 
 	def watch(self, notify_started, notify_stopped):
-		for name in viewkeys(self.followed):
-			stream = self.api.get_stream(name)
+		# type: (Callable[[str, str, Optional[str]], None], Callable[[str, str], None]) -> None
 
-			if stream is not None and not self.followed[name]:
-				self.followed[name] = True
-				notify_started(name)
-			elif stream is None and self.followed[name]:
-				self.followed[name] = False
-				notify_stopped(name)
+		user_ids = viewkeys(self.followed_names)
+		streams = self.api.get_streams(user_ids)
+		online = viewkeys(streams)
+		offline = user_ids - online
+
+		for user_id in online:
+			if not self.followed_online[user_id]:
+				self.followed_online[user_id] = True
+				notify_started(user_id, self.followed_names[user_id], streams[user_id].get('title', None))
+
+		for user_id in offline:
+			if self.followed_online[user_id]:
+				self.followed_online[user_id] = False
+				notify_stopped(user_id, self.followed_names[user_id])
 
 class TwitchAPI(object):
 
-	base = "https://api.twitch.tv/kraken/"
-	follows = "users/{}/follows/channels?client_id={}"
-	streams = "streams/{}?client_id={}"
+	base = "https://api.twitch.tv/helix/"
+	login = "users"
+	follows = "users/follows"
+	streams = "streams?user_id={}"
 
-	def __init__(self, username, client_id):
-		self.username = username
+	def __init__(self, client_id, userid=None, username=None):
+	
+		assert logical_xor(userid, username)
+	
 		self.client_id = client_id
 
-	def get_followed(self):
-		url = TwitchAPI.base + TwitchAPI.follows.format(self.username, self.client_id)
-		data = URLRequest(url).load()
-		d = json.loads(data)
-		return [follow["channel"]["_links"]["self"].rsplit("/", 1)[1] for follow in d["follows"]]
+		if userid:
+			self.userid = userid
+		else:
+			self.userid = self.get_userid(username)
 
-	def get_stream(self, channel):
-		url = TwitchAPI.base + TwitchAPI.streams.format(channel, self.client_id)
-		data = URLRequest(url).load()
-		d = json.loads(data)
-		return d["stream"]
+	def req(self, url, params):
+		qs = "&".join(k+"="+v for k, v in params)
+		data = URLRequest(url + "?" + qs, headers={"Client-ID": self.client_id}).load()
+		return json.loads(data)
+
+	def get_userid(self, username):
+		d = self.req(self.base + self.login, [("login", username)])
+		return d['data'][0]['id']
+
+	def get_followed(self):
+		d = self.req(self.base + self.follows, [("from_id", self.userid)])
+		return {follow["to_id"]: follow["to_name"] for follow in d["data"]}
+
+	def get_streams(self, user_ids):
+		d = self.req(self.base + self.streams, [("user_id", user_id) for user_id in user_ids])
+		ret = {stream['user_id']: stream for stream in d['data']}
+		assert len(d['data']) == len(ret), "More than one stream per user"
+		return ret
 
 	def watcher(self):
 		return StreamWatcher(self)

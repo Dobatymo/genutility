@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from genutility.test import MyTestCase, parametrize
-from genutility.numpy import remove_color, unblock, decompress, batchtopk, sliding_window_2d, rgb_to_hsi
+from genutility.numpy import remove_color, unblock, decompress, batchtopk, sliding_window_2d, rgb_to_hsi, shannon_entropy
+from genutility.math import shannon_entropy as shannon_entropy_python
 
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
@@ -26,6 +27,18 @@ class NumpyTest(MyTestCase):
 		remove_color(img, ratio) # inplace
 		truth = np.array(truth)
 		self.assertTrue(np.array_equal(truth, img))
+
+	@parametrize(
+		([1/3, 2/3], 0.9182958340544896),
+		([0.5, 0.2, 0.1, 0.1, 0.1], 1.9609640474436814)
+	)
+	def test_shannon_entropy(self, probabilities, truth):
+		result = shannon_entropy(probabilities)
+		truth = np.array(truth)
+		self.assertAlmostEqual(truth, result)
+
+		result_python = shannon_entropy_python(probabilities)
+		self.assertAlmostEqual(result_python, result)
 
 	@parametrize(
 		([0., 0., 0.], [0., 0., 0.]), #000000

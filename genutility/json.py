@@ -169,3 +169,12 @@ class json_lines(object):
 
 		if self.doclose:
 			self.f.close()
+
+def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt", encoding="utf-8"):
+	# type: (str, str, Callable[[dict], Sequence[str]], str, str) -> None
+
+	with json_lines.from_path(jlpath, "rt", encoding="utf-8") as fr:
+		with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
+			fw = csv.writer(csvfile)
+			for obj in fr:
+				fw.writerow(keyfunc(obj))

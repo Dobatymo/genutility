@@ -105,8 +105,8 @@ def input_type(s, type=None, predicate=None, errormsg=None, exception=Exception,
 
 def confirm(msg, yesno=True):
 	if yesno:
-		s = input_type(msg+" (yes, no): ", predicate=lambda x: x.strip().lower() in {"yes", "no"})
-		return s.strip().lower() == "yes"
+		s = input_type(msg+" (yes, no): ", predicate=lambda x: x.strip().lower() in {"yes", "y", "n", "no"})
+		return s.strip().lower() in {"yes", "y"}
 	else:
 		return input_type(msg+" (anything, nothing): ", type=bool) # bool cannot throw if given string I think...
 
