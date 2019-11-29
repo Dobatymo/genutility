@@ -21,6 +21,20 @@ def hash_file(path, hashcls, chunksize=FILE_IO_BUFFER_SIZE, mode="rb", encoding=
 		m.update(d)
 	return m
 
+def hash_data(data, hashcls):
+	# type: (bytes, Union[Callable[[], Hashobj], str]) -> Hashobj
+
+	if isinstance(hashcls, str):
+		m = hashlib.new(hashcls)
+	else:
+		m = hashcls()
+	m.update(data)
+	return m
+
+md4_hash_data = partial(hash_data, hashcls="md4")
+md5_hash_data = partial(hash_data, hashcls=hashlib.md5)
+sha1_hash_data = partial(hash_data, hashcls=hashlib.sha1)
+
 def crc32_hash_iter(it):
 	# type: (Iterable[bytes], ) -> int
 
@@ -59,13 +73,6 @@ def hash_dir_str(path, hashcls=hashlib.sha1, include_names=False):
 			m.update(file.name.encode("utf-8"))
 		m.update(filehash.digest())
 	yield format_file_hash(m, path)
-
-def md4_hash_data(data):
-	# type: (bytes,) -> Hashobj
-
-	hasher = hashlib.new("md4")
-	hasher.update(data)
-	return hasher
 
 ed2k_chunksize = 9728000
 

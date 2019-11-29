@@ -3,8 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from ctypes import byref, sizeof
 from ctypes import GetLastError, FormatError, WinError
 from errno import EACCES
-from msvcrt import get_osfhandle, open_osfhandle
-from os import fdopen
 
 from cwinsdk.windows import (
 	CloseHandle, CreateFileW, OpenFileById, GetFileInformationByHandleEx,
@@ -15,39 +13,16 @@ from cwinsdk.windows import (
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
 from cwinsdk.um.winnt import FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_SHARE_WRITE
 
+from .handle import WindowsHandle
+
 class SharingViolation(OSError):
 	pass
 
-class WindowsFile(object):
+class WindowsFile(WindowsHandle):
 
 	def __init__(self, handle):
 		assert isinstance(handle, int)
 		self.handle = handle
-
-	def get_fd(self, flags):
-		return open_osfhandle(self.handle, flags)
-
-	def get_file(self, flags, mode="r", buffering=-1, encoding=None, errors=None, newline=None, closefd=True):
-		return fdopen(self.get_fd(flags), mode, buffering, encoding, errors, newline, closefd)
-
-	def close(self):
-		if CloseHandle(self.handle) == 0:
-			raise WinError()
-
-	def __enter__(self):
-		return self
-
-	def __exit__(self, exc_type, exc_value, traceback):
-		self.close()
-
-	@classmethod
-	def from_file(cls, fp):
-		return cls.from_fd(fp.fileno())
-
-	@classmethod
-	def from_fd(cls, fd):
-		handle = get_osfhandle(fd)
-		return cls(handle)
 
 	@classmethod
 	def from_path(cls, path, mode="r", shared=False):

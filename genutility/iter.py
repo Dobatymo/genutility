@@ -51,7 +51,11 @@ def progressdata(it, refresh=1, end="\r", file=sys.stdout):
 		print("Unsafely aborted after reading {} in {} seconds ({:0.2e}/s).".format(total, int(last-start), total/(last-start)), end=end, file=file)
 		raise
 	else:
-		print("Finished {} in {} seconds ({:0.2e}/s).".format(total, int(last-start), total/(last-start)), end=end, file=file)
+		duration = last-start
+		if duration > 0:
+			print("Finished {} in {} seconds ({:0.2e}/s).".format(total, int(duration), total/duration), end=end, file=file)
+		else:
+			print("Finished {} in {} seconds.".format(total, int(duration)), end=end, file=file)
 
 def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None):
 	# type: (Union[Iterable, Collection], Optional[int], float, Optional[TextIO], Callable) -> Iterator
@@ -87,7 +91,12 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 			if extra_info_callback:
 				extra = " [{}]".format(extra_info_callback(i, length))
 			print("{}{}, running for {} seconds ({:0.2e}/s){}.".format(i, lstr, int(duration), i/duration, extra), end="\r", file=file)
-	print("Finished {} in {} seconds.".format(i, int(last-start)), end=end, file=file)
+
+	duration = last-start
+	if duration > 0:
+		print("Finished {} in {} seconds ({:0.2e}/s).".format(i, int(duration), i/duration), end=end, file=file)
+	else:
+		print("Finished {} in {} seconds.".format(i, int(duration)), end=end, file=file)
 
 class Progress(object):
 
