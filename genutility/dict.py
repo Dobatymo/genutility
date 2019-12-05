@@ -11,8 +11,38 @@ if TYPE_CHECKING:
 	U = TypeVar("U")
 	H = TypeVar("H", bound=Hashable)
 
+def get_one_of(d, keys):
+	# type: (Dict[T, U], Iterable[T]) -> Tuple[T, U]
+
+	""" Returns the (key, value) pair of the first key of `keys` found in `d`.
+	"""
+
+	for key in keys:
+		try:
+			return key, d[key]
+		except KeyError:
+			pass
+
+	raise KeyError("None of the {} keys could be found".format(len(keys)))
+
+def get_available(d, keys):
+	# type: (Dict[T, U], Iterable[T], -> Iterator[Tuple[T, U]]
+
+	for key in keys:
+		try:
+			yield key, d[key]
+		except KeyError:
+			pass
+
 def hasvalues(d):
+	# type: (dict, ) -> dict
+
 	return {k:v for k, v in viewitems(d) if v}
+
+def valuemap(func, d):
+	# type: (Callable[[U], V], Dict[T, U]) -> Dict[T, V]
+
+	return {k: func(v) for k, v in viewitems(d)}
 
 def itemgetter(it):
 	# type: (Iterable[T], ) -> Callable[[Mapping[T, U]], Iterator[U]]

@@ -46,7 +46,7 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
 	def Append(self, items):
 		assert(len(items) == self.columns)
-		pos = self.InsertStringItem(self.rows, items[0])
+		pos = self.InsertItem(self.rows, items[0])
 		assert(pos == self.rows)
 		#logger.debug("Appending Item on rows->pos: {}->{}".format(self.rows, pos))
 
@@ -62,14 +62,14 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 		self.insertcount += 1
 
 		for col in range(1, self.columns):
-			self.SetStringItem(pos, col, items[col])
+			self.SetItem(pos, col, items[col])
 
 		return self.insertcount - 1
 
 	def Edit(self, pos, items):
 		"""items is dict with col as key and string als value"""
 		for col, val in viewitems(items):
-			self.SetStringItem(pos, col, val)
+			self.SetItem(pos, col, val)
 
 	def GetSelections(self):
 		indexes = []

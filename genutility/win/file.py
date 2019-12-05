@@ -13,7 +13,7 @@ from cwinsdk.windows import (
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
 from cwinsdk.um.winnt import FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_SHARE_WRITE
 
-from .handle import WindowsHandle
+from .handle import WindowsHandle, _mode2access
 
 class SharingViolation(OSError):
 	pass
@@ -28,12 +28,7 @@ class WindowsFile(WindowsHandle):
 	def from_path(cls, path, mode="r", shared=False):
 		# shared: allow write access from other processes
 
-		if mode == "r":
-			DesiredAccess = GENERIC_READ
-		elif mode == "w":
-			DesiredAccess = GENERIC_WRITE
-		else:
-			raise ValueError("Unsupported mode")
+		DesiredAccess = _mode2access[mode]
 
 		if shared:
 			ShareMode = FILE_SHARE_READ|FILE_SHARE_WRITE

@@ -5,9 +5,24 @@ from random import shuffle
 
 from genutility.test import MyTestCase, parametrize
 from genutility.string import replace_list, replace_pairs, are_parentheses_matched, replace_pairs_chars, \
-	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted
+	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, endcut
 
 class StringTest(MyTestCase):
+
+	@parametrize(
+		("", "", ""),
+		("ab", "b", "a"),
+		("ab", "a", "ab"),
+		("asdqwe", "qwe", "asd"),
+		("asdqwe", "asd", "asdqwe"),
+		("a", "a", ""),
+		("asd", "asd", ""),
+		("a", "b", "a"),
+		("asd", "qwe", "asd"),
+	)
+	def test_endcut(self, s, postfix, truth):
+		result = endcut(s, postfix)
+		self.assertEqual(truth, result)
 
 	def test_locale_sorted(self):
 		seq = ["a", "b", "c", "A", "B", "C", "aa", "Aa", "aA", "ab", "aB", "BC"]

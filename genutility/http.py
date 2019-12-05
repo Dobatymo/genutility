@@ -2,12 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import map, str
 from future.moves.urllib import request
-from future.moves.urllib.parse import urlparse, urlsplit
 from future.moves.urllib.error import URLError
 
 import os, os.path, logging, gzip, errno, json
 from io import open
-from string import ascii_letters, digits
 from typing import TYPE_CHECKING
 
 from .twothree import FileExistsError
@@ -15,6 +13,7 @@ from .file import copyfilelike, Tell
 from .iter import first_not_none
 from .filesystem import safe_filename
 from .exceptions import DownloadFailed
+from .url import get_filename_from_url
 
 if TYPE_CHECKING:
 	from typing import Callable, Optional, Tuple, Mapping
@@ -24,13 +23,6 @@ if __debug__:
 	import requests
 
 logger = logging.getLogger(__name__)
-
-# URI RFC
-gen_delims = ":/?#[]@"
-sub_delims = "!$&'()*+;="
-reserved = gen_delims + sub_delims
-unreserved = ascii_letters + digits + "-._~"
-valid_uri_characters = reserved + unreserved
 
 class HTTPError(Exception):
 
@@ -89,15 +81,6 @@ except ImportError:
 			return content_disposition.split("=")[1].replace("\"", "").strip()
 		except (KeyError, IndexError):
 			return None
-
-def get_filename_from_url(url):
-	return os.path.split(urlsplit(url).path)[1]
-
-def get_filename_from_url_v2(url):
-	return urlparse(url)[2].split("/")[-1]
-
-def get_filename_from_url_v3(url):
-	return url.rstrip("/").rsplit("/", 1)[1]
 
 class URLRequestBuilder(object):
 

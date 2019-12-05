@@ -27,6 +27,26 @@ german_vowels = "aeiou"
 #def cycleright(s, start=0, end=-1): # bad
 #	return s[:start] + s[end] + s[start:end] + s[end+1:]
 
+def startcut(s, pre):
+	# type: (str, str) -> str
+
+	""" If string `s` starts with `pre` cut it off and return the remaining string. """
+
+	if s.startswith(pre):
+		return s[len(pre):]
+	else:
+		return s
+
+def endcut(s, post):
+	# type: (str, str) -> str
+
+	""" If string `s` ends with `post` cut it off and return the preceding string. """
+
+	if s.endswith(post):
+		return s[:-len(post)]
+	else:
+		return s
+
 def encode_case(s):
 	# type: (str, ) -> bytes
 

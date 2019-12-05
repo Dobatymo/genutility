@@ -11,7 +11,7 @@ nltk
 opencv-python; python_version < '3.8' # cv2, is not available for python 3.8 yet
 orderedset
 PyPDF2
-pypiwin32; sys_platform == 'win32' # win32evtlog, winerror
+pywin32; sys_platform == 'win32' # win32evtlog, winerror
 rhash; sys_platform == 'win32'
 toml
 unidecode

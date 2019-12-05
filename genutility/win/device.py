@@ -7,7 +7,7 @@ from ctypes.wintypes import BYTE
 from cwinsdk import struct2dict
 from cwinsdk.um.fileapi import CreateFileW, OPEN_EXISTING
 from cwinsdk.um.ioapiset import DeviceIoControl
-from cwinsdk.um.winnt import GENERIC_READ, GENERIC_WRITE, FILE_SHARE_READ, FILE_SHARE_WRITE
+from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE, CloseHandle
 from cwinsdk.um.winioctl import PARTITION_IFS, PARTITION_MSFT_RECOVERY, DISK_GEOMETRY, IOCTL_DISK_GET_DRIVE_GEOMETRY, \
 	IOCTL_DISK_GET_LENGTH_INFO, GET_LENGTH_INFORMATION, STORAGE_READ_CAPACITY, IOCTL_STORAGE_READ_CAPACITY, \
@@ -15,7 +15,7 @@ from cwinsdk.um.winioctl import PARTITION_IFS, PARTITION_MSFT_RECOVERY, DISK_GEO
 	IOCTL_STORAGE_QUERY_PROPERTY, FSCTL_LOCK_VOLUME, FSCTL_UNLOCK_VOLUME, STORAGE_DEVICE_DESCRIPTOR, \
 	SMART_GET_VERSION, GETVERSIONINPARAMS, IOCTL_DISK_VERIFY, VERIFY_INFORMATION, FSCTL_ALLOW_EXTENDED_DASD_IO
 
-from .handle import WindowsHandle
+from .handle import WindowsHandle, _mode2access
 
 def get_length(path):
 	# type: (str, ) -> int
@@ -41,7 +41,7 @@ class Volume(WindowsHandle):
 	def __init__(self, path):
 		# type: (str, ) -> None
 
-		WindowsHandle.__init__()
+		WindowsHandle.__init__(self)
 		self.handle = open_logical_volume(path)
 
 	def lock(self):
@@ -58,7 +58,7 @@ class Drive(WindowsHandle):
 	def __init__(self, DriveIndex):
 		# type: (int, ) -> None
 
-		WindowsHandle.__init__()
+		WindowsHandle.__init__(self)
 		self.handle = open_physical_drive(DriveIndex)
 
 	def get_alignment(self):
@@ -120,8 +120,10 @@ class Drive(WindowsHandle):
 
 		return struct2dict(OutBuffer)
 
-	def verify(self, start, length):
+	def verify_extent(self, start, length):
 		# type: (int, int) -> None
+
+		""" Can cause issues with some drivers (like TrueCrypt). """
 
 		InBuffer = VERIFY_INFORMATION()
 		OutBuffer = EMPTY_BUFFER()
@@ -171,11 +173,13 @@ def MyDeviceIoControl(DeviceHandle, IoControlCode, InBuffer, OutBuffer, check_ou
 	if check_output:
 		assert BytesReturned.value == sizeof(OutBuffer), "expected: {}, got: {}".format(sizeof(OutBuffer), BytesReturned.value)
 
-def open_device(FileName):
+def open_device(FileName, mode="r"):
+
+	DesiredAccess = _mode2access[mode]
 
 	DeviceHandle = CreateFileW(
 		FileName,
-		GENERIC_READ|GENERIC_WRITE,
+		DesiredAccess,
 		FILE_SHARE_READ|FILE_SHARE_WRITE,
 		None,
 		OPEN_EXISTING,
@@ -210,25 +214,25 @@ def open_logical_volume(FileName):
 def open_physical_drive(DriveIndex):
 	# type: (int, ) -> Any
 
+	assert isinstance(DriveIndex, int)
 	drive = r"\\.\PHYSICALDRIVE{}".format(DriveIndex)
 	FileName = create_unicode_buffer(drive)
 
 	return open_device(FileName)
 
-def verify_drive_fast(d):
-	from itertools import count
-	from ..iter import progress
-
-	gb = 1024**3
-	for i in progress(count()):
-		d.verify(i * gb, gb)
-
 if __name__ == "__main__":
-	with Drive(0) as d:
+
+	from argparse import ArgumentParser
+	parser = ArgumentParser()
+	parser.add_argument("driveindex", type=int)
+	args = parser.parse_args()
+
+	with Drive(args.driveindex) as d:
 		print(d.get_alignment())
 		print(d.get_capacity())
 		print(d.get_device())
 		print(d.get_geometry())
-		print(d.get_smart_version())
-
-		verify_drive_fast(d)
+		try:
+			print(d.get_smart_version())
+		except OSError as e:
+			print(e)

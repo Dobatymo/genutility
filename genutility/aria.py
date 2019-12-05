@@ -47,8 +47,9 @@ class AriaDownloader(object):
 		if global_options:
 			global_options = self.default_global_options.copy()
 			global_options.update(global_options)
-
-		self.aria2.change_global_option(global_options)
+			self.aria2.change_global_option(global_options)
+		else:
+			self.aria2.change_global_option(self.default_global_options)
 
 		self.gids = set()
 
@@ -211,7 +212,7 @@ class AriaDownloader(object):
 		finally:
 			self.remove_stopped(gid)
 
-	def download(self, uri, path=None, max_connections=None, split=None):
+	def download(self, uri, path=None, filename=None, max_connections=None, split=None):
 		# type: (str, Optional[str], Optional[int], Optional[int]) -> str
 
 		""" Downloads `uri` to directory `path`.
@@ -221,6 +222,7 @@ class AriaDownloader(object):
 		options = self.default_options.copy()
 		update(options, {
 			"dir": path,
+			"out": filename,
 			"max-connection-per-server": max_connections,
 			"split": split,
 		})
@@ -235,6 +237,76 @@ class AriaDownloader(object):
 		self.download(uri, path, max_connections, split)
 		if self.managed_downloads() >= num:
 			return self.block_one()
+
+class DownloadManager(object):
+
+	""" To use from a single thread.
+		State transitions:
+		waiting -> running (automatically)
+		running -> paused (manually)
+		paused -> running (manually)
+		running -> complete (automatically)
+		running -> error (automatically)
+	"""
+
+	def __init__(self):
+		pass
+
+	def download_with_callback(self, url, path=None, filename=None, headers=None, force=False, func=None):
+		""" Starts or enqueues download and a unique id for that download job.
+			if `force` is True, the download is started without regard for the current number
+			of downloads and queue position.
+		"""
+
+	def block_uid(self, uid):
+		""" Blocks until `uid` completes or errors
+			and returns information about that download.
+		"""
+
+	def block_one(self):
+		""" Block until any download completes or errors
+			and returns information about that download.
+		"""
+
+	def block_active(self, x):
+		""" Block if more than `x` downloads are currently active
+			until x or less are active. Yields information about completed/errored downloads
+			as they become available.
+		"""
+
+	def cancel(self, uid, states=None):
+		""" Cancels a download identified by `uid`. if `states` is None, it will be
+			- removed from the queue if waiting
+			- canceled if downloading
+			- removed if completed
+			- removed if errored.
+			The previous state will be returned, 
+		"""
+		
+		# sets the status if `uid` to canceled.
+
+	def clean(self, uid, states=None):
+		""" Removed all files associated to `uid` from disk. `states` is a list of acceptable states.
+			For example ("stopped", "error") will only remove files if the download
+			was stopped mid-progress or because of an error.
+			Take notice that ("complete") will remove files of completed downloads from disk.
+		"""
+
+		# doesn't change status
+	
+	def forget(self, uid):
+		""" Remove `uid` from the manager completely. It can only do so for downloads
+			with the state "canceled".
+		"""
+
+	# for convenience only
+
+	def block_all(self, uid):
+		return self.block_active(0)
+
+	def download_and_block(self, url):
+		uid = self.download_with_callback(url)
+		return self.block_uid(uid)
 
 if __name__ == "__main__":
 	'''from argparse import ArgumentParser

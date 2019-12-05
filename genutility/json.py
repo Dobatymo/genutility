@@ -8,6 +8,7 @@ from .file import copen
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Dict, Optional, TextIO, Union, Iterator
+	JsonDict = Dict[str, Any]
 
 if __debug__:
 	import jsonschema
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class BuiltinEncoder(json.JSONEncoder):
 	def default(self, obj):
-		from datetime import date
+		from datetime import date, timedelta
 
 		if isinstance(obj, (set, frozenset)):
 			return tuple(obj)
@@ -24,17 +25,19 @@ class BuiltinEncoder(json.JSONEncoder):
 			return [obj.real, obj.imag]
 		elif isinstance(obj, date):
 			return obj.isoformat()
+		elif isinstance(obj, timedelta):
+			return obj.total_seconds()
 
 		return json.JSONEncoder.default(self, obj)
 
 def read_json_schema(path):
-	# type: (str, ) -> Dict[str, Any]
+	# type: (str, ) -> JsonDict
 
 	with open(path, "r", encoding="utf-8") as fr:
 		return json.load(fr)
 
 def read_json(path, schema=None, object_hook=None):
-	# type: (str, Optional[Union[str, dict]]) -> Any
+	# type: (str, Optional[Union[str, JsonDict]]) -> Any
 
 	""" Read the json file at `path` and optionally validates the input according to `schema`.
 		The validation requires `jsonschema`.
@@ -57,7 +60,7 @@ def read_json(path, schema=None, object_hook=None):
 	return obj
 
 def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None):
-	# type: (Any, str, Optional[Union[str, dict]], bool, Optional[str], bool, Optional[Callable]) -> None
+	# type: (Any, str, Optional[Union[str, JsonDict]], bool, Optional[str], bool, Optional[Callable]) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
@@ -171,7 +174,7 @@ class json_lines(object):
 			self.f.close()
 
 def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt", encoding="utf-8"):
-	# type: (str, str, Callable[[dict], Sequence[str]], str, str) -> None
+	# type: (str, str, Callable[[JsonDict], Sequence[str]], str, str) -> None
 
 	with json_lines.from_path(jlpath, "rt", encoding="utf-8") as fr:
 		with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:

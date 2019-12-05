@@ -43,8 +43,11 @@ def simple_microdata_parser(bstree): # schema.org Microdata, replace with `extru
 
 					if child.name == "meta":
 						value = child["content"]
+					elif key == "url":
+						value = child["href"]
+						rec(child, dict)
 					elif child.contents:
-						value = child.contents[0].string
+						value = child.text.strip() # was: child.contents[0].string
 					else:
 						continue
 

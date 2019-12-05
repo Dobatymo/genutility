@@ -180,7 +180,7 @@ def append_to_filename(path, s):
 	return root + s + ext
 
 def scandir_error_log(entry, exception):
-	logger.exception("Error in %s", entry, exc_info=exception)
+	logger.exception("Error in %s", entry.path, exc_info=exception)
 
 def scandir_error_raise(entry, exception):
 	raise exception
