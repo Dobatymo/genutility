@@ -17,7 +17,7 @@ from io import TextIOWrapper
 from typing import TYPE_CHECKING
 
 from .ops import logical_xor, logical_implication
-from .file import equal_files
+from .file import equal_files, _check_arguments
 from .signal import HandleKeyboardInterrupt # problem here
 
 if TYPE_CHECKING:
@@ -243,14 +243,7 @@ class closeable_tempfile(object):
 
 	def __init__(self, mode="w+b", encoding=None):
 
-		is_text = "t" in mode
-		is_binary = "b" in mode
-
-		assert logical_xor(is_text, is_binary), "Explicit text or binary mode required: {}".format(mode)
-		assert logical_implication(is_binary, encoding is None)
-
-		if is_text:
-			encoding = encoding or "utf-8"
+		encoding = _check_arguments(mode, encoding)
 
 		if PY2:
 			ntf = NamedTemporaryFile(mode=mode, delete=False)

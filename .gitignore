@@ -3,7 +3,6 @@ unicode_categories.pkl
 upload.bat
 
 testfiles/
-testtemp/
 others/
 
 __pycache__/

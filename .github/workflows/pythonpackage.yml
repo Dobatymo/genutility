@@ -21,6 +21,10 @@ jobs:
       run: |
         python -m pip install -U pip
         pip install -r requirements.txt
+    - name: Security analysis with bandit
+      run: |
+        python -m pip install bandit
+        python -m bandit -r . -c bandit.yml
     - name: Lint with flake8
       run: |
         pip install flake8

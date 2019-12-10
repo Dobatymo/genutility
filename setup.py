@@ -38,10 +38,10 @@ setup(
 	extras_require={
 		"gensim": ["gensim>=3.3.0", "numpy"],
 		"pdf": ["PyPDF2"],
-		"tls": ["pycryptodome", "pyOpenSSL"],
+		"tls": ["cryptography", "pyOpenSSL"],
 		"toml": ["toml"],
-		"ALL": ["aiohttp", "bencode.py", "ctypes-windows-sdk", "flask", "gensim", "msgpack",
-			"netifaces", "nltk", "orderedset", "pycryptodome", "pyOpenSSL", "PyPDF2", "pypiwin32",
+		"ALL": ["aiohttp", "bencode.py", "cryptography", "ctypes-windows-sdk", "flask", "gensim",
+			"msgpack", "netifaces", "nltk", "orderedset", "pyOpenSSL", "PyPDF2", "pypiwin32",
 			"rhash", "toml", "unidecode", "werkzeug", "wmi", "wx"],
 	},
 	use_2to3=False

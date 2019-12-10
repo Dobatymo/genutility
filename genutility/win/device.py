@@ -170,8 +170,8 @@ def MyDeviceIoControl(DeviceHandle, IoControlCode, InBuffer, OutBuffer, check_ou
 	if ret == 0:
 		raise WinError()
 
-	if check_output:
-		assert BytesReturned.value == sizeof(OutBuffer), "expected: {}, got: {}".format(sizeof(OutBuffer), BytesReturned.value)
+	if check_output and BytesReturned.value != sizeof(OutBuffer):
+		raise RuntimeError("DeviceIoControl expected {} bytes but got {} bytes".format(sizeof(OutBuffer), BytesReturned.value))
 
 def open_device(FileName, mode="r"):
 

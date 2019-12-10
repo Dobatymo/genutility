@@ -39,9 +39,10 @@ class TwitchAPI(object):
 	streams = "streams?user_id={}"
 
 	def __init__(self, client_id, userid=None, username=None):
-	
-		assert logical_xor(userid, username)
-	
+
+		if not logical_xor(userid, username):
+			raise ValueError("Either the userid or the username must be given")
+
 		self.client_id = client_id
 
 		if userid:

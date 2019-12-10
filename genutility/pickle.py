@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import pickle
+import pickle  # nosec
 from functools import wraps
 from typing import TYPE_CHECKING
 
@@ -13,7 +13,9 @@ if TYPE_CHECKING:
 def cache(path, protocol=None):
 	# type: (str, int) -> Callable[[Callable], Callable]
 
-	""" Decorator to cache function calls. Doesn't take function arguments into regard. """
+	""" Decorator to cache function calls. Doesn't take function arguments into regard.
+		It's using `pickle` to deserialize the data. So don't use it with untrusted inputs.
+	"""
 
 	def decorator(func):
 		# type: (Callable, ) -> Callable
@@ -24,7 +26,7 @@ def cache(path, protocol=None):
 
 			try:
 				with copen(path, "rb") as fr:
-					return pickle.load(fr)
+					return pickle.load(fr)  # nosec
 			except FileNotFoundError:
 				result = func(*args, **kwargs)
 				with OpenFileAndDeleteOnError(path, "wb") as fw:

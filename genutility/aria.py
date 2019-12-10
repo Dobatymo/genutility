@@ -34,7 +34,7 @@ class AriaDownloader(object):
 		Tries to respect other users of the same instance and doesn't interfere with them.
 	"""
 
-	def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT, secret="", poll=1.0, global_options=None):
+	def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT, secret="", poll=1.0, global_options=None):  # nosec
 		# type: (str, int, str, float, Optional[dict]) -> None
 
 		""" Initialize the aria2 client with `host`, `port` and `secret`.

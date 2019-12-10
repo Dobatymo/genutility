@@ -2,6 +2,7 @@ future
 
 aiohttp; python_version >= '3.5'
 bencode.py # bencode
+cryptography
 ctypes-windows-sdk; sys_platform == 'win32'
 flask
 jsonschema
@@ -11,6 +12,7 @@ nltk
 opencv-python; python_version < '3.8' # cv2, is not available for python 3.8 yet
 orderedset
 PyPDF2
+pyOpenSSL # OpenSSL
 pywin32; sys_platform == 'win32' # win32evtlog, winerror
 rhash; sys_platform == 'win32'
 toml

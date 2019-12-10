@@ -18,12 +18,27 @@ if TYPE_CHECKING:
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
+def _check_arguments(mode, encoding=None):
+	# type: (str, Optional[str]) -> Optional[str]
+
+	is_text = "t" in mode
+	is_binary = "b" in mode
+
+	if not logical_xor(is_text, is_binary):
+		raise ValueError("Explicit text or binary mode required: {}".format(mode))
+
+	if not logical_implication(is_binary, encoding is None):
+		raise ValueError("Encoding is not None for binary file")
+
+	if is_text:
+		encoding = encoding or "utf-8"
+
 def read_file(path, mode="b", encoding=None, errors=None):
 	# type: (str, str, Optional[str]) -> bytes
 
 	""" Reads and returns whole file. If content is not needed use consume_file()"""
 
-	assert (encoding is None) == ("b" in mode)
+	encoding = _check_arguments(mode, encoding)
 
 	if not "r" in mode:
 		mode = "r" + mode
@@ -36,7 +51,7 @@ def write_file(data, path, mode="wb", encoding=None, errors=None):
 
 	""" Writes file. """
 
-	assert (encoding is None) == ("b" in mode)
+	encoding = _check_arguments(mode, encoding)
 
 	with open(path, mode, encoding=encoding, errors=errors) as fw:
 		fw.write(data)
@@ -86,15 +101,7 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 	`compresslevel`: 0-9, 0: no compression, 1: least, 9: highest compression
 	"""
 
-	is_text = "t" in mode
-	is_binary = "b" in mode
-
-	assert logical_xor(is_text, is_binary), "Explicit text or binary mode required: {}".format(mode)
-	assert logical_implication(is_binary, encoding is None and errors is None)
-
-	if is_text:
-		encoding = encoding or "utf-8"
-		errors = errors or "strict"
+	encoding = _check_arguments(mode, encoding)
 
 	ext = os.path.splitext(file)[1].lower()
 	if ext == '.gz':
@@ -106,7 +113,9 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 		return bz2.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
 	elif ext == '.zip':
-		assert archive_file, "archive_file must be specified"
+		if archive_file is None:
+			raise ValueError("archive_file must be specified")
+
 		from zipfile import ZipFile
 
 		newmode = "".join(set(mode) - {"t", "b"})
@@ -131,15 +140,7 @@ class OpenFileAndDeleteOnError(object):
 	def __init__(self, file, mode="rt", encoding=None, errors=None, newline=None, compresslevel=9):
 	# type: (str, str, Optional[str], Optional[str], Optional[str], int) -> None
 
-		is_text = "t" in mode
-		is_binary = "b" in mode
-
-		assert logical_xor(is_text, is_binary), "Explicit text or binary mode required: {}".format(mode)
-		assert logical_implication(is_binary, encoding is None and errors is None)
-
-		if is_text:
-			encoding = encoding or "utf-8"
-			errors = errors or "strict"
+		encoding = _check_arguments(mode, encoding)
 
 		self.file = file
 		self.mode = mode
@@ -518,7 +519,8 @@ def blockfileiter(path, mode="rb", encoding=None, errors=None, amount=None, chun
 		Optionally limit output to `amount` bytes.
 	"""
 
-	assert (mode == "rt" and encoding) or (mode == "rb" and not encoding and not errors)
+	encoding = _check_arguments(mode, encoding)
+
 	with open(path, mode, encoding=encoding, errors=errors) as fr:
 		for data in iterfilelike(fr, amount, chunk_size):
 			yield data

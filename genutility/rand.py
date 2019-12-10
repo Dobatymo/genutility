@@ -4,14 +4,30 @@ from builtins import range
 from random import choice, randrange
 
 def randstr(length, charset):
-	return "".join(choice(charset) for i in range(length))
+	# type: (int, str) -> str
+	
+	""" Returns a (noncryptographic) random string consisting of characters from `charset`
+		of length `length`.
+	"""
+
+	return "".join(choice(charset) for i in range(length))  # nosec
 
 def randbytes(size):
-	return b"".join(chr(randrange(0, 256)) for _ in range(size))
+	# type: (int, ) -> bytes
+	
+	""" Returns (noncryptographic) random bytes of length `length`.
+	"""
+
+	return b"".join(chr(randrange(0, 256)) for _ in range(size))  # nosec
 
 def rgb_colors():
+	# type: () -> Iterator[Tuple[int, int, int]]
+
+	""" Yields a stream of (noncryptographic) random RGB color tuples.
+	"""
+
 	while True:
-		rgb = randrange(0, 256**3)
+		rgb = randrange(0, 256**3)  # nosec
 		rg, b = divmod(rgb, 256)
 		r, g = divmod(rg, 256)
 		yield (r, g, b)

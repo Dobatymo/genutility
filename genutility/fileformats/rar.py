@@ -2,7 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import filter, range
 
-import sys, os, os.path, subprocess, logging
+import sys, os, os.path, logging
+import subprocess  # nosec
 
 from ..twothree.filesystem import tofs, fromfs
 from ..string import surrounding_join
@@ -34,6 +35,8 @@ class Rar(object):
 	windows_executable = "C:/Program Files/WinRAR/Rar.exe"
 
 	def __init__(self, archive, executable=None):
+		# type: (str, str) -> None
+
 		"""archive: archive to work with, everything which is supported by winrar
 		executable: path/to/Rar.exe"""
 
@@ -114,18 +117,18 @@ class Rar(object):
 	def commandline(self, cmd):
 		self.cmd = cmd.strip()
 
-	def execute(self, args):
+	def _execute(self, args):
 		cmd = "{} {}".format(self.exe, args)
 		logger.debug("CMD: " + cmd)
 		try:
-			ret = subprocess.check_output(tofs(cmd), stderr=subprocess.STDOUT, cwd=os.getcwd())
+			ret = subprocess.check_output(tofs(cmd), stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
 		except UnicodeEncodeError as e:
 			raise RarError("UnicodeError, Win32Console fault")
 		except subprocess.CalledProcessError as e:
 			raise RarError("Error", e.returncode, fromfs(e.cmd), e.output.decode(sys.stdout.encoding)) #should use only stderr
 
-	def test(self, password="-"):
-		self.execute('t -p{} "{}"'.format(password, self.archive))
+	def test(self, password="-"):  # nosec
+		self._execute('t -p{} "{}"'.format(password, self.archive))
 
 	def get_files_str(self):
 		return surrounding_join(" ", self.filelist, "\"", "\"")
@@ -136,17 +139,17 @@ class Rar(object):
 	def get_options_str(self):
 		return surrounding_join(" ", [value[1] % value[0] for value in self.options.itervalues() if value[0] is not False], "-", "")
 
-	def get_args(self, command):
+	def _get_args(self, command):
 		return "%s %s %s %s \"%s\" %s" % (command, self.get_flag_str(), self.get_options_str(), self.cmd, self.archive, self.get_files_str())
 
 	def create(self):
-		self.execute(self.get_args("a"))
+		self._execute(self._get_args("a"))
 
 	def extract(self, dir, mode = 0):
 		self.filelist = [dir]
 		if mode == 1:
 			self.flags["append_archive_name"][0] = True
-		self.execute(self.get_args("x"))
+		self._execute(self._get_args("x"))
 
 	def close(self):
 		pass
