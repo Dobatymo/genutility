@@ -3,9 +3,25 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import tempfile, os.path
 
 from genutility.test import MyTestCase, parametrize
+from genutility.file import write_file # not tested, used to set up the tests
 from genutility.file import equal_files, is_all_byte, OpenFileAndDeleteOnError
 
 class FileTest(MyTestCase):
+
+	@classmethod
+	def setUpClass(cls):
+		data = b"abcdefghijklmnopqrstuvwxyz"
+		write_file(data, "testfiles/file_1.bin", "wb")
+		write_file(data, "testfiles/file_2.bin", "wb")
+		write_file(data, "testfiles/file_3.bin", "wb")
+
+		data_win = b"abc\r\ndef\r\n"
+		write_file(data_win, "testfiles/file_win.bin", "wb")
+		data_unix = b"abc\ndef\n"
+		write_file(data_unix, "testfiles/file_unix.bin", "wb")
+
+		write_file(b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", "testfiles/file_zeros.bin", "wb")
+		write_file(b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f", "testfiles/file_nonzero.bin", "wb")
 
 	@parametrize(
 		(("testfiles/file_1.bin", "testfiles/file_2.bin"), "rb", None, True),
@@ -40,20 +56,4 @@ class FileTest(MyTestCase):
 
 if __name__ == "__main__":
 	import unittest
-
-	from genutility.file import write_file
-
-	data = b"abcdefghijklmnopqrstuvwxyz"
-	write_file(data, "testfiles/file_1.bin", "wb")
-	write_file(data, "testfiles/file_2.bin", "wb")
-	write_file(data, "testfiles/file_3.bin", "wb")
-
-	data_win = b"abc\r\ndef\r\n"
-	write_file(data_win, "testfiles/file_win.bin", "wb")
-	data_unix = b"abc\ndef\n"
-	write_file(data_unix, "testfiles/file_unix.bin", "wb")
-
-	write_file(b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", "testfiles/file_zeros.bin", "wb")
-	write_file(b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f", "testfiles/file_nonzero.bin", "wb")
-
 	unittest.main()

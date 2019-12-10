@@ -1,9 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from genutility.test import MyTestCase, parametrize
+from genutility.file import write_file
 from genutility.hash import crc32_hash_file, sha1_hash_file, md5_hash_file, ed2k_hash_file_v1, ed2k_hash_file_v2
 
 class HashTest(MyTestCase):
+
+	@classmethod
+	def setUpClass(cls):
+		write_file(b"abcdefghijklmnopqrstuvwxyz", "testfiles/hash.bin", "wb")
 
 	@parametrize(
 		("testfiles/hash.bin", "4c2750bd"),
@@ -25,8 +30,6 @@ class HashTest(MyTestCase):
 	def test_md5_hash_file(self, path, truth):
 		result = md5_hash_file(path).hexdigest()
 		self.assertEqual(truth, result)
-
-class Ed2kTest(MyTestCase):
 
 	@parametrize(
 		("testfiles/hash.bin", "d79e1c308aa5bbcdeea8ed63df412da9"),
@@ -52,7 +55,4 @@ class Ed2kTest(MyTestCase):
 
 if __name__ == "__main__":
 	import unittest
-	from genutility.file import write_file
-
-	write_file(b"abcdefghijklmnopqrstuvwxyz", "testfiles/hash.bin", "wb")
 	unittest.main()

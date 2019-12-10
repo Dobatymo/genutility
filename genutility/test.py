@@ -17,6 +17,7 @@ from io import TextIOWrapper
 from typing import TYPE_CHECKING
 
 from .ops import logical_xor, logical_implication
+from .file import equal_files
 from .signal import HandleKeyboardInterrupt # problem here
 
 if TYPE_CHECKING:
@@ -112,6 +113,9 @@ class MyTestCase(TestCase):
 		# type: (Any, Any, Optional[str]) -> None
 
 		self.assertTrue(first and second, msg)
+
+	def assertFilesEqual(self, first_path, second_path):
+		self.assertTrue(equal_files(first_path, second_path))
 
 	def assertIterEqual(self, first, second, msg=None):
 		# type: (Iterable, Iterable, Optional[str]) -> None

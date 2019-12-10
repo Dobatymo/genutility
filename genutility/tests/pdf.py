@@ -7,12 +7,12 @@ from genutility.pdf import join_pdfs_in_folder
 class PdfTest(MyTestCase):
 
 	@parametrize(
-		("testfiles/pdf/", "testfiles/out/joined.pdf"),
+		("testfiles/pdf/", "testtemp/joined.pdf", "testfiles/joined.pdf"),
 	)
-	def test_join_pdfs_in_folder(self, path, out):
+	def test_join_pdfs_in_folder(self, path, out, truth):
 		with self.assertNoRaise():
 			join_pdfs_in_folder(path, out, overwrite=True)
-		self.assertGreater(os.path.getsize(out), 10*1024)
+		self.assertFilesEqual(out, truth)
 
 if __name__ == "__main__":
 	import unittest
