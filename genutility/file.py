@@ -33,6 +33,8 @@ def _check_arguments(mode, encoding=None):
 	if is_text:
 		encoding = encoding or "utf-8"
 
+	return encoding
+
 def read_file(path, mode="b", encoding=None, errors=None):
 	# type: (str, str, Optional[str]) -> bytes
 

@@ -82,7 +82,7 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 
 	last = start = time()
 	i = 0
-	for i, elm in enumerate(it):
+	for i, elm in enumerate(it, 1):
 		yield elm
 		current = time()
 		if current - last > refresh:

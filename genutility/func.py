@@ -40,7 +40,9 @@ def compose_two(f, g):
 def compose(*functions):
 	# type: (Iterable[Callable[[Any], Any]], ) -> Callable[[Any], Any]
 
-	""" compose(f, g, h) -> lambda x: f(g(h(x))) """
+	""" compose(f, g, h) -> lambda x: f(g(h(x))).
+		see: Function composition
+	"""
 
 	return reduce(compose_two, functions, identity)
 
