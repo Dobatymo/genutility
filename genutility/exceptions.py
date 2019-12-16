@@ -42,6 +42,9 @@ class NoResult(ControlFlowException):
 class Break(ControlFlowException):
 	""" Control flow exception to break out of a recursive call. """
 
+class NoActionNeeded(ControlFlowException):
+	""" Raised when nothing needs to be done / nothing was modified. """
+
 # external errors
 
 class ExternalError(Exception):

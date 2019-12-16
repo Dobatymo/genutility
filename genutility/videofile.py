@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
+import os, os.path
 
 import cv2
 
@@ -9,6 +9,8 @@ def grab_pic(inpath, outpath, pos=0.5, overwrite=False):
 
 	if not overwrite and os.path.exists(outpath):
 		raise RuntimeError("File already exists")
+
+	os.makedirs(os.path.dirname(outpath), exist_ok=True)
 
 	cap = cv2.VideoCapture(inpath)
 

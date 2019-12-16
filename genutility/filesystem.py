@@ -135,6 +135,22 @@ class SkippableDirEntry(object):
 if TYPE_CHECKING:
 	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
 
+def rename(old, new):
+	# type: (str, str) -> None
+
+	""" Renames `old` to `new`. Fails if `new` already exists.
+		This is the default behaviour of `os.rename` on Windows.
+		This function should do the same cross-platform.
+		It is however not race free.
+	"""
+
+	# fixme: renaming a non-existing file in a non-existing folder yields a PermissionError not FileNotFoundError
+
+	if os.path.exists(new):
+		raise FileExistsError(new)
+
+	os.renames(old, new) # fixme: don't use rename*s*
+
 def copy_file_generator(source, dest, buffer_size=FILE_IO_BUFFER_SIZE, overwrite_readonly=False):
 	# type: (str, str, int, bool) -> Iterator[None]
 
