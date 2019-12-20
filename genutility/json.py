@@ -112,7 +112,7 @@ class json_lines(object):
 
 	@staticmethod
 	def from_path(
-		file, mode="r", encoding="UTF-8", errors="strict", newline=None,
+		file, mode="rt", encoding="utf-8", errors="strict", newline=None,
 		cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
 	):
 		# type: (str, str, int, str, str, Optional[str], bool, Optional[Callable], Optional[json.JSONEncoder], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
