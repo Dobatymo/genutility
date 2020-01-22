@@ -44,6 +44,12 @@ def valuemap(func, d):
 
 	return {k: func(v) for k, v in viewitems(d)}
 
+# was: mapdict, mapget
+def mapmap(d, it):
+	# type: (Mapping[T, U], Iterable[T]) -> Iterator[U}
+
+	return (d[i] for i in it)
+
 def itemgetter(it):
 	# type: (Iterable[T], ) -> Callable[[Mapping[T, U]], Iterator[U]]
 

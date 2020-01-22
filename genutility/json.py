@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class BuiltinEncoder(json.JSONEncoder):
 	def default(self, obj):
 		from datetime import date, timedelta
+		from uuid import UUID
 
 		if isinstance(obj, (set, frozenset)):
 			return tuple(obj)
@@ -27,6 +28,8 @@ class BuiltinEncoder(json.JSONEncoder):
 			return obj.isoformat()
 		elif isinstance(obj, timedelta):
 			return obj.total_seconds()
+		elif isinstance(obj, UUID):
+			return str(obj)
 
 		return json.JSONEncoder.default(self, obj)
 

@@ -1,9 +1,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from genutility.test import MyTestCase, parametrize
-from genutility.dict import subdict, subdictdefault, keydefaultdict
+from genutility.dict import mapmap, subdict, subdictdefault, keydefaultdict
 
 class DictTest(MyTestCase):
+
+	@parametrize(
+		({1:"a", 2:"b", 3:"c"}, (1, 2, 3), ("a", "b", "c")),
+	)
+	def test_mapmap(self, d, it, truth):
+		result = mapmap(d, it)
+		self.assertIterEqual(result, truth)
 
 	@parametrize(
 		({}, (), {}),
