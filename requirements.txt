@@ -6,7 +6,7 @@ cryptography
 ctypes-windows-sdk; sys_platform == 'win32'
 flask
 jsonschema
-msgpack
+msgpack>=0.6.0
 netifaces
 nltk
 opencv-python; python_version < '3.8' # cv2, is not available for python 3.8 yet
