@@ -1,23 +1,23 @@
 future
 
-aiohttp; python_version >= '3.5'
-bencode.py # bencode
-cryptography
+aiohttp>=0.16.3; python_version >= '3.5'
+bencode.py>=2.0.0 # bencode
+cryptography>=1.5.3
 ctypes-windows-sdk; sys_platform == 'win32'
-flask
+flask>=0.12.3
 jsonschema
 msgpack>=0.6.0
 netifaces
 nltk
-opencv-python; python_version < '3.8' # cv2, is not available for python 3.8 yet
+opencv-python # cv2
 orderedset
 PyPDF2
-pyOpenSSL # OpenSSL
+pyOpenSSL>=17.5.0 # OpenSSL
 pywin32; sys_platform == 'win32' # win32evtlog, winerror
 rhash; sys_platform == 'win32'
 toml
 unidecode
-werkzeug
+werkzeug>=0.11.11
 wmi
 
 #wxasync
