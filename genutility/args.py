@@ -47,6 +47,18 @@ def arg_to_path(func):
 	return inner
 
 @arg_to_path
+def existing_path(path):
+	# type: (Path, ) -> Path
+
+	""" Checks if a path exists. """
+
+	if not path.exists():
+		msg = "{0} does not exist".format(path)
+		raise argparse.ArgumentTypeError(msg)
+
+	return path
+
+@arg_to_path
 def is_dir(path):
 	# type: (Path, ) -> Path
 

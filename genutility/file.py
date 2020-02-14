@@ -502,19 +502,22 @@ def limited_file_iter(fr, amount, chunk_size=FILE_IO_BUFFER_SIZE):
 		yield data
 		amount -= len(data)
 
-def iterfilelike(fr, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
+def iterfilelike(fr, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
 	# type: (IO, Optional[int], int) -> Iterator
 
 	""" Iterate file-like object `fr` and yield chunks of size `chunk_size`.
-		Optionally limit output to `amount` bytes.
+		Starts reading at `start` and optionally limit output to `amount` bytes.
 	"""
+
+	if start:
+		fr.seek(start)
 
 	if amount is None:
 		return simple_file_iter(fr, chunk_size)
 	else:
 		return limited_file_iter(fr, amount, chunk_size)
 
-def blockfileiter(path, mode="rb", encoding=None, errors=None, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
+def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
 	# type: (Path, str, Optional[str], Optional[int], int) -> Iterator
 
 	""" Iterate over file at `path` and yield chunks of size `chunk_size`.
@@ -524,8 +527,36 @@ def blockfileiter(path, mode="rb", encoding=None, errors=None, amount=None, chun
 	encoding = _check_arguments(mode, encoding)
 
 	with open(path, mode, encoding=encoding, errors=errors) as fr:
-		for data in iterfilelike(fr, amount, chunk_size):
+		for data in iterfilelike(fr, start, amount, chunk_size):
 			yield data
+
+def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
+	# types: (Iterable[str], int) -> Iterator[bytes]
+
+	chunk = r""
+
+	for path in paths:
+		with open(path, "rb") as fr:
+			if len(chunk) != 0:
+				#print("a")
+				data = fr.read(chunk_size - len(chunk))
+				chunk += data # probably slow for lots of small files
+
+			if len(chunk) == chunk_size:
+				#print("b")
+				yield chunk
+				chunk = r""
+
+			if len(chunk) == 0:
+				#print("c")
+				for data in iterfilelike(fr, chunk_size=chunk_size): # is chunk overwritten here?
+					if len(data) == chunk_size:
+						yield data
+					else:
+						chunk = data
+
+	if chunk:
+		yield chunk
 
 def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, amount=None, buffer_size=FILE_IO_BUFFER_SIZE):
 	# type: (Path, int, str, Optional[str], Optional[int], int) -> Iterator

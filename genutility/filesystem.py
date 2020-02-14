@@ -170,7 +170,7 @@ def copy_file_generator(source, dest, buffer_size=FILE_IO_BUFFER_SIZE, overwrite
 				raise
 
 	with open(source, "rb") as src, open(dest, "wb") as dst:
-		for data in iterfilelike(src, buffer=buffer_size):
+		for data in iterfilelike(src, chunk_size=buffer_size):
 			dst.write(data)
 			yield
 

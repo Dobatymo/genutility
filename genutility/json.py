@@ -19,6 +19,7 @@ class BuiltinEncoder(json.JSONEncoder):
 	def default(self, obj):
 		from datetime import date, timedelta
 		from uuid import UUID
+		from base64 import b85encode
 
 		if isinstance(obj, (set, frozenset)):
 			return tuple(obj)
@@ -30,6 +31,8 @@ class BuiltinEncoder(json.JSONEncoder):
 			return obj.total_seconds()
 		elif isinstance(obj, UUID):
 			return str(obj)
+		elif isinstance(obj, bytes):
+			return b85encode(obj).decode("ascii")
 
 		return json.JSONEncoder.default(self, obj)
 
