@@ -3,11 +3,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.moves.itertools import zip_longest
 from builtins import zip, map, range, reversed
 
-import sys, logging
+import sys, logging, random
 from collections import deque
 from itertools import groupby, chain, tee, islice, count, combinations, product, starmap, repeat
 from operator import add
-from time import time
+from time import time, sleep
+from random import randrange
 from types import GeneratorType
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,16 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+# was: iterrandint
+def iterrandrange(a, b):
+	# type: (int, int) -> Iterator[int]
+
+	""" Yields a stream of random numbers between `a` (inclusive) and `b` (exclusive).
+	"""
+
+	while True:
+		yield randrange(a, b)
 
 def repeatfunc(func, times=None, *args):
 	# type: (Callable[[*Any], T], Optional[int], *any) -> Iterator[T]
@@ -520,6 +531,44 @@ def remove_all_dupes(it): # was: remove_dup_list
 	# Dave Kirby
 	seen = set()
 	return (x for x in it if x not in seen and not seen.add(x))
+
+def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter_dist="uniform", waitfunc=sleep):
+	# type: (float, int, float, float, Optional[float], str, Callable[[float], Any]) -> Iterator[None]
+
+	""" Iterator which yields after predefined amounts of time.
+		Supports `multiplier` to implements linear or exponential backoff.
+		`jitter` adds noise to the average wait time, distributed according to `jitter_dist`.
+		Supported values for `jitter_dist` are `uniform` and `normal`.
+	"""
+
+	if jitter_dist == "uniform":
+		rand = random.uniform
+	elif jitter_dist == "normal":
+		rand = random.normalvariate
+	else:
+		raise ValueError()
+
+	if attempts == 0:
+		return
+
+	for i in count():
+		yield i
+
+		attempts -= 1
+
+		if attempts != 0:
+			if max_wait and waittime > max_wait:
+				jitter *= max_wait/waittime
+				waittime = max_wait
+				multiplier = 1
+
+			do_wait = max(0, waittime + rand(-jitter, jitter))
+			waitfunc(do_wait)
+		else:
+			break
+
+		waittime *= multiplier
+		jitter *= multiplier
 
 if __name__ == "__main__":
 	import timeit

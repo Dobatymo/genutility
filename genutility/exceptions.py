@@ -64,6 +64,13 @@ class ExternalProcedureUnavailable(ExternalError):
 		correctly handled (or rather correctly not handled in thie case).
 	"""
 
+# runtime, possible coding errors
+
+class ClosedObjectUsed(RuntimeError):
+
+	def __init__(self, obj):
+		RuntimeError.__init__(self, "{} is already closed".format(obj.__class__.__name__))
+
 # values, input errors
 
 class EmptyIterable(ValueError):

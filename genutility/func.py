@@ -1,11 +1,20 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import logging
 from sys import stdout
 from functools import wraps, reduce, partial
+from time import sleep
 from typing import TYPE_CHECKING
+
+from .iter import retrier
 
 if TYPE_CHECKING:
 	from typing import Callable, Any, TextIO, Iterable, Iterator
+
+logger = logging.getLogger(__name__)
+
+class NotRetried(RuntimeError):
+	pass
 
 def identity(x):
 	# type: (T, ) -> T
@@ -96,3 +105,19 @@ def print_return_type(func, file=stdout):
 		print(type(ret), file=file)
 		return ret
 	return inner
+
+def retry(func, waittime, exceptions=(Exception, ), attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter_dist="uniform", waitfunc=sleep):
+	# type: (Callable[[], T], float, tuple, int, float, float, Optional[float], str, Callable[[float], Any]) -> T
+
+	last_exception = None
+	for i in retrier(waittime, attempts, multiplier, jitter, max_wait, jitter_dist, waitfunc):
+		try:
+			return func()
+		except exceptions as e:
+			logger.info("Attempt %s failed: %s", i+1, e)
+			last_exception = e
+
+	if last_exception:
+		raise last_exception  #pylint: disable=raising-bad-type
+	else:
+		raise NotRetried

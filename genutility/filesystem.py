@@ -98,7 +98,7 @@ class DirEntryStub(object):
 		self.path = path
 
 class SkippableDirEntry(object):
-	__slots__ = ('entry', '_path', 'follow')
+	__slots__ = ('entry', '_path', 'follow', 'abspath')
 
 	def __init__(self, entry):
 		self.entry = entry
@@ -266,10 +266,13 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 		if not allow_skip:
 			def modpathrelative(entry):
 				entry = SkippableDirEntry(entry)
+				entry.abspath = entry.path
 				entry.path = os.path.relpath(entry.path, basepath)
 				return entry
 		else:
+			# entry is already a SkippableDirEntry
 			def modpathrelative(entry):
+				entry.abspath = entry.path
 				entry.path = os.path.relpath(entry.path, basepath)
 				return entry
 

@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from genutility.test import MyTestCase, parametrize
-from genutility.func import identity, compose, zipmap, call_repeated
+from genutility.func import identity, compose, zipmap, call_repeated, retry
 
 class FuncTest(MyTestCase):
 
@@ -40,6 +40,15 @@ class FuncTest(MyTestCase):
 		result = call_repeated(3)(adder)(self)
 		self.assertEqual(3, self.a)
 		self.assertEqual(3, result)
+
+	def test_retry(self):
+		def raisefunc():
+			raise RuntimeError
+
+		results = []
+		with self.assertRaises(RuntimeError):
+			retry(raisefunc, 1, (RuntimeError,), 5, multiplier=2, max_wait=3, waitfunc=results.append)
+		self.assertIterEqual([1., 2., 3., 3.], results)
 
 if __name__ == '__main__':
 	import unittest

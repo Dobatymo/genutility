@@ -531,7 +531,7 @@ def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=N
 			yield data
 
 def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
-	# types: (Iterable[str], int) -> Iterator[bytes]
+	# type: (Iterable[str], int) -> Iterator[bytes]
 
 	chunk = r""
 

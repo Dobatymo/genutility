@@ -7,7 +7,8 @@ from itertools import chain
 from genutility.test import MyTestCase, parametrize
 from genutility.iter import (product_range_repeat, every_n, any_in_common, split, remove_all_dupes,
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
-	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys)
+	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
+	retrier)
 
 try:
 	from unittest import mock
@@ -310,6 +311,17 @@ class IterTest(MyTestCase):
 	def test_valleys(self, it, truth):
 		result = valleys(it)
 		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		({"waittime": 1, "attempts": 3}, [1., 1.]),
+		({"waittime": 1, "attempts": 3, "multiplier": 2}, [1., 2.]),
+		({"waittime": 1, "attempts": 3, "max_wait": 3}, [1., 1.]),
+		({"waittime": 1, "attempts": 5, "multiplier": 2, "max_wait": 3}, [1., 2., 3., 3.]),
+	)
+	def test_retrier(self, kwargs, truth):
+		results = []
+		result = tuple(retrier(waitfunc=results.append, **kwargs))
+		self.assertIterEqual(truth, results)
 
 if __name__ == "__main__":
 	import unittest

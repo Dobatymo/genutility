@@ -32,7 +32,7 @@ class BuiltinEncoder(json.JSONEncoder):
 		elif isinstance(obj, UUID):
 			return str(obj)
 		elif isinstance(obj, bytes):
-			return b85encode(obj).decode("ascii")
+			return b85encode(obj).decode("ascii") # b85encode doesn't use ", ' or \
 
 		return json.JSONEncoder.default(self, obj)
 

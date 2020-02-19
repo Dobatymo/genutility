@@ -66,6 +66,7 @@ class MediaInfoHelper(object):
 					"album": track.album,
 					"track-position": track.track_name_position,
 					"duration": track.duration / 1000.,
+					"date": track.Recorded_Date,
 				}
 
 		raise LookupError("Meta data not available")

@@ -2,6 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from .compat.datetime import datetime, timezone
 
+utcmin = datetime.min.replace(tzinfo=timezone.utc)
+utcmax = datetime.max.replace(tzinfo=timezone.utc)
+
 def now():
 	# type: () -> datetime
 

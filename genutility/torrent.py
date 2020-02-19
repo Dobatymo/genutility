@@ -36,7 +36,7 @@ def pieces_field(pieces):
 	return b"".join(sha1(piece).digest() for piece in pieces)
 
 def create_torrent_info_dict(path, piece_size, private=None):
-	# types: (Path, int, Optional[int]) -> dict
+	# type: (Path, int, Optional[int]) -> dict
 
 	assert private is None or private in {0, 1}
 
@@ -78,7 +78,7 @@ def get_torrent_hash(path):
 	return torrent_info_hash(read_torrent_info_dict(path))
 
 def create_torrent(path, piece_size, announce=""):
-	# types: (Path, int, str) -> bytes
+	# type: (Path, int, str) -> bytes
 
 	info = create_torrent_info_dict(path, piece_size)
 	torrent = {
