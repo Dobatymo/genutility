@@ -11,3 +11,11 @@ def now():
 	""" Returns the current datetime as timezone aware object in UTC timezone. """
 
 	return datetime.now(timezone.utc)
+
+# was: datetime_from_utc_timestamp
+def datetime_from_utc_timestamp(epoch):
+	# type: (int, ) -> datetime
+
+	""" Converts a UNIX epoch time to a timezone aware datetime. """
+
+	return datetime.fromtimestamp(epoch, timezone.utc)

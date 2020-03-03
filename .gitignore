@@ -1,5 +1,5 @@
 *.bak
-unicode_categories.pkl
+unicode_categories.*.pkl
 upload.bat
 
 others/

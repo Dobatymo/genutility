@@ -46,6 +46,38 @@ def arg_to_path(func):
 		return func(Path(path))
 	return inner
 
+def multiple_of(divisor):
+	# type: (int, ) -> Callable[[str], int]
+
+	from builtins import int as builtin_int
+
+	""" This function is called 'int' so that argparse can show a nicer error message
+		in case input cannot be cast to int:
+		error: argument --multiple: invalid int value: 'a'
+	"""
+	def int(s): 
+		# type: (str, ) -> int
+
+		number = builtin_int(s)
+		if number % divisor != 0:
+			msg = "{0} is not clearly divisible by {1}".format(s, divisor)
+			raise argparse.ArgumentTypeError(msg)
+
+		return number
+
+	return int
+
+def suffix(s):
+	# type: (str, ) -> str
+
+	""" Checks if `s` is a valid suffix. """
+
+	if not s.startswith("."):
+		msg = "{0} is not a valid suffix. It must start with a dot.".format(s)
+		raise argparse.ArgumentTypeError(msg)
+
+	return s
+
 @arg_to_path
 def existing_path(path):
 	# type: (Path, ) -> Path
@@ -53,6 +85,18 @@ def existing_path(path):
 	""" Checks if a path exists. """
 
 	if not path.exists():
+		msg = "{0} does not exist".format(path)
+		raise argparse.ArgumentTypeError(msg)
+
+	return path
+
+@arg_to_path
+def new_path(path):
+	# type: (Path, ) -> Path
+
+	""" Checks if a path exists. """
+
+	if path.exists():
 		msg = "{0} does not exist".format(path)
 		raise argparse.ArgumentTypeError(msg)
 

@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os.path
 from sys import version_info
+from os import fdopen, PathLike
 from io import open, TextIOWrapper, TextIOBase, RawIOBase, BufferedIOBase, SEEK_SET, SEEK_END
 from typing import TYPE_CHECKING
 
@@ -49,7 +50,7 @@ def read_file(path, mode="b", encoding=None, errors=None):
 		return fr.read()
 
 def write_file(data, path, mode="wb", encoding=None, errors=None):
-	# type: (str, Union[str, bytes], str, Optional[str]) -> None
+	# type: (Union[str, bytes], Union[str, PathLike], str, Optional[str]) -> None
 
 	""" Writes file. """
 
@@ -96,25 +97,43 @@ def wrap_text(bf, mode, encoding, errors, newline):
 		return TextIOWrapper(bf, encoding, errors, newline)
 	return bf
 
-def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9):
-	# type: (str, str, Optional[str], Optional[str], Optional[str], Optional[str], int) -> IO
+def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9, ext=None):
+	# type: (Union[str, PathLike, BinaryIO, int], str, Optional[str], Optional[str], Optional[str], Optional[str], int, Optional[str]) -> IO
 
-	"""
-	`compresslevel`: 0-9, 0: no compression, 1: least, 9: highest compression
+	""" Generic file open method. It supports transparent compression and improved text-mode handling.
+
+		`file`: Can be a path, file-like or file descriptor.
+		`mode`, `errors` and `newline`: see `io.open`
+		`archive_file`: if a zip file is opened, this specifies the file within the archive.
+		`encoding`: if `None` it defaults to "utf-8" in text-mode. It doesn't use any locale.
+		`compresslevel`: 0-9, 0: no compression, 1: least, 9: highest compression.
+			Only used if a compressed format is specified.
+		`ext`: if `file` is a file-like object, than this can be one of {".gz", ".bz2", ".zip"}
+			to enable transparent compression
+
+		Returns a file-like object. If `file` was a fd,
+			it will be closed if the file-like object is closed.
 	"""
 
 	encoding = _check_arguments(mode, encoding)
 
-	ext = os.path.splitext(file)[1].lower()
-	if ext == '.gz':
+	if isinstance(file, (str, PathLike)):
+		ext = os.path.splitext(file)[1].lower()
+	elif isinstance(file, int):
+		file = fdopen(file, mode, encoding=encoding, errors=errors, newline=newline)
+		ext = ext and ext.lower()
+	else:
+		ext = ext and ext.lower()
+
+	if ext == ".gz":
 		from .compat import gzip
 		return gzip.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
-	elif ext == '.bz2':
+	elif ext == ".bz2":
 		from .compat import bz2
 		return bz2.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
-	elif ext == '.zip':
+	elif ext == ".zip":
 		if archive_file is None:
 			raise ValueError("archive_file must be specified")
 
@@ -129,6 +148,9 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 				bf = zf.open(archive_file, newmode)
 
 		return wrap_text(bf, mode, encoding, errors, newline)
+
+	if hasattr(file, "read") or hasattr(file, "write"): # file should be in binary mode here
+		return wrap_text(file, mode, encoding, errors, newline)
 
 	return open(file, mode, encoding=encoding, errors=errors, newline=newline)
 
@@ -587,7 +609,7 @@ def equal_files(*paths, **kwargs):
 		Data can be optionally limited to `amount`.
 	"""
 
-	# python2 fix for 'equal_files(*paths, mode="rb", encoding=None, errors=None, amount=None, chunk_size=FILE_IO_BUFFER_SIZE)'
+	# python2 fix for `equal_files(*paths, mode="rb", encoding=None, errors=None, amount=None, chunk_size=FILE_IO_BUFFER_SIZE)`
 	mode = kwargs.pop("mode", "rb")
 	encoding = kwargs.pop("encoding", None)
 	errors = kwargs.pop("errors", None)

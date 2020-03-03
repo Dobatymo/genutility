@@ -5,9 +5,19 @@ from random import shuffle
 
 from genutility.test import MyTestCase, parametrize
 from genutility.string import replace_list, replace_pairs, are_parentheses_matched, replace_pairs_chars, \
-	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, endcut
+	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, endcut, toint
 
 class StringTest(MyTestCase):
+
+	@parametrize(
+		(("asd",), None),
+		(("1",), 1),
+		((1,), 1),
+		((None,), None),
+		((None, None), None)
+	)
+	def test_toint(self, inputs, truth):
+		self.assertEqual(truth, toint(*inputs))
 
 	@parametrize(
 		("", "", ""),

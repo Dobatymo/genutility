@@ -25,7 +25,7 @@ def grab_pic(inpath, outpath, pos=0.5, overwrite=False):
 		if ret:
 			cv2.imwrite(outpath, frame)
 		else:
-			raise RuntimeError("Cannot read video")
+			raise RuntimeError("Cannot read video file: {}".format(inpath))
 
 	finally:
 		cap.release()

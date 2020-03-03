@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import PY2
-import platform
+import platform, os
 from typing import TYPE_CHECKING
 
 from .os_shared import is_os_64bit
@@ -11,6 +11,23 @@ if TYPE_CHECKING:
 	from builtins import str
 
 system = platform.system()
+
+class CurrentWorkingDirectory(object):
+
+	__slots__ = ("oldcwd", )
+
+	def __init__(self, path):
+		self.oldcwd = os.getcwd()
+		os.chdir(path)
+
+	def close(self):
+		os.chdir(self.oldcwd)
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		self.close()
 
 def rename(func_name):
 	# type: (str, ) -> Callable

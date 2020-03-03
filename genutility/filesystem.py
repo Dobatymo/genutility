@@ -17,6 +17,7 @@ from .iter import is_empty
 from .os import islink, uncabspath
 from .ops import logical_implication
 from .string import replace_list
+from .datetime import datetime_from_utc_timestamp
 
 if __debug__:
 	import unidecode
@@ -134,6 +135,13 @@ class SkippableDirEntry(object):
 
 if TYPE_CHECKING:
 	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
+
+def mdatetime(path):
+	# type: (str, ) -> datetime
+
+	""" Returns the last modified date of `path`. """
+
+	return datetime_from_utc_timestamp(os.stat(path).st_mtime)
 
 def rename(old, new):
 	# type: (str, str) -> None

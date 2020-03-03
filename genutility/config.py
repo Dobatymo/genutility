@@ -1,13 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path
+from configparser import ConfigParser
+from io import open
 from typing import TYPE_CHECKING
 
 from .twothree import FileNotFoundError
 from .compat.importlib.util import find_spec
 
-from .toml import read_toml
-from .json import read_json_schema
 from .os import get_appdata_dir
 
 if TYPE_CHECKING:
@@ -15,9 +15,22 @@ if TYPE_CHECKING:
 
 if __debug__:
 	import jsonschema
+	import sortedcontainers
+
+def sort_config(inpath, outpath):
+	# type: (str, str) -> None
+
+	from sortedcontainers import SortedDict
+
+	config = ConfigParser(dict_type=SortedDict)
+	config.read(inpath, encoding="utf-8")
+	with open(outpath, "wt", encoding="utf-8") as fw:
+		config.write(fw)
 
 def _load(name):
 	# type: (str, ) -> Dict[str, Any]
+
+	from .toml import read_toml
 
 	configfilename = name+".toml"
 
@@ -54,6 +67,8 @@ def _load(name):
 
 def load(name, json_schema=None):
 	# type: (str, Optional[Union[dict, str]]) -> Dict[str, Any]
+
+	from .json import read_json_schema
 
 	obj = _load(name)
 

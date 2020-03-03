@@ -7,7 +7,7 @@ try:
 except ImportError:
 	from contextlib2 import ExitStack
 
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfFileMerger, PdfFileReader
 
 from .twothree import FileNotFoundError
 
@@ -38,12 +38,47 @@ def join_pdfs_in_folder(path_in, file_out, overwrite=False):
 		with open(file_out, mode+"b") as fw:
 			merger.write(fw)
 
+def iter_pdf_text(path):
+	# type: (str, ) -> Iterator[str]
+
+	with open(path, "rb") as fr:
+		pdf = PdfFileReader(fr)
+		for i in range(pdf.getNumPages()):
+			page = pdf.getPage(i)
+			yield page.extractText()
+
+def _read_pdf_pdfminer(path):
+	from pdfminer.high_level import extract_text
+
+	return extract_text(path)
+
+def _read_pdf_tika(path):
+	from tika import parser
+
+	raw = parser.from_file(path)
+
+	#return raw["metadata"]
+	return raw["content"]
+
+def read_pdf(path, engine="pdfminer"):
+	# type: (str, str) -> str
+
+	try:
+		func = {
+			"pdfminer": _read_pdf_pdfminer,
+			"tika": _read_pdf_tika,
+		}[engine]
+	except KeyError:
+		raise ValueError("Engine {} doesn't exist".format(engine))
+
+	return func(path)
+
 if __name__ == "__main__":
 	from argparse import ArgumentParser
 
-	parser = ArgumentParser(description='Merge pdf files in directory into one file.')
-	parser.add_argument('dir', help='input directory')
-	parser.add_argument('out', help='output file path')
+	parser = ArgumentParser(description="Merge pdf files in directory into one file.")
+	parser.add_argument("dir", help="input directory")
+	parser.add_argument("out", help="output file path")
 	args = parser.parse_args()
 
 	join_pdfs_in_folder(args.dir, args.out)

@@ -27,6 +27,14 @@ german_vowels = "aeiou"
 #def cycleright(s, start=0, end=-1): # bad
 #	return s[:start] + s[end] + s[start:end] + s[end+1:]
 
+def toint(obj, default=None):
+	# type: (Any, Optional[T]) -> Union[int, Optional[T]]
+
+	try:
+		return int(obj)
+	except (ValueError, TypeError):
+		return default
+
 def startcut(s, pre):
 	# type: (str, str) -> str
 

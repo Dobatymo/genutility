@@ -5,6 +5,7 @@ from builtins import filter, range
 import sys, os, os.path, logging
 import subprocess  # nosec
 
+from ..os import CurrentWorkingDirectory
 from ..twothree.filesystem import tofs, fromfs
 from ..string import surrounding_join
 
@@ -35,14 +36,14 @@ class Rar(object):
 	windows_executable = "C:/Program Files/WinRAR/Rar.exe"
 
 	def __init__(self, archive, executable=None):
-		# type: (str, str) -> None
+		# type: (Path, Path) -> None
 
 		"""archive: archive to work with, everything which is supported by winrar
 		executable: path/to/Rar.exe"""
 
 		self.exe = executable or self.windows_executable
 
-		if not os.path.isfile(self.exe):
+		if not self.exe.is_file():
 			raise ValueError("Invalid executable")
 
 		self.archive = archive
@@ -155,49 +156,45 @@ class Rar(object):
 		pass
 
 def create_rar_from_folder(path, dest_path=".", profile_setter_func=None, filter_func=lambda x:True, name_transform=lambda x:x):
-	if not os.path.isdir(path):
-		return False
+	# type: (Path, Path, Callable, Callable, Callable) -> None
 
-	root, dirname = os.path.split(path)
+	if not path.is_dir():
+		return False
 
 	if dest_path == ".":
-		dest_path = root
+		dest_path = path.parent
 
-	cwd = os.getcwd()
-	os.chdir(path)
+	with CurrentWorkingDirectory(path):
 
-	try:
-		r = Rar(os.path.join(dest_path, "{}.rar".format(name_transform(dirname))))
-		if profile_setter_func:
-			profile_setter_func(r)
-		for c in filter(filter_func, os.listdir(".")): #was: listdir_rec
-			r.add_file(c)
-		r.create()
-	except RarError as e:
-		logger.error("%s\n%s" % (str(e), e.output))
-		return False
+		try:
+			r = Rar(dest_path / "{}.rar".format(name_transform(path.name)))
+			if profile_setter_func:
+				profile_setter_func(r)
+			for c in filter(filter_func, os.listdir(".")): #was: listdir_rec
+				r.add_file(c)
+			r.create()
+		except RarError as e:
+			logger.error("%s\n%s" % (str(e), e.output))
+			return False
 
-	os.chdir(cwd)
 	return True
 
 def create_rar_from_file(path, dest_path=".", profile_setter_func=None, name_transform = lambda x:x):
-	root, dirname = os.path.split(path)
+	# type: (Path, Path, Callable, Callable) -> None
 
 	if dest_path == ".":
-		dest_path = root
+		dest_path = path.parent
 
-	cwd = os.getcwd()
-	os.chdir(root)
+	with CurrentWorkingDirectory(path.parent):
 
-	try:
-		r = Rar(os.path.join(dest_path, "{}.rar".format(name_transform(dirname))))
-		if profile_setter_func:
-			profile_setter_func(r)
-		r.add_file(dirname)
-		r.create()
-	except RarError as e:
-		logger.error("%s\n%s" % (str(e), e.output))
-		return False
+		try:
+			r = Rar(dest_path / "{}.rar".format(name_transform(path.name)))
+			if profile_setter_func:
+				profile_setter_func(r)
+			r.add_file(path.name)
+			r.create()
+		except RarError as e:
+			logger.error("%s\n%s" % (str(e), e.output))
+			return False
 
-	os.chdir(cwd)
 	return True

@@ -4,6 +4,7 @@ from future.utils import PY2
 
 import genutility.algorithms
 import genutility.args
+import genutility.atomic
 import genutility.concurrency
 import genutility.config
 import genutility.constants_video
