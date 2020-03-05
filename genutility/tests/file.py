@@ -1,6 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, tempfile, os.path
+import tempfile, os.path
+
+try:
+	from os import scandir
+except ImportError:
+	from scandir import scandir # backport
 
 from genutility.test import MyTestCase, parametrize
 from genutility.file import write_file # not tested, used to set up the tests
@@ -56,7 +61,7 @@ class FileTest(MyTestCase):
 
 	def test_blockfilesiter(self):
 		base = "testfiles/chunks"
-		paths = sorted(e.path for e in os.scandir(base))
+		paths = sorted(e.path for e in scandir(base))
 
 		result = blockfilesiter(paths, 2)
 		truth = [b'12', b'34', b'56', b'78', b'90', b'12', b'34', b'56', b'78', b'9']

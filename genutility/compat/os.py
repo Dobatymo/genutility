@@ -19,17 +19,18 @@ else:
 if version_info >= (3, 6):
 	from os import PathLike
 else:
-	import abc
+	from abc import abstractmethod
+	from .abc import ABC
 
-	class PathLike(abc.ABC):
+	class PathLike(ABC):
 
 		"""Abstract base class for implementing the file system path protocol."""
 
-		@abc.abstractmethod
+		@abstractmethod
 		def __fspath__(self):
 			"""Return the file system path representation of the object."""
 			raise NotImplementedError
 
 		@classmethod
 		def __subclasshook__(cls, subclass):
-			return hasattr(subclass, '__fspath__')
+			return hasattr(subclass, "__fspath__")

@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from builtins import str
+
 import hashlib, zlib, os.path
 from functools import partial
 from typing import TYPE_CHECKING
