@@ -33,7 +33,7 @@ def torrent_to_json(path, indent="\t"):
 	return json.dumps(torrent, ensure_ascii=False, indent=indent, cls=BuiltinEncoder)
 
 def pieces_field(pieces):
-	return b"".join(sha1(piece).digest() for piece in pieces)
+	return b"".join(sha1(piece).digest() for piece in pieces)  # nosec
 
 def create_torrent_info_dict(path, piece_size, private=None):
 	# type: (Path, int, Optional[int]) -> dict
@@ -72,7 +72,7 @@ def create_torrent_info_dict(path, piece_size, private=None):
 	return ret
 
 def torrent_info_hash(d):
-	return sha1(bencode(d)).hexdigest()
+	return sha1(bencode(d)).hexdigest()  # nosec
 
 def get_torrent_hash(path):
 	return torrent_info_hash(read_torrent_info_dict(path))

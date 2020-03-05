@@ -26,11 +26,11 @@ logger.addHandler(logging.NullHandler())
 def iterrandrange(a, b):
 	# type: (int, int) -> Iterator[int]
 
-	""" Yields a stream of random numbers between `a` (inclusive) and `b` (exclusive).
+	""" Yields a stream of non-cryptographic random numbers between `a` (inclusive) and `b` (exclusive).
 	"""
 
 	while True:
-		yield randrange(a, b)
+		yield randrange(a, b)  # nosec
 
 def repeatfunc(func, times=None, *args):
 	# type: (Callable[[*Any], T], Optional[int], *any) -> Iterator[T]
