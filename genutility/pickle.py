@@ -13,6 +13,10 @@ from .filesystem import mdatetime
 if TYPE_CHECKING:
 	from typing import Any, Callable
 
+def read_pickle(path, buffers=None):
+	with open(path, "rb") as fr:
+		return pickle.load(fr, buffers=buffers)
+
 def cache(path, duration=None, protocol=None):
 	# type: (str, Optional[timedelta], int) -> Callable[[Callable], Callable]
 
