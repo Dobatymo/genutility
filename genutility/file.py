@@ -2,13 +2,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os.path
 from sys import version_info
-from os import fdopen, PathLike
+from os import fdopen
 from io import open, TextIOWrapper, TextIOBase, RawIOBase, BufferedIOBase, SEEK_SET, SEEK_END
 from typing import TYPE_CHECKING
 
 from .iter import iter_equal, consume, resizer
 from .math import PosInfInt
 from .ops import logical_xor, logical_implication
+from .compat.os import PathLike
 
 if __debug__:
 	from .compat import gzip, bz2

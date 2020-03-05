@@ -27,7 +27,7 @@ def join_pdfs_in_folder(path_in, file_out, overwrite=False):
 	with ExitStack() as stack:
 		for path in path_in.glob("*.pdf"):
 			if path.is_file():
-				fr = stack.enter_context(open(path, "rb"))
+				fr = stack.enter_context(path.open("rb")) # open does not support Path in <3.6
 				merger.append(fr)
 
 		if overwrite:

@@ -9,6 +9,7 @@ from .file import copen
 
 if TYPE_CHECKING:
 	from typing import Union
+	from .compat.os import PathLike
 
 from os import remove
 
