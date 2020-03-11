@@ -4,6 +4,7 @@ from builtins import filter, range
 
 import sys, os, os.path, logging
 import subprocess  # nosec
+from pathlib import Path
 
 from ..os import CurrentWorkingDirectory
 from ..twothree.filesystem import tofs, fromfs
@@ -33,7 +34,7 @@ class RarError(Exception):
 
 class Rar(object):
 
-	windows_executable = "C:/Program Files/WinRAR/Rar.exe"
+	windows_executable = Path("C:/Program Files/WinRAR/Rar.exe")
 
 	def __init__(self, archive, executable=None):
 		# type: (Path, Path) -> None

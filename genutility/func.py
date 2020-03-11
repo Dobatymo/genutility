@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging
+import logging, os.path
 from sys import stdout
 from functools import wraps, reduce, partial
 from time import sleep
@@ -58,21 +58,32 @@ def compose(*functions):
 def apply(f, x): # *args, **kwargs
 	# type: (Callable[[T], U], T) -> U
 
+	""" Same as `f(x)`. """
+
 	return f(x)
 
 def zipmap(funcs, vals):
 	# type: (Iterable[Callable[[T], U]], Iterable[T]) -> Iterator[U]
 
-	""" applies a list of functions to a list of values """
+	""" Applies a list of functions to a list of values. """
 
 	return map(apply, funcs, vals)
 
 def multiapply(funcs, elm):
+	# type: (Iterable[Callable], Any) -> Any
+
+	""" Applies functions `funcs` to element `elm` iteratively. """
+
 	for func in funcs:
 		elm = func(elm)
+
 	return elm
 
 def multimap(funcs, it):
+	# type: (Sequence[Callable], Iterable[Any]) -> Iterator[Any]
+
+	""" Applies functions `funcs` to each element of `it` iteratively. """
+
 	for i in it:
 		yield multiapply(funcs, i)
 
@@ -100,6 +111,7 @@ def print_return_type(func, file=stdout):
 
 	""" Wraps function to print the return type after calling. """
 
+	@wraps(func)
 	def inner(*args, **kwargs):
 		ret = func(*args, **kwargs)
 		print(type(ret), file=file)
@@ -107,9 +119,14 @@ def print_return_type(func, file=stdout):
 	return inner
 
 def retry(func, waittime, exceptions=(Exception, ), attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter_dist="uniform", waitfunc=sleep):
-	# type: (Callable[[], T], float, tuple, int, float, float, Optional[float], str, Callable[[float], Any]) -> T
+	# type: (Callable[[], T], float, Tuple[Exception], int, float, float, Optional[float], str, Callable[[float], Any]) -> T
 
-	last_exception = None
+	""" Retry function `func` multiple times in case of raised `exceptions`.
+		See `genutility.iter.retrier()` for the remaining arguments.
+		Reraises the last exception in case the function call doesn't succeed after retrying.
+	"""
+
+	last_exception = None # type: Optional[Exception]
 	for i in retrier(waittime, attempts, multiplier, jitter, max_wait, jitter_dist, waitfunc):
 		try:
 			return func()
@@ -121,3 +138,50 @@ def retry(func, waittime, exceptions=(Exception, ), attempts=-1, multiplier=1, j
 		raise last_exception  #pylint: disable=raising-bad-type
 	else:
 		raise NotRetried
+
+class CustomCache(object):
+
+	""" Class to build decorator cache function using custom reader and writer functions.
+		The cache method ignores all arguments of the decorated function.
+
+		Example:
+		```
+		cc = CustomCache(read_pickle, write_pickle)
+
+		@cc.cache("func-cache.p")
+		# arg is ignored, so the cache will return the result of the argument which was supplied
+		# when the cache file was created.
+		def func(arg): 
+			return arg
+		```
+		a = func(1) # cache created, a == 1
+		b = func(2) # cache loaded, b == 1
+	"""
+
+	def __init__(self, reader, writer):
+		# type: (Callable, Callable) -> None
+
+		self.reader = reader
+		self.writer = writer
+
+	def cache(self, path):
+		# type: (str, ) -> Callable
+
+		def dec(func):
+			# type: (Callable, ) -> Callable
+
+			@wraps(func)
+			def inner(*args, **kwargs):
+				# type: (*Any, **Any) -> Any
+
+				if os.path.exists(path):
+					logger.debug("Loading object from cache %s", path)
+					return self.reader(path)
+				else:
+					logger.debug("Saving obect to cache %s", path)
+					result = func(*args, **kwargs)
+					self.writer(result, path)
+					return result
+
+			return inner
+		return dec

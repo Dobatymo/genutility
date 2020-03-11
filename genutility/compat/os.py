@@ -1,10 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from sys import version_info
-
-if version_info >= (3, 2):
+try:
 	from os import makedirs
-else:
+
+except ImportError:
 	import os, errno
 
 	def makedirs(name, mode=0o777, exist_ok=False):
@@ -16,9 +15,10 @@ else:
 			else:
 				raise
 
-if version_info >= (3, 6):
+try:
 	from os import PathLike
-else:
+
+except ImportError:
 	from abc import abstractmethod
 	from .abc import ABC
 
@@ -34,3 +34,30 @@ else:
 		@classmethod
 		def __subclasshook__(cls, subclass):
 			return hasattr(subclass, "__fspath__")
+
+try:
+	from os import replace
+
+except ImportError:
+
+	import sys
+
+	if sys.platform == "win32":
+		from ctypes import WinError
+		from cwinsdk.um.WinBase import MOVEFILE_REPLACE_EXISTING
+
+		def replace(src, dst):
+			# type: (Union[str, bytes], Union[str, bytes]) -> None
+
+			if isinstance(src, str) and isinstance(dst, str):
+				from cwinsdk.um.WinBase import MoveFileExW as MoveFileEx
+			elif isinstance(src, bytes) and isinstance(dst, bytes):
+				from cwinsdk.um.WinBase import MoveFileExA as MoveFileEx
+			else:
+				raise ValueError("Arguments must be both bytes or both string")
+
+			if MoveFileEx(src, dst, MOVEFILE_REPLACE_EXISTING) == 0:
+				raise WinError()
+
+	else:
+		from os import rename as replace # on posix rename can already replace existing files atomically

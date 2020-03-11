@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import socket
+import socket, re
 import netifaces
 
 def is_ipv4(s):
@@ -15,6 +15,17 @@ def is_ipv4(s):
 		return len(nums) == 4 and min(nums) >= 0 and max(nums) <= 255
 	except (AttributeError, ValueError):
 		return False
+
+simple_email_regex = r"[^@\s]+@[^@\s]+\.[^@\s]+"
+
+def is_email(s):
+	# type: (str, ) -> bool
+
+	""" Coarse check to test of a string is an email. Will accept some invalid ones like
+		"asd@.asd.com" and reject some valid ones like "asd@localhost"
+	"""
+
+	return re.fullmatch(simple_email_regex, s)
 
 def get_standard_gateway(default=None):
 	# type: (Optional[str], ) -> Optional[str]

@@ -3,42 +3,15 @@ from builtins import str, bytes
 
 import os.path
 from tempfile import mkstemp
+from os import remove
 from typing import TYPE_CHECKING
 
 from .file import copen
+from .compat.os import replace
 
 if TYPE_CHECKING:
 	from typing import Union
 	from .compat.os import PathLike
-
-from os import remove
-
-try:
-	from os import replace
-
-except ImportError:
-
-	import sys
-
-	if sys.platform == "win32":
-		from ctypes import WinError
-		from cwinsdk.um.WinBase import MOVEFILE_REPLACE_EXISTING
-
-		def replace(src, dst):
-			# type: (Union[str, bytes], Union[str, bytes]) -> None
-
-			if isinstance(src, str) and isinstance(dst, str):
-				from cwinsdk.um.WinBase import MoveFileExW as MoveFileEx
-			elif isinstance(src, bytes) and isinstance(dst, bytes):
-				from cwinsdk.um.WinBase import MoveFileExA as MoveFileEx
-			else:
-				raise ValueError("Arguments must be both bytes or both string")
-
-			if MoveFileEx(src, dst, MOVEFILE_REPLACE_EXISTING) == 0:
-				raise WinError()
-
-	else:
-		from os import rename as replace # on posix rename can already replace existing files atomically
 
 # http://stupidpythonideas.blogspot.tw/2014/07/getting-atomic-writes-right.html
 class TransactionalCreateFile(object):

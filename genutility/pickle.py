@@ -5,23 +5,82 @@ from functools import wraps
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
-from .twothree import FileNotFoundError
-from .file import copen
 from .atomic import TransactionalCreateFile
+from .datetime import now
+from .file import copen
 from .filesystem import mdatetime
+from .twothree import FileNotFoundError
 
 if TYPE_CHECKING:
-	from typing import Any, Callable
+	from typing import Any, Callable, Optional
 
-def read_pickle(path, buffers=None):
+def read_pickle(path):
+	# type: (str, ) -> Any
+
+	""" Read pickle file from `path`. """
+
 	with copen(path, "rb") as fr:
-		return pickle.load(fr, buffers=buffers)  # nosec
+		return pickle.load(fr)  # nosec
 
-def cache(path, duration=None, protocol=None):
-	# type: (str, Optional[timedelta], int) -> Callable[[Callable], Callable]
+def write_pickle(result, path, protocol=None, safe=False):
+	# type: (Any, str, Optional[int], bool) -> None
+
+	""" Write `result` to `path` using pickle serialization.
+
+		`protocol': pickle protocol version
+		`safe`: if True, don't overwrite original file in case any error occurs
+	"""
+
+	if safe:
+		context = TransactionalCreateFile
+	else:
+		context = copen
+
+	with context(path, "wb") as fw:
+		pickle.dump(result, fw, protocol=protocol)
+
+def read_iter(path):
+	# type: (str, ) -> Iterator[Any]
+
+	""" Read pickled iterable from `path`. """
+
+	with copen(path, "rb") as fr:
+		unpickler = pickle.Unpickler(fr)
+		while fr.peek(1):
+			yield unpickler.load()  # nosec
+
+def write_iter(it, path, protocol=None, safe=False):
+	# type: (Iterable[Any], str, Optional[int], bool) -> Iterator[Any]
+
+	""" Write iterable `it` to `path` using pickle serialization. This uses much less memory than
+			writing a full list at once.
+		Read back using `read_iter()`. If `safe` is True, the original file is not overwritten
+			if any error occurs.
+		This is a generator which yields the values read from `it`. So it must be consumed
+			to actually write anything to disk.
+	"""
+
+	if safe:
+		context = TransactionalCreateFile
+	else:
+		context = copen
+
+	with context(path, "wb") as fw:
+		pickler = pickle.Pickler(fw, protocol=protocol)
+		for result in it:
+			pickler.dump(result)
+			yield result
+
+def cache(path, duration=None, generator=False, protocol=None):
+	# type: (str, Optional[timedelta], bool, Optional[int]) -> Callable[[Callable], Callable]
 
 	""" Decorator to cache function calls. Doesn't take function arguments into regard.
 		It's using `pickle` to deserialize the data. So don't use it with untrusted inputs.
+
+		`path`: path to cache file
+		`duration`: maximum age of cache
+		`generator`: set to True to store the results of generator objects
+		`protocol`: pickle protocol version
 	"""
 
 	duration = duration or timedelta.max
@@ -38,14 +97,17 @@ def cache(path, duration=None, protocol=None):
 				invalid = True
 
 			if invalid:
-				result = func(*args, **kwargs)
-				with TransactionalCreateFile(path, "wb") as fw:
-					# if pickling fails, the file will be deleted
-					# and no incomplete file will be left on the disk
-					pickle.dump(result, fw, protocol=protocol)
-				return result
+				if generator:
+					it = func(*args, **kwargs)
+					return write_iter(it, path, protocol=protocol, safe=True)
+				else:
+					result = func(*args, **kwargs)
+					write_pickle(result, path, protocol=protocol, safe=True)
+					return result
 			else:
-				with copen(path, "rb") as fr:
-					return pickle.load(fr)  # nosec
+				if generator:
+					return read_iter(path)
+				else:
+					return read_pickle(path)
 		return inner
 	return decorator
