@@ -25,7 +25,6 @@ wmi
 
 contextlib2; python_version < '3'
 mock; python_version < '3'
-pathlib; python_version < '3'
 pathlib2; python_version < '3'
 scandir; python_version < '3'
 typing; python_version < '3'

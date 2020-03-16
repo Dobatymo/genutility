@@ -17,7 +17,9 @@ if TYPE_CHECKING:
 def read_pickle(path):
 	# type: (str, ) -> Any
 
-	""" Read pickle file from `path`. """
+	""" Read pickle file from `path`.
+		Warning: All usual security consideration regarding the pickle module still apply.
+	"""
 
 	with copen(path, "rb") as fr:
 		return pickle.load(fr)  # nosec
@@ -42,12 +44,14 @@ def write_pickle(result, path, protocol=None, safe=False):
 def read_iter(path):
 	# type: (str, ) -> Iterator[Any]
 
-	""" Read pickled iterable from `path`. """
+	""" Read pickled iterable from `path`. 
+		Warning: All usual security consideration regarding the pickle module still apply.
+	"""
 
 	with copen(path, "rb") as fr:
-		unpickler = pickle.Unpickler(fr)
+		unpickler = pickle.Unpickler(fr)  # nosec
 		while fr.peek(1):
-			yield unpickler.load()  # nosec
+			yield unpickler.load()
 
 def write_iter(it, path, protocol=None, safe=False):
 	# type: (Iterable[Any], str, Optional[int], bool) -> Iterator[Any]

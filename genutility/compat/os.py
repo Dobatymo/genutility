@@ -61,3 +61,22 @@ except ImportError:
 
 	else:
 		from os import rename as replace # on posix rename can already replace existing files atomically
+
+try:
+	from os import DirEntry
+
+except ImportError:
+
+	try:
+		from os import scandir
+	except ImportError:
+		from scandir import scandir
+
+	DirEntry = type(next(scandir()))
+
+try:
+	from os import fspath
+
+except ImportError:
+
+	fspath = str # bad, but at least works for `Path`s.

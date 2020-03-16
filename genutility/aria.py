@@ -15,6 +15,21 @@ from requests.exceptions import ConnectionError
 if TYPE_CHECKING:
 	from typing import Optional, IO
 
+def aria_bool(value):
+	# type: (Optional[bool], ) -> Optional[str]
+
+	""" aria2 rpc requires strings for some boolean arguments like 'continue'
+	"""
+
+	if value is None:
+		return None
+	elif value is True:
+		return "true"
+	elif value is False:
+		return "false"
+	else:
+		raise ValueError(str(value))
+
 class AriaDownloader(object):
 
 	default_global_options = {
@@ -212,8 +227,8 @@ class AriaDownloader(object):
 		finally:
 			self.remove_stopped(gid)
 
-	def download(self, uri, path=None, filename=None, max_connections=None, split=None):
-		# type: (str, Optional[str], Optional[int], Optional[int]) -> str
+	def download(self, uri, path=None, filename=None, max_connections=None, split=None, continue_=None, retry_wait=None):
+		# type: (str, Optional[str], Optional[str], Optional[int], Optional[int], Optional[bool], Optional[int]) -> str
 
 		""" Downloads `uri` to directory `path`.
 			Does not block. Returns a download identifier.
@@ -225,16 +240,18 @@ class AriaDownloader(object):
 			"out": filename,
 			"max-connection-per-server": max_connections,
 			"split": split,
+			"continue": aria_bool(continue_),
+			"retry-wait": retry_wait,
 		})
 
 		gid = self.query("add_uri", [uri], options)
 		self.gids.add(gid)
 		return gid
 
-	def download_x(self, num, uri, path=None, max_connections=None, split=None):
-		# type: (int, str, Optional[str], Optional[int], Optional[int]) -> Optional[str]
+	def download_x(self, num, uri, path=None, filename=None, max_connections=None, split=None, continue_=None, retry_wait=None):
+		# type: (int, str, Optional[str], Optional[str], Optional[int], Optional[int], Optional[bool], Optional[int]) -> Optional[str]
 
-		self.download(uri, path, max_connections, split)
+		self.download(uri, path, filename, max_connections, split, continue_, retry_wait)
 		if self.managed_downloads() >= num:
 			return self.block_one()
 

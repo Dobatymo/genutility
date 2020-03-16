@@ -3,13 +3,18 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from typing import TYPE_CHECKING
 from pymediainfo import MediaInfo
 
+from .compat.os import fspath, PathLike
+
 if TYPE_CHECKING:
 	from pymediainfo import Track
 
 class MediaInfoHelper(object):
 
 	def __init__(self, path):
-		# type: (str, ) -> None
+		# type: (Union[str, Path], ) -> None
+
+		if isinstance(path, PathLike):
+			path = fspath(path)
 
 		self.mi = MediaInfo.parse(path)
 
@@ -60,12 +65,18 @@ class MediaInfoHelper(object):
 
 		for track in self.mi.tracks:
 			if track.track_type == "General":
+			
+				if track.duration is None:
+					duration = None
+				else:
+					duration = track.duration / 1000.
+
 				return {
 					"title": track.title, # track_name
 					"performer": track.performer,
 					"album": track.album,
 					"track-position": track.track_name_position,
-					"duration": track.duration / 1000.,
+					"duration": duration,
 					"date": track.Recorded_Date,
 				}
 

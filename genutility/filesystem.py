@@ -2,9 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import chr
 from future.moves.itertools import zip_longest
-import os, stat, os.path, re, logging, shutil, errno
+import os, platform, stat, os.path, re, logging, shutil, errno
 from operator import attrgetter
 from fnmatch import fnmatch
+from functools import partial
 from typing import TYPE_CHECKING
 
 try:
@@ -25,7 +26,7 @@ if __debug__:
 if TYPE_CHECKING:
 	from typing import Callable, Union, Iterable, Iterator, Optional
 	from pathlib import Path
-	from os import DirEntry
+	from .compat.os import DirEntry
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,10 @@ windows_fat_illegal_chars = fat_illegal_chars
 windows_illegal_chars = windows_ntfs_illegal_chars | windows_fat_illegal_chars
 unix_illegal_chars = {"\0", "/"}
 mac_illegal_chars = {"\0", "/", ":"}
+
+windows_sep = r"\/"
+linux_sep = r"/"
+mac_sep = r"/:"
 
 windows_reserved_names = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}
 
@@ -98,13 +103,16 @@ class DirEntryStub(object):
 		self.name = name
 		self.path = path
 
-class SkippableDirEntry(object):
-	__slots__ = ('entry', '_path', 'follow', 'abspath')
+class RelativeDirEntry(object):
+	__slots__ = ('entry', 'basepath', 'relpath')
 
 	def __init__(self, entry):
 		self.entry = entry
-		self._path = entry.path
-		self.follow = True
+		self.basepath = None # type: Optional[str]
+		self.relpath = None # type: Optional[str]
+
+	def __str__(self):
+		return self._path
 
 	def stat(self):
 		return self.entry.stat()
@@ -127,11 +135,22 @@ class SkippableDirEntry(object):
 
 	@property
 	def path(self):
-		return self._path
+		if self.relpath is not None:
+			return self.relpath
+		assert self.basepath is not None
+		self.relpath = os.path.relpath(self.entry.path, self.basepath)
+		return self.relpath
 
-	@path.setter
-	def path(self, path):
-		self._path = path
+	@property
+	def abspath(self):
+		return self.entry.path
+
+class SkippableDirEntry(RelativeDirEntry):
+	__slots__ = ('follow', )
+
+	def __init__(self, entry):
+		MyDirEntry.__init__(self, entry)
+		self.follow = True
 
 if TYPE_CHECKING:
 	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
@@ -273,15 +292,13 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 		basepath = uncabspath(path)
 		if not allow_skip:
 			def modpathrelative(entry):
-				entry = SkippableDirEntry(entry)
-				entry.abspath = entry.path
-				entry.path = os.path.relpath(entry.path, basepath)
+				entry = RelativeDirEntry(entry)
+				entry.basepath = basepath
 				return entry
 		else:
 			# entry is already a SkippableDirEntry
 			def modpathrelative(entry):
-				entry.abspath = entry.path
-				entry.path = os.path.relpath(entry.path, basepath)
+				entry.basepath = basepath
 				return entry
 
 		return map(modpathrelative, it)
@@ -347,21 +364,123 @@ def safe_filename(filename, replace=""):
 
 safe_filename_simple = safe_filename
 
+def _char_subber(s, illegal_chars, replacement):
+	# type: (str, Set[str], str) -> str
+
+	if set(replacement) & illegal_chars:
+		raise ValueError("replace character cannot be a illegal character")
+
+	regex = "[" + re.escape("".join(illegal_chars)) + "]"
+	return re.sub(regex, replacement, s)
+
+def _char_splitter(s, chars):
+	# type: (str, Set[str]) -> str
+
+	regex = "[" + re.escape("".join(chars)) + "]"
+	return re.split(regex, s)
+
+def _special_subber(s, replacement="_"):
+	# type: (str, str) -> str
+
+	if s == "." or s == "..":
+		return s.replace(".", replace)
+
+	return s
+
 def windows_compliant_filename(filename, replace="_"):
 	# type: (str, str) -> str
 	""" https://msdn.microsoft.com/en-us/library/aa365247.aspx """
 	# reg. wikipedia: \x7f is valid!
 	# trailing dots and spaces are ignored by windows
 
-	if replace in windows_illegal_chars:
-		raise ValueError("replace character cannot be a illegal character")
-
-	ret = replace_list(filename, windows_illegal_chars, replace).rstrip(". ") # strip or replace?, translate
+	ret = _char_subber(filename, windows_illegal_chars, replace).rstrip(". ") # strip or replace?, translate
 
 	root, _ = os.path.splitext(ret)
 
 	if root.upper() in windows_reserved_names:
 		raise WindowsIllegalFilename("filename would result in reserved name")
+
+	return ret
+
+def windows_compliant_dirname(filename, replace):
+	# type: (str, str) -> str
+	""" https://msdn.microsoft.com/en-us/library/aa365247.aspx """
+	# reg. wikipedia: \x7f is valid!
+	# trailing dots and spaces are ignored by windows
+
+	ret = _char_subber(filename, windows_illegal_chars, replace).rstrip(" ")
+
+	root, _ = os.path.splitext(ret)
+
+	if root.upper() in windows_reserved_names:
+		raise WindowsIllegalFilename("filename would result in reserved name")
+
+	return ret
+
+def linux_compliant_filename(filename, replace="_"):
+	filename = _special_subber(filename, replace)
+	return _char_subber(filename, unix_illegal_chars, replace)
+
+def linux_compliant_dirname(filename, replace="_"):
+	return _char_subber(filename, unix_illegal_chars, replace)
+
+def mac_compliant_filename(filename, replace="_"):
+	filename = _special_subber(filename, replace)
+	return _char_subber(filename, mac_illegal_chars, replace)
+
+def mac_compliant_dirname(filename, replace="_"):
+	return _char_subber(filename, mac_illegal_chars, replace)
+
+def windows_split_path(s):
+	# type: (str, ) -> List[str]
+
+	return _char_splitter(s, windows_sep)
+
+def linux_split_path(s):
+	# type: (str, ) -> List[str]
+
+	return _char_splitter(s, linux_sep)
+
+def mac_split_path(s):
+	# type: (str, ) -> List[str]
+
+	return _char_splitter(s, mac_sep)
+
+system = platform.system()
+
+if system == "Windows":
+	compliant_filename = windows_compliant_filename
+	compliant_dirname = windows_compliant_dirname
+	split_path = windows_split_path
+elif system == "Linux":
+	compliant_filename = linux_compliant_filename
+	compliant_dirname = linux_compliant_dirname
+	split_path = linux_split_path
+elif system == "Darwin":
+	compliant_filename = mac_compliant_filename
+	compliant_dirname = mac_compliant_dirname
+	split_path = mac_split_path
+else:
+	compliant_filename = _not_available("compliant_filename")
+	compliant_dirname = _not_available("compliant_dirname")
+	split_path = _not_available("split_path")
+
+def compliant_path(path, replace="_"):
+	# type: (str, str) -> str
+
+	fn_func = partial(compliant_dirname, replace=replace)
+	path_compontents = split_path(path)
+
+	ret = os.sep.join(map(fn_func, path_compontents[:-1]))
+	ret = os.path.join(ret, compliant_filename(path_compontents[-1]))
+	return ret
+
+def reldirname(path):
+	# type: (str, ) -> str
+
+	ret = os.path.dirname(path)
+	if not ret:
+		ret = "."
 
 	return ret
 
