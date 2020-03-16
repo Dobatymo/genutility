@@ -94,16 +94,16 @@ def enumerate_atoms(path):
 if __name__ == "__main__":
 
 	import logging
-	from pathlib import Path
 	from argparse import ArgumentParser
+	from genutility.args import is_dir
 	from genutility.iter import list_except
 
 	parser = ArgumentParser()
-	parser.add_argument("drive")
-	parser.add_argument("erroronly")
+	parser.add_argument("drive", type=is_dir)
+	parser.add_argument("--erroronly", action="store_true")
 	args = parser.parse_args()
 
-	paths = Path(args.drive).glob("**/*.mp4")
+	paths = args.drive.glob("**/*.mp4")
 
 	for path in paths:
 		if args.erroronly:

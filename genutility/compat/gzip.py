@@ -5,11 +5,9 @@ from builtins import str, bytes
 
 if PY2:
 
-	import io, os
+	import io
 	from gzip import GzipFile
-	from pathlib2 import PurePath
-
-	os.PathLike = PurePath
+	from . import os
 
 	""" This function is copied from `Python36\Lib\gzip.py`.
 	"""

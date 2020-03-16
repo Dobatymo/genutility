@@ -2,14 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import time, errno
 
-try:
-	from unittest.mock import Mock
-except ImportError:
-	from mock import Mock # type: ignore # backport
-
 from genutility.test import MyTestCase
 from genutility.os import interrupt
 from genutility.signal import HandleKeyboardInterrupt
+from genutility.compat.unittest.mock import Mock
 
 class SignalTest(MyTestCase):
 

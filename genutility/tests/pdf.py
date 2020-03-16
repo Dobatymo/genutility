@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest, os.path, sys
 from genutility.test import MyTestCase, parametrize
 from genutility.pdf import join_pdfs_in_folder
+from genutility.compat.pathlib import Path
 
 class PdfTest(MyTestCase):
 
@@ -12,7 +13,7 @@ class PdfTest(MyTestCase):
 	)
 	def test_join_pdfs_in_folder(self, path, out, truth):
 		with self.assertNoRaise():
-			join_pdfs_in_folder(path, out, overwrite=True)
+			join_pdfs_in_folder(Path(path), out, overwrite=True)
 
 		self.assertFilesEqual(out, truth)
 

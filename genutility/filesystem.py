@@ -21,6 +21,14 @@ from .string import replace_list
 from .datetime import datetime_from_utc_timestamp
 
 if __debug__:
+	from .compat import gzip, bz2
+
+if TYPE_CHECKING:
+	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator
+	from .compat.os import PathLike
+	PathType = Union[str, PathLike]
+
+if __debug__:
 	import unidecode
 
 if TYPE_CHECKING:
@@ -311,7 +319,7 @@ def join_ext(name, ext):
 	return name + "." + ext
 
 def make_readonly(path, stats=None):
-	# type: (Path, Optional[os.stat_result]) -> None
+	# type: (PathType, Optional[os.stat_result]) -> None
 
 	"""deletes all write flags"""
 	if not stats:
@@ -319,7 +327,7 @@ def make_readonly(path, stats=None):
 	os.chmod(path, stat.S_IMODE(stats.st_mode) & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
 
 def make_writeable(path, stats=None):
-	# type: (Path, Optional[os.stat_result]) -> None
+	# type: (PathType, Optional[os.stat_result]) -> None
 
 	"""set owner write flag"""
 	if not stats:
@@ -509,7 +517,7 @@ def equal_dirs(dir1, dir2):
 	return is_empty(equal_dirs_iter(dir1, dir2))
 
 def realpath_win(path):
-	# type: (Path, ) -> str
+	# type: (PathType, ) -> str
 	"""fix for os.path.realpath() which doesn't work under Win7"""
 	# fixme: handle junctions
 
@@ -520,7 +528,7 @@ def realpath_win(path):
 		return path
 
 def convert_filenames_to_ascii(path, follow_symlinks=False):
-	# type: (Path, ) -> None
+	# type: (PathType, ) -> None
 	""" convert all files in `path` to a ascii representation using unidecode """
 
 	from unidecode import unidecode
@@ -531,7 +539,7 @@ def convert_filenames_to_ascii(path, follow_symlinks=False):
 		os.rename(filepath, os.path.join(base, unidecode(name)))
 
 def search(directories, pattern, dirs=True, files=True, rec=True, follow_symlinks=False):
-	# type: (Iterable[Path], str, bool, bool, bool) -> Iterator[DirEntry]
+	# type: (Iterable[PathType], str, bool, bool, bool) -> Iterator[DirEntry]
 
 	""" Search for files and folders matching the wildcard `pattern`. """
 

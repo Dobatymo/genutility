@@ -9,11 +9,7 @@ from genutility.iter import (product_range_repeat, every_n, any_in_common, split
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
 	retrier)
-
-try:
-	from unittest import mock
-except ImportError:
-	import mock # backport
+from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
 nulllogger.addHandler(logging.NullHandler())
@@ -162,7 +158,7 @@ class IterTest(MyTestCase):
 			tuple(iter_except(GeneratorWithException(), {}))
 
 	def test_iter_except_it(self):
-		m = mock.Mock(return_value=None)
+		m = Mock(return_value=None)
 		result = tuple(iter_except(IteratorWithException(), {ZeroDivisionError: m}))
 		truth = (1,2)
 		self.assertEqual(truth, result)

@@ -2,11 +2,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import input
 
 import os, sys, os.path, argparse, shlex
-from pathlib import Path
 from functools import wraps
 
 from .iter import is_empty
 from .stdio import confirm
+from .compat.pathlib import Path
 
 def get_args(argparser):
 	""" get commandline arguments from std input instead """
@@ -39,7 +39,7 @@ def get_args(argparser):
 	return argparser.parse_args(args)
 
 def arg_to_path(func):
-	# type: (Callable, ) -> Callable
+	# type: (Callable[[Path], Path], ) -> Callable
 
 	@wraps(func)
 	def inner(path):

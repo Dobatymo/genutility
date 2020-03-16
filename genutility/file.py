@@ -16,7 +16,7 @@ if __debug__:
 
 if TYPE_CHECKING:
 	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator
-	from pathlib import Path
+	PathType = Union[str, PathLike]
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
@@ -38,7 +38,7 @@ def _check_arguments(mode, encoding=None):
 	return encoding
 
 def read_file(path, mode="b", encoding=None, errors=None):
-	# type: (str, str, Optional[str]) -> bytes
+	# type: (PathType, str, Optional[str]) -> bytes
 
 	""" Reads and returns whole file. If content is not needed use consume_file()"""
 
@@ -51,7 +51,7 @@ def read_file(path, mode="b", encoding=None, errors=None):
 		return fr.read()
 
 def write_file(data, path, mode="wb", encoding=None, errors=None):
-	# type: (Union[str, bytes], Union[str, PathLike], str, Optional[str]) -> None
+	# type: (Union[str, bytes], PathType, str, Optional[str]) -> None
 
 	""" Writes file. """
 
@@ -81,14 +81,14 @@ def linefileiter(fin, check_last=True): # kinda unnecessary
 	assert last.endswith("\n"), "File does not end in newline: {}".format(last)
 
 def get_file_range(path, start, size):
-	# type: (str, int, int) -> bytes
+	# type: (PathType, int, int) -> bytes
 
 	with open(path, "rb") as fp:
 		fp.seek(start)
 		return fp.read(size)
 
 def truncate_file(path, size):
-	# type: (str, int) -> None
+	# type: (PathType, int) -> None
 
 	with open(path, "r+b") as fp:
 		fp.truncate(size)
@@ -99,7 +99,7 @@ def wrap_text(bf, mode, encoding, errors, newline):
 	return bf
 
 def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9, ext=None):
-	# type: (Union[str, PathLike, BinaryIO, int], str, Optional[str], Optional[str], Optional[str], Optional[str], int, Optional[str]) -> IO
+	# type: (Union[PathType, BinaryIO, int], str, Optional[str], Optional[str], Optional[str], Optional[str], int, Optional[str]) -> IO
 
 	""" Generic file open method. It supports transparent compression and improved text-mode handling.
 
@@ -163,7 +163,7 @@ class OpenFileAndDeleteOnError(object):
 	"""
 
 	def __init__(self, file, mode="rt", encoding=None, errors=None, newline=None, compresslevel=9):
-	# type: (str, str, Optional[str], Optional[str], Optional[str], int) -> None
+	# type: (PathType, str, Optional[str], Optional[str], Optional[str], int) -> None
 
 		encoding = _check_arguments(mode, encoding)
 
@@ -193,6 +193,8 @@ class OpenFileAndDeleteOnError(object):
 class OptionalWriteOnlyFile(object):
 
 	def __init__(self, path=None, mode="xb", encoding=None, compresslevel=9):
+		# type: (Optional[PathType], str, Optional[str], int) -> None
+
 		if path:
 			self.f = copen(path, mode, encoding=encoding, compresslevel=compresslevel)
 		else:
@@ -217,7 +219,7 @@ class OptionalWriteOnlyFile(object):
 class PathOrBinaryIO(object):
 
 	def __init__(self, fname, mode="rb", close=False):
-		# type: (Union[str, BinaryIO],  str, str, str, Optional[str], bool) -> None
+		# type: (Union[PathType, BinaryIO],  str, str, str, Optional[str], bool) -> None
 
 		if isinstance(fname, (RawIOBase, BufferedIOBase)):
 			self._close = close
@@ -236,7 +238,7 @@ class PathOrBinaryIO(object):
 class PathOrTextIO(object):
 
 	def __init__(self, fname, mode="rt", encoding="utf-8", errors="strict", newline=None, close=False):
-		# type: (Union[str, TextIO],  str, str, str, Optional[str], bool) -> None
+		# type: (Union[PathType, TextIO], str, str, str, Optional[str], bool) -> None
 
 		if isinstance(fname, TextIOBase):
 			self.close = close
@@ -541,7 +543,7 @@ def iterfilelike(fr, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
 		return limited_file_iter(fr, amount, chunk_size)
 
 def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (Path, str, Optional[str], Optional[int], int) -> Iterator
+	# type: (PathType, str, Optional[str], Optional[int], int) -> Iterator
 
 	""" Iterate over file at `path` and yield chunks of size `chunk_size`.
 		Optionally limit output to `amount` bytes.
@@ -554,7 +556,7 @@ def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=N
 			yield data
 
 def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (Iterable[str], int) -> Iterator[bytes]
+	# type: (Iterable[PathType], int) -> Iterator[bytes]
 
 	chunk = r""
 
@@ -582,7 +584,7 @@ def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
 		yield chunk
 
 def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, amount=None, buffer_size=FILE_IO_BUFFER_SIZE):
-	# type: (Path, int, str, Optional[str], Optional[int], int) -> Iterator
+	# type: (PathType, int, str, Optional[str], Optional[int], int) -> Iterator
 
 	""" Iterate over file at `path` reading chunks of size `buffer_size` at a time.
 		Yields data chunks of `chunk_size` and optionally limits output to `amount` bytes.
@@ -591,20 +593,20 @@ def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, am
 	return resizer(blockfileiter(path, mode, encoding, errors, amount, buffer_size), chunk_size)
 
 def byte_out(path, buffer_size=FILE_IO_BUFFER_SIZE):
-	# type: (str, int) -> Iterator[bytes]
+	# type: (PathType, int) -> Iterator[bytes]
 	""" open file and return it byte by byte """
 
 	return resizer(blockfileiter(path, mode="rb", chunk_size=buffer_size), 1)
 
 def consume_file(filename, buffer_size=FILE_IO_BUFFER_SIZE):
-	# type: (str, int) -> None
+	# type: (PathType, int) -> None
 	""" reads whole file but ignores content """
 
 	consume(blockfileiter(filename, mode="rb", chunk_size=buffer_size))
 
 # was: same_files, textfile_equal: equal_files(*paths, mode="rt")
 def equal_files(*paths, **kwargs):
-	# type: (*str, str, int) -> bool
+	# type: (*PathType, str, int) -> bool
 
 	""" Check if files at `*paths` are equal. Chunks of size `chunk_size` are read at a time.
 		Data can be optionally limited to `amount`.

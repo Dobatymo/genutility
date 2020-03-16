@@ -2,13 +2,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import filter, range
 
-import sys, os, os.path, logging
+import sys, os, logging
 import subprocess  # nosec
-from pathlib import Path
 
 from ..os import CurrentWorkingDirectory
-from ..twothree.filesystem import tofs, fromfs
 from ..string import surrounding_join
+from ..compat.pathlib import Path
+from ..twothree.filesystem import tofs, fromfs
 
 logger = logging.getLogger(__name__)
 

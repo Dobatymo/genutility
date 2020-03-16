@@ -1,23 +1,22 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from io import open
-from pathlib import Path
-try:
-	from contextlib import ExitStack
-except ImportError:
-	from contextlib2 import ExitStack
+from typing import TYPE_CHECKING
 
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 from .twothree import FileNotFoundError
+from .compat.contextlib import ExitStack
+from .compat.pathlib import Path
+
+if TYPE_CHECKING:
+	from typing import Union, Iterator
+	from .compat.os import PathLike
 
 def join_pdfs_in_folder(path_in, file_out, overwrite=False):
-	# type: (Union[Path, str], Union[Path, str]) -> None
+	# type: (Path, Union[PathLike, str]) -> None
 
 	""" Join all PDFs in `path_in` and write to `file_out`. """
-
-	if not isinstance(path_in, Path):
-		path_in = Path(path_in)
 
 	merger = PdfFileMerger(strict=True)
 
