@@ -368,15 +368,15 @@ def multi_join(it_a, it_b, join_func=add):
 
 	return [join_func(a, b) for b in it_b for a in it_a]
 
-def iter_except(iterator, exception_callbacks):
-	# type: (Iterator[T], Dict[Type, Callable[[Iterator[T], Exception], bool]]) -> Iterator[T]
+def iter_except(iterator, exception_callbacks, return_on_exception=False):
+	# type: (Iterator[T], Dict[Type, Callable[[Iterator[T], Exception], bool]], bool) -> Iterator[T]
 
 	""" Calls callbacks when exceptions are raised in `iterator`. Does not work for Generators.
 		The type key in the `exception_callbacks` dict must be the same type as the exception which
 		should be caught, not a subtype.
 	"""
 
-	if isinstance(iterator, GeneratorType):
+	if not return_on_exception and isinstance(iterator, GeneratorType):
 		raise TypeError("iterator cannot be a generator")
 
 	while True:
@@ -390,6 +390,8 @@ def iter_except(iterator, exception_callbacks):
 					raise
 			except KeyError:
 				raise e
+			if return_on_exception:
+				return
 
 def list_except(it, catch=Exception):
 	# type: (Iterable[T], Union[Exception, Sequence[Exception]]) -> Tuple[Exception, List[T]]

@@ -4,7 +4,7 @@ from builtins import range
 from copy import deepcopy
 
 from .compat.math import isqrt
-from .math import row_indices, col_indices, subblock_indices
+from .indexing import row_indices, col_indices, subblock_indices
 from .set import get as setget
 
 class Unsolvable(Exception):

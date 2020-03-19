@@ -4,8 +4,8 @@ from itertools import islice
 
 from genutility.test import MyTestCase, parametrize
 from genutility.math import (PosInfInt, fibonaccigen, primes, additaet, digitsum_small, digitsum,
-	digitsum_base, closest, byte2size, byte2size_str, fibonacci, subblock_indices, limit,
-	multinomial_coefficient, argfind_lte, argfind_gte, argmin, argmax, argmax_v2)
+	digitsum_base, closest, byte2size, byte2size_str, fibonacci, limit, multinomial_coefficient,
+	argfind_lte, argfind_gte, argmin, argmax, argmax_v2)
 
 class TestPosInfInt(MyTestCase):
 
@@ -149,31 +149,6 @@ class MathTest(MyTestCase):
 		fibs = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393, 196418, 317811, 514229, 832040, 1346269, 2178309, 3524578, 5702887, 9227465, 14930352, 24157817, 39088169, 63245986, 102334155]
 		for i, truth in zip(range(100), fibs):
 			result = fibonacci(i)
-			self.assertEqual(truth, result)
-
-	@parametrize(
-		(16, 4, 2, [
-			[0, 1, 4, 5],
-			[0, 1, 4, 5],
-			[2, 3, 6, 7],
-			[2, 3, 6, 7],
-			[0, 1, 4, 5],
-			[0, 1, 4, 5],
-			[2, 3, 6, 7],
-			[2, 3, 6, 7],
-			[8, 9, 12, 13],
-			[8, 9, 12, 13],
-			[10, 11, 14, 15],
-			[10, 11, 14, 15],
-			[8, 9, 12, 13],
-			[8, 9, 12, 13],
-			[10, 11, 14, 15],
-			[10, 11, 14, 15],
-		])
-	)
-	def test_subblock_indices(self, n, i, j, truths):
-		for x, truth in zip(range(n), truths):
-			result = list(subblock_indices(x, i, j))
 			self.assertEqual(truth, result)
 
 	@parametrize(

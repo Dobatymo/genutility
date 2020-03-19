@@ -3,9 +3,26 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from genutility.test import MyTestCase, parametrize
-from genutility.image import grayscale, histogram_1d, histogram_2d
+from genutility.image import grayscale, histogram_1d, histogram_2d, resize_oar
 
 class ImageTest(MyTestCase):
+
+	@parametrize(
+		(100, 100, 1., (100, 100)),
+		(100, 100, 2., (100, 50)),
+		(100, 100, 0.5, (50, 100)),
+
+		(100, 50, 1., (50, 50)),
+		(100, 50, 2., (100, 50)),
+		(100, 50, 0.5, (25, 50)),
+
+		(50, 100, 1., (50, 50)),
+		(50, 100, 2., (50, 25)),
+		(50, 100, 0.5, (50, 100)),
+	)
+	def test_resize_oar_dar(self, max_width, max_height, dar, truth):
+		result = resize_oar(max_width, max_height, dar)
+		self.assertEqual(truth, result)
 
 	@parametrize(
 		([[[1],[2]],[[3],[4]]], [[1,2],[3,4]]),

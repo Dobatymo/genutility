@@ -16,6 +16,25 @@ def histogram_1d(arr, levels):
 
 	return np.apply_along_axis(np.bincount, -1, arr, minlength=levels)
 
+def resize_oar(max_width, max_height, dar):
+	# type: (int, int, Union[float, Fraction]) -> Tuple[int, int]
+
+	maxdar = max_width / max_height
+
+	if dar >= maxdar: # wider than it should be
+		width = max_width
+		height = int(width / dar)
+	else: # thinner than it should be
+		height = max_height
+		width = int(height * dar)
+
+	return width, height
+
+def resize_maxsize(max_width, max_height, width, height):
+	# type: (int, int, int, int) -> Tuple[int, int]
+
+	return resize_oar(max_width, max_height, width / heigh)
+
 def histogram_2d(arr, levels):
 	# type: (np.ndarray, int) -> np.ndarray
 

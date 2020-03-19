@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from builtins import input
+from builtins import input, range
 
-import os, sys, os.path, argparse, shlex
+import os, sys, os.path, shlex
 from functools import wraps
+from argparse import ArgumentTypeError
 
 from .iter import is_empty
 from .stdio import confirm
@@ -55,13 +56,34 @@ def multiple_of(divisor):
 		in case input cannot be cast to int:
 		error: argument --multiple: invalid int value: 'a'
 	"""
-	def int(s): 
+	def int(s):
 		# type: (str, ) -> int
 
 		number = builtin_int(s)
+
 		if number % divisor != 0:
 			msg = "{0} is not clearly divisible by {1}".format(s, divisor)
-			raise argparse.ArgumentTypeError(msg)
+			raise ArgumentTypeError(msg)
+
+		return number
+
+	return int
+
+def in_range(start, stop, step=1):
+	# type: (int, int, int) -> Callable[[str], int]
+
+
+	from builtins import int as builtin_int
+
+	def int(s): # see: multiple_of()
+		# type: (str, ) -> int
+
+		number = builtin_int(s)
+
+		r = range(start, stop, step)
+		if number not in r:
+			msg = "{0} is not in {1}".format(s, r)
+			raise ArgumentTypeError(msg)
 
 		return number
 
@@ -74,7 +96,7 @@ def suffix(s):
 
 	if not s.startswith("."):
 		msg = "{0} is not a valid suffix. It must start with a dot.".format(s)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 
 	return s
 
@@ -86,7 +108,7 @@ def existing_path(path):
 
 	if not path.exists():
 		msg = "{0} does not exist".format(path)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 
 	return path
 
@@ -98,7 +120,7 @@ def new_path(path):
 
 	if path.exists():
 		msg = "{0} does not exist".format(path)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 
 	return path
 
@@ -110,9 +132,17 @@ def is_dir(path):
 
 	if not path.is_dir():
 		msg = "{0} is not a directory".format(path)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 
 	return path
+
+@arg_to_path
+def abs_path(path):
+	# type: (Path, ) -> Path
+
+	"""Checks if a path is an actual directory"""
+
+	return path.resolve()
 
 @arg_to_path
 def is_file(path):
@@ -122,7 +152,7 @@ def is_file(path):
 
 	if not path.is_file():
 		msg = "{0} is not a file".format(path)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 
 	return path
 
@@ -136,10 +166,10 @@ def future_file(path):
 
 	if path.parent and not os.access(str(path.parent), os.W_OK):
 		msg = "cannot access directory {0}".format(path.parent)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 	if path.is_file():
 		msg = "file {0} already exists".format(path)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 	return path
 
 @arg_to_path
@@ -150,19 +180,22 @@ def empty_dir(dirname):
 
 	if not is_empty(os.scandir(dirname)):
 		msg = "directory {0} is not empty".format(dirname)
-		raise argparse.ArgumentTypeError(msg)
+		raise ArgumentTypeError(msg)
 
 	return dirname
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser()
+
+	from argparse import ArgumentParser
+
+	parser = ArgumentParser()
 	parser.add_argument('--str')
 	parser.add_argument('--required', action='store_true')
 	parser.add_argument('--add', nargs="+")
 	print(get_args(parser))
 
 	"""
-	parser = argparse.ArgumentParser()
+	parser = ArgumentParser()
 	parser.add_argument('--indir', type=is_dir)
 	parser.add_argument('--infile', type=is_file)
 	parser.add_argument('--outfile', type=future_file)

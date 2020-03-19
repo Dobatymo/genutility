@@ -6,6 +6,7 @@ from operator import itemgetter
 from typing import TYPE_CHECKING
 
 from .func import identity
+from .indexing import triangular_indices
 
 if TYPE_CHECKING:
 	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple, Sequence
@@ -52,9 +53,8 @@ def triangular(seq):
 		triangular([1, 2, 3, 4]) -> (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)
 	"""
 
-	for i in range(len(seq)-1):
-		for j in range(i+1, len(seq)):
-			yield seq[i], seq[j]
+	for i, j in triangular_indices(len(seq)):
+		yield seq[i], seq[j]
 
 def sliding_window(seq, size):
 	# type: (Sequence, int) -> Iterator[Sequence]

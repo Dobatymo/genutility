@@ -155,43 +155,6 @@ def limit(x, left=0, right=1):
 	else:
 		return left
 
-def row_indices(n, square_length):
-	""" Returns the one-dimensional indices of all the cells belonging to the
-		same row as index `n`.
-	"""
-
-	j = n // square_length
-	return range(j * square_length, (j + 1) * square_length)
-
-def col_indices(n, square_length):
-	""" Returns the one-dimensional indices of all the cells belonging to the
-		same column as index `n`.
-	"""
-
-	j = n % square_length
-	return range(j, square_length * (square_length - 1) + j + 1, square_length)
-
-def subblock_indices(n, outer_square_length, inner_square_length):
-	# type: (int, int, int) -> Iterator[Tuple[int, int]]
-
-	""" Returns the one-dimensional indices of all the cells belonging to the
-		same block as index `n`.
-		`outer_square_length` is the number of cells per block.
-		`inner_square_length` current has to be sqrt(block_size).
-	"""
-
-	i = outer_square_length
-	j = inner_square_length
-
-	assert n < i*i, "n not contained in matrix"
-	assert j*j == i, "Currently only squares are supported"
-
-	x, y = (n % i // j, n // i // j)
-
-	for iy in range(j):
-		for ix in range(j):
-			yield (y * i * j) + (i * iy) + (x * j) + (ix)
-
 def relative_luminance(r, g, b):
 	# type: (float, float, float) -> float
 

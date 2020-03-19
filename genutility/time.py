@@ -1,8 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from time import time
+from time import sleep
 from collections import defaultdict
 from typing import TYPE_CHECKING
+
+try:
+	from time import monotonic # Python 3.5+
+except ImportError:
+	from time import clock as monotonic
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Hashable, Iterator, Optional, Tuple, TypeVar
@@ -12,12 +17,30 @@ def iter_timer(it):
 	# type: (Iterator[T], ) -> Iterator[Tuple[T, float]]
 	try:
 		while True:
-			start = time()
+			start = monotonic()
 			res = next(it)
-			delta = time()-start
+			delta = monotonic()-start
 			yield res, delta
 	except StopIteration:
 		pass
+
+class TakeAtleast(object):
+
+	def __init__(self, delta, wait_on_error=False):
+		# type: (timedelta, ) -> None
+
+		self.delta = delta.total_seconds()
+		self.wait_on_error = wait_on_error
+
+	def __enter__(self):
+		self.now = monotonic()
+
+	def __exit__(self, exc_type, exc_value, traceback):
+
+		if exc_type is None or self.wait_on_error:
+			elapsed = monotonic() - self.now
+			if elapsed < self.delta:
+				sleep(self.delta - elapsed)
 
 class DeltaTime(object):
 
@@ -27,7 +50,7 @@ class DeltaTime(object):
 		# type: () -> None
 
 		self.start = None # type: Optional[float]
-		self.end = time()
+		self.end = monotonic()
 
 	def __iter__(self):
 		# type: () -> DeltaTime
@@ -37,23 +60,23 @@ class DeltaTime(object):
 	def __next__(self):
 		# type: () -> float
 
-		self.start, self.end = self.end, time()
+		self.start, self.end = self.end, monotonic()
 		return self.end - self.start
 
 	def get(self):
 		# type: () -> float
 
-		return time() - self.end
+		return monotonic() - self.end
 
 	def reset(self):
 		# type: () -> None
 
-		self.end = time()
+		self.end = monotonic()
 
 	def get_reset(self):
 		# type: () -> float
 
-		self.start, self.end = self.end, time()
+		self.start, self.end = self.end, monotonic()
 		return self.end - self.start
 
 class PrintStatementTime(object):
@@ -68,11 +91,11 @@ class PrintStatementTime(object):
 			self.tpl = tpl
 
 	def __enter__(self):
-		self.start = time()
+		self.start = monotonic()
 		return self
 
 	def __exit__(self, exc_type, exc_value, traceback):
-		end = time()
+		end = monotonic()
 		delta = end - self.start
 		msg = self.tpl.format(start=self.start, end=end, delta=delta)
 		if exc_type:
@@ -89,18 +112,18 @@ class MeasureTime(object):
 		self.delta = None
 
 	def __enter__(self):
-		self.start = time()
+		self.start = monotonic()
 		return self
 
 	def __exit__(self, type, value, traceback):
-		self.delta = time() - self.start
+		self.delta = monotonic() - self.start
 
 	def get(self):
 		# type: () -> float
 		if self.delta:
 			return self.delta
 		else:
-			return time() - self.start
+			return monotonic() - self.start
 
 class TimeIt(object):
 
