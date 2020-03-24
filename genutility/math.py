@@ -232,6 +232,21 @@ def floordiv2(n):
 		yield n
 		n = n // 2
 
+def isintlog(num, base):
+
+	assert num > 0
+
+	if num == 1:
+		return False
+
+	while num > 1:
+		r = num % base
+		if r != 0:
+			return False
+		num //= base
+
+	return True
+
 def _fibonacci(n):
 	# returns (F(n), F(n+1)).
 	# inspired by https://www.nayuki.io/page/fast-fibonacci-algorithms

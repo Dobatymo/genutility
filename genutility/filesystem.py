@@ -8,24 +8,19 @@ from fnmatch import fnmatch
 from functools import partial
 from typing import TYPE_CHECKING
 
-try:
-	from os import scandir
-except ImportError:
-	from scandir import scandir # backport
-
 from .file import equal_files, iterfilelike, FILE_IO_BUFFER_SIZE
 from .iter import is_empty
 from .os import islink, uncabspath
 from .ops import logical_implication
 from .string import replace_list
 from .datetime import datetime_from_utc_timestamp
+from .compat.os import PathLike, fspath, scandir
 
 if __debug__:
 	from .compat import gzip, bz2
 
 if TYPE_CHECKING:
 	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator
-	from .compat.os import PathLike
 	PathType = Union[str, PathLike]
 
 if __debug__:
@@ -284,9 +279,12 @@ def _scandir_rec(rootentry, files=True, dirs=False, others=False, rec=True, foll
 		errorfunc(rootentry, e)
 
 def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_symlinks=True, relative=False, allow_skip=False, errorfunc=scandir_error_log):
-	# type: (str, bool, bool, bool, bool, bool, bool, bool, Callable[[MyDirEntryT, Exception], None]) -> Iterator[MyDirEntryT]
+	# type: (PathType, bool, bool, bool, bool, bool, bool, bool, Callable[[MyDirEntryT, Exception], None]) -> Iterator[MyDirEntryT]
 
 	assert logical_implication(allow_skip, dirs and rec)
+
+	if isinstance(path, PathLike):
+		path = fspath(path)
 
 	entry = DirEntryStub(os.path.basename(path), uncabspath(path)) # for python 2 compat. and long filename support
 	if not allow_skip:

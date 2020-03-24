@@ -1,6 +1,6 @@
 future
 
-av
+# av # no simple build
 aiohttp>=0.16.3; python_version >= '3.5'
 bencode.py>=2.0.0 # bencode
 cryptography>=1.5.3

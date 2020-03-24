@@ -69,6 +69,7 @@ class AriaDownloader(object):
 		self.gids = set()
 
 	def query(self, method, *args, **kwargs):
+
 		try:
 			return getattr(self.aria2, method)(*args, **kwargs)
 		except ClientException as e:

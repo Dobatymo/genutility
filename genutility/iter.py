@@ -216,6 +216,13 @@ def empty():
 	return
 	yield # pylint: disable=unreachable
 
+def last(it):
+
+	ret = None
+	for i in it:
+		ret = i
+	return ret
+
 def batch(it, n, filter=None):
 	# type: (Iterable[Any], int, Optional[Callable]) -> Iterator[Any] # return type cannot be more specific because of filter()
 

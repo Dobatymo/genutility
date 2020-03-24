@@ -12,6 +12,7 @@ from .filesystem import scandir_rec
 if TYPE_CHECKING:
 	from typing import Callable, Optional
 	from _hashlib import HASH as Hashobj
+	from .filesystem import PathType
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
@@ -63,7 +64,7 @@ def format_file_hash(hashobj, path):
 	return "{} *{}".format(hashobj.hexdigest(), path)
 
 def hash_dir_str(path, hashcls=hashlib.sha1, include_names=False):
-	# type: (str, Callable[[], Hashobj], bool) -> str
+	# type: (PathType, Callable[[], Hashobj], bool) -> str
 
 	""" sorts names naively, e.g. all uppercase chars come before lowercase """
 
