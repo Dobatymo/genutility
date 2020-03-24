@@ -69,11 +69,11 @@ def hash_dir_str(path, hashcls=hashlib.sha1, include_names=False):
 	""" sorts names naively, e.g. all uppercase chars come before lowercase """
 
 	m = hashcls()
-	for file in sorted(scandir_rec(path), key=lambda x: x.path):
-		filehash = hash_file(file, hashcls)
-		yield format_file_hash(filehash, file.path)
+	for entry in sorted(scandir_rec(path), key=lambda x: x.path):
+		filehash = hash_file(entry.path, hashcls)
+		yield format_file_hash(filehash, entry.path)
 		if include_names:
-			m.update(file.name.encode("utf-8"))
+			m.update(entry.name.encode("utf-8"))
 		m.update(filehash.digest())
 	yield format_file_hash(m, path)
 
