@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
-from .twothree import FileNotFoundError
+from .compat import FileNotFoundError
 from .compat.contextlib import ExitStack
 from .compat.pathlib import Path
 

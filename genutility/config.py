@@ -5,7 +5,7 @@ from configparser import ConfigParser
 from io import open
 from typing import TYPE_CHECKING
 
-from .twothree import FileNotFoundError
+from .compat import FileNotFoundError
 from .compat.importlib.util import find_spec
 
 from .os import get_appdata_dir

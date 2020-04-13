@@ -20,7 +20,7 @@ def _load_atoms():
 
 	out = {"container": {}, "leaf": {}}
 
-	with open(atoms_path, newline="") as fr:
+	with open(atoms_path, "rt", encoding="utf-8", newline="") as fr:
 		for _, type, fourcc, description, _ in csv.reader(fr, delimiter="\t"):
 			out[type][fourcc] = description
 
@@ -28,7 +28,7 @@ def _load_atoms():
 
 atoms = _load_atoms()
 
-atomcodep = re.compile(r"[0-9a-zA-Z]{4}") # what do the specs say here?
+atomcodep = re.compile(br"[0-9a-zA-Z]{4}") # what do the specs say here?
 
 def read_atom(fin):
 
@@ -36,12 +36,10 @@ def read_atom(fin):
 
 	size, code = struct.unpack(">L4s", read_or_raise(fin, 8))
 
-	try:
-		code = code.decode("ascii")
-		assert bool(atomcodep.match(code))
-
-	except Exception:
+	if not atomcodep.match(code):
 		raise ParseError("{!r} @ {} is not a valid atom code".format(code, pos))
+
+	code = code.decode("ascii") # cannot fail
 
 	if size == 1: # 64bit size
 		size, = struct.unpack(">Q", read_or_raise(fin, 8))
@@ -100,19 +98,18 @@ if __name__ == "__main__":
 
 	parser = ArgumentParser()
 	parser.add_argument("drive", type=is_dir)
-	parser.add_argument("--erroronly", action="store_true")
+	parser.add_argument("--errors-only", action="store_true")
 	args = parser.parse_args()
 
-	paths = args.drive.glob("**/*.mp4")
+	paths = args.drive.rglob("*.mp4")
 
 	for path in paths:
-		if args.erroronly:
+		if args.errors_only:
 			exc, res = list_except(enumerate_atoms(path))
 			if exc:
-				print(path)
 				for depth, pos, type, size in res:
 					print("--"*depth, pos, type, size)
-				logging.exception("Enumerating atoms failed", exc_info=exc)
+				logging.exception("Enumerating atoms of %s failed", path, exc_info=exc)
 		else:
 			print(path)
 			for depth, pos, type, size in enumerate_atoms(path):

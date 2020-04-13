@@ -155,7 +155,7 @@ def get_redirect_url(url, headers=None):
 
 class URLRequest(object):
 
-	def __init__(self, url, headers=None, timeout=None, cookiejar=None, basicauth=None, openfunc=None):
+	def __init__(self, url, headers=None, timeout=120, cookiejar=None, basicauth=None, openfunc=None):
 		# type: (str, Optional[dict], Optional[float], Optional[CookieJar], Optional[Tuple[str, str, str]], Optional[Callable]) -> None
 
 		self.url = url

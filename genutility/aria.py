@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.utils import viewvalues
 import sys
 from time import sleep
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from .dict import update
@@ -102,7 +103,7 @@ class AriaDownloader(object):
 		return len(self.gids)
 
 	def block_one(self, progress_file=sys.stdout):
-		# type: () -> str
+		# type: () -> Tuple[str, str]
 
 		""" Blocks until one download is done. """
 
@@ -126,7 +127,7 @@ class AriaDownloader(object):
 				try:
 					if entry["status"] == "complete":
 						assert len(entry["files"]) == 1
-						return entry["files"][0]["path"]
+						return gid, entry["files"][0]["path"]
 					elif entry["status"] == "error":
 						raise DownloadFailed(gid, entry["errorCode"], entry["errorMessage"])
 					else:
@@ -166,7 +167,7 @@ class AriaDownloader(object):
 
 		while True:
 			try:
-				path = self.block_one()
+				gid, path = self.block_one()
 				ret.append((None, path))
 			except WouldBlockForever:
 				break
@@ -228,12 +229,14 @@ class AriaDownloader(object):
 		finally:
 			self.remove_stopped(gid)
 
-	def download(self, uri, path=None, filename=None, max_connections=None, split=None, continue_=None, retry_wait=None):
-		# type: (str, Optional[str], Optional[str], Optional[int], Optional[int], Optional[bool], Optional[int]) -> str
+	def download(self, uri, path=None, filename=None, headers=None, max_connections=None, split=None, continue_=None, retry_wait=None):
+		# type: (str, Optional[str], Optional[str], Optional[Sequence[str]], Optional[int], Optional[int], Optional[bool], Optional[int]) -> str
 
 		""" Downloads `uri` to directory `path`.
 			Does not block. Returns a download identifier.
 		"""
+
+		assert headers is None or isinstance(headers, Sequence)
 
 		options = self.default_options.copy()
 		update(options, {
@@ -243,18 +246,22 @@ class AriaDownloader(object):
 			"split": split,
 			"continue": aria_bool(continue_),
 			"retry-wait": retry_wait,
+			"header": headers,
 		})
 
 		gid = self.query("add_uri", [uri], options)
 		self.gids.add(gid)
 		return gid
 
-	def download_x(self, num, uri, path=None, filename=None, max_connections=None, split=None, continue_=None, retry_wait=None):
-		# type: (int, str, Optional[str], Optional[str], Optional[int], Optional[int], Optional[bool], Optional[int]) -> Optional[str]
+	def download_x(self, num, uri, path=None, filename=None, headers=None, max_connections=None, split=None, continue_=None, retry_wait=None):
+		# type: (int, str, Optional[str], Optional[str], Optional[Sequence[str]], Optional[int], Optional[int], Optional[bool], Optional[int]) -> Optional[Tuple[str, str, str]]
 
-		self.download(uri, path, filename, max_connections, split, continue_, retry_wait)
+		queued_gid = self.download(uri, path, filename, headers, max_connections, split, continue_, retry_wait)
 		if self.managed_downloads() >= num:
-			return self.block_one()
+			finished_gid, path = self.block_one()
+			return queued_gid, finished_gid, path
+
+		return None
 
 class DownloadManager(object):
 

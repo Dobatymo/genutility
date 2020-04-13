@@ -6,10 +6,10 @@ from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from .atomic import TransactionalCreateFile
+from .compat import FileNotFoundError
 from .datetime import now
 from .file import copen
 from .filesystem import mdatetime
-from .twothree import FileNotFoundError
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Optional

@@ -169,7 +169,9 @@ def _volume_info_windows(path):
 	)
 
 def _interrupt_windows():
-	os.kill(os.getpid(), signal.CTRL_C_EVENT)
+	# type: () -> None
+
+	os.kill(os.getpid(), signal.CTRL_C_EVENT) # fixme: verify: works on win 10 but not on win 7
 
 def _filemanager_cmd_windows(path):
 	# type: (str, ) -> str

@@ -214,13 +214,26 @@ quicktime-code	container	crgn	Visual clipping region definition	QT
 quicktime-code	container	ctab	Track color-table	QT
 quicktime-code	container	dcfD	Marlin DCF Duration	OMArlin
 quicktime-code	container	elng	Extended Language	QT
-quicktime-code	container	imap	Input map	QT
+quicktime-code	container	imap	Track input map	QT
 quicktime-code	container	kmat	Compressed visual track matte	QT
 quicktime-code	container	load	Track pre-load definitions	QT
 quicktime-code	container	matt	Visual track matte	QT
 quicktime-code	container	pnot	Preview container	QT
 quicktime-code	container	wide	Expansion space reservation	QT
+quicktime-code	leaf	chap	Chapter list	QT
+quicktime-code	leaf	tmcd	Time code	QT
+quicktime-code	leaf	sync	Synchronization	QT
+quicktime-code	container	gmhd	Base media information header	QT
+quicktime-code	leaf	gmin	Base media information atom	QT
+quicktime-code	leaf	text	Text media information header	QT
+quicktime-code	container	tapt	Track aperture mode dimensions	QT
+quicktime-code	leaf	clef	Track Clean Aperture Dimensions	QT
+quicktime-code	leaf	prof	Track Production Aperture Dimensions	QT
+quicktime-code	leaf	enof	Track Encoded Pixels Dimensions	QT
+quicktime-code	leaf	txas	Track exclude from autoselection	QT
 custom-code	container	SDLN	User-data XXX	Samsung
 custom-code	leaf	smrd	User-data XXX	Samsung
 custom-code	leaf	smta	User-data XXX	Samsung
 custom-code	leaf	beam	User-data XXX	WhatsApp
+custom-code	leaf	mpod	OD reference track	Unknown
+custom-code	leaf	hint	Hint reference track	Unknown
