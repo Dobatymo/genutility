@@ -8,7 +8,7 @@ import os, os.path, logging, gzip, errno, json
 from io import open
 from typing import TYPE_CHECKING
 
-from .twothree import FileExistsError
+from .compat import FileExistsError
 from .file import copyfilelike, Tell
 from .iter import first_not_none
 from .filesystem import safe_filename

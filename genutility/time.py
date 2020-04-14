@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from time import sleep
+from datetime import timedelta
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -10,7 +11,7 @@ except ImportError:
 	from time import clock as monotonic
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Hashable, Iterator, Optional, Tuple, TypeVar
+	from typing import Any, Callable, Hashable, Iterator, Optional, Tuple, TypeVar, Union
 	T = TypeVar("T")
 
 def iter_timer(it):
@@ -27,9 +28,13 @@ def iter_timer(it):
 class TakeAtleast(object):
 
 	def __init__(self, delta, wait_on_error=False):
-		# type: (timedelta, ) -> None
+		# type: (Union[float, timedelta], ) -> None
 
-		self.delta = delta.total_seconds()
+		if isinstance(delta, timedelta):
+			self.delta = delta.total_seconds()
+		else:
+			self.delta = float(delta)
+
 		self.wait_on_error = wait_on_error
 
 	def __enter__(self):

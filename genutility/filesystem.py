@@ -14,6 +14,7 @@ from .os import islink, uncabspath
 from .ops import logical_implication
 from .string import replace_list
 from .datetime import datetime_from_utc_timestamp
+from .compat import FileExistsError
 from .compat.os import PathLike, fspath, scandir
 
 if __debug__:
