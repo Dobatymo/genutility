@@ -1,11 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, re, struct, csv, warnings
+import os, re, struct, warnings
+from io import open
 
 import pkg_resources
 
 from .exceptions import ParseError, Break
 from .file import read_or_raise
+from .csv import iter_csv
+from .compat.os import fspath
 
 # http://mp4ra.org/#/atoms
 # https://wiki.multimedia.cx/index.php/QuickTime_container#QuickTime_Atom_Reference
@@ -20,9 +23,8 @@ def _load_atoms():
 
 	out = {"container": {}, "leaf": {}}
 
-	with open(atoms_path, "rt", encoding="utf-8", newline="") as fr:
-		for _, type, fourcc, description, _ in csv.reader(fr, delimiter="\t"):
-			out[type][fourcc] = description
+	for _, type, fourcc, description, _ in iter_csv(atoms_path, delimiter="\t"):
+		out[type][fourcc] = description
 
 	return out
 
@@ -79,6 +81,8 @@ def enumerate_atoms(path):
 		Unknown atoms will print a warning.
 	"""
 
+	path = fspath(path)
+
 	total_size = os.path.getsize(path)
 	with open(path, "rb") as fr:
 		try:
@@ -97,11 +101,15 @@ if __name__ == "__main__":
 	from genutility.iter import list_except
 
 	parser = ArgumentParser()
-	parser.add_argument("drive", type=is_dir)
+	parser.add_argument("path", type=is_dir)
 	parser.add_argument("--errors-only", action="store_true")
+	parser.add_argument("-r", "--recursive", action="store_true")
 	args = parser.parse_args()
 
-	paths = args.drive.rglob("*.mp4")
+	if args.recursive:
+		paths = args.path.rglob("*.mp4")
+	else:
+		paths = args.path.glob("*.mp4")
 
 	for path in paths:
 		if args.errors_only:

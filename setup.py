@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as fr:
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.24",
+	version="0.0.25",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,
