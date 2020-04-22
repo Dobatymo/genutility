@@ -4,7 +4,7 @@ from builtins import map, str
 from future.moves.urllib import request
 from future.moves.urllib.error import URLError
 
-import os, os.path, logging, gzip, errno, json
+import os, os.path, logging, gzip, errno, json, socket
 from io import open
 from typing import TYPE_CHECKING
 
@@ -167,7 +167,7 @@ class URLRequest(object):
 
 		req = request.Request(url, data=None, headers=headers)
 		self.response = openfunc(req, timeout=timeout)
-		self.headers = self.response.info()
+		self.headers = self.response.info() # type: http.client.HTTPMessage
 
 	def _close(self): # unused
 		self.response.close()
@@ -269,7 +269,7 @@ class URLRequest(object):
 				# https://www.ietf.org/mail-archive/web/httpbisa/current/msg27484.html
 				transferred = copyfilelike(self.response, out, content_length, report=report)
 
-		except URLError:
+		except (socket.timeout, URLError):
 			logger.warning("Timeout after {}s at {}: {}".format(self.timeout, self.response.geturl(), self.headers))
 			raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
 

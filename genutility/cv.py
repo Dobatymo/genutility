@@ -31,10 +31,6 @@ def iter_video(input=0, show=False):
 	cap = cv2.VideoCapture(input)
 	logger.debug("Reading video using %s backend", cap.getBackendName())
 
-	#fps = cap.get(cv2.CAP_PROP_FPS)
-	#pos = cap.get(cv2.CAP_PROP_POS_MSEC)
-	#print(fps, pos)
-
 	try:
 		while True:
 			retval, image = cap.read()
