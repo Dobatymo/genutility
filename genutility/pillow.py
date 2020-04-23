@@ -9,8 +9,23 @@ import piexif
 from .exceptions import NoActionNeeded
 
 if TYPE_CHECKING:
-	from typing import Any
+	from typing import Any, Tuple, Union
 	Color = Union[str, Tuple[int, int, int]]
+
+def multiline_textsize(text, ttf, spacing=4):
+	# type: (str, ImageFont, int) -> Tuple[int, int]
+
+	lines = text.splitlines()
+
+	width = 0
+	height = (len(lines) - 1) * spacing
+
+	for line in lines:
+		w, h = ttf.getsize(line)
+		width = max(width, w)
+		height = height + h
+
+	return width, height
 
 def exifinfo(image):
 	# type: (Image, ) -> Dict[str, Any]

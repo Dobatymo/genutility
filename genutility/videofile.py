@@ -93,9 +93,9 @@ class CvVideo(VideoBase):
 		)
 		display_aspect_ratio = pixel_aspect_ratio * Fraction(frame_width, frame_height)
 
-		self.fps = self.cap.get(self.cv2.CAP_PROP_FPS)
+		fps = self.cap.get(self.cv2.CAP_PROP_FPS)
 		try:
-			duration = timedelta(seconds=frame_count / self.fps)
+			duration = timedelta(seconds=frame_count / fps)
 		except ZeroDivisionError:
 			raise BadFile("Cannot open {}".format(path))
 
@@ -105,6 +105,7 @@ class CvVideo(VideoBase):
 			"width": frame_width,
 			"height": frame_height,
 			"duration": duration, # duration in seconds
+			"fps": fps,
 			"sample_aspect_ratio": pixel_aspect_ratio,
 			"display_aspect_ratio": display_aspect_ratio,
 			"format": fourcc(int(self.cap.get(self.cv2.CAP_PROP_CODEC_PIXEL_FORMAT))).decode("ascii"),
@@ -117,7 +118,7 @@ class CvVideo(VideoBase):
 		return cv2
 
 	def time_to_seconds(self, frame):
-		return frame / self.fps
+		return frame / self.meta["fps"]
 
 	def _get_frame(self, offset, rgb=True):
 		# type: (int, ) -> Tuple[float, np.ndarray]
@@ -177,6 +178,7 @@ class AvVideo(VideoBase):
 			"width": vcc["width"],
 			"height": vcc["height"],
 			"duration": duration,
+			"fps": vcc["framerate"],
 			"sample_aspect_ratio": vcc["sample_aspect_ratio"] or Fraction(1, 1),
 			"display_aspect_ratio": vcc["display_aspect_ratio"] or Fraction(vcc["width"], vcc["height"]),
 			"format": vcc["pix_fmt"],
