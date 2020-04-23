@@ -91,6 +91,10 @@ class CvVideo(VideoBase):
 			int(self.cap.get(self.cv2.CAP_PROP_SAR_NUM)),
 			int(self.cap.get(self.cv2.CAP_PROP_SAR_DEN))
 		)
+
+		if pixel_aspect_ratio == 0:
+			pixel_aspect_ratio = Fraction(1, 1)
+
 		display_aspect_ratio = pixel_aspect_ratio * Fraction(frame_width, frame_height)
 
 		fps = self.cap.get(self.cv2.CAP_PROP_FPS)
