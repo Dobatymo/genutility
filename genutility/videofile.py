@@ -10,6 +10,8 @@ from .compat.os import PathLike, fspath
 #	import av
 #	import cv2
 
+logger = logging.getLogger(__name__)
+
 class NoGoodFrame(Exception):
 	pass
 
@@ -23,8 +25,8 @@ class VideoBase(object):
 
 	single_frame_ratio = 0.5
 
-	def calculate_step(self, time_base, duration):
-		# type: (Fraction, int) -> int
+	def calculate_offsets(self, time_base, duration):
+		# type: (Fraction, int) -> Iterator[int]
 
 		raise NotImplementedError
 
@@ -33,26 +35,14 @@ class VideoBase(object):
 
 		raise NotImplementedError
 
-	def _yield_frames(self, start, stop, step):
-		# type: (int, int, int) -> Iterator[Tuple[float, np.ndarray]]
+	def iterate(self):
+		# type: () -> Iterator[Tuple[float, np.ndarray]]
 
-		""" start, stop, step are in frames """
-
-		for offset in range(start, stop, step):
+		for offset in self.calculate_offsets(self.time_base, self.native_duration):
 			try:
 				yield self._get_frame(offset)
 			except NoKeyFrame as e:
 				yield offset, e
-
-	def iterate(self):
-		# type: () -> Iterator[Tuple[float, np.ndarray]]
-
-		step = self.calculate_step(self.time_base, self.native_duration)
-		if step:
-			for tf in self._yield_frames(0, self.native_duration, step):
-				yield tf
-		else:
-			yield self.grab_frame(self.single_frame_ratio) # if only 1 frame is requested, return one from the middle
 
 	def grab_frame(self, pos):
 		# type: (float, ) -> np.ndarray
@@ -103,7 +93,7 @@ class CvVideo(VideoBase):
 		except ZeroDivisionError:
 			raise BadFile("Cannot open {}".format(path))
 
-		self.native_duration = frame_count
+		self.native_duration = frame_count # exclusive
 		self.time_base = Fraction(1, 1)
 		self.meta = {
 			"width": frame_width,
@@ -147,6 +137,16 @@ class CvVideo(VideoBase):
 
 		self.cap.release()
 
+def object_attributes(obj):
+	
+	def asd():
+		for attr in dir(obj):
+			val = getattr(obj, attr)
+			if not callable(val):
+				yield attr, val
+
+	return dict(asd())
+
 class AvVideo(VideoBase):
 
 	vcc_attrs = ["coded_height", "coded_width", "display_aspect_ratio", "encoded_frame_count", "format",
@@ -161,7 +161,13 @@ class AvVideo(VideoBase):
 		if isinstance(path, PathLike):
 			path = fspath(path)
 
-		self.container = self.av.open(path, "r")
+		try:
+			self.container = self.av.open(path, "r")
+		except self.av.error.InvalidDataError:
+			raise BadFile("Cannot open {}".format(path))
+
+		if self.container.format.name == "matroska,webm":
+			raise BadFile("Matroska files are currently not supported :(")
 
 		self.vstream = self.container.streams.video[0]
 		self.vstream.thread_type = "AUTO"
@@ -172,11 +178,18 @@ class AvVideo(VideoBase):
 		vcc = {attr:getattr(vcc, attr) for attr in self.vcc_attrs}
 		del vcc["format"]
 
-		self.native_duration = self.vstream.duration
+		self.native_duration = self.vstream.duration # exclusive
+		self.time_base = self.vstream.time_base
+
+		if not self.native_duration:
+			self.native_duration = self.container.duration
+			self.time_base = Fraction(1, self.av.time_base)
+			logger.debug("Using container instead of video stream duration")
+
 		if not self.native_duration:
 			raise BadFile("Cannot open {}".format(path))
 
-		self.time_base = self.vstream.time_base
+		# what to do with self.vstream.start_time?
 
 		self.meta = {
 			"width": vcc["width"],
@@ -186,6 +199,7 @@ class AvVideo(VideoBase):
 			"sample_aspect_ratio": vcc["sample_aspect_ratio"] or Fraction(1, 1),
 			"display_aspect_ratio": vcc["display_aspect_ratio"] or Fraction(vcc["width"], vcc["height"]),
 			"format": vcc["pix_fmt"],
+			#"containser_bit_rate": self.container.bit_rate,
 		}
 
 	@staticmethod
@@ -196,26 +210,34 @@ class AvVideo(VideoBase):
 
 	def _get_frame(self, offset, rgb=True):
 		# type: (int, ) -> Tuple[float, np.ndarray]
+	
+		for i in range(1): # trying x times to find good frames
+			try:
+				self.container.seek(offset, backward=True, any_frame=False, stream=self.vstream) # this can silently fail for broken files
+			except self.av.error.PermissionError:
+				raise NoKeyFrame("Failed to seek to {} of {}.".format(offset, self.container.duration))
 
-		try:
-			self.container.seek(offset, backward=True, any_frame=False, stream=self.vstream) # this can silently fail for broken files
-		except self.av.error.PermissionError:
-			raise NoKeyFrame("Failed to seek to {} of {}.".format(offset, self.container.duration))
+			try:
+				for vframe in self.container.decode(self.vstream): # can raise
+					if not vframe.is_corrupt:
+						logger.debug("Grabbing frame at %.03fs from seek offset %.03fs", vframe.time, offset*self.time_base)
 
-		for vframe in self.container.decode(self.vstream): # can raise av.error.InvalidDataError
-			if not vframe.is_corrupt:
-				logging.debug("Grabbing frame at %.02fs (%d)", vframe.time, offset)
+						if rgb:
+							frame = vframe.to_rgb().to_ndarray()
+						else:
+							frame = vframe.to_ndarray()
 
-				if rgb:
-					frame = vframe.to_rgb().to_ndarray()
-				else:
-					frame = vframe.to_ndarray()
+						return vframe.time, frame
 
-				return vframe.time, frame
+					logger.debug("Skipping corrupt frame at %.03fs from seek offset %.03fs", vframe.time, offset*self.time_base)
 
-			logging.debug("Skipping corrupt frame at %.02fs (%d)", vframe.time, offset)
+			except (self.av.error.InvalidDataError, self.av.error.ValueError) as e:
+				logger.warning("Skipping corrupt container position at seek offset %.03fs: %s", offset*self.time_base, e)
+				offset += int(self.time_base.denominator / self.meta["fps"])
+			else:
+				raise NoGoodFrame("Could not find good frame after decoding full file")
 
-		raise NoGoodFrame("Could not find good frame")
+		raise NoGoodFrame("Could not find good frame after trying various offsets")
 
 	def frame_to_file(self, outpath, frame):
 		# type: (Path, np.ndarray) -> None
@@ -245,7 +267,6 @@ def grab_pic(inpath, outpath, pos=0.5, overwrite=False, backend="av"):
 		outpath.parent.mkdir(parents=True, exist_ok=True)
 
 		frame = vf.grab_frame(pos)
-		print(frame.shape)
 		vf.frame_to_file(outpath, frame)
 	finally:
 		vf.close()
