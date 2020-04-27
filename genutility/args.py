@@ -72,7 +72,6 @@ def multiple_of(divisor):
 def in_range(start, stop, step=1):
 	# type: (int, int, int) -> Callable[[str], int]
 
-
 	from builtins import int as builtin_int
 
 	def int(s): # see: multiple_of()
@@ -88,6 +87,24 @@ def in_range(start, stop, step=1):
 		return number
 
 	return int
+
+def between(start, stop):
+	# type: (float, float) -> Callable[[str], float]
+
+	from builtins import float as builtin_float
+
+	def float(s):
+		# type: (str, ) -> float
+
+		number = builtin_float(s)
+
+		if not (start <= number < stop):
+			msg = "{0} is not in between {1} and {2}".format(s, start, stop)
+			raise ArgumentTypeError(msg)
+
+		return number
+
+	return float
 
 def suffix(s):
 	# type: (str, ) -> str

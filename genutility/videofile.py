@@ -4,6 +4,7 @@ import logging
 from datetime import timedelta
 from fractions import Fraction
 
+from .compat import FileExistsError
 from .compat.os import PathLike, fspath
 
 #if __debug__:
@@ -11,6 +12,12 @@ from .compat.os import PathLike, fspath
 #	import cv2
 
 logger = logging.getLogger(__name__)
+
+def _raise_exists(outpath, overwrite=False):
+	# type: (Path, bool) -> None
+
+	if not overwrite and outpath.exists():
+		raise FileExistsError()
 
 class NoGoodFrame(Exception):
 	pass
@@ -30,8 +37,13 @@ class VideoBase(object):
 
 		raise NotImplementedError
 
-	def _get_frame(self, offset, rgb=True):
+	def _get_frame(self, offset, native=False):
 		# type: (int, bool) -> Tuple[float, np.ndarray]
+
+		raise NotImplementedError
+
+	def _frame_to_file(self, frame, outpath):
+		# type: (Any, PathLike) -> None
 
 		raise NotImplementedError
 
@@ -44,11 +56,11 @@ class VideoBase(object):
 			except NoKeyFrame as e:
 				yield offset, e
 
-	def grab_frame(self, pos):
-		# type: (float, ) -> np.ndarray
+	def save_frame_to_file(self, pos, outpath):
+		# type: (float, PathLike) -> None
 
-		frametime, frame = self._get_frame(int(self.native_duration * pos))
-		return frame
+		frametime, frame = self._get_frame(int(self.native_duration * pos), native=True)
+		self._frame_to_file(frame, outpath)
 
 	def __enter__(self):
 		return self
@@ -65,6 +77,7 @@ def fourcc(integer):
 class CvVideo(VideoBase):
 
 	def __init__(self, path):
+		# type: (Union[str, PathLike, int], ) -> None
 
 		self.cv2 = self.import_backend()
 
@@ -111,24 +124,26 @@ class CvVideo(VideoBase):
 
 		return cv2
 
-	def time_to_seconds(self, frame):
-		return frame / self.meta["fps"]
+	def time_to_seconds(self, offset):
+		# type: (int, ) -> float
 
-	def _get_frame(self, offset, rgb=True):
+		return offset / self.meta["fps"]
+
+	def _get_frame(self, offset, native=False):
 		# type: (int, ) -> Tuple[float, np.ndarray]
 
 		self.cap.set(self.cv2.CAP_PROP_POS_FRAMES, offset)
 
 		ret, frame = self.cap.read()
 		if ret:
-			if rgb:
+			if not native:
 				frame = self.cv2.cvtColor(frame, self.cv2.COLOR_BGR2RGB)
 			return self.time_to_seconds(offset), frame
 		else:
 			raise NoGoodFrame("Could not find good frame")
 
-	def frame_to_file(self, outpath, frame):
-		# type: (Path, np.ndarray) -> None
+	def _frame_to_file(self, frame, outpath):
+		# type: (np.ndarray, PathLike) -> None
 
 		self.cv2.imwrite(fspath(outpath), frame)
 
@@ -138,7 +153,7 @@ class CvVideo(VideoBase):
 		self.cap.release()
 
 def object_attributes(obj):
-	
+
 	def asd():
 		for attr in dir(obj):
 			val = getattr(obj, attr)
@@ -154,7 +169,7 @@ class AvVideo(VideoBase):
 			"sample_aspect_ratio", "width"]
 
 	def __init__(self, path, videostream=0):
-		# type: (str, int) -> None
+		# type: (PathLike, int) -> None
 
 		self.av = self.import_backend()
 
@@ -169,7 +184,7 @@ class AvVideo(VideoBase):
 		if self.container.format.name == "matroska,webm":
 			raise BadFile("Matroska files are currently not supported :(")
 
-		self.vstream = self.container.streams.video[0]
+		self.vstream = self.container.streams.video[videostream]
 		self.vstream.thread_type = "AUTO"
 
 		duration = timedelta(seconds=self.container.duration / self.av.time_base)
@@ -208,9 +223,9 @@ class AvVideo(VideoBase):
 
 		return av
 
-	def _get_frame(self, offset, rgb=True):
-		# type: (int, ) -> Tuple[float, np.ndarray]
-	
+	def _get_frame(self, offset, native=False):
+		# type: (int, bool) -> Tuple[float, np.ndarray]
+
 		for i in range(1): # trying x times to find good frames
 			try:
 				self.container.seek(offset, backward=True, any_frame=False, stream=self.vstream) # this can silently fail for broken files
@@ -222,10 +237,10 @@ class AvVideo(VideoBase):
 					if not vframe.is_corrupt:
 						logger.debug("Grabbing frame at %.03fs from seek offset %.03fs", vframe.time, offset*self.time_base)
 
-						if rgb:
-							frame = vframe.to_rgb().to_ndarray()
+						if native:
+							frame = vframe
 						else:
-							frame = vframe.to_ndarray()
+							frame = vframe.to_ndarray(format="rgb24")
 
 						return vframe.time, frame
 
@@ -239,35 +254,40 @@ class AvVideo(VideoBase):
 
 		raise NoGoodFrame("Could not find good frame after trying various offsets")
 
-	def frame_to_file(self, outpath, frame):
-		# type: (Path, np.ndarray) -> None
+	def _frame_to_file(self, frame, outpath):
+		# type: (VideoFrame, Path) -> None
 
-		from PIL import Image
-		Image.fromarray(frame).save(fspath(outpath))
+		frame.to_image(fspath(outpath))
 
 	def close(self):
 		# type: () -> None
 
 		self.container.close()
 
-def grab_pic(inpath, outpath, pos=0.5, overwrite=False, backend="av"):
-	# type: (Union[str, Path], Path, float) -> None
-
-	if not overwrite and outpath.exists():
-		raise RuntimeError("File already exists")
+def grab_pic(inpath, outpath, pos=0.5, overwrite=False, backend="cv"):
+	# type: (Union[str, PathLike], Path, Union[float, Sequence[float]], bool, str) -> None
 
 	if backend == "av":
 		vf = AvVideo(inpath)
 	elif backend == "cv":
 		vf = CvVideo(inpath)
 	else:
-		raise InputError("Unsupported backend: {}".format(backend))
+		raise ValueError("Unsupported backend: {}".format(backend))
 
 	try:
 		outpath.parent.mkdir(parents=True, exist_ok=True)
 
-		frame = vf.grab_frame(pos)
-		vf.frame_to_file(outpath, frame)
+		if isinstance(pos, float):
+			_raise_exists(outpath, overwrite)
+			vf.save_frame_to_file(pos, outpath)
+		elif isinstance(pos, list):
+			for i, p in enumerate(pos):
+				outpathseq = outpath.with_suffix(".{}{}".format(i, outpath.suffix))
+				_raise_exists(outpathseq, overwrite)
+				vf.save_frame_to_file(p, outpathseq)
+		else:
+			raise TypeError("pos")
+
 	finally:
 		vf.close()
 
@@ -277,7 +297,7 @@ if __name__ == "__main__":
 	parser = ArgumentParser()
 	parser.add_argument("path")
 	args = parser.parse_args()
-	
+
 	with CvVideo(args.path) as vf:
 		print(vf.meta)
 
