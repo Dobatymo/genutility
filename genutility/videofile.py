@@ -145,7 +145,9 @@ class CvVideo(VideoBase):
 	def _frame_to_file(self, frame, outpath):
 		# type: (np.ndarray, PathLike) -> None
 
-		self.cv2.imwrite(fspath(outpath), frame)
+		is_success, im_buf = self.cv2.imencode(outpath.suffix, frame) # type: Tuple[bool, np.ndarray]
+		assert is_success
+		im_buf.tofile(fspath(outpath)) # cv2.imwrite doesn't handle unicode paths correctly
 
 	def close(self):
 		# type: () -> None
