@@ -165,13 +165,13 @@ class json_lines(object):
 		return self.iterrange()
 
 	def write(self, obj, skipkeys=False, ensure_ascii=False, check_circular=True, allow_nan=True,
-		cls=None, indent=None, separators=None, default=None, sort_keys=False, **kw):
-		# type: (Any, bool, bool, bool, bool, Optional[Callable], Optional[str], Optional[Tuple[str, str]], Optional[Callable], bool, **Any) -> None
+		cls=None, separators=None, default=None, sort_keys=False, **kw):
+		# type: (Any, bool, bool, bool, bool, Optional[Callable], Optional[Tuple[str, str]], Optional[Callable], bool, **Any) -> None
 
-		line = json.dumps(obj, skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular,
-			allow_nan=allow_nan, cls=cls, indent=indent, separators=separators, default=default, sort_keys=sort_keys,
-			**kw) + self.newline
-		self.f.write(line)
+		json.dump(obj, self.f, skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular,
+			allow_nan=allow_nan, cls=cls, indent=None, separators=separators, default=default, sort_keys=sort_keys,
+			**kw)
+		self.f.write(self.newline)
 
 	def close(self):
 		# type: () -> None

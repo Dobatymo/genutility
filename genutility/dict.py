@@ -5,11 +5,26 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Hashable, Iterable, Mapping, Optional
+	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, Mapping, Optional
 
 	T = TypeVar("T")
 	U = TypeVar("U")
 	H = TypeVar("H", bound=Hashable)
+
+def flatten(d):
+	# type: (Dict[T, U], ) -> Iterator[U]
+
+	""" Flattens dicts of (dicts of...) lists to lists. """
+
+	if isinstance(d, (list, tuple)):
+		for v in d:
+			yield v
+	elif isinstance(d, dict):
+		for k, val in viewitems(d):
+			for v in flatten(val):
+				yield v
+	else:
+		raise TypeError("Unsupported type: {}".format(type(d)))
 
 def get_one_of(d, keys):
 	# type: (Dict[T, U], Iterable[T]) -> Tuple[T, U]
