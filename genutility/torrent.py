@@ -1,13 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import json
 from hashlib import sha1
 
 from bencode import bdecode, bencode # bencoding ?
 
 from .file import read_file, blockfileiter, blockfilesiter
 from .filesystem import FileProperties
-from .json import BuiltinEncoder
+
+def read_torrent(path):
+	return bdecode(read_file(path, "rb"))
 
 def read_torrent_info_dict(path):
 	return bdecode(read_file(path, "rb"))["info"]
@@ -27,10 +28,6 @@ def iter_torrent(path):
 		for fd in files:
 			path = "/".join(fd["path"])
 			yield FileProperties(info["name"] + "/" + path, fd["length"], False, hash=fd.get("sha1"))
-
-def torrent_to_json(path, indent="\t"):
-	torrent = bdecode(read_file(path, "rb"))
-	return json.dumps(torrent, ensure_ascii=False, indent=indent, cls=BuiltinEncoder)
 
 def pieces_field(pieces):
 	return b"".join(sha1(piece).digest() for piece in pieces)  # nosec
@@ -87,13 +84,3 @@ def create_torrent(path, piece_size, announce=""):
 	}
 
 	return bencode(torrent)
-
-if __name__ == "__main__":
-	from argparse import ArgumentParser
-	from genutility.args import existing_path
-
-	parser = ArgumentParser()
-	parser.add_argument("torrentfile", type=existing_path)
-	args = parser.parse_args()
-
-	print(torrent_to_json(args.torrentfile))

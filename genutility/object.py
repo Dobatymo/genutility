@@ -14,3 +14,21 @@ def cast(object, class_, instanceof=object, *args, **kwargs):
 	else:
 		raise TypeError("Object is not an instance of {}".format(instanceof.__name__))
 	return object
+
+class STAR(object):
+	pass
+
+def args_to_key(args, kwargs):
+	# type: (Tuple[Any], Dict[Any, Any] -> List[Any]
+
+	""" Create cache key out of function arguments.
+	"""
+
+	key = []
+	if args:
+		key.extend(args)
+	if kwargs:
+		key.append(STAR)
+		key.extend(sorted(kwargs.items()))
+
+	return tuple(key)

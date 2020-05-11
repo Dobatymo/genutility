@@ -5,7 +5,7 @@ from random import shuffle
 
 from genutility.test import MyTestCase, parametrize
 from genutility.string import replace_list, replace_pairs, are_parentheses_matched, replace_pairs_chars, \
-	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, endcut, toint
+	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, removesuffix, toint
 
 class StringTest(MyTestCase):
 
@@ -30,8 +30,8 @@ class StringTest(MyTestCase):
 		("a", "b", "a"),
 		("asd", "qwe", "asd"),
 	)
-	def test_endcut(self, s, postfix, truth):
-		result = endcut(s, postfix)
+	def test_removesuffix(self, s, suffix, truth):
+		result = removesuffix(s, suffix)
 		self.assertEqual(truth, result)
 
 	def test_locale_sorted(self):

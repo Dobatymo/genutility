@@ -35,37 +35,50 @@ def toint(obj, default=None):
 	except (ValueError, TypeError):
 		return default
 
-def startcut(s, pre):
+# was: startcut
+def removeprefix(s, prefix):
 	# type: (str, str) -> str
 
 	""" If string `s` starts with `pre` cut it off and return the remaining string. """
 
-	if s.startswith(pre):
-		return s[len(pre):]
+	if s.startswith(prefix):
+		return s[len(prefix):]
 	else:
 		return s
 
-def endcut(s, post):
+# was: endcut
+def removesuffix(s, suffix):
 	# type: (str, str) -> str
 
-	""" If string `s` ends with `post` cut it off and return the preceding string. """
+	""" If string `s` ends with `suffix` cut it off and return the preceding string. """
 
-	if s.endswith(post):
-		return s[:-len(post)]
+	if s.endswith(suffix):
+		return s[:-len(suffix)]
 	else:
 		return s
 
 def encode_case(s):
 	# type: (str, ) -> bytes
 
+	""" Encode case information of a string to a bit-encoded bytes string.
+	"""
+
 	return encode_binary(c.isupper() for c in s)
 
 def decode_case(s, key):
 	# type: (str, bytes) -> str
 
+	""" Apply the case information encoded in `key` to string `s`.
+	"""
+
 	return "".join(c.upper() if b else c for c, b in zip(s, decode_binary(key)))
 
 def tryint(obj):
+	# type: (Any, ) -> Any
+
+	""" Converts `obj` to int if possible and returns the original object otherwise.
+	"""
+
 	try:
 		return int(obj)
 	except (ValueError, TypeError):
@@ -96,13 +109,16 @@ def build_multiple_replace(d, escape=True):
 	cp = re.compile("(" + "|".join(it) + ")")
 	return partial(cp.sub, lambda m: d[m.group(0)])
 
-def deunicode(s):
-	# type: (str, ) -> str
+def replace_multiple(s, d): # cython candidate...
+	# type: (Iterable[str], Dict[str, str]) -> str
 
-	pairs = (("\u2014", "--"), ("\u2017", ">="), ("\u2019", "'"), ("\u2026", "..."))
-	s = replace_pairs(s, pairs)
-	s.encode("ascii") #check for further unicode
-	return s
+	""" Use dictionary d to replace instances of key with value.
+		If input is a string, the keys must be strings of length 1.
+		If the input is an iterable of strings,
+		the strings will be compared to the keys for equality
+	"""
+
+	return "".join(d.get(c, c) for c in s)
 
 def are_parentheses_matched(s, open="([{", close=")]}"):
 	# type: (str, str, str) -> bool

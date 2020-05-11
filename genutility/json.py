@@ -1,10 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from future.utils import viewkeys
 import logging, json
 from itertools import islice
+from functools import partial, wraps
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
+from .atomic import TransactionalCreateFile
+from .compat import FileNotFoundError
+from .datetime import now
 from .file import copen
+from .filesystem import mdatetime
+from .object import args_to_key
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Dict, Optional, TextIO, Union, Iterator
@@ -179,11 +187,131 @@ class json_lines(object):
 		if self.doclose:
 			self.f.close()
 
-def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt", encoding="utf-8"):
+def read_json_lines(file, object_hook=None):
+
+	""" Iterate over a JSON Lines `file` object by object.
+		`object_hook` is passed through to `json.load`.
+	"""
+
+	with json_lines.from_path(file, mode="rt", object_hook=object_hook) as fr:
+		for obj in fr:
+			yield obj
+
+def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt"):
 	# type: (str, str, Callable[[JsonDict], Sequence[str]], str, str) -> None
 
-	with json_lines.from_path(jlpath, "rt", encoding="utf-8") as fr:
+	with json_lines.from_path(jlpath, "rt") as fr:
 		with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
 			fw = csv.writer(csvfile)
 			for obj in fr:
 				fw.writerow(keyfunc(obj))
+
+def key_to_hash(key, default=None):
+	from hashlib import md5
+	binary = json.dumps(key, default=default).encode("utf-8")
+	return md5(binary).hexdigest()
+
+def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False, default=None, object_hook=None):
+	# type: (Path, Optional[timedelta], bool, Optional[str], bool, Optional[Callable], Optional[Callable]) -> Callable
+
+	""" Decorator to cache results of function to json files at `path` for `duration`.
+		The remaining parameters are passed through to `json.dump`.
+	"""
+
+	duration = duration or timedelta.max
+
+	def decorator(func):
+		# type: (Callable, ) -> Callable
+
+		@wraps(func)
+		def inner(*args, **kwargs):
+
+			hash = key_to_hash(args_to_key(args, kwargs), default=default)
+			fullpath = path / hash
+
+			try:
+				invalid = now() - mdatetime(fullpath) > duration
+			except FileNotFoundError:
+				invalid = True
+
+			if invalid:
+				path.mkdir(parents=True, exist_ok=True)
+				ret = func(*args, **kwargs)
+				write_json(ret, fullpath, ensure_ascii=ensure_ascii, indent=indent, sort_keys=sort_keys, default=default)
+				return ret
+			else:
+				return read_json(fullpath, object_hook=object_hook)
+
+		return inner
+	return decorator
+
+def jsonlines_cache(path, duration=None, ensure_ascii=False, sort_keys=False, default=None, object_hook=None):
+	# type: (Path, Optional[timedelta], bool, Optional[str], bool, Optional[Callable], Optional[Callable]) -> Callable
+
+	""" Decorator to cache results of function to jsonlines files at `path` for `duration`.
+		The remaining parameters are passed through to `json_lines.from_path`.
+	"""
+
+	duration = duration or timedelta.max
+
+	def decorator(func):
+		# type: (Callable, ) -> Callable
+
+		@wraps(func)
+		def inner(*args, **kwargs):
+
+			hash = key_to_hash(args_to_key(args, kwargs))
+			fullpath = path / hash
+
+			try:
+				invalid = now() - mdatetime(fullpath) > duration
+			except FileNotFoundError:
+				invalid = True
+
+			if invalid:
+				path.mkdir(parents=True, exist_ok=True)
+				with TransactionalCreateFile(fullpath, "wt") as stream:
+					with json_lines.from_stream(stream, ensure_ascii=ensure_ascii, sort_keys=sort_keys, default=default) as fw:
+						# if `func` raises, TransactionalCreateFile makes sure that the original
+						# cache file remains unmodified and that temporary files are deleted
+						for obj in func(*args, **kwargs):
+							fw.write(obj)
+							yield obj
+			else:
+				with json_lines.from_path(fullpath, "rt", object_hook=object_hook) as fr:
+					for obj in fr:
+						yield obj
+
+		return inner
+	return decorator
+
+class JsonLinesFormatter(logging.Formatter):
+
+	""" A JSON Lines formatter for the Python logging library.
+		It expects a `dict` as logging message.
+		For example:
+			logger = logging.getLogger("jsonlines-test")
+			handler = logging.StreamHandler()
+			formatter = JsonLinesFormatter()
+			handler.setFormatter(formatter)
+			logger.addHandler(handler)
+			logger.warning({"msg": "Hello world!", "level": "greeting"})
+	"""
+
+	myfields = {
+		"datetime": now,
+	}
+
+	def __init__(self, include=frozenset(), default=None):
+		logging.Formatter.__init__(self)
+		self.include_b = include & viewkeys(self.myfields)
+		self.dumps = partial(json.dumps, ensure_ascii=False, indent=None, sort_keys=True, default=default)
+
+	def format(self, record):
+		if self.include_b:
+			row = {k: self.myfields[k]() for k in self.include_b}
+			row.update(record.msg)
+		else:
+			row = record.msg
+
+		return self.dumps(row)
