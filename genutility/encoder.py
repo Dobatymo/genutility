@@ -8,7 +8,57 @@ from nltk.tokenize import word_tokenize
 from .func import identity
 
 if TYPE_CHECKING:
-	from typing import Iterable, Iterator, List, Any, Dict
+	from typing import Any, Dict, Hashable, Iterable, Iterator, List
+
+class GenericLabelEncoder(object):
+
+	""" Encodes all hashable objects to integers """
+
+	def __init__(self):
+		self.reset()
+
+	def reset(self):
+		self.object2idx = {} # type: Dict[Hashable, int]
+		self.idx2object = [] # type: List[Hashable]
+
+	def encode(self, obj):
+		# type: (Hashable, ) -> int
+
+		""" Encode a hashable `obj` to an integer. """
+
+		size = len(self.idx2object)
+		idx = self.object2idx.setdefault(obj, size)
+		if idx == size: # inserted new object
+			self.idx2object.append(obj)
+
+		return idx
+
+	def encode_batch(self, objs):
+		# type: (Iterable[Hashable], ) -> Iterator[int]
+
+		for obj in objs:
+			yield self.encode(obj)
+
+	def decode(self, idx):
+		# type: (int, ) -> Hashable
+
+		""" Decode an integer `idx` to the previously encoded object.
+			Raises IndexError if the index is out of range.
+		"""
+
+		return self.idx2object[idx]
+
+	def decode_batch(self, indices):
+		# type: (Iterable[int], ) -> Iterator[Hashable]
+
+		for idx in indices:
+			yield self.decode(idx)
+
+	def __len__(self):
+		# type: () -> int
+
+		assert len(self.object2idx) == len(self.idx2object)
+		return len(self.idx2object)
 
 class BatchLabelEncoder(object):
 

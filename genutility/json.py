@@ -24,6 +24,7 @@ if __debug__:
 logger = logging.getLogger(__name__)
 
 class BuiltinEncoder(json.JSONEncoder):
+
 	def default(self, obj):
 		from datetime import date, timedelta
 		from uuid import UUID
@@ -50,17 +51,17 @@ def read_json_schema(path):
 	with open(path, "r", encoding="utf-8") as fr:
 		return json.load(fr)
 
-def read_json(path, schema=None, object_hook=None):
+def read_json(path, schema=None, cls=None, object_hook=None):
 	# type: (str, Optional[Union[str, JsonDict]]) -> Any
 
 	""" Read the json file at `path` and optionally validates the input according to `schema`.
 		The validation requires `jsonschema`.
 		`schema` can either be a path as well, or a Python dict which represents the schema.
-		`object_hook` is passed through to `json.load`.
+		`cls` and `object_hook` is passed through to `json.load`.
 	"""
 
 	with copen(path, "rt", encoding="utf-8") as fr:
-		obj = json.load(fr, object_hook=object_hook)
+		obj = json.load(fr, cls=cls, object_hook=object_hook)
 
 	if schema is None:
 		return obj
