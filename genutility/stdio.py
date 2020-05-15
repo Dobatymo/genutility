@@ -24,7 +24,7 @@ def print_line(char="-", length=_terminal_width, file=None, flush=False):
 
 class PrintOnError(object):
 
-	""" A context manager which can be used to outout data
+	""" A context manager which can be used to output data
 		before an exception is printed by the python runtime.
 	"""
 
@@ -104,6 +104,8 @@ def input_type(s, type=None, predicate=None, errormsg=None, exception=Exception,
 		return ret
 
 def confirm(msg, yesno=True):
+	# type: (str, bool) -> bool
+
 	if yesno:
 		s = input_type(msg+" (yes, no): ", predicate=lambda x: x.strip().lower() in {"yes", "y", "n", "no"})
 		return s.strip().lower() in {"yes", "y"}

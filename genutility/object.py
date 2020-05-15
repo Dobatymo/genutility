@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from future.utils import viewitems
+
 from copy import copy
 
 def cast(object, class_, instanceof=object, *args, **kwargs):
@@ -21,7 +23,7 @@ class STAR(object):
 def args_to_key(args, kwargs):
 	# type: (Tuple[Any], Dict[Any, Any] -> List[Any]
 
-	""" Create cache key out of function arguments.
+	""" Create cache key from function arguments.
 	"""
 
 	key = []
@@ -32,3 +34,25 @@ def args_to_key(args, kwargs):
 		key.extend(sorted(kwargs.items()))
 
 	return tuple(key)
+
+def compress(value):
+	# type: (Any, ) -> Any
+
+	""" Creates a copy of the object where some data structures are replaced with equivalent ones
+		which take up less space, but are not necessarily mutable anymore.
+
+		tuple < list
+		set == frozenset
+		bytes < bytearray
+	"""
+
+	# sets are not processed because they cannot contain lists or bytearrays anyway.
+
+	if isinstance(value, (tuple, list)): # tuple *can* contain mutables
+		return tuple(compress(x) for x in value)
+	elif isinstance(value, bytearray):
+		return bytes(value) # bytearray can only be bytes or List[int] right?
+	elif isinstance(value, dict):
+		return {k: compress(v) for k, v in viewitems(value)}
+	else:
+		return value

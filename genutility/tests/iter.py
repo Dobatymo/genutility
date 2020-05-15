@@ -1,14 +1,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from builtins import range
 from future.utils import PY2, PY3
 import logging
 from itertools import chain
+from os import devnull
 
 from genutility.test import MyTestCase, parametrize
 from genutility.iter import (product_range_repeat, every_n, any_in_common, split, remove_all_dupes,
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
-	retrier)
+	retrier, progress)
 from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
@@ -45,6 +47,11 @@ def GeneratorWithException():
 	yield 2
 
 class IterTest(MyTestCase):
+
+	def test_progress(self):
+		r = range(1000)
+		with open(devnull, "w") as fw:
+			self.assertIterEqual(r, progress(r, file=fw))
 
 	@parametrize(
 		(range(0), ),

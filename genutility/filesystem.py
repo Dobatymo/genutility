@@ -12,7 +12,6 @@ from .file import equal_files, iterfilelike, FILE_IO_BUFFER_SIZE
 from .iter import is_empty
 from .os import islink, uncabspath
 from .ops import logical_implication
-from .string import replace_list
 from .datetime import datetime_from_utc_timestamp
 from .compat import FileExistsError
 from .compat.os import PathLike, fspath, scandir
@@ -21,14 +20,8 @@ if __debug__:
 	from .compat import gzip, bz2
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator
+	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable
 	PathType = Union[str, PathLike]
-
-if __debug__:
-	import unidecode
-
-if TYPE_CHECKING:
-	from typing import Callable, Union, Iterable, Iterator, Optional
 	from pathlib import Path
 	from .compat.os import DirEntry
 
@@ -160,11 +153,16 @@ if TYPE_CHECKING:
 	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
 
 def mdatetime(path):
-	# type: (str, ) -> datetime
+	# type: (Union[PathLike, Path], ) -> datetime
 
 	""" Returns the last modified date of `path`. """
 
-	return datetime_from_utc_timestamp(os.stat(path).st_mtime)
+	if isinstance(path, Path):
+		mtime = path.stat().st_mtime
+	else:
+		mtime = os.stat(path).st_mtime
+
+	return datetime_from_utc_timestamp(mtime)
 
 def rename(old, new):
 	# type: (str, str) -> None
@@ -360,14 +358,17 @@ def extract_basic_stat_info(stats):
 	""" Returns size, modification, creation time and access mode. """
 	return (stats.st_size, stats.st_mtime, stats.st_ctime, stats.st_mode)
 
-def safe_filename(filename, replace=""):
+def safe_filename(filename, replacement=""):
 	# type: (str, str) -> str
 
 	WIN = windows_illegal_chars
 	UNIX = unix_illegal_chars
 	MAC = mac_illegal_chars
+	bad = set.union(WIN, UNIX, MAC)
 
-	return replace_list(filename, set.union(WIN, UNIX, MAC), replace) # use translate or something similar fast
+	safe_filename_translation_table = str.maketrans({c: replacement for c in bad})
+
+	return filename.translate(safe_filename_translation_table) # fixme: return callable which accepts only filename
 
 safe_filename_simple = safe_filename
 
@@ -525,17 +526,6 @@ def realpath_win(path):
 		return os.path.normpath(os.path.join(os.path.dirname(path), os.readlink(path)))
 	else:
 		return path
-
-def convert_filenames_to_ascii(path, follow_symlinks=False):
-	# type: (PathType, ) -> None
-	""" convert all files in `path` to a ascii representation using unidecode """
-
-	from unidecode import unidecode
-
-	for entry in scandir_rec(path, files=True, dirs=False, rec=False, follow_symlinks=follow_symlinks):
-		filepath = entry.path
-		base, name = os.path.split(filepath)
-		os.rename(filepath, os.path.join(base, unidecode(name)))
 
 def search(directories, pattern, dirs=True, files=True, rec=True, follow_symlinks=False):
 	# type: (Iterable[PathType], str, bool, bool, bool) -> Iterator[DirEntry]

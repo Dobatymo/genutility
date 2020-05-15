@@ -6,13 +6,13 @@ from builtins import sum
 from itertools import islice
 from typing import TYPE_CHECKING
 
+from nltk.tokenize import word_tokenize as tokenize
+
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
 	from typing import Dict, TextIO, Union, Iterator, List
 	from .gensim import KeyedVectors
-
-from nltk.tokenize import word_tokenize as tokenize
 
 def gensim_indexer(embeddings, doc, ignore=True):
 	# type: (KeyedVectors, str) -> Iterator[int]

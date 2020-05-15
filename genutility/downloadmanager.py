@@ -1,18 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging, asyncio
+from io import open
 from typing import TYPE_CHECKING
 
 import aiohttp
 from orderedset import OrderedSet
-from io import open
 
 from .datetime import now
 
 if TYPE_CHECKING:
 	from typing import Any
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class DownloadTask(object):
@@ -134,6 +133,8 @@ class DownloadManager(object):
 		await self.session.close()
 
 if __name__ == "__main__":
+
+	logging.basicConfig(level=logging.INFO)
 
 	dm = DownloadManager()
 

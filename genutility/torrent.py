@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from hashlib import sha1
 
-from bencode import bdecode, bencode # bencoding ?
+from bencode import bdecode, bencode
 
 from .file import read_file, blockfileiter, blockfilesiter
 from .filesystem import FileProperties

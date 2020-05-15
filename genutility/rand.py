@@ -5,7 +5,7 @@ from random import choice, randrange
 
 def randstr(length, charset):
 	# type: (int, str) -> str
-	
+
 	""" Returns a (noncryptographic) random string consisting of characters from `charset`
 		of length `length`.
 	"""
@@ -14,7 +14,7 @@ def randstr(length, charset):
 
 def randbytes(size):
 	# type: (int, ) -> bytes
-	
+
 	""" Returns (noncryptographic) random bytes of length `length`.
 	"""
 

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 
-	from typing import Any
+	from typing import Any, Optional, Sequence
 	from typing_extensions import Protocol
 
 	class Computable(Protocol):
@@ -81,4 +81,64 @@ if TYPE_CHECKING:
 
 		def __ifloordiv__(self, other):
 			# type: (Any, ) -> Any
+			...
+
+	class Cursor(Protocol):
+
+		def callproc(self, procname, parameters):
+			# type: (str, Optional[Sequence[Any]]) -> None
+			...
+
+		def close(self):
+			# type: () -> None
+			...
+
+		def execute(self, operation, parameters):
+			# types: (str, Optional[Sequence[Any]]) -> None
+			...
+
+		def executemany(self, operation, seq_of_parameters):
+			# types: (str, Sequence[Sequence[Any]]) -> None
+			...
+
+		def fetchone(self):
+			# types: () -> Optional[Sequence[Any]]
+			...
+
+		def fetchmany(self, size):
+			# types: (Optional[int], ) -> Sequence[Sequence[Any]]
+			...
+
+		def fetchall(self):
+			# types: () -> Sequence[Sequence[Any]]
+			...
+
+		def nextset(self):
+			# type: () -> Optional[bool]
+			...
+
+		def setinputsizes(self, sizes):
+			# types: (Sequence[int], ) -> None
+			...
+
+		def setoutputsize(self, size, column):
+			# type: (int, Optional[int]) -> None
+			...
+
+	class Connection(Protocol):
+
+		def close(self):
+			# type: () -> None
+			...
+
+		def commit(self):
+			# type: () -> None
+			...
+
+		def rollback(self):
+			# type: () -> None
+			...
+
+		def cursor():
+			# type: () -> Cursor
 			...

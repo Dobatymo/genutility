@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from .iter import pairwise
-from .cv import iter_video
 from .image import image_histogram, image_block_histogram
 from .numpy import histogram_correlation
 
@@ -53,11 +52,15 @@ def proc(hist, lambda_=200):
 	raise RuntimeError("Unfinished")
 
 def test_scene_change_detection_histogram_correlation():
+	from .cv import iter_video
+
 	images = iter_video()
 	for score in scene_change_detection_histogram_correlation(images):
 		print(score)
 
 def test_scene_change_detection_block_histogram():
+	from .cv import iter_video
+
 	images = iter_video()
 	for diffs in scene_change_detection_block_histogram(images):
 		print(diffs.tolist())

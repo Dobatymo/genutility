@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from lxml import etree
 from io import open
+
+from lxml import etree
 
 def xml_xslt_to_xhtml(path_xml, path_xslt, path_xhtml):
 

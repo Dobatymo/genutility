@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.utils import viewkeys
 import json
 
-from genutility.http import URLRequest
-from genutility.ops import logical_xor
+from .http import URLRequest
+from .ops import logical_xor
 
 class StreamWatcher(object):
 
