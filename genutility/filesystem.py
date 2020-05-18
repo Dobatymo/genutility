@@ -6,6 +6,7 @@ import os, platform, stat, os.path, re, logging, shutil, errno
 from operator import attrgetter
 from fnmatch import fnmatch
 from functools import partial
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .file import equal_files, iterfilelike, FILE_IO_BUFFER_SIZE
@@ -22,7 +23,6 @@ if __debug__:
 if TYPE_CHECKING:
 	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable
 	PathType = Union[str, PathLike]
-	from pathlib import Path
 	from .compat.os import DirEntry
 
 logger = logging.getLogger(__name__)
