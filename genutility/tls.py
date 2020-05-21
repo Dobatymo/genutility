@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from typing import TYPE_CHECKING
 
-from OpenSSL import crypto # pyOpenSSL
+from OpenSSL import crypto  # pyOpenSSL
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_der_private_key

@@ -7,7 +7,9 @@ from pymediainfo import MediaInfo
 from .compat.os import fspath, PathLike
 
 if TYPE_CHECKING:
+	from typing import Union
 	from pymediainfo import Track
+	from .compat.pathlib import Path
 
 class MediaInfoHelper(object):
 
@@ -66,7 +68,7 @@ class MediaInfoHelper(object):
 
 		for track in self.mi.tracks:
 			if track.track_type == "General":
-			
+
 				if track.duration is None:
 					duration = None
 				else:

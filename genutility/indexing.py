@@ -1,6 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import map, range
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Iterator, Tuple
 
 def obj2tuple(obj):
 	return (obj, )
@@ -33,8 +37,8 @@ def subblock_indices(n, outer_square_length, inner_square_length):
 	i = outer_square_length
 	j = inner_square_length
 
-	assert n < i*i, "n not contained in matrix"
-	assert j*j == i, "Currently only squares are supported"
+	assert n < i * i, "n not contained in matrix"
+	assert j * j == i, "Currently only squares are supported"
 
 	x, y = (n % i // j, n // i // j)
 

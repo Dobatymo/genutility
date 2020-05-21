@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 from cwinsdk.shared.ehstorioctl import MAX_PATH
 from cwinsdk.shared.ntdef import PWSTR
 from cwinsdk.um.consoleapi import SetConsoleMode, GetConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
-from cwinsdk.um.consoleapi2 import CONSOLE_SCREEN_BUFFER_INFO, GetConsoleScreenBufferInfo
 from cwinsdk.um.fileapi import INVALID_FILE_ATTRIBUTES, GetDiskFreeSpaceExW, GetVolumeInformationW, LockFileEx, UnlockFileEx, GetFileAttributesW
 from cwinsdk.um.processenv import GetStdHandle
 from cwinsdk.um.combaseapi import CoTaskMemFree
@@ -22,7 +21,7 @@ from cwinsdk.um.winnt import FILE_ATTRIBUTE_REPARSE_POINT
 from .os_shared import _usagetuple, _volumeinfotuple
 
 if TYPE_CHECKING:
-	from typing import Tuple
+	from typing import IO
 	from ctypes.wintypes import HANDLE
 
 unc_prefix = "\\\\?\\"
@@ -39,7 +38,7 @@ class EnableAnsi(object): # doesn't work for some reason...
 	def __init__(self):
 		# type: () -> None
 
-		#os.system('') # calls cmd, which sets ANSI mode, but doesn't disable it when exiting (it's a bug probably)
+		# os.system("") # calls cmd, which sets ANSI mode, but doesn't disable it when exiting (it's a bug probably)
 		self.handle = get_stdout_handle()
 		self.oldmode = DWORD()
 
@@ -47,6 +46,8 @@ class EnableAnsi(object): # doesn't work for some reason...
 		SetConsoleMode(self.handle, self.oldmode.value|ENABLE_VIRTUAL_TERMINAL_PROCESSING)
 
 	def close(self):
+		# type: () -> None
+
 		SetConsoleMode(self.handle, self.oldmode.value)
 
 	def __enter__(self):
@@ -56,6 +57,8 @@ class EnableAnsi(object): # doesn't work for some reason...
 		self.close()
 
 def _islink(path):
+	# type: (PathLike, ) -> bool
+
 	""" Tests if `path` refers to a symlink or a junction.
 		- Python >= 3.2 `os.path.islink()` only supports symlinks, not junctions.
 		- Python < 3.2 `os.path.islink()` always returns `False` on Windows.
@@ -72,7 +75,7 @@ def _islink(path):
 def _uncabspath(path):
 	# type: (str, )-> str
 
-	return unc_prefix+os.path.abspath(path)
+	return unc_prefix + os.path.abspath(path)
 
 def _lock(fp, exclusive=True, block=False):
 	# type: (IO, bool, bool) -> None
@@ -103,6 +106,8 @@ def _unlock(fp):
 	UnlockFileEx(handle, 0, 0xffffffff, 0xffffffff, overlapped)
 
 def _get_appdata_dir():
+	# type: () -> str
+
 	KF_FLAG_CREATE = 0x00008000
 
 	rfid = byref(FOLDERID_RoamingAppData)
@@ -113,7 +118,7 @@ def _get_appdata_dir():
 	try:
 		result = SHGetKnownFolderPath(rfid, KF_FLAG_CREATE, None, byref(Path))
 	except OSError:
-		logging.error("SHGetKnownFolderPath result: %X".format(result & 0xffffffff))
+		logging.error("SHGetKnownFolderPath result: {:X}".format(result & 0xffffffff))
 		raise
 
 	ret = cast(Path, c_wchar_p).value
@@ -179,7 +184,7 @@ def _filemanager_cmd_windows(path):
 	return 'explorer.exe /select,"{}"'.format(path)
 
 if __name__ == "__main__":
-	s = '\033[35m'+'color-test'+'\033[39m'+" test end"
+	s = '\033[35m' + 'color-test' + '\033[39m' + " test end"
 	print(s)
 	with EnableAnsi():
 		print(s)

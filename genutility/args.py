@@ -4,10 +4,14 @@ from builtins import input, range
 import os, sys, os.path, shlex
 from functools import wraps
 from argparse import ArgumentTypeError
+from typing import TYPE_CHECKING
 
 from .iter import is_empty
 from .stdio import confirm
 from .compat.pathlib import Path
+
+if TYPE_CHECKING:
+	from typing import Callable
 
 def get_args(argparser):
 	""" get commandline arguments from std input instead """
@@ -31,7 +35,7 @@ def get_args(argparser):
 			if confirm(str(k)):
 				args.append(k)
 		else:
-			instr = input("{} ({}): ".format(k, nargs)) # separate multiple value by whitespace, quoting supported.
+			instr = input("{} ({}): ".format(k, nargs))  # separate multiple value by whitespace, quoting supported.
 			args.append(k)
 			args.append(instr)
 
@@ -74,7 +78,7 @@ def in_range(start, stop, step=1):
 
 	from builtins import int as builtin_int
 
-	def int(s): # see: multiple_of()
+	def int(s):  # see: multiple_of()
 		# type: (str, ) -> int
 
 		number = builtin_int(s)

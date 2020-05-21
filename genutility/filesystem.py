@@ -6,7 +6,6 @@ import os, platform, stat, os.path, re, logging, shutil, errno
 from operator import attrgetter
 from fnmatch import fnmatch
 from functools import partial
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .file import equal_files, iterfilelike, FILE_IO_BUFFER_SIZE
@@ -16,6 +15,7 @@ from .ops import logical_implication
 from .datetime import datetime_from_utc_timestamp
 from .compat import FileExistsError
 from .compat.os import PathLike, fspath, scandir
+from .compat.pathlib import Path
 
 if __debug__:
 	from .compat import gzip, bz2

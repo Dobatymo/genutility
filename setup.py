@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-#don't do `from builtins import str`
+# don't do `from builtins import str`
 from setuptools import setup
 from io import open
 from itertools import chain
@@ -83,7 +83,7 @@ extras_require = {
 	"resizing": ["numpy", "opencv-python", "scikit-learn"],
 	"scene_change_detection": ["numpy"],
 	"tls": ["cryptography", "pyOpenSSL>=17.5.0"],
-	"torrent": ["bencode.py>=2.0.0"], # bencoding ?
+	"torrent": ["bencode.py>=2.0.0"],  # bencoding ?
 	"videofile": ["opencv-python", "av"],
 	"win32": ["wmi", "pypiwin32"],
 	"widgets": ["wxPython"],
@@ -129,7 +129,7 @@ setup(
 		"Topic :: Utilities",
 	],
 	packages=["genutility", "genutility/compat", "genutility/fileformats", "genutility/hardware", "genutility/twothree"],
-	package_data = {str("genutility"): ["data/*.tsv"]},
+	package_data={str("genutility"): ["data/*.tsv"]},
 	python_requires=">=2.7",
 	install_requires=[
 		"future",

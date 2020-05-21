@@ -32,7 +32,7 @@ class Worker(threading.Thread):
 		# type: () -> None
 
 		while self.running:
-			#self.returns.put((self.TASK_IDLE, self))
+			# self.returns.put((self.TASK_IDLE, self))
 			task = self.tasks.get(True)
 			if task:
 				state, id, func, args, kargs = task
@@ -43,7 +43,7 @@ class Worker(threading.Thread):
 
 			try:
 				ret = func(*args, **kargs)
-			except Exception as e: # pylint: disable=broad-except
+			except Exception as e:  # pylint: disable=broad-except
 				logger.exception("threaded task failed")
 				self.returns.put((state, self.TASK_EXCEPTION, (id, e)))
 			else:
@@ -51,7 +51,7 @@ class Worker(threading.Thread):
 
 			try:
 				self.tasks.task_done()
-			except ValueError: # if the task was canceled inbetween
+			except ValueError:  # if the task was canceled inbetween
 				pass
 
 		logger.debug("thread ended")
@@ -67,10 +67,10 @@ class ThreadPool(object):
 		# type: (int, ) -> None
 
 		self.num_threads = num_threads
-		self.tasks = Queue() # type: Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]
-		self.returns = Queue() # type: Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]
+		self.tasks = Queue()  # type: Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]
+		self.returns = Queue()  # type: Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]
 		self.my_worker = [Worker(self.tasks, self.returns) for _ in range(num_threads)]
-		self.state = 0 # this is used to be able to cancel (or ignore the results of ongoing) tasks
+		self.state = 0  # this is used to be able to cancel (or ignore the results of ongoing) tasks
 
 	def add_task(self, id, func, *args, **kargs):
 		# type: (int, Callable[..., Any], *Any, **Any) -> None
@@ -80,15 +80,15 @@ class ThreadPool(object):
 	def get(self):
 		# type: () -> Tuple[int, Optional[Any]]
 
-		while True: # so invalid states can be ignored
-			state, type, result = self.returns.get(True) # Tuple[int, int, Tuple[int, Union[Any, Exception]]]
+		while True:  # so invalid states can be ignored
+			state, type, result = self.returns.get(True)  # type: Tuple[int, int, Tuple[int, Union[Any, Exception]]]
 			if state == self.state:
 				if type == Worker.TASK_COMPLETE:
 					return result # (id, ret)
 				else:
 					id, e = result
-					return id, None # maybe raise here?
-			# else: old result, ignore
+					return id, None  # maybe raise here?
+			#  else: old result, ignore
 
 	@staticmethod
 	def clear(queue):
@@ -117,6 +117,7 @@ class ThreadPool(object):
 		""" if `finishall` is True, it will finish all tasks currently in the queue,
 			if `finishall` is False, only currently active tasks will be finished
 		"""
+
 		if finishall:
 			for i in range(self.num_threads):
 				self.tasks.put(None)
@@ -128,13 +129,16 @@ class ThreadPool(object):
 		# type: () -> None
 
 		""" Does not cancel already running tasks. Just clears queue and ignores
-			results of currently running tasks. """
+			results of currently running tasks.
+		"""
 
 		self.clear(self.tasks)
 		self.clear(self.returns)
 		self.state += 1
 
 	def wait(self):
+		# type: () -> None
+
 		self.tasks.join()
 
 def gather_all_unsorted(threadpool, func, params, *args, **kwargs):
@@ -248,9 +252,9 @@ class IterWorker(threading.Thread):
 							continue
 						elif cmd == self.CMD_ABORT:
 							break
-			except AbortIteration as e:
+			except AbortIteration:
 				logger.warning("Task aborted")
-			except Exception as e:
+			except Exception:
 				logger.exception("Task threw exception")
 			self.queue.task_done() #untested
 			self.state = self.STATE_WAITING
@@ -289,7 +293,7 @@ class IterWorker(threading.Thread):
 		self.pause()
 		self.control.put(self.CMD_ABORT)
 
-#was: DownloadWorker
+# was: DownloadWorker
 class ProgressWorker(threading.Thread):
 	def __init__(self, manager, tasks):
 		threading.Thread.__init__(self)
@@ -328,7 +332,7 @@ class ProgressWorker(threading.Thread):
 		else:
 			return None
 
-#was: ThreadedDownloader
+# was: ThreadedDownloader
 class ProgressThreadPool(object):
 
 	def __init__(self, concurrent=1):
@@ -342,7 +346,7 @@ class ProgressThreadPool(object):
 
 		self.workers = list(ProgressWorker(self, self.waiting_queue) for i in range(self.concurrent))
 		for w in self.workers:
-			w.daemon = True # program will end even if threads are still running
+			w.daemon = True  # program will end even if threads are still running
 			w.start()
 
 	def start(self, callable, *args, **kwargs):
@@ -357,11 +361,11 @@ class ProgressThreadPool(object):
 				else:
 					self.completed.append((localname, length))
 					setter(localname)
-		else: # task failed
+		else:  # task failed
 			pass
 
 	def clear_completed(self):
-		self.completed = [] # assignment is atomic right?
+		self.completed = []  # assignment is atomic right?
 
 	def cancel_pending(self):
 		# copied from https://stackoverflow.com/a/18873213
@@ -379,10 +383,10 @@ class ProgressThreadPool(object):
 	def get_failed(self):
 		return self.failed
 
-	def get_running(self): # no locks, inconsistent data
+	def get_running(self):  # no locks, inconsistent data
 		return list(task for task in (w.get() for w in self.workers) if task)
 
-class ThreadsafeList(list): # untested!!!
+class ThreadsafeList(list):  # untested!!!
 
 	""" This is a list object with context manager to handle locking to perform multiple operations
 		on a list in a threadsafe way.

@@ -1,8 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from .numpy import unblock
+
+if TYPE_CHECKING:
+	from typing import Union
+	from fractions import Fraction
 
 def grayscale(arr):
 	return np.sum(arr, axis=-1) // arr.shape[-1]
@@ -21,10 +27,10 @@ def resize_oar(max_width, max_height, dar):
 
 	maxdar = max_width / max_height
 
-	if dar >= maxdar: # wider than it should be
+	if dar >= maxdar:  # wider than it should be
 		width = max_width
 		height = int(width / dar)
-	else: # thinner than it should be
+	else:  # thinner than it should be
 		height = max_height
 		width = int(height * dar)
 
@@ -33,7 +39,7 @@ def resize_oar(max_width, max_height, dar):
 def resize_maxsize(max_width, max_height, width, height):
 	# type: (int, int, int, int) -> Tuple[int, int]
 
-	return resize_oar(max_width, max_height, width / heigh)
+	return resize_oar(max_width, max_height, width / height)
 
 def histogram_2d(arr, levels):
 	# type: (np.ndarray, int) -> np.ndarray
