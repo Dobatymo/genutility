@@ -227,7 +227,7 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
 		@wraps(func)
 		def inner(*args, **kwargs):
 
-			hash = key_to_hash(args_to_key(args, kwargs), default=default)
+			hash = key_to_hash(args_to_key(args, kwargs, {}), default=default)
 			fullpath = path / hash
 
 			try:
@@ -261,7 +261,7 @@ def jsonlines_cache(path, duration=None, ensure_ascii=False, sort_keys=False, de
 		@wraps(func)
 		def inner(*args, **kwargs):
 
-			hash = key_to_hash(args_to_key(args, kwargs))
+			hash = key_to_hash(args_to_key(args, kwargs, {}), default=default)
 			fullpath = path / hash
 
 			try:

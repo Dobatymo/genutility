@@ -3,14 +3,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import range
 from future.utils import PY2, PY3
 import logging
-from itertools import chain
+from itertools import chain, islice
 from os import devnull
+
+from hypothesis import given, strategies
 
 from genutility.test import MyTestCase, parametrize
 from genutility.iter import (product_range_repeat, every_n, any_in_common, split, remove_all_dupes,
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
-	retrier, progress)
+	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, last, findfirst,
+	is_empty, switch, multi_join, first_not_none)
 from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
@@ -53,6 +56,107 @@ class IterTest(MyTestCase):
 		with open(devnull, "w") as fw:
 			self.assertIterEqual(r, progress(r, file=fw))
 
+	def test_iterrandrange(self):
+		result = set(islice(iterrandrange(0, 10), 100))
+		truth = set(range(0, 10))
+		self.assertTrue(result <= truth)
+
+	def test_iterrandrange_2(self):
+		with self.assertRaises((TypeError, ValueError)):
+			next(iterrandrange("a", "b"))
+
+	@parametrize(
+		(int, 0, ("1", ), ()),
+		(int, 3, ("1", ), (1, 1, 1)),
+		(int, 3, ("a", 16), (10, 10, 10)),
+	)
+	def test_repeatfunc(self, func, times, args, truth):
+		result = repeatfunc(func, times, *args)
+		self.assertIterEqual(result, truth)
+
+	def test_repeatfunc_2(self):
+		result = islice(repeatfunc(int), 3)
+		truth = (0, 0, 0)
+		self.assertIterEqual(result, truth)
+
+	def test_repeatfunc_3(self):
+		with self.assertRaises(TypeError):
+			next(repeatfunc(1))
+
+	@parametrize(
+		((), 0),
+		((1, ), 1),
+		((1, 2), 2),
+		((1, 2, 1), 2),
+		((1, 2, 1, 2), 2),
+		(("a"), 1),
+		(("aa"), 1),
+		(("aaa"), 1),
+		(("ab"), 2),
+		(("aab"), 2),
+		(("aaab"), 2),
+		(("abb"), 2),
+		(("abbb"), 2),
+	)
+	def test_count_distinct(self, it, truth):
+		result = count_distinct(it)
+		self.assertEqual(result, truth)
+
+	@parametrize(
+		(None, ),
+		(0, ),
+	)
+	def test_count_distinct_2(self, it):
+		with self.assertRaises(TypeError):
+			count_distinct(it)
+
+	@parametrize(
+		((), []),
+		(([], []), []),
+		(([], [], []), []),
+		(([1, 2, 3], [4, 5, 6]), [(3, 6), (2, 5), (1, 4)]),
+		(([1], [2], [3]), [(1, 2, 3)]),
+	)
+	def test_reversedzip(self, its, truth):
+		result = reversedzip(*its)
+		self.assertIterEqual(result, truth)
+
+	@given(strategies.lists(strategies.integers()), strategies.lists(strategies.integers()))
+	def test_reversedzip_2(self, it1, it2):
+		result = list(reversedzip(*reversedzip(*reversedzip(*reversedzip(it1, it2)))))
+		if it1 and it2:
+			minlen = min(len(it1), len(it2))
+			self.assertIterIterEqual(result, [it1[-minlen:], it2[-minlen:]])
+
+	@parametrize(
+		((), ()),
+		([], []),
+		([1, 2, 3], [1, 2, 3]),
+		([[1, 2], 3], [1, 2, 3]),
+		([[[1], 2], 3], [1, 2, 3]),
+		([1, [2, 3]], [1, 2, 3]),
+		([1, [2, [3]]], [1, 2, 3]),
+		((((1, ), 2), 3), [1, 2, 3]),
+		((1, (2, (3, ))), [1, 2, 3]),
+		([[1, 2], [3, 4]], [1, 2, 3, 4]),
+	)
+	def test_flatten(self, it, truth):
+		result = flatten(it)
+		self.assertIterEqual(result, truth)
+
+	def test_flatten_2(self):
+		with self.assertRaises(TypeError):
+			next(flatten(1))
+
+	@parametrize(
+		([], None),
+		([1], 1),
+		([1, 2], 2),
+	)
+	def test_last(self, it, truth):
+		result = last(it)
+		self.assertEqual(result, truth)
+
 	@parametrize(
 		(range(0), ),
 		(range(1), ),
@@ -88,6 +192,31 @@ class IterTest(MyTestCase):
 		self.assertIterIterEqual(truth, result)
 
 	@parametrize(
+		([], []),
+		([(1, 2)], [(2, 1)]),
+		([(1, 2), (3, 4)], [(2, 1), (4, 3)]),
+	)
+	def test_switch(self, it, truth):
+		result = switch(it)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		([1], ),
+		([(1, )], ),
+	)
+	def test_switch_2(self, it):
+		with self.assertRaises((TypeError, ValueError)):
+			next(switch(it))
+
+	@parametrize(
+		((1, 2), (3, 4), lambda x, y: x*y, (3, 6, 4, 8)),
+		((1, 2), (3, 4), lambda x, y: str(x)+str(y), ('13', '23', '14', '24')),
+	)
+	def test_multi_join(self, it1, it2, func, truth):
+		result = multi_join(it1, it2, func)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
 		(0, (0,), [()]),
 		(0, (1,), [()]),
 		(1, (0,), []),
@@ -110,9 +239,9 @@ class IterTest(MyTestCase):
 		self.assertIterEqual(truth, result)
 
 	@parametrize(
-		([],[], False),
-		([1,2],[2,3], True),
-		([1,2],[3,4], False)
+		([], [], False),
+		([1,2], [2,3], True),
+		([1,2], [3,4], False)
 	)
 	def test_any_in_common(self, a, b, truth):
 		result = any_in_common(a, b)
@@ -140,7 +269,10 @@ class IterTest(MyTestCase):
 		self.assertIterEqual(truth, result)
 
 	@parametrize(
+		((), [()]),
+		((1,2,1), ((),(1,),(2,),(1,),(1,2),(1,1),(2,1),(1,2,1))),
 		((1,2,3), ((),(1,),(2,),(3,),(1,2),(1,3),(2,3),(1,2,3))),
+		(range(1, 4), ((),(1,),(2,),(3,),(1,2),(1,3),(2,3),(1,2,3))),
 	)
 	def test_powerset(self, seq, truth):
 		result = powerset(seq)
@@ -162,7 +294,7 @@ class IterTest(MyTestCase):
 
 	def test_iter_except_ignore_gen(self):
 		with self.assertRaises(TypeError):
-			tuple(iter_except(GeneratorWithException(), {}))
+			tuple(iter_except_ignore(GeneratorWithException(), {}))
 
 	def test_iter_except_it(self):
 		m = Mock(return_value=None)
@@ -180,6 +312,7 @@ class IterTest(MyTestCase):
 		self.assertEqual(truth, result)
 
 	@parametrize(
+		([], iter([]), []),
 		([True, False, True], iter(["A", "B"]), ("A", None, "B")),
 	)
 	def test_decompress(self, selectors, data, truth):
@@ -187,6 +320,7 @@ class IterTest(MyTestCase):
 		self.assertIterEqual(truth, result)
 
 	@parametrize(
+		([False, True], iter([])),
 		([True, False], iter([])),
 	)
 	def test_decompress_error(self, selectors, data):
@@ -194,17 +328,49 @@ class IterTest(MyTestCase):
 			result = tuple(decompress(selectors, data))
 
 	@parametrize(
-		(tuple(), tuple()),
+		([], None),
+		([1], 1),
+		([None, 1], 1),
+	)
+	def test_first_not_none(self, it, truth):
+		result = first_not_none(it)
+		self.assertEqual(result, truth)
+
+	@parametrize(
+		([], []),
 		(range(0), tuple()),
 		(range(1), tuple()),
 		(range(2), ((0, 1),)),
-		(range(3), ((0, 1), (1, 2)))
+		(range(3), ((0, 1), (1, 2))),
+		(range(4), ((0, 1), (1, 2), (2, 3))),
 	)
 	def test_pairwise(self, input, truth):
 		result = pairwise(input)
 		self.assertIterEqual(truth, result)
 
+	def test_pairwise_2(self):
+		with self.assertRaises(TypeError):
+			next(pairwise(1))
+
 	@parametrize(
+		(lambda x: x, [], (None, None)),
+		(lambda x: x == 2, [1, 2, 3], (1, 2)),
+		(lambda x: x == 4, [1, 2, 3], (None, None)),
+	)
+	def test_findfirst(self, func, it, truth):
+		result = findfirst(func, it)
+		self.assertEqual(result, truth)
+
+	@parametrize(
+		(iter([]), True),
+		(iter([1]), False),
+	)
+	def test_is_empty(self, it, truth):
+		result = is_empty(it)
+		self.assertEqual(result, truth)
+
+	@parametrize(
+		([], []),
 		([1], [1]),
 		([None], []),
 		([1, None], [1])
@@ -219,7 +385,8 @@ class IterTest(MyTestCase):
 		((1, 1), True),
 		((1, 1, 1), True),
 		((1, 2), False),
-		((1, 1, 2), False)
+		((1, 1, 2), False),
+		((1, 2, 2), False),
 	)
 	def test_all_equal(self, input, truth):
 		result = all_equal(input)
@@ -228,12 +395,13 @@ class IterTest(MyTestCase):
 	@parametrize(
 		(range(5), 0, 0),
 		(range(5), 1, 1),
-		(range(5), 2, 2),
+		(range(0), 0, None),
+		(range(0), 1, None),
 	)
 	def test_advance(self, it, n, truth):
 		it = iter(it)
 		advance(it, n)
-		self.assertEqual(truth, next(it))
+		self.assertEqual(truth, next(it, None))
 
 	@parametrize(
 		((), 1, ()),
@@ -296,6 +464,8 @@ class IterTest(MyTestCase):
 		self.assertIterEqual(truth, result)
 
 	@parametrize(
+		([], []),
+		([1], [1]),
 		([1, 2, 3], [3]),
 		([3, 2, 1], [3]),
 		([1, 2, 3, 2, 1], [3]),
@@ -306,6 +476,8 @@ class IterTest(MyTestCase):
 		self.assertIterEqual(truth, result)
 
 	@parametrize(
+		([], []),
+		([1], [1]),
 		([1, 2, 3], [1]),
 		([3, 2, 1], [1]),
 		([1, 2, 3, 2, 1], [1, 1]),

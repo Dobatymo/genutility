@@ -20,7 +20,7 @@ def cast(object, class_, instanceof=object, *args, **kwargs):
 class STAR(object):
 	pass
 
-def args_to_key(args, kwargs):
+def args_to_key(args, kwargs, separator=STAR):
 	# type: (Tuple[Any], Dict[Any, Any] -> List[Any]
 
 	""" Create cache key from function arguments.
@@ -30,7 +30,7 @@ def args_to_key(args, kwargs):
 	if args:
 		key.extend(args)
 	if kwargs:
-		key.append(STAR)
+		key.append(separator)
 		key.extend(sorted(kwargs.items()))
 
 	return tuple(key)

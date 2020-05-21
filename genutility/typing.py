@@ -2,6 +2,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from typing import TYPE_CHECKING
 
+from collections.abc import Iterable, Sized
+
+class SizedIterable(Iterable, Sized):
+	pass
+
 if TYPE_CHECKING:
 
 	from typing import Any, Optional, Sequence

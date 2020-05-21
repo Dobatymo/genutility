@@ -17,6 +17,7 @@ from .exceptions import IteratorExhausted
 if TYPE_CHECKING:
 	from typing import Any, Callable, Iterable, Iterator, TypeVar, Tuple, Sequence, Optional
 	from logging import Logger
+	from .typing import SizedIterable
 	T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
@@ -175,8 +176,15 @@ def asc_peaks(iterable):
 
 def extrema(iterable, first=None, last=None, derivatives={1, -1}):
 	it = iter(iterable)
-	old = next(it)
-	old_d = diffsgn(old, next(it))
+	try:
+		old = next(it)
+	except StopIteration:
+		return
+	try:
+		old_d = diffsgn(old, next(it))
+	except StopIteration:
+		yield old # fixme: should this be returned?
+		return
 
 	if old_d == first:
 		yield old
@@ -216,9 +224,10 @@ def empty():
 	return
 	yield # pylint: disable=unreachable
 
-def last(it):
+def last(it, default=None):
+	# type: (Iterable[T], Optional[T]) -> Optional[T]
 
-	ret = None
+	ret = default
 	for i in it:
 		ret = i
 	return ret
@@ -243,7 +252,7 @@ def batch(it, n, filter=None):
 			yield chain((first_el,), chunk_it)
 
 def advance(it, n):
-	# type: (Iterable, int) -> None
+	# type: (Iterable[T], int) -> None
 	""" Advances the iterable `it` n steps. """
 
 	"""
@@ -289,20 +298,20 @@ def pairwise(it):
 	next(b, None)
 	return zip(a, b)
 
-def findfirst(func, it, default_index=None, default_value=None):
-	# type: (Callable, Iterable[T]) -> Optional[T]
+def findfirst(func, it, default=(None, None)):
+	# type: (Callable[[T], bool], Iterable[T], Tuple[Optional[int], Optional[T]]) -> Tuple[Optional[int], Optional[T]]
 
 	for i, x in enumerate(it):
 		if func(x):
 			return i, x
 
-	return default_index, default_value
+	return default
 
 #was: isempty
 def is_empty(it):
-	# type: (Iterable, ) -> bool
+	# type: (Iterator, ) -> bool
 
-	""" Returns True if the iterable `it` is already fully consumed. """
+	""" Returns True if the iterator `it` is already fully consumed. """
 
 	try:
 		next(it)
@@ -320,11 +329,18 @@ def consume(it):
 def resizer(it, size, pad=False, pad_elm=None):
 	# type: (Iterable[Sequence[T]], int, bool, Optional[T]) -> Iterable
 
+	""" Cuts the input iterable `it` consisting of variable length slices
+		into slices of length `size`. If pad is True, the last slice
+		will be padded to length `size` with `pad_elm`.
+		resizer(("asd", "qw", "e"), 4) -> (['a', 's', 'd', 'q'], ['w', 'e'])
+		resizer(("asd", "qw", "e"), 4, True, "x") -> (['a', 's', 'd', 'q'], ['w', 'e', 'x', 'x'])
+	"""
+
 	if size <= 0:
 		raise ValueError("size must be larger than 0")
 
 	it = iter(it)
-	buf = ""
+	buf = "" # type: Sequence[T]
 	pos = 0
 	try:
 		while True:
@@ -404,7 +420,7 @@ def list_except(it, catch=Exception):
 	# type: (Iterable[T], Union[Exception, Sequence[Exception]]) -> Tuple[Exception, List[T]]
 
 	""" Same as `list()` except in the case of an exception, the partial list which was collected
-		so far is returned. `catch` specifies which exeptions are caught. It can be an exception
+		so far is returned. `catch` specifies which exceptions are caught. It can be an exception
 		or a tuple of exceptions.
 	"""
 
@@ -453,15 +469,15 @@ def decompress(selectors, data, default=None):
 		raise IteratorExhausted
 
 #was: get_first_non_none
-def first_not_none(it):
-	# type: (Iterable[T], ) -> Optional[T]
+def first_not_none(it, default=None):
+	# type: (Iterable[T], Optional[T]) -> Optional[T]
 
 	""" Returns the first element of `it` which is not None. """
 
-	return next(filternone(it), None)
+	return next(filternone(it), default)
 
 def range_count(start=0, stop=None, step=1):
-	# type: (int, Optional[int]) -> Iterator[int]
+	# type: (int, Optional[int], int) -> Iterator[int]
 
 	""" Similar to `range`, except it optionally allows for an infinite range. """
 
@@ -479,16 +495,19 @@ def product_range_repeat(depth, args):
 
 	return product(tuple(range(*args)), repeat=depth)
 
-def powerset(it):
-	# type: (Iterable[T], ) -> Iterator[Tuple[T, ...]]
+def powerset(sit):
+	# type: (SizedIterable[T], ) -> Iterator[Tuple[T, ...]]
 
-	""" powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3) """
+	""" Returns the powerset of a sized iterable.
+		The powerset of an empty set is a set including the empty set.
 
-	s = tuple(it)
-	return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+		powerset([1,2,3]) --> (), (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+	"""
+
+	return chain.from_iterable(combinations(sit, r) for r in range(len(sit)+1))
 
 def any_in_common(a, b):
-	# type: (Iterable, Iterable) -> bool
+	# type: (Iterable[T], Iterable[T]) -> bool
 
 	""" Tests if iterables `a` and `b` have any elements in common. """
 
@@ -527,16 +546,17 @@ def every_n(it, n, pos=0):
 def split(it, size):
 	# type: (Iterable[T], int) -> Sequence[Iterable[T]]
 
-	""" memory consumption should be proportional to size when output iterators
-		are used in parallel loop (zip), else might be higher
+	""" memory consumption should be proportional to `size` when output iterators
+		are used in parallel loops (like `zip`), else might be higher
 	"""
 
 	copies = tee(it, size)
 	return tuple(every_n(it, size, pos) for it, pos in zip(copies, range(size)))
 
 def remove_all_dupes(it): # was: remove_dup_list
-	# type: (Iterable, ) -> Iterable
+	# type: (Iterable[T], ) -> Iterable[T]
 	""" Removes all duplicates from `it` while preserving order. """
+
 	# Dave Kirby
 	seen = set()
 	return (x for x in it if x not in seen and not seen.add(x))
@@ -555,7 +575,7 @@ def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter
 	elif jitter_dist == "normal":
 		rand = random.normalvariate
 	else:
-		raise ValueError()
+		raise ValueError("Unsupported jitter_dist")
 
 	if attempts == 0:
 		return
@@ -578,9 +598,3 @@ def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter
 
 		waittime *= multiplier
 		jitter *= multiplier
-
-if __name__ == "__main__":
-	import timeit
-	print(min(timeit.repeat(stmt="ae(range(100000))", setup="from __main__ import all_equal as ae")))
-
-	print(min(timeit.repeat(stmt="ae(itertools.repeat(0, 100000))", setup="import itertools; from __main__ import all_equal as ae", number=1000)))

@@ -10,6 +10,7 @@ from .compat import FileNotFoundError
 from .datetime import now
 from .file import copen
 from .filesystem import mdatetime
+from .object import args_to_key
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Optional
@@ -75,8 +76,13 @@ def write_iter(it, path, protocol=None, safe=False):
 			pickler.dump(result)
 			yield result
 
+def key_to_hash(key, protocol=None):
+	from hashlib import md5
+	binary = pickle.dumps(key, protocol=protocol)
+	return md5(binary).hexdigest()
+
 def cache(path, duration=None, generator=False, protocol=None):
-	# type: (str, Optional[timedelta], bool, Optional[int]) -> Callable[[Callable], Callable]
+	# type: (Path, Optional[timedelta], bool, Optional[int]) -> Callable[[Callable], Callable]
 
 	""" Decorator to cache function calls. Doesn't take function arguments into regard.
 		It's using `pickle` to deserialize the data. So don't use it with untrusted inputs.
@@ -95,23 +101,28 @@ def cache(path, duration=None, generator=False, protocol=None):
 		@wraps(func)
 		def inner(*args, **kwargs):
 			# type: (*Any, **Any) -> Any
+
+			hash = key_to_hash(args_to_key(args, kwargs), protocol=protocol)
+			fullpath = path / hash
+
 			try:
-				invalid = now() - mdatetime(path) > duration
+				invalid = now() - mdatetime(fullpath) > duration
 			except FileNotFoundError:
 				invalid = True
 
 			if invalid:
+				path.mkdir(parents=True, exist_ok=True)
 				if generator:
 					it = func(*args, **kwargs)
-					return write_iter(it, path, protocol=protocol, safe=True)
+					return write_iter(it, fullpath, protocol=protocol, safe=True)
 				else:
 					result = func(*args, **kwargs)
-					write_pickle(result, path, protocol=protocol, safe=True)
+					write_pickle(result, fullpath, protocol=protocol, safe=True)
 					return result
 			else:
 				if generator:
-					return read_iter(path)
+					return read_iter(fullpath)
 				else:
-					return read_pickle(path)
+					return read_pickle(fullpath)
 		return inner
 	return decorator
