@@ -2,12 +2,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from io import open
 
-from lxml import etree
+from lxml import etree  # nosec
 
 def xml_xslt_to_xhtml(path_xml, path_xslt, path_xhtml):
 
-	xml = etree.parse(path_xml)
-	xslt = etree.parse(path_xslt)
+	""" Only use with trusted xml data """
+
+	xml = etree.parse(path_xml)  # nosec
+	xslt = etree.parse(path_xslt)  # nosec
 	transform = etree.XSLT(xslt)
 	newdom = transform(xml)
 	with open(path_xhtml, "wb") as xhtml:

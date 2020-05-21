@@ -19,7 +19,7 @@ rhash; sys_platform == 'win32'
 toml
 unidecode
 werkzeug>=0.11.11
-wmi
+wmi; sys_platform == 'win32'
 
 #wxasync
 #wxPython # wx

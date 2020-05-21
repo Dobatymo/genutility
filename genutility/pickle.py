@@ -79,7 +79,7 @@ def write_iter(it, path, protocol=None, safe=False):
 def key_to_hash(key, protocol=None):
 	from hashlib import md5
 	binary = pickle.dumps(key, protocol=protocol)
-	return md5(binary).hexdigest()
+	return md5(binary).hexdigest()  # nosec
 
 def cache(path, duration=None, generator=False, protocol=None):
 	# type: (Path, Optional[timedelta], bool, Optional[int]) -> Callable[[Callable], Callable]

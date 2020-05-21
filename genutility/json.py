@@ -210,7 +210,7 @@ def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt"):
 def key_to_hash(key, default=None):
 	from hashlib import md5
 	binary = json.dumps(key, default=default).encode("utf-8")
-	return md5(binary).hexdigest()
+	return md5(binary).hexdigest()  # nosec
 
 def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False, default=None, object_hook=None):
 	# type: (Path, Optional[timedelta], bool, Optional[str], bool, Optional[Callable], Optional[Callable]) -> Callable
