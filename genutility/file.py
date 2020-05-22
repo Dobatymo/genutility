@@ -9,13 +9,15 @@ from typing import TYPE_CHECKING
 from .iter import iter_equal, consume, resizer
 from .math import PosInfInt
 from .ops import logical_xor, logical_implication
-from .compat.os import PathLike
+from .compat.os import PathLike, fspath
 
 if __debug__:
 	from .compat import gzip, bz2
+	import zipfile, tarfile
 
 if TYPE_CHECKING:
 	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator
+
 	PathType = Union[str, PathLike]
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
@@ -36,6 +38,9 @@ def _check_arguments(mode, encoding=None):
 		encoding = encoding or "utf-8"
 
 	return encoding
+
+def _stripmode(mode):
+	return "".join(set(mode) - {"t", "b"})
 
 def read_file(path, mode="b", encoding=None, errors=None):
 	# type: (PathType, str, Optional[str]) -> bytes
@@ -140,7 +145,7 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 
 		from zipfile import ZipFile
 
-		newmode = "".join(set(mode) - {"t", "b"})
+		newmode = _stripmode(mode)
 
 		with ZipFile(file, newmode) as zf: # note: even if the outer zip file is closed, the inner file can still be read apparently
 			if version_info >= (3, 6):
@@ -462,7 +467,7 @@ def copyfilelike(fin, fout, amount=None, buffer=FILE_IO_BUFFER_SIZE, report=None
 	# type: (IO, IO, Optional[int], Optional[int], Optional[Callable]) -> int
 
 	""" Read data from `fin` in chunks of size `buffer` and write them to `fout`.
-		Optionally limit the amout of data to `amount`. `report` can be a callable which receives
+		Optionally limit the amount of data to `amount`. `report` can be a callable which receives
 		the total number of bytes copied and bytes remaining.
 		see `shutil.copyfileobj`
 	"""
@@ -558,19 +563,24 @@ def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=N
 def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
 	# type: (Iterable[PathType], int) -> Iterator[bytes]
 
-	chunk = r""
+	""" Iterate over a list of files and return their contents in a
+		continuous stream of chunks of size `chunk_size`.
+		That means one chunk can span multiple files.
+	"""
+
+	chunk = b""
 
 	for path in paths:
 		with open(path, "rb") as fr:
 			if len(chunk) != 0:
 				#print("a")
 				data = fr.read(chunk_size - len(chunk))
-				chunk += data # probably slow for lots of small files
+				chunk += data  # fixme: probably slow for lots of small files
 
 			if len(chunk) == chunk_size:
 				#print("b")
 				yield chunk
-				chunk = r""
+				chunk = b""
 
 			if len(chunk) == 0:
 				#print("c")
@@ -594,7 +604,9 @@ def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, am
 
 def byte_out(path, buffer_size=FILE_IO_BUFFER_SIZE):
 	# type: (PathType, int) -> Iterator[bytes]
-	""" open file and return it byte by byte """
+
+	""" Reads file at `path` byte by byte, using a read buffer of size `buffer_size`.
+	"""
 
 	return resizer(blockfileiter(path, mode="rb", chunk_size=buffer_size), 1)
 
@@ -635,6 +647,53 @@ def is_all_byte(fr, thebyte=b"\0", chunk_size=FILE_IO_BUFFER_SIZE):
 		if data != thebyte[:len(data)]:
 			return False
 	return True
+
+def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password=None):
+	# type: (Union[str, PathLike, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+
+	"""
+		Iterate file-pointers to archived files. They are valid for one iteration step each.
+		If `file` is a file-like, it must be seekable.
+	"""
+
+	#from pyzipper import AESZipFile as ZipFile
+	from zipfile import ZipFile
+
+	encoding = _check_arguments(mode, encoding)
+	newmode = _stripmode(mode)
+
+	with ZipFile(file, newmode) as zf:
+		for zi in zf.infolist():
+			if not zi.is_dir():  # fixeme: Py3.5 AttributeError: 'ZipInfo' object has no attribute 'is_dir'
+				with zf.open(zi, newmode, password) as bf:
+					yield wrap_text(bf, mode, encoding, errors, newline)
+
+def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
+	# type: (Union[str, PathLike, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+
+	"""
+		Iterate file-pointers to archived files. They are valid for one iteration step each.
+		With the correct mode, `file` can be a non-seekable file-like.
+	"""
+
+	import tarfile
+
+	encoding = _check_arguments(mode, encoding)
+	newmode = _stripmode(mode)
+
+	if isinstance(file, os.PathLike):
+		file = fspath(file)
+
+	if isinstance(file, str):
+		cls = tarfile.open(name=file, mode=newmode+"|*")
+	else:
+		cls = tarfile.open(fileobj=file, mode=newmode+"|*")
+
+	with cls as tf:
+		for ti in tf:
+			if ti.isfile(): # fixme: what about links?
+				with tf.extractfile(ti) as bf: # no `mode` for `extractfile`
+					yield wrap_text(bf, mode, encoding, errors, newline)
 
 # is this still needed?
 def file_byte_reader(filename, inputblocksize, outputblocksize, DEBUG=True):

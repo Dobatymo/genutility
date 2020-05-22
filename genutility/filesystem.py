@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import chr
 from future.moves.itertools import zip_longest
+
 import os, platform, stat, os.path, re, logging, shutil, errno
 from operator import attrgetter
 from fnmatch import fnmatch
@@ -519,10 +520,9 @@ def equal_dirs(dir1, dir2):
 def realpath_win(path):
 	# type: (PathType, ) -> str
 	"""fix for os.path.realpath() which doesn't work under Win7"""
-	# fixme: handle junctions
 
 	path = os.path.abspath(path)
-	if os.path.islink(path):
+	if islink(path):
 		return os.path.normpath(os.path.join(os.path.dirname(path), os.readlink(path)))
 	else:
 		return path
@@ -582,3 +582,14 @@ def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
 			except OSError as e:
 				logger.exception("Should not have happened")
 				break
+
+def iter_links(path):
+	# type: (str, ) -> Iterator[str]
+
+	""" Yields all directory symlinks (and junctions on windows). """
+
+	for dirpath, dirnames, filenames in os.walk(path):
+		for dirname in dirnames:
+			joined = os.path.join(dirpath, dirname)
+			if islink(joined):
+				yield joined

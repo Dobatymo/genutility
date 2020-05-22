@@ -12,8 +12,8 @@ from genutility.test import MyTestCase, parametrize
 from genutility.iter import (product_range_repeat, every_n, any_in_common, split, remove_all_dupes,
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
-	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, last, findfirst,
-	is_empty, switch, multi_join, first_not_none)
+	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, findfirst,
+	is_empty, switch, multi_join, first_not_none, lastdefault, last, EmptyIterable)
 from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
@@ -149,12 +149,24 @@ class IterTest(MyTestCase):
 			next(flatten(1))
 
 	@parametrize(
-		([], None),
 		([1], 1),
 		([1, 2], 2),
 	)
 	def test_last(self, it, truth):
 		result = last(it)
+		self.assertEqual(result, truth)
+
+	def test_last_2(self):
+		with self.assertRaises(EmptyIterable):
+			last([])
+
+	@parametrize(
+		([], None),
+		([1], 1),
+		([1, 2], 2),
+	)
+	def test_lastdefault(self, it, truth):
+		result = lastdefault(it)
 		self.assertEqual(result, truth)
 
 	@parametrize(

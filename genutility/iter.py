@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.moves.itertools import zip_longest
+from future.utils import raise_from
 from builtins import zip, map, range, reversed
 
 import sys, logging, random
@@ -12,7 +13,7 @@ from random import randrange
 from types import GeneratorType
 from typing import TYPE_CHECKING
 
-from .exceptions import IteratorExhausted
+from .exceptions import IteratorExhausted, EmptyIterable
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Iterable, Iterator, TypeVar, Tuple, Sequence, Optional
@@ -45,40 +46,7 @@ def repeatfunc(func, times=None, *args):
 		return starmap(func, repeat(args))
 	return starmap(func, repeat(args, times))
 
-def progressdata(it, refresh=1, end="\r", file=sys.stdout):
-	# type: (Union[Iterable, Sequence], Optional[int], Number, Optional[IO[str]]) -> Iterable
-
-	last = start = time()
-	total = 0
-	try:
-		for elm in it:
-			yield elm
-			total += len(elm)
-			current = time()
-			if current - last > refresh:
-				last = current
-				duration = current-start
-				print("Read {}, running for {} seconds ({:0.2e}/s).".format(total, int(duration), total/duration), end="\r", file=file)
-	except KeyboardInterrupt:
-		print("Unsafely aborted after reading {} in {} seconds ({:0.2e}/s).".format(total, int(last-start), total/(last-start)), end=end, file=file)
-		raise
-	else:
-		duration = last-start
-		if duration > 0:
-			print("Finished {} in {} seconds ({:0.2e}/s).".format(total, int(duration), total/duration), end=end, file=file)
-		else:
-			print("Finished {} in {} seconds.".format(total, int(duration)), end=end, file=file)
-
-def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None):
-	# type: (Union[Iterable, Collection], Optional[int], float, Optional[TextIO], Callable) -> Iterator
-
-	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
-
-	""" todo: `from operator import length_hint`
-		Use `length_hint(it)` for a guess which might be better than nothing.
-		Can return 0.
-	"""
-
+def _lstr(it, length=None):
 	if length is None:
 		try:
 			length = len(it) # type: ignore # TypeError caught below
@@ -90,10 +58,49 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 	else:
 		lstr = ""
 
-	extra = ""
+	return length, lstr
 
+def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout):
+	# type: (Union[Iterable, Sequence], Optional[int], float, str, Optional[TextIO]) -> Iterable
+
+	length, lstr = _lstr(it, length)
+	last = start = time()
+	total = 0
+
+	try:
+		for elm in it:
+			yield elm
+			total += len(elm)
+			current = time()
+			if current - last > refresh:
+				last = current
+				duration = current-start
+				print("Read {}{}, running for {} seconds ({:0.2e}/s).".format(total, lstr, int(duration), total/duration), end="\r", file=file)
+	except KeyboardInterrupt:
+		print("Unsafely aborted after reading {}{} in {} seconds ({:0.2e}/s).".format(total, lstr, int(last-start), total/(last-start)), end=end, file=file)
+		raise
+	else:
+		duration = last-start
+		if duration > 0:
+			print("Finished {} in {} seconds ({:0.2e}/s).".format(total, int(duration), total/duration), end=end, file=file)
+		else:
+			print("Finished {} in {} seconds.".format(total, int(duration)), end=end, file=file)
+
+def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None):
+	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Callable) -> Iterator
+
+	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
+
+	""" todo: `from operator import length_hint`
+		Use `length_hint(it)` for a guess which might be better than nothing.
+		Can return 0.
+	"""
+
+	length, lstr = _lstr(it, length)
+	extra = ""
 	last = start = time()
 	i = 0
+
 	for i, elm in enumerate(it, 1):
 		yield elm
 		current = time()
@@ -224,13 +231,30 @@ def empty():
 	return
 	yield # pylint: disable=unreachable
 
-def last(it, default=None):
+def lastdefault(it, default=None):
 	# type: (Iterable[T], Optional[T]) -> Optional[T]
+
+	""" Returns the last element of iterable `it`. It discards all other values.
+		This method is about 1/2 times as fast as `last()` for large iterables.
+	"""
 
 	ret = default
 	for i in it:
 		ret = i
 	return ret
+
+# was: iterlast
+def last(it):
+	# type: (Iterable[T], ) -> T
+
+	""" Returns the last element of iterable `it`. It discards all other values.
+		This method is about 2 times as fast as `lastdefault()` for large iterables.
+	"""
+
+	try:
+		return deque(it, 1).pop()
+	except IndexError:
+		raise_from(EmptyIterable("Empty iterable"), None)
 
 def batch(it, n, filter=None):
 	# type: (Iterable[Any], int, Optional[Callable]) -> Iterator[Any] # return type cannot be more specific because of filter()
