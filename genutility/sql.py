@@ -4,6 +4,8 @@ from future.utils import viewkeys, viewvalues
 from itertools import chain, repeat
 from typing import TYPE_CHECKING
 
+from .exceptions import NoResult
+
 if TYPE_CHECKING:
 	from typing import Any, Iterator
 	from .typing import Connection, Cursor
