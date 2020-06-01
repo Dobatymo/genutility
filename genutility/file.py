@@ -16,7 +16,7 @@ if __debug__:
 	import zipfile, tarfile
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator
+	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable
 
 	PathType = Union[str, PathLike]
 
@@ -649,7 +649,7 @@ def is_all_byte(fr, thebyte=b"\0", chunk_size=FILE_IO_BUFFER_SIZE):
 	return True
 
 def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password=None):
-	# type: (Union[str, PathLike, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
 
 	"""
 		Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -669,7 +669,7 @@ def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password
 					yield wrap_text(bf, mode, encoding, errors, newline)
 
 def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
-	# type: (Union[str, PathLike, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
 
 	"""
 		Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -681,7 +681,7 @@ def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
 	encoding = _check_arguments(mode, encoding)
 	newmode = _stripmode(mode)
 
-	if isinstance(file, os.PathLike):
+	if isinstance(file, PathLike):
 		file = fspath(file)
 
 	if isinstance(file, str):
@@ -697,6 +697,8 @@ def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
 
 # is this still needed?
 def file_byte_reader(filename, inputblocksize, outputblocksize, DEBUG=True):
+	# type: (PathType, int, int, bool) -> Iterator[bytes]
+
 	assert (inputblocksize % outputblocksize == 0) or (outputblocksize % inputblocksize == 0), "Neither input nor output size is a multiple of the other"
 
 	bytes_yielded = 0

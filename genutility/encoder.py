@@ -8,16 +8,21 @@ from nltk.tokenize import word_tokenize
 from .func import identity
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Hashable, Iterable, Iterator, List
+	from typing import Any, Dict, Hashable, Iterable, Iterator, List, TypeVar
+	T = TypeVar("T")
 
 class GenericLabelEncoder(object):
 
 	""" Encodes all hashable objects to integers """
 
 	def __init__(self):
+		# type: () -> None
+
 		self.reset()
 
 	def reset(self):
+		# type: () -> None
+
 		self.object2idx = {} # type: Dict[Hashable, int]
 		self.idx2object = [] # type: List[Hashable]
 
@@ -206,5 +211,7 @@ class BatchLabelEncoder(object):
 
 	@property
 	def num_labels(self):
+		# type: () -> int
+
 		assert len(self.token2idx) == len(self.idx2count) == len(self.idx2token)
 		return len(self.idx2token)

@@ -7,23 +7,24 @@ from os import remove
 from typing import TYPE_CHECKING
 
 from .file import copen
-from .compat.os import replace
+from .compat.os import replace, fspath
 
 if TYPE_CHECKING:
-	from typing import Union
+	from typing import Union, Optional, IO
 	from .compat.os import PathLike
+	PathType = Union[str, PathLike]
 
 # http://stupidpythonideas.blogspot.tw/2014/07/getting-atomic-writes-right.html
 class TransactionalCreateFile(object):
 
 	def __init__(self, path, mode="wb", encoding=None, errors=None, newline=None, prefix="tmp"):
-		# type: (str, str, Optional[str], Optional[str]) -> None
+		# type: (PathType, str, Optional[str], Optional[str], Optional[str], str) -> None
 
 		is_text = "t" in mode
 
-		self.path = path
-		suffix = os.path.splitext(path)[1].lower()
-		curdir = os.path.dirname(path)
+		self.path = fspath(path)
+		suffix = os.path.splitext(self.path)[1].lower()
+		curdir = os.path.dirname(self.path)
 		fd, self.tmppath = mkstemp(suffix, prefix, curdir, is_text)
 		self.fp = copen(fd, mode, encoding=encoding, errors=errors, newline=newline, ext=suffix)
 
@@ -52,7 +53,7 @@ class TransactionalCreateFile(object):
 			self.commit()
 
 def write_file(data, path, mode="wb", encoding=None, errors=None, newline=None):
-	# type: (Union[str, bytes], Union[str, PathLike], str, Optional[str], Optional[str]) -> None
+	# type: (Union[str, bytes], PathType, str, Optional[str], Optional[str], Optional[str]) -> None
 
 	""" Writes/overwrites files in a safe way. That means either the original file
 		will be left untouched, or it will be replaced with the complete new file.

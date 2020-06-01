@@ -12,7 +12,8 @@ import numpy as np
 from .numba import opjit
 
 if TYPE_CHECKING:
-	from typing import Iterator, Tuple, Callable
+	from typing import Iterator, Tuple, Callable, TypeVar
+	T = TypeVar("T")
 
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
@@ -336,13 +337,19 @@ def _two_sample_kolmogorov_smirnov_pmf(pmf1, pmf2, alpha=0.05):
 	return statistic, pvalue, reject
 
 def inf_matrix_power(pm):
+	# type: (np.ndarray, ) -> np.ndarray
+
+	""" Calculate stochastic matrix `pm` to the power of infinity,
+		by finding the eigenvector which corresponds to the eigenvalue 1.
+	"""
+
 	w, v = np.linalg.eig(pm) # scipy.linalg.eig would probably by faster as it can return the left and right eigen vectors
 
 	if not np.isclose(w[0], 1.):
 		raise ValueError("The first eigenvalue is not none. Is this a right stochastic matrix?")
 
 	vi = np.linalg.inv(v)
-	d = np.zeros(m.shape[0], dtype=np.float)
+	d = np.zeros(pm.shape[0], dtype=np.float)
 	d[0] = 1.
 
 	return np.matmul(v, np.matmul(np.diag(d), vi))

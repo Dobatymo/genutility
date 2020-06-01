@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING
 from .func import identity
 
 if TYPE_CHECKING:
-	from typing import Any, Sequence, Callable
+	from typing import Any, Sequence, Callable, TypeVar
+	T = TypeVar("T")
+	U = TypeVar("U")
 
 class BisectRetVal(Enum):
 	Lower = -1

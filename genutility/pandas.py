@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .func import identity
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional
+	from typing import Callable, Optional, List
 	from pandas import DataFrame
 
 def strlist(sep):

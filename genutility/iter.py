@@ -16,10 +16,13 @@ from typing import TYPE_CHECKING
 from .exceptions import IteratorExhausted, EmptyIterable
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Iterator, TypeVar, Tuple, Sequence, Optional
+	from typing import (Any, Callable, Iterable, Iterator, TypeVar, Tuple, Sequence,
+		Optional, Collection, List, Union, Type, Dict, TextIO)
 	from logging import Logger
-	from .typing import SizedIterable
+	from .typing import SizedIterable, Number
 	T = TypeVar("T")
+	U = TypeVar("U")
+	V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -259,7 +262,7 @@ def last(it):
 def batch(it, n, filter=None):
 	# type: (Iterable[Any], int, Optional[Callable]) -> Iterator[Any] # return type cannot be more specific because of filter()
 
-	""" Batches iterator `it` into batches of size `n`.
+	""" Batches iterable `it` into batches of size `n`.
 		Optionally post-processes batch with `filter`.
 	"""
 
@@ -277,6 +280,7 @@ def batch(it, n, filter=None):
 
 def advance(it, n):
 	# type: (Iterable[T], int) -> None
+
 	""" Advances the iterable `it` n steps. """
 
 	"""
@@ -296,6 +300,7 @@ def all_equal(it):
 	# type: (Iterable, ) -> bool
 
 	""" Returns `True` if all elements of `it` are equal to each other.
+
 		Much faster than:
 			return len(set(it)) in (0, 1)
 		and also faster than:
@@ -315,7 +320,7 @@ def pairwise(it):
 
 	""" Return two elements of iterable `it` at a time,
 		but only advances the iterable by 1 each time.
-		(a, b, c) -> (a, b), (b, c)
+		pairwise((a, b, c)) -> (a, b), (b, c)
 	"""
 
 	a, b = tee(it, 2)
@@ -324,6 +329,10 @@ def pairwise(it):
 
 def findfirst(func, it, default=(None, None)):
 	# type: (Callable[[T], bool], Iterable[T], Tuple[Optional[int], Optional[T]]) -> Tuple[Optional[int], Optional[T]]
+
+	""" Find the first element of iterable `it` where `func(elm)` evaluates to True.
+		Return `default` if not such element was found.
+	"""
 
 	for i, x in enumerate(it):
 		if func(x):
@@ -335,7 +344,9 @@ def findfirst(func, it, default=(None, None)):
 def is_empty(it):
 	# type: (Iterator, ) -> bool
 
-	""" Returns True if the iterator `it` is already fully consumed. """
+	""" Returns True if the iterator `it` is already fully consumed.
+		If not, it will be advanced.
+	"""
 
 	try:
 		next(it)
@@ -346,7 +357,7 @@ def is_empty(it):
 def consume(it):
 	# type: (Iterable, ) -> None
 
-	""" Consumes the iterable `it` completely """
+	""" Consumes the iterable `it` completely. """
 
 	deque(it, maxlen=0)
 
@@ -356,6 +367,7 @@ def resizer(it, size, pad=False, pad_elm=None):
 	""" Cuts the input iterable `it` consisting of variable length slices
 		into slices of length `size`. If pad is True, the last slice
 		will be padded to length `size` with `pad_elm`.
+
 		resizer(("asd", "qw", "e"), 4) -> (['a', 's', 'd', 'q'], ['w', 'e'])
 		resizer(("asd", "qw", "e"), 4, True, "x") -> (['a', 's', 'd', 'q'], ['w', 'e', 'x', 'x'])
 	"""
@@ -395,7 +407,7 @@ def resizer(it, size, pad=False, pad_elm=None):
 def switch(it):
 	# type: (Iterable[Tuple[T, U]], ) -> Iterator[Tuple[U, T]]
 
-	""" Swaps the elements in a iterable of pairs.
+	""" Swaps the elements in iterable of pairs `it`.
 		((3, 6), (7, 4), (1, 9)) -> (6, 3), (4, 7), (9, 1)
 	"""
 
@@ -403,6 +415,9 @@ def switch(it):
 
 def switched_enumerate(it):
 	# type: (Iterable[T], ) -> Iterator[Tuple[T, int]]
+
+	""" Same as `enumerate()` except that order of the output pair is switched.
+	"""
 
 	return switch(enumerate(it))
 
@@ -533,19 +548,26 @@ def powerset(sit):
 def any_in_common(a, b):
 	# type: (Iterable[T], Iterable[T]) -> bool
 
-	""" Tests if iterables `a` and `b` have any elements in common. """
+	""" Tests if iterables `a` and `b` have any elements in common.
+	"""
 
 	return any(i == j for i, j in product(a, b))
 
 # had cmp=b"\0" default before
-def all_equal_to(iterable, cmp):
+def all_equal_to(it, cmp):
 	# type: (Iterable[T], T) -> bool
 
-	return all(elm == cmp for elm in iterable)
+	""" Test if every item of iterable `it` is equal to `cmp`.
+	"""
+
+	return all(elm == cmp for elm in it)
 
 # was: iter_same
 def iter_equal(*its):
 	# type: (*Iterable, ) -> bool
+
+	""" Test if the contents of all iterables `its` is the same.
+	"""
 
 	return all(all_equal(it_elements) for it_elements in zip_longest(*its))
 
@@ -558,6 +580,7 @@ def iter_different(it_a, it_b):
 
 def every_n(it, n, pos=0):
 	# type: (Iterable[T], int, int) -> T
+
 	""" Yields every `n`-th element from iterable `it` and starts at `pos`. """
 
 	if pos > 0:
@@ -579,6 +602,7 @@ def split(it, size):
 
 def remove_all_dupes(it): # was: remove_dup_list
 	# type: (Iterable[T], ) -> Iterable[T]
+
 	""" Removes all duplicates from `it` while preserving order. """
 
 	# Dave Kirby

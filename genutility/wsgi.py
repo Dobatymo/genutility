@@ -4,7 +4,7 @@ from werkzeug.exceptions import BadRequest
 from werkzeug.wsgi import get_host
 
 if TYPE_CHECKING:
-	from typing import Any
+	from typing import Any, Dict, Optional, Callable, Mapping, Iterable
 	WsgiApp = Any
 
 class HostDispatcher(object):

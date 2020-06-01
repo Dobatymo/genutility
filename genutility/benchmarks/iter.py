@@ -1,5 +1,3 @@
-from timeit import repeat
-
 benchmarks = {
 	"all_equal": {
 		"all-different": {
@@ -44,6 +42,8 @@ benchmarks = {
 }
 
 if __name__ == "__main__":
+
+	from timeit import repeat
 
 	for funcname, benchs in benchmarks.items():
 		for benchname, kwargs in benchs.items():

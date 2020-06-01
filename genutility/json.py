@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import viewkeys
-import logging, json
+import logging, json, csv
 from itertools import islice
 from functools import partial, wraps
 from datetime import timedelta
@@ -15,7 +15,8 @@ from .filesystem import mdatetime
 from .object import args_to_key
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Optional, TextIO, Union, Iterator
+	from typing import Any, Callable, Dict, Optional, TextIO, Union, Iterator, Sequence, Tuple
+	from .compat.pathlib import Path
 	JsonDict = Dict[str, Any]
 
 if __debug__:

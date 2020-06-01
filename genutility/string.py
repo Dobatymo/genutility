@@ -13,7 +13,8 @@ from .iter import switched_enumerate
 from .binary import encode_binary, decode_binary
 
 if TYPE_CHECKING:
-	from typing import Dict, Iterable, Tuple, Callable, Optional, Sequence
+	from typing import Any, Dict, Iterable, Tuple, Callable, Optional, Sequence, TypeVar, Union
+	T = TypeVar("T")
 
 english_consonants = "bcdfghjklmnpqrstvwxz" # y?
 english_vowels = "aeiouy" # y?

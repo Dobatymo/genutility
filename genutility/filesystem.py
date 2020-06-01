@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from .file import equal_files, iterfilelike, FILE_IO_BUFFER_SIZE
 from .iter import is_empty
-from .os import islink, uncabspath
+from .os import islink, uncabspath, _not_available
 from .ops import logical_implication
 from .datetime import datetime_from_utc_timestamp
 from .compat import FileExistsError
@@ -22,7 +22,8 @@ if __debug__:
 	from .compat import gzip, bz2
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable
+	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable, List, Set
+	from datetime import datetime
 	PathType = Union[str, PathLike]
 	from .compat.os import DirEntry
 
@@ -30,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 ascii_control = set(chr(i) for i in range(1, 32))
 ntfs_illegal_chars = {"\0", "/"}
-fat_illegal_chars = {"\0", "/", '?', '<', '>', '\\', ':', '*', '|', '"', '^'} # ^ really?
+fat_illegal_chars = {"\0", "/", "?", "<", ">", "\\", ":", "*", "|", '"', "^"} # ^ really?
 
 windows_ntfs_illegal_chars = ntfs_illegal_chars | {"\\", ":", "*", "?", "\"", "<", ">", "|"} | ascii_control
 windows_fat_illegal_chars = fat_illegal_chars
@@ -95,14 +96,14 @@ class FileProperties(object):
 		return "FileProperties({})".format(", ".join(args))
 
 class DirEntryStub(object):
-	__slots__ = ('name', 'path')
+	__slots__ = ("name", "path")
 
 	def __init__(self, name, path):
 		self.name = name
 		self.path = path
 
 class RelativeDirEntry(object):
-	__slots__ = ('entry', 'basepath', 'relpath')
+	__slots__ = ("entry", "basepath", "relpath")
 
 	def __init__(self, entry):
 		self.entry = entry
@@ -144,17 +145,17 @@ class RelativeDirEntry(object):
 		return self.entry.path
 
 class SkippableDirEntry(RelativeDirEntry):
-	__slots__ = ('follow', )
+	__slots__ = ("follow", )
 
 	def __init__(self, entry):
-		MyDirEntry.__init__(self, entry)
+		RelativeDirEntry.__init__(self, entry)
 		self.follow = True
 
 if TYPE_CHECKING:
 	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
 
 def mdatetime(path):
-	# type: (Union[PathLike, Path], ) -> datetime
+	# type: (PathType, ) -> datetime
 
 	""" Returns the last modified date of `path`. """
 
@@ -166,7 +167,7 @@ def mdatetime(path):
 	return datetime_from_utc_timestamp(mtime)
 
 def rename(old, new):
-	# type: (str, str) -> None
+	# type: (PathType, PathType) -> None
 
 	""" Renames `old` to `new`. Fails if `new` already exists.
 		This is the default behaviour of `os.rename` on Windows.
@@ -182,7 +183,7 @@ def rename(old, new):
 	os.renames(old, new) # fixme: don't use rename*s*
 
 def copy_file_generator(source, dest, buffer_size=FILE_IO_BUFFER_SIZE, overwrite_readonly=False):
-	# type: (str, str, int, bool) -> Iterator[None]
+	# type: (PathType, PathType, int, bool) -> Iterator[None]
 
 	""" Partial file is not deleted if exception gets raised anywhere. """
 
@@ -219,6 +220,7 @@ def st_mode_to_str(st_mode):
 	else: return "unknown"
 
 def append_to_filename(path, s):
+	# type: (PathType, str) -> str
 
 	""" Add `s` to the filename given in `path`. It's added before the extension, not after. """
 
@@ -334,23 +336,28 @@ def make_writeable(path, stats=None):
 
 def is_writeable(stats):
 	# type: (os.stat_result, ) -> bool
+
 	return stats.st_mode & stat.S_IWRITE
 
 def is_readable(stats):
 	# type: (os.stat_result, ) -> bool
+
 	return stats.st_mode & stat.S_IREAD
 
 def isfile(stats):
 	# type: (os.stat_result, ) -> bool
+
 	return stat.S_ISREG(stats.st_mode)
 
 def isdir(stats):
 	# type: (os.stat_result, ) -> bool
+
 	return stat.S_ISDIR(stats.st_mode)
 
 # was: islink
 def statsislink(stats):
 	# type: (os.stat_result, ) -> bool
+
 	return stat.S_ISLNK(stats.st_mode)
 
 def extract_basic_stat_info(stats):
@@ -392,17 +399,17 @@ def _special_subber(s, replacement="_"):
 	# type: (str, str) -> str
 
 	if s == "." or s == "..":
-		return s.replace(".", replace)
+		return s.replace(".", replacement)
 
 	return s
 
-def windows_compliant_filename(filename, replace="_"):
+def windows_compliant_filename(filename, replacement="_"):
 	# type: (str, str) -> str
 	""" https://msdn.microsoft.com/en-us/library/aa365247.aspx """
 	# reg. wikipedia: \x7f is valid!
 	# trailing dots and spaces are ignored by windows
 
-	ret = _char_subber(filename, windows_illegal_chars, replace).rstrip(". ") # strip or replace?, translate
+	ret = _char_subber(filename, windows_illegal_chars, replacement).rstrip(". ") # strip or replace?, translate
 
 	root, _ = os.path.splitext(ret)
 
@@ -411,13 +418,13 @@ def windows_compliant_filename(filename, replace="_"):
 
 	return ret
 
-def windows_compliant_dirname(filename, replace):
+def windows_compliant_dirname(filename, replacement):
 	# type: (str, str) -> str
 	""" https://msdn.microsoft.com/en-us/library/aa365247.aspx """
 	# reg. wikipedia: \x7f is valid!
 	# trailing dots and spaces are ignored by windows
 
-	ret = _char_subber(filename, windows_illegal_chars, replace).rstrip(" ")
+	ret = _char_subber(filename, windows_illegal_chars, replacement).rstrip(" ")
 
 	root, _ = os.path.splitext(ret)
 
@@ -426,19 +433,27 @@ def windows_compliant_dirname(filename, replace):
 
 	return ret
 
-def linux_compliant_filename(filename, replace="_"):
-	filename = _special_subber(filename, replace)
-	return _char_subber(filename, unix_illegal_chars, replace)
+def linux_compliant_filename(filename, replacement="_"):
+	# type: (str, str) -> str
 
-def linux_compliant_dirname(filename, replace="_"):
-	return _char_subber(filename, unix_illegal_chars, replace)
+	filename = _special_subber(filename, replacement)
+	return _char_subber(filename, unix_illegal_chars, replacement)
 
-def mac_compliant_filename(filename, replace="_"):
-	filename = _special_subber(filename, replace)
-	return _char_subber(filename, mac_illegal_chars, replace)
+def linux_compliant_dirname(filename, replacement="_"):
+	# type: (str, str) -> str
 
-def mac_compliant_dirname(filename, replace="_"):
-	return _char_subber(filename, mac_illegal_chars, replace)
+	return _char_subber(filename, unix_illegal_chars, replacement)
+
+def mac_compliant_filename(filename, replacement="_"):
+	# type: (str, str) -> str
+
+	filename = _special_subber(filename, replacement)
+	return _char_subber(filename, mac_illegal_chars, replacement)
+
+def mac_compliant_dirname(filename, replacement="_"):
+	# type: (str, str) -> str
+
+	return _char_subber(filename, mac_illegal_chars, replacement)
 
 def windows_split_path(s):
 	# type: (str, ) -> List[str]
@@ -485,7 +500,7 @@ def compliant_path(path, replace="_"):
 	return ret
 
 def reldirname(path):
-	# type: (str, ) -> str
+	# type: (PathType, ) -> str
 
 	ret = os.path.dirname(path)
 	if not ret:
@@ -519,6 +534,7 @@ def equal_dirs(dir1, dir2):
 
 def realpath_win(path):
 	# type: (PathType, ) -> str
+
 	"""fix for os.path.realpath() which doesn't work under Win7"""
 
 	path = os.path.abspath(path)
@@ -528,7 +544,7 @@ def realpath_win(path):
 		return path
 
 def search(directories, pattern, dirs=True, files=True, rec=True, follow_symlinks=False):
-	# type: (Iterable[PathType], str, bool, bool, bool) -> Iterator[DirEntry]
+	# type: (Iterable[PathType], str, bool, bool, bool, bool) -> Iterator[DirEntry]
 
 	""" Search for files and folders matching the wildcard `pattern`. """
 
@@ -538,6 +554,8 @@ def search(directories, pattern, dirs=True, files=True, rec=True, follow_symlink
 				yield entry
 
 def rename_files_in_folder(path, pattern, transform, template, rec=True, follow_symlinks=False):
+	# type: (PathType, str, Callable, str, bool, bool) -> None
+
 	cpattern = re.compile(pattern)
 
 	for entry in scandir_rec(path, files=True, dirs=False, rec=rec, follow_symlinks=follow_symlinks):
@@ -553,7 +571,7 @@ def rename_files_in_folder(path, pattern, transform, template, rec=True, follow_
 		os.rename(filepath, os.path.join(base, to))
 
 def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
-	# type: (str, str, bool, bool) -> None
+	# type: (PathType, str, bool, bool) -> None
 
 	""" Deletes all files of type `ext` if the same file without the ext exists
 		and rename if it does not exit. """
@@ -584,7 +602,7 @@ def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
 				break
 
 def iter_links(path):
-	# type: (str, ) -> Iterator[str]
+	# type: (PathType, ) -> Iterator[str]
 
 	""" Yields all directory symlinks (and junctions on windows). """
 

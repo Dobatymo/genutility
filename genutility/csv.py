@@ -6,9 +6,13 @@ import csv
 from itertools import islice
 from functools import partial
 from io import open
+from typing import TYPE_CHECKING
 
 from .dict import itemgetter
 from .func import identity, zipmap, compose
+
+if TYPE_CHECKING:
+	from typing import Iterator, List, Optional, Sequence, Callable
 
 def iter_csv(path, delimiter=",", encoding="utf-8"):
 	# type: (str, str, str, str, str) -> Iterator[List[str]]
@@ -23,6 +27,8 @@ def iter_csv(path, delimiter=",", encoding="utf-8"):
 				yield data
 
 def read_csv(path, delimiter=",", skip=0, usecols=None, dtype=None, encoding="utf-8"):
+	# type: (str, str, int, Optional[Sequence[int]], Optional[Sequence[Callable]], str) -> Iterator[tuple]
+
 	with open(path, "rt", encoding=encoding, newline="") as csvfile:
 		if usecols:
 			if dtype:

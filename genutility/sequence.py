@@ -9,7 +9,8 @@ from .func import identity
 from .indexing import triangular_indices
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple, Sequence
+	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple, Sequence, TypeVar
+	T = TypeVar("T")
 
 class LazyStringList(object):
 

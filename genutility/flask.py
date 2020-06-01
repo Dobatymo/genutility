@@ -5,11 +5,13 @@ from future.moves.urllib.parse import quote, unquote
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from typing import TYPE_CHECKING
 
-from flask import request
+from flask import request, Response
 from werkzeug.routing import BaseConverter
 
 if TYPE_CHECKING:
-	from typing import Optional
+	from typing import Optional, Dict, TypeVar, Hashable
+	T = TypeVar("T")
+	H = TypeVar("H", bound=Hashable)
 
 """ examples
 
@@ -61,9 +63,9 @@ def authenticate():
 	"""Sends a 401 response that enables basic auth"""
 
 	return Response(
-		'Could not verify your access level for that URL.\n'
-		'You have to login with proper credentials', 401,
-		{'WWW-Authenticate': 'Basic realm="Login Required"'}
+		"Could not verify your access level for that URL.\n"
+		"You have to login with proper credentials", 401,
+		{"WWW-Authenticate": 'Basic realm="Login Required"'}
 	)
 
 def do_basic_auth(user_dict):

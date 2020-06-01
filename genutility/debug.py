@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Callable, Collection
+	from typing import Callable, Collection, Optional, Any
 
 def _to_union(types):
 	# type: (Collection[str], ) -> str
@@ -60,7 +60,7 @@ def _kwarg_str(key, value, maxlen=None, app="...", repr_args=True):
 	return key + "=" + _arg_str(value, maxlen, app, repr_args)
 
 def args_str(args, kwargs, maxlen=20, app="...", repr_args=True):
-	# type: (tuple, dict, Optional[tin], str, bool) -> str
+	# type: (tuple, dict, Optional[int], str, bool) -> str
 
 	""" Creates printable string from function arguments. """
 

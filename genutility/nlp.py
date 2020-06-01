@@ -11,7 +11,7 @@ from nltk.tokenize import word_tokenize as tokenize
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
-	from typing import Dict, TextIO, Union, Iterator, List
+	from typing import Dict, Iterator, Iterable, List, TextIO, Union
 	from .gensim import KeyedVectors
 
 def gensim_indexer(embeddings, doc, ignore=True):

@@ -3,9 +3,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 from datetime import timedelta
 from fractions import Fraction
+from typing import TYPE_CHECKING
 
 from .compat import FileExistsError
 from .compat.os import PathLike, fspath
+
+if TYPE_CHECKING:
+	from typing import Any, Union, Iterator, Tuple, Sequence
+	import numpy as np
+	from av import VideoFrame
+	from .compat.pathlib import Path
+	WsgiApp = Any
 
 #if __debug__:
 #	import av

@@ -14,7 +14,7 @@ from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
 from requests.exceptions import ConnectionError
 
 if TYPE_CHECKING:
-	from typing import Optional, IO
+	from typing import Optional, Tuple, TextIO
 
 def aria_bool(value):
 	# type: (Optional[bool], ) -> Optional[str]
@@ -103,7 +103,7 @@ class AriaDownloader(object):
 		return len(self.gids)
 
 	def block_one(self, progress_file=sys.stdout):
-		# type: () -> Tuple[str, str]
+		# type: (Optional[TextIO], ) -> Tuple[str, str]
 
 		""" Blocks until one download is done. """
 
@@ -163,7 +163,9 @@ class AriaDownloader(object):
 			raise WouldBlockForever("No downloads active or waiting")
 
 	def block_all(self):
-		ret = []
+		# type: () -> List[Tuple[Any, Any]]
+
+		ret = [] # type: Tuple[Any, Any]
 
 		while True:
 			try:
@@ -177,6 +179,8 @@ class AriaDownloader(object):
 		return ret
 
 	def remove_stopped(self, gid):
+		# type: (str, ) -> None
+
 		self.gids.remove(gid)
 
 		# removes a complete/error/removed download
@@ -184,7 +188,7 @@ class AriaDownloader(object):
 		self.query("remove_download_result", gid)
 
 	def block_gid(self, gid, progress_file=sys.stdout):
-		# type: (str, Optional[IO]) -> path
+		# type: (str, Optional[TextIO]) -> str
 
 		""" Blocks until download is done.
 			If progress printing is not needed, `progress_file` should be set to `None`.
@@ -266,6 +270,7 @@ class AriaDownloader(object):
 class DownloadManager(object):
 
 	""" To use from a single thread.
+
 		State transitions:
 		waiting -> running (automatically)
 		running -> paused (manually)
@@ -305,9 +310,9 @@ class DownloadManager(object):
 			- canceled if downloading
 			- removed if completed
 			- removed if errored.
-			The previous state will be returned, 
+			The previous state will be returned,
 		"""
-		
+
 		# sets the status if `uid` to canceled.
 
 	def clean(self, uid, states=None):
@@ -318,7 +323,7 @@ class DownloadManager(object):
 		"""
 
 		# doesn't change status
-	
+
 	def forget(self, uid):
 		""" Remove `uid` from the manager completely. It can only do so for downloads
 			with the state "canceled".

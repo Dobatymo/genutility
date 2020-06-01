@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import re
 from ctypes import wintypes, Structure, create_unicode_buffer, WinError, sizeof, byref
 from ctypes.wintypes import BYTE
+from typing import TYPE_CHECKING
 
 from cwinsdk import struct2dict
 from cwinsdk.um.fileapi import CreateFileW, OPEN_EXISTING
@@ -16,6 +17,9 @@ from cwinsdk.um.winioctl import PARTITION_IFS, PARTITION_MSFT_RECOVERY, DISK_GEO
 	SMART_GET_VERSION, GETVERSIONINPARAMS, IOCTL_DISK_VERIFY, VERIFY_INFORMATION, FSCTL_ALLOW_EXTENDED_DASD_IO
 
 from .handle import WindowsHandle, _mode2access
+
+if TYPE_CHECKING:
+	from typing import Any
 
 def get_length(path):
 	# type: (str, ) -> int
@@ -196,6 +200,9 @@ volumep = re.compile(r"^\\\\[\.\?]\\[A-Z]:$")
 drivep = re.compile(r"^\\\\[\.\?]\\PHYSICALDRIVE[0-9]$")
 
 def is_volume_or_drive(s):
+
+	from argparse import ArgumentTypeError
+
 	pre = "\\\\.\\"
 	if not s.startswith(pre):
 		s = pre + s
@@ -205,7 +212,7 @@ def is_volume_or_drive(s):
 	if volumep.match(s) or drivep.match(s):
 		return s
 	else:
-		raise argparse.ArgumentTypeError("X: or PHYSICALDRIVEX")
+		raise ArgumentTypeError("X: or PHYSICALDRIVEX")
 
 def open_logical_volume(FileName):
 	assert volumep.match(FileName)

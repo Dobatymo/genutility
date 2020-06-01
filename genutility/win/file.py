@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from ctypes import byref, sizeof
-from ctypes import GetLastError, FormatError, WinError
+from ctypes import byref, sizeof, GetLastError, FormatError, WinError
 from errno import EACCES
 
 from cwinsdk.windows import (
@@ -21,6 +20,8 @@ class SharingViolation(OSError):
 class WindowsFile(WindowsHandle):
 
 	def __init__(self, handle):
+		# type: (int, ) -> None
+
 		assert isinstance(handle, int)
 		self.handle = handle
 
@@ -71,6 +72,8 @@ class WindowsFile(WindowsHandle):
 		return FileInformation
 
 def is_open_for_write(path):
+	# type: (str, ) -> bool
+
 	try:
 		with WindowsFile.from_path(path, mode="r", shared=False):
 			return False

@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os, re, struct, warnings
 from io import open
+from typing import TYPE_CHECKING
 
 import pkg_resources
 
@@ -9,6 +10,9 @@ from .exceptions import ParseError, Break
 from .file import read_or_raise
 from .csv import iter_csv
 from .compat.os import fspath
+
+if TYPE_CHECKING:
+	from typing import Optional, BytesIO, Tuple, Iterator
 
 # http://mp4ra.org/#/atoms
 # https://wiki.multimedia.cx/index.php/QuickTime_container#QuickTime_Atom_Reference
@@ -18,6 +22,8 @@ from .compat.os import fspath
 """
 
 def _load_atoms():
+	# type: () -> dict
+
 	package_name = __package__ or "genutility"
 	atoms_path = pkg_resources.resource_filename(package_name, "data/mp4-atoms.tsv")
 
@@ -33,6 +39,7 @@ atoms = _load_atoms()
 atomcodep = re.compile(br"[0-9a-zA-Z]{4}") # what do the specs say here?
 
 def read_atom(fin):
+	# type: (BytesIO, ) -> Tuple[int, str, int]
 
 	pos = fin.tell()
 
@@ -49,6 +56,7 @@ def read_atom(fin):
 	return pos, code, size
 
 def _enum_atoms(fin, total_size, depth):
+	# type: (BytesIO, int, int) -> Iterator[Tuple[int, int, str, int]]
 
 	while fin.tell() < total_size:
 		pos, type, size = read_atom(fin)
@@ -102,7 +110,7 @@ if __name__ == "__main__":
 
 	parser = ArgumentParser()
 	parser.add_argument("path", type=is_dir)
-	parser.add_argument("--errors-only", action="store_true")
+	parser.add_argument("-e", "--errors-only", action="store_true")
 	parser.add_argument("-r", "--recursive", action="store_true")
 	args = parser.parse_args()
 

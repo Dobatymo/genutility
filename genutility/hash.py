@@ -10,7 +10,7 @@ from .file import read_file, blockfileiter
 from .filesystem import scandir_rec
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional
+	from typing import Callable, Optional, Union, Iterable
 	from _hashlib import HASH as Hashobj
 	from .filesystem import PathType
 
@@ -27,6 +27,10 @@ def hash_file(path, hashcls, chunksize=FILE_IO_BUFFER_SIZE, mode="rb", encoding=
 def hash_data(data, hashcls):
 	# type: (bytes, Union[Callable[[], Hashobj], str]) -> Hashobj
 
+	""" Hashes `data` with `hashcls`.
+		`hashcls` can either be a string like "md5" or a hash object like `hashlib.md5`.
+	"""
+
 	if isinstance(hashcls, str):
 		m = hashlib.new(hashcls)
 	else:
@@ -40,6 +44,9 @@ sha1_hash_data = partial(hash_data, hashcls=hashlib.sha1)
 
 def crc32_hash_iter(it):
 	# type: (Iterable[bytes], ) -> int
+
+	""" Create CRC32 hash from bytes takes from `it`.
+	"""
 
 	prev = 0
 	for data in it:
@@ -85,6 +92,8 @@ def ed2k_hash_file_v1(path):
 		- MLDonkey
 		- Shareaza
 		- HashCalc
+
+		This differs from `ed2k_hash_file_v2` only if the file size is a multiple of `ed2k_chunksize`.
 	"""
 
 	if os.path.getsize(path) <= ed2k_chunksize:
@@ -101,6 +110,8 @@ def ed2k_hash_file_v2(path):
 		This hashing method is used by
 		- eMule
 		- AOM
+
+		This differs from `ed2k_hash_file_v1` only if the file size is a multiple of `ed2k_chunksize`.
 	"""
 
 	filesize = os.path.getsize(path)

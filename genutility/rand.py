@@ -2,6 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import range
 
 from random import choice, randrange
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Iterator, Tuple
 
 def randstr(length, charset):
 	# type: (int, str) -> str

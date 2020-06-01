@@ -1,15 +1,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import logging
 from typing import TYPE_CHECKING
 
 import sqlite3
 
-from .exceptions import InconsistentState, NoResult
 from .iter import batch, progress
 from .signal import safe_for_loop
 
 if TYPE_CHECKING:
-	from sqlite3 import Cursor
+	from sqlite3 import Cursor, Iterable
 
 def vacuum(db_path):
 	# type: (str, ) -> None

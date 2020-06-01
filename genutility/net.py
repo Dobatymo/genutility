@@ -1,7 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import socket, re
+from typing import TYPE_CHECKING
+
 import netifaces
+
+if TYPE_CHECKING:
+	from typing import Optional
 
 def is_ipv4(s):
 	# type: (str, ) -> bool
@@ -29,6 +34,9 @@ def is_email(s):
 
 def get_standard_gateway(default=None):
 	# type: (Optional[str], ) -> Optional[str]
+
+	""" Returns the standard IPv4 gateway.
+	"""
 
 	for ipv4_gateway in netifaces.gateways()["default"][netifaces.AF_INET]:
 		try:

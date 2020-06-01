@@ -9,7 +9,7 @@ import piexif
 from .exceptions import NoActionNeeded
 
 if TYPE_CHECKING:
-	from typing import Any, Tuple, Union
+	from typing import Any, Tuple, Union, Dict
 	Color = Union[str, Tuple[int, int, int]]
 
 def multiline_textsize(text, ttf, spacing=4):

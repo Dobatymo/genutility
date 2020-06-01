@@ -7,8 +7,9 @@ import numpy as np
 from .numpy import unblock
 
 if TYPE_CHECKING:
-	from typing import Union
+	from typing import Union, Tuple
 	from fractions import Fraction
+	Rational = Union[float, Fraction]
 
 def grayscale(arr):
 	return np.sum(arr, axis=-1) // arr.shape[-1]
@@ -23,7 +24,7 @@ def histogram_1d(arr, levels):
 	return np.apply_along_axis(np.bincount, -1, arr, minlength=levels)
 
 def resize_oar(max_width, max_height, dar):
-	# type: (int, int, Union[float, Fraction]) -> Tuple[int, int]
+	# type: (int, int, Rational) -> Tuple[int, int]
 
 	maxdar = max_width / max_height
 

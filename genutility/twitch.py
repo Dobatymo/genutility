@@ -2,9 +2,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from future.utils import viewkeys
 import json
+from typing import TYPE_CHECKING
 
 from .http import URLRequest
 from .ops import logical_xor
+
+if TYPE_CHECKING:
+	from typing import Callable, Optional, List, Tuple
 
 class StreamWatcher(object):
 
@@ -39,6 +43,7 @@ class TwitchAPI(object):
 	streams = "streams?user_id={}"
 
 	def __init__(self, client_id, userid=None, username=None):
+		# type: (str, Optional[str], Optional[str]) -> None
 
 		if not logical_xor(userid, username):
 			raise ValueError("Either the userid or the username must be given")
@@ -51,11 +56,15 @@ class TwitchAPI(object):
 			self.userid = self.get_userid(username)
 
 	def req(self, url, params):
+		# type: (str, List[Tuple[str, str]]) -> dict
+
 		qs = "&".join(k+"="+v for k, v in params)
 		data = URLRequest(url + "?" + qs, headers={"Client-ID": self.client_id}).load()
 		return json.loads(data)
 
 	def get_userid(self, username):
+		# type: (str, ) -> str
+
 		d = self.req(self.base + self.login, [("login", username)])
 		return d['data'][0]['id']
 
@@ -70,4 +79,6 @@ class TwitchAPI(object):
 		return ret
 
 	def watcher(self):
+		# type: () -> StreamWatcher
+
 		return StreamWatcher(self)

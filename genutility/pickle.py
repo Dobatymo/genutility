@@ -13,7 +13,8 @@ from .filesystem import mdatetime
 from .object import args_to_key
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Optional
+	from typing import Any, Callable, Optional, Iterator, Iterable
+	from .compat.pathlib import Path
 
 def read_pickle(path):
 	# type: (str, ) -> Any

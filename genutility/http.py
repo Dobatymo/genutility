@@ -18,6 +18,7 @@ from .url import get_filename_from_url
 if TYPE_CHECKING:
 	from typing import Callable, Optional, Tuple, Mapping
 	from http.cookiejar import CookieJar
+	from http.client import HTTPMessage
 
 if __debug__:
 	import requests
@@ -167,7 +168,7 @@ class URLRequest(object):
 
 		req = request.Request(url, data=None, headers=headers)
 		self.response = openfunc(req, timeout=timeout)
-		self.headers = self.response.info() # type: http.client.HTTPMessage
+		self.headers = self.response.info() # type: HTTPMessage
 
 	def _close(self): # unused
 		self.response.close()

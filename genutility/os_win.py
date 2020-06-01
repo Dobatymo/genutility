@@ -19,10 +19,12 @@ from cwinsdk.um.WinBase import STD_OUTPUT_HANDLE
 from cwinsdk.um.winnt import FILE_ATTRIBUTE_REPARSE_POINT
 
 from .os_shared import _usagetuple, _volumeinfotuple
+from .compat.os import fspath
 
 if TYPE_CHECKING:
 	from typing import IO
 	from ctypes.wintypes import HANDLE
+	from .compat.os import PathLike
 
 unc_prefix = "\\\\?\\"
 
@@ -65,7 +67,7 @@ def _islink(path):
 		This function works in all cases.
 	"""
 
-	FileName = os.fspath(path)
+	FileName = fspath(path)
 	FileAttributes = GetFileAttributesW(FileName)
 
 	if FileAttributes == INVALID_FILE_ATTRIBUTES:

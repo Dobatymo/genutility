@@ -15,11 +15,12 @@ from .iter import progress
 from .object import cast
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable
+	from typing import Any, Dict, Iterable, List, Tuple, MutableMapping, Iterator
 
 	RawDocument = List[int]
 	IterableDocuments = Iterable[Iterable[int]]
 	TopicsMapping = MutableMapping[Tuple[int, int], int]
+	# fixme: where are Indices ?
 
 def top_topics(id2word, term_topic_matrix, num_words=10, decimals=2):
 	# type: (Dict[int, str], float[K, V], int) -> Iterator[List[Tuple[str, float]]]
@@ -31,7 +32,7 @@ def top_topics(id2word, term_topic_matrix, num_words=10, decimals=2):
 		yield [(id2word[id], prob) for id, prob in zip(indices, probs)]
 
 def format_topics(topics, linesep="\n", tokensep="\t"):
-	# type: (iterable[List[Tuple[str, float]]], ) -> str
+	# type: (Iterable[List[Tuple[str, float]]], ) -> str
 
 	buffer = []
 

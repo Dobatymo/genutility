@@ -5,7 +5,7 @@ from future.utils import viewitems
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Sequence, TypeVar
+	from typing import Any, Callable, Sequence, TypeVar, Container
 	T = TypeVar("T")
 
 def extract_indexes(d):

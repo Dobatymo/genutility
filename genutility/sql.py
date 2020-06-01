@@ -4,7 +4,7 @@ from future.utils import viewkeys, viewvalues
 from itertools import chain, repeat
 from typing import TYPE_CHECKING
 
-from .exceptions import NoResult
+from .exceptions import InconsistentState, NoResult
 
 if TYPE_CHECKING:
 	from typing import Any, Iterator

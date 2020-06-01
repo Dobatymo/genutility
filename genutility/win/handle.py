@@ -1,3 +1,6 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from ctypes import WinError
 from msvcrt import get_osfhandle, open_osfhandle
 from os import fdopen
 

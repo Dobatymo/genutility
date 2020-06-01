@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Set
+	from typing import Set, TypeVar
+	T = TypeVar("T")
 
 def get(s):
 	# type: (Set[T], ) -> T

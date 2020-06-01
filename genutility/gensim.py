@@ -10,7 +10,7 @@ from gensim.models.keyedvectors import KeyedVectors as KeyedVectorsOriginal
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
-	from typing import Iterator, Tuple, Optional, Callable, Collection, TextIO
+	from typing import Iterator, Tuple, Optional, Callable, Collection, TextIO, Union
 
 class DuplicateEntry(ValueError):
 	pass

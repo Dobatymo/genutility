@@ -9,8 +9,20 @@ class SizedIterable(Iterable, Sized):
 
 if TYPE_CHECKING:
 
-	from typing import Any, Optional, Sequence
+	from typing import Any, Optional, Sequence, Union
 	from typing_extensions import Protocol
+
+	Number = Union[int, float]
+
+	class Comparable(Protocol):
+
+		def __le__(self, other):
+			# type: (Any, ) -> bool
+			...
+
+		def __ge__(self, other):
+			# type: (Any, ) -> bool
+			...
 
 	class Computable(Protocol):
 

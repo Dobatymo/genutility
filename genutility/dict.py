@@ -5,11 +5,12 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, Mapping, Optional
+	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, Mapping, Optional, Tuple, TypeVar
 
 	T = TypeVar("T")
 	U = TypeVar("U")
 	H = TypeVar("H", bound=Hashable)
+	V = TypeVar("V")
 
 def flatten(d):
 	# type: (Dict[T, U], ) -> Iterator[U]
@@ -41,7 +42,7 @@ def get_one_of(d, keys):
 	raise KeyError("None of the {} keys could be found".format(len(keys)))
 
 def get_available(d, keys):
-	# type: (Dict[T, U], Iterable[T], -> Iterator[Tuple[T, U]]
+	# type: (Dict[T, U], Iterable[T]) -> Iterator[Tuple[T, U]]
 
 	for key in keys:
 		try:
@@ -61,7 +62,7 @@ def valuemap(func, d):
 
 # was: mapdict, mapget
 def mapmap(d, it):
-	# type: (Mapping[T, U], Iterable[T]) -> Iterator[U}
+	# type: (Mapping[T, U], Iterable[T]) -> Iterator[U]
 
 	return (d[i] for i in it)
 

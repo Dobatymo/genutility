@@ -2,6 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import bytes, zip
 from itertools import cycle
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Iterable
 
 def xor_stream(it, key, cyclekey=True):
 	# type: (Iterable[bytes], Iterable[bytes]) -> Iterator[bytes]

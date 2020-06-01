@@ -4,11 +4,15 @@ from builtins import filter, range
 
 import sys, os, logging
 import subprocess  # nosec
+from typing import TYPE_CHECKING
 
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
 from ..compat.pathlib import Path
 from ..twothree.filesystem import tofs, fromfs
+
+if TYPE_CHECKING:
+	from typing import Callable
 
 logger = logging.getLogger(__name__)
 

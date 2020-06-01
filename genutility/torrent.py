@@ -1,11 +1,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from hashlib import sha1
+from typing import TYPE_CHECKING
 
 from bencode import bdecode, bencode
 
 from .file import read_file, blockfileiter, blockfilesiter
 from .filesystem import FileProperties
+
+if TYPE_CHECKING:
+	from typing import Optional
+	from .compat.pathlib import Path
 
 def read_torrent(path):
 	return bdecode(read_file(path, "rb"))

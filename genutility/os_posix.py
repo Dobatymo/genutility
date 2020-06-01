@@ -1,8 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os, fcntl, signal
+from typing import TYPE_CHECKING
 
 from .os_shared import _usagetuple
+
+if TYPE_CHECKING:
+	from typing import IO
 
 def _lock(fp, exclusive=True, block=False):
 	# type: (IO, bool, bool) -> None

@@ -1,6 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from typing import TYPE_CHECKING
+
 import av
+
+if TYPE_CHECKING:
+	from typing import Iterator
+	import numpy as np
 
 class CorruptFile(Exception):
 	pass

@@ -9,7 +9,9 @@ from typing import TYPE_CHECKING
 from .iter import retrier
 
 if TYPE_CHECKING:
-	from typing import Callable, Any, TextIO, Iterable, Iterator
+	from typing import Callable, Any, TextIO, Iterable, Iterator, Optional, TypeVar, Tuple, Sequence
+	T = TypeVar("T")
+	U = TypeVar("U")
 
 logger = logging.getLogger(__name__)
 

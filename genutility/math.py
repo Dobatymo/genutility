@@ -14,21 +14,40 @@ from .iter import range_count
 from .exceptions import EmptyIterable
 
 if TYPE_CHECKING:
-	from typing import TypeVar, Comparable, Iterable, Tuple, Optional
+	from typing import TypeVar, Iterable, Tuple, Optional, Callable, Sequence, SupportsFloat
+	from .typing import Computable, Comparable
 	C = TypeVar("C", bound=Comparable)
 
 inf = float("inf")
 
 def reciprocal(n):
+	# type: (Computable, ) -> Computable
+
 	return 1. / n
 
 def sqr(x):
+	# type: (Computable, ) -> Computable
+
+	""" Returns `x` to the power of 2.
+	"""
+
 	return x*x
 
 def dot(a, b):
+	# type: (Iterable[Computable], Iterable[Computable]) -> Computable
+
+	""" Returns the dot product (inner product) of vectors `a` and `b`.
+	"""
+
 	return sum(map(mul, a, b))
 
-def euclidic_norm(x):
+# was: euclidic_norm
+def euclidean_norm(x):
+	# type: (Iterable[Computable], ) -> Computable
+
+	""" Returns the Euclidean norm of vector `x`.
+	"""
+
 	return sqrt(sum(map(sqr, x)))
 
 def shannon_entropy(ps, base=2):
@@ -39,10 +58,15 @@ def shannon_entropy(ps, base=2):
 	return -sum(p * log(p, base) for p in ps)
 
 def cosine_similarity(a, b):
-	return dot(a, b)/euclidic_norm(a)/euclidic_norm(b)
+	# type: (Iterable[Computable], Iterable[Computable]) -> Computable
+
+	""" Calculate the cosine similarity (normalized dot product) of vectors `a` and `b`.
+	"""
+
+	return dot(a, b)/euclidean_norm(a)/euclidean_norm(b)
 
 def argmin(l, s=0, e=None):
-	# type: (Sequence[T], int, Optional[int]) -> T
+	# type: (Sequence[C], int, Optional[int]) -> C
 
 	if not l:
 		raise EmptyIterable()
@@ -55,7 +79,7 @@ def argmin(l, s=0, e=None):
 	return arg
 
 def argmax(l, s=0, e=None):
-	# type: (Sequence[T], int, Optional[int]) -> T
+	# type: (Sequence[C], int, Optional[int]) -> C
 
 	if not l:
 		raise EmptyIterable()
@@ -68,7 +92,7 @@ def argmax(l, s=0, e=None):
 	return arg
 
 def argmax_pair(iterable):
-	# type: (Iterable[Orderable], ) -> Tuple[int, Orderable]
+	# type: (Iterable[C], ) -> Tuple[int, C]
 
 	it = iter(iterable)
 	arg = 0
@@ -87,13 +111,13 @@ def argmax_pair(iterable):
 from itertools import count
 from operator import itemgetter
 def argmax_v2(iterable):
-	# type: (Iterable[T], ) -> Tuple[int, T]
+	# type: (Iterable[C], ) -> Tuple[int, C]
 
 	""" nicer, but almost 2 times slower than above"""
 	return max(zip(count(), iterable), key=itemgetter(1))[0]
 
 def minmax(a, b):
-	# type: (T, T) -> T
+	# type: (C, C) -> C
 
 	""" `default` argument cannot be used, because the C level function doesn't have a default value
 		but an overload.
@@ -298,7 +322,7 @@ def fibonacci(n):
 	return _fibonacci(n-1)[1]
 
 def byte2size(byte, exp=0, base=1024):
-	# type: (Number, int, int) -> Tuple[float, str]
+	# type: (SupportsFloat, int, int) -> Tuple[float, str]
 
 	""" Converts integer number to float and unit string """
 
@@ -312,7 +336,7 @@ def byte2size(byte, exp=0, base=1024):
 			return byte, unit
 
 def byte2size_str(byte, roundval=3):
-	# type: (Number, int) -> str
+	# type: (SupportsFloat, int) -> str
 
 	""" Converts integer number to human readable size string. """
 
@@ -347,6 +371,7 @@ def primes(stop=None):
 
 def additaet(n):
 	# type: (int, ) -> int
+
 	""" sums all numbers from 0 to n using Gaussian formula.
 	basically same performance
 		(n*n + n) >> 1
@@ -363,12 +388,14 @@ addity = additaet
 
 def digitsum(n):
 	# type: (int, ) -> int
+
 	""" Use for numbers with more than 6 digits. """
 
 	return sum(map(int, str(n)))
 
 def digitsum_small(n):
 	# type: (int, ) -> int
+
 	""" Use for numbers with less than 6 digits. """
 
 	s = 0
@@ -379,19 +406,21 @@ def digitsum_small(n):
 
 def digitsum_base(n, base=10):
 	# type: (int, int) -> int
+
 	""" Use with string input if base is not 10. """
 
 	return sum(map(partial(int, base=base), str(n)))
 
 def euclidean_distance(a, b):
-	# type: (Number, Number) -> Number
+	# type: (Computable, Computable) -> Computable
 
 	""" Euclidean distance between `a` and `b`. """
 
 	return abs(b-a)
 
 def closest(numbers, number, distance_func=euclidean_distance):
-	# type: (Iterable, Number) -> Number
+	# type: (Iterable, Computable) -> Computable
+
 	""" For a list of `numbers`, return the closest number to `number`. """
 
 	return min(numbers, key=partial(distance_func, number))

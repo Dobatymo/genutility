@@ -3,6 +3,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.utils import viewitems
 
 from copy import copy
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Any
 
 def cast(object, class_, instanceof=object, *args, **kwargs):
 	""" Changes the class of `object` to `class_` if `object` is an instance of `instanceof`,
@@ -21,7 +25,7 @@ class STAR(object):
 	pass
 
 def args_to_key(args, kwargs, separator=STAR):
-	# type: (Tuple[Any], Dict[Any, Any] -> List[Any]
+	# type: (tuple, dict, Any) -> tuple
 
 	""" Create cache key from function arguments.
 	"""
