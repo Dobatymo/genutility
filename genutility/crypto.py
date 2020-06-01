@@ -5,7 +5,7 @@ from itertools import cycle
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Iterable
+	from typing import Iterable, Iterator
 
 def xor_stream(it, key, cyclekey=True):
 	# type: (Iterable[bytes], Iterable[bytes]) -> Iterator[bytes]

@@ -14,7 +14,7 @@ from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
 from requests.exceptions import ConnectionError
 
 if TYPE_CHECKING:
-	from typing import Optional, Tuple, TextIO
+	from typing import Any, Optional, Tuple, TextIO, List
 
 def aria_bool(value):
 	# type: (Optional[bool], ) -> Optional[str]
