@@ -134,7 +134,6 @@ class MyTestCase(TestCase):
 			try:
 				self.assertAlmostEqual(a, b, msg="in iteration index {}: {}".format(i, msg))
 			except TypeError:
-				# assert False, "Invalid types (probably different length iters)"
 				raise AssertionError("Invalid types (probably different length iters)") # from None
 
 	def assertAllEqual(self, args, msg=None): # *args doesn't work in python2!?
@@ -197,7 +196,8 @@ def random_arguments(n, *funcs):
 		def inner(self):
 			for i in range(n):
 				with self.subTest(str(i)):
-					assert func(self, *(f() for f in funcs)) is None
+					if func(self, *(f() for f in funcs)) is not None:
+						raise AssertionError
 		return inner
 	return decorator
 
@@ -210,7 +210,8 @@ def parametrize(*args_list):
 		def inner(self):
 			for args in args_list:
 				with self.subTest(str(args)):
-					assert func(self, *args) is None
+					if func(self, *args) is not None:
+						raise AssertionError
 		return inner
 	return decorator
 
@@ -222,7 +223,8 @@ def parametrize_product(*args_list):
 		def inner(self):
 			for args in product(*args_list):
 				with self.subTest(str(args)):
-					assert func(self, *args) is None
+					if func(self, *args) is not None:
+						raise AssertionError
 		return inner
 	return decorator
 
@@ -233,7 +235,8 @@ def repeat(number):
 		@wraps(func)
 		def inner(self):
 			for i in range(number):
-				assert func(self) is None # no self.subTest(str(i))
+				if func(self) is not None:# no self.subTest(str(i))
+					raise AssertionError
 		return inner
 	return decorator
 
