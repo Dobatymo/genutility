@@ -425,6 +425,13 @@ def closest(numbers, number, distance_func=euclidean_distance):
 
 	return min(numbers, key=partial(distance_func, number))
 
+def absolute_difference(a, b):
+	# type: (Computable, Computable) -> Computable
+
+	return abs(b - a)
+
+number_metric = absolute_difference
+
 if __name__ == "__main__":
 	import timeit
 	print(min(timeit.repeat(stmt="digitsum(111111)", setup="from __main__ import digitsum")))
