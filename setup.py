@@ -104,7 +104,7 @@ extras_require = {
 	"pdf": ["PyPDF2"],
 	"pillow": ["pillow", "piexif"],
 	"powerpoint": ["python-pptx"],
-	"salesforce": ["simple_salesforce>=1.1.0"],
+	"salesforce": ["simple_salesforce>=1.1.0", "simplejson"],
 	"scipy": ["numpy", "scipy"],
 	"toml": ["toml"],
 	"torch": ["torch"],

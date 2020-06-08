@@ -143,7 +143,7 @@ class MySalesforce(object):
 			Warning: `object_name` is not escaped!
 		"""
 
-		query_str = "SELECT QualifiedApiName FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{}'".format(object_name)
+		query_str = "SELECT QualifiedApiName FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{}'".format(object_name)  # nosec
 
 		return self._query(query_str)
 
