@@ -376,7 +376,8 @@ def unblock(arr, n1, n2, axis1=-1, axis2=-2, blocksize=False):
 	"""
 
 	s = np.array(arr.shape)
-	assert s[axis1] % n1 == 0 and s[axis2] % n2 == 0, "{}x{} does not divide by {}x{}".format(s[axis1], s[axis2], n1, n2)
+	if s[axis1] % n1 != 0 or s[axis2] % n2 != 0:
+		raise ValueError("{}x{} does not divide by {}x{}".format(s[axis1], s[axis2], n1, n2))
 
 	if blocksize:
 		n1 = s[axis1] // n1

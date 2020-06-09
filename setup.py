@@ -68,6 +68,7 @@ extras_require = {
 	"config": ["jsonschema", "sortedcontainers"],
 	"downloadmanager": ["aiohttp>=0.16.3", "orderedset"],
 	"encoder": ["numpy", "nltk; python_version>='3'", "nltk<3.5; python_version<'3'"],
+	"fingerprinting": ["numpy", "numba", "pillow"],
 	"html": ["beautifulsoup4"],
 	"http": ["requests"],
 	"http2": ["hyper"],
@@ -117,7 +118,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.38",
+	version="0.0.39",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,
