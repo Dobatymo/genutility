@@ -11,7 +11,6 @@ import genutility.concurrency
 import genutility.config
 import genutility.constants_video
 import genutility.cv
-import genutility.deprecated_filesystem
 import genutility.dict
 if not PY2:
 	import genutility.downloadmanager

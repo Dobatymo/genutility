@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from genutility.test import MyTestCase, parametrize
-from genutility.filesystem import append_to_filename, join_ext
+from genutility.filesystem import append_to_filename
 
 class FilesystemTest(MyTestCase):
 
@@ -14,13 +14,6 @@ class FilesystemTest(MyTestCase):
 	)
 	def test_append_to_filename(self, path, s, truth):
 		result = append_to_filename(path, s)
-		self.assertEqual(truth, result)
-
-	@parametrize(
-		("picture", "jpg", "picture.jpg"),
-	)
-	def test_join_ext(self, name, ext, truth):
-		result = join_ext(name, ext)
 		self.assertEqual(truth, result)
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
 from ..compat.pathlib import Path
+from ..compat.os import scandir
 from ..twothree.filesystem import tofs, fromfs
 
 if TYPE_CHECKING:
@@ -175,8 +176,8 @@ def create_rar_from_folder(path, dest_path=".", profile_setter_func=None, filter
 			r = Rar(dest_path / "{}.rar".format(name_transform(path.name)))
 			if profile_setter_func:
 				profile_setter_func(r)
-			for c in filter(filter_func, os.listdir(".")): #was: listdir_rec
-				r.add_file(c)
+			for entry in filter(filter_func, scandir(".")): #was: scandir_rec
+				r.add_file(entry.path)
 			r.create()
 		except RarError as e:
 			logger.error("%s\n%s" % (str(e), e.output))

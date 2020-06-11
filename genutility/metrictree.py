@@ -71,8 +71,11 @@ class BKTree(object):
 		"""
 
 		node = self.root
-
 		ret = [] # type: List[Tuple[int, Any]]
+
+		if node is None:
+			return ret
+
 		candidates = [node] # is a deque better here?
 
 		while candidates:
@@ -107,7 +110,13 @@ class BKTree(object):
 	def find_by_distance(self, distance):
 		# type: (int, ) -> Iterator[Set[Any]]
 
-		return BKTree._find_by_distance(self.root, distance)
+		""" Find all sets of values base on `distance` between each other.
+		"""
+
+		if self.root is None:
+			return iter([])
+		else:
+			return BKTree._find_by_distance(self.root, distance)
 
 	@staticmethod
 	def _dot(dot, node):
@@ -120,6 +129,9 @@ class BKTree(object):
 
 	def saveimage(self, filename, format="png"):
 		from graphviz import Digraph
+
+		if self.root is None:
+			raise ValueError("Tree is empty")
 
 		dot = Digraph(format=format)
 		dot.node(str(self.root.value))
@@ -138,7 +150,10 @@ class BKTree(object):
 	def values(self):
 		# type: () -> Iterator[Any]
 
-		return self._values(self.root)
+		if self.root is None:
+			return iter([])
+		else:
+			return self._values(self.root)
 
 	def __iter__(self):
 		# type: () -> Iterator[Any]

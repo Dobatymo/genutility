@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path
-from sys import version_info
+from sys import version_info, stdout
 from os import fdopen
 from io import open, TextIOWrapper, TextIOBase, RawIOBase, BufferedIOBase, SEEK_SET, SEEK_END
 from typing import TYPE_CHECKING
@@ -197,23 +197,23 @@ class OpenFileAndDeleteOnError(object):
 
 class OptionalWriteOnlyFile(object):
 
-	def __init__(self, path=None, mode="xb", encoding=None, compresslevel=9):
-		# type: (Optional[PathType], str, Optional[str], int) -> None
+	def __init__(self, path=None, mode="xb", encoding=None, errors=None, newline=None, compresslevel=9):
+		# type: (Optional[PathType], str, Optional[str], Optional[str], Optional[str], int) -> None
 
 		if path:
-			self.f = copen(path, mode, encoding=encoding, compresslevel=compresslevel)
+			self.fp = copen(path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel)
 		else:
-			self.f = None
+			self.fp = None
 
 	def __enter__(self):
-		if self.f:
-			return self.f
+		if self.fp:
+			return self.fp
 		else:
 			return self
 
 	def __exit__(self, exc_type, exc_value, traceback):
-		if self.f:
-			self.f.close()
+		if self.fp:
+			self.fp.close()
 
 	def write(self, data):
 		pass
@@ -221,23 +221,47 @@ class OptionalWriteOnlyFile(object):
 	def seek(self, offset, whence=None):
 		pass
 
+class StdoutFile(object):
+
+	def __init__(self, path=None, mode="xb", encoding=None, errors=None, newline=None, compresslevel=9):
+		# type: (Optional[PathType], str, Optional[str], Optional[str], Optional[str], int) -> None
+
+		if path:
+			self.fp = copen(path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel)
+			self.doclose = True
+		else:
+			self.doclose = False
+			if "b" in mode:
+				self.fp = stdout.buffer
+			elif "t" in mode:
+				self.fp = stdout
+			else:
+				raise ValueError("Explicit text or binary mode required: {}".format(mode))
+
+	def __enter__(self):
+		return self.fp
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if self.doclose:
+			self.fp.close()
+
 class PathOrBinaryIO(object):
 
 	def __init__(self, fname, mode="rb", close=False):
 		# type: (Union[PathType, BinaryIO],  str, str, str, Optional[str], bool) -> None
 
 		if isinstance(fname, (RawIOBase, BufferedIOBase)):
-			self._close = close
+			self.doclose = close
 			self.fp = fname
 		else:
-			self._close = True
+			self.doclose = True
 			self.fp = copen(fname, mode)
 
 	def __enter__(self):
 		return self.fp
 
 	def __exit__(self, exc_type, exc_value, traceback):
-		if self._close:
+		if self.doclose:
 			self.fp.close()
 
 class PathOrTextIO(object):
@@ -246,17 +270,17 @@ class PathOrTextIO(object):
 		# type: (Union[PathType, TextIO], str, str, str, Optional[str], bool) -> None
 
 		if isinstance(fname, TextIOBase):
-			self.close = close
+			self.doclose = close
 			self.fp = fname
 		else:
-			self.close = True
+			self.doclose = True
 			self.fp = copen(fname, mode, encoding=encoding, errors=errors, newline=newline)
 
 	def __enter__(self):
 		return self.fp
 
 	def __exit__(self, exc_type, exc_value, traceback):
-		if self.close:
+		if self.doclose:
 			self.fp.close()
 
 class LastLineFile(object):

@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import chr
+from builtins import chr, zip
 from future.moves.itertools import zip_longest
 
 import os, platform, stat, os.path, re, logging, shutil, errno
@@ -78,6 +78,8 @@ class FileProperties(object):
 	__slots__ = ("relpath", "size", "isdir", "abspath", "id", "modtime", "hash")
 
 	def __init__(self, relpath, size, isdir, abspath=None, id=None, modtime=None, hash=None):
+		# type: (str, int, bool, Optional[str], Optional[Any], Optional[datetime], Optional[str]) -> None
+
 		self.relpath = relpath
 		self.size = size
 		self.isdir = isdir
@@ -86,13 +88,22 @@ class FileProperties(object):
 		self.modtime = modtime
 		self.hash = hash
 
+	@classmethod
+	def keys(cls):
+		return cls.__slots__
+
+	def values(self):
+		return attrgetter(*self.__slots__)(self)
+
 	def __iter__(self):
-		return (self.relpath, self.size, self.isdir, self.abspath, self.id, self.modtime, self.hash)
+		# type: () -> tuple
+
+		return self.values()
 
 	def __repr__(self):
-		keys = self.__slots__
-		values = attrgetter(*keys)(self)
-		args = ("{}={!r}".format(k, v) for k, v in zip(keys, values) if v is not None)
+		# type: () -> str
+
+		args = ("{}={!r}".format(k, v) for k, v in zip(self.keys(), self.values.values()) if v is not None)
 		return "FileProperties({})".format(", ".join(args))
 
 class DirEntryStub(object):
@@ -102,19 +113,22 @@ class DirEntryStub(object):
 		self.name = name
 		self.path = path
 
-class RelativeDirEntry(object):
-	__slots__ = ("entry", "basepath", "relpath")
+class BaseDirEntry(object):
+	__slots__ = ("entry", )
 
 	def __init__(self, entry):
 		self.entry = entry
-		self.basepath = None # type: Optional[str]
-		self.relpath = None # type: Optional[str]
 
-	def __str__(self):
-		return self._path
+	@property
+	def name(self):
+		return self.entry.name
 
-	def stat(self):
-		return self.entry.stat()
+	@property
+	def path(self):
+		return self.entry.path
+
+	def inode(self):
+		return self.entry.inode()
 
 	def is_dir(self):
 		return self.entry.is_dir()
@@ -125,34 +139,46 @@ class RelativeDirEntry(object):
 	def is_symlink(self):
 		return self.entry.is_symlink()
 
-	def inode(self):
-		return self.entry.inode()
+	def stat(self):
+		return self.entry.stat()
 
-	@property
-	def name(self):
-		return self.entry.name
+	def __str__(self):
+		return str(self.entry)
 
-	@property
-	def path(self):
-		if self.relpath is not None:
-			return self.relpath
-		assert self.basepath is not None
-		self.relpath = os.path.relpath(self.entry.path, self.basepath)
-		return self.relpath
+	def __repr__(self):
+		return repr(self.entry)
 
-	@property
-	def abspath(self):
-		return self.entry.path
-
-class SkippableDirEntry(RelativeDirEntry):
-	__slots__ = ("follow", )
+class MyDirEntry(BaseDirEntry):
+	__slots__ = ("basepath", "_relpath", "follow")
 
 	def __init__(self, entry):
-		RelativeDirEntry.__init__(self, entry)
+		BaseDirEntry.__init__(self, entry)
+
+		self.basepath = None # type: Optional[str]
+		self._relpath = None # type: Optional[str]
 		self.follow = True
 
+	@property
+	def relpath(self):
+		# type: () -> str
+
+		if self._relpath is not None:
+			return self._relpath
+
+		if self.basepath is None:
+			raise RuntimeError("relpath cannot be returned, because basepath is not set")
+
+		self._relpath = os.path.relpath(self.entry.path, self.basepath)
+		return self._relpath
+
+	@relpath.setter
+	def relpath(self, path):
+		# type: (str, ) -> None
+
+		self._relpath = path
+
 if TYPE_CHECKING:
-	MyDirEntryT = Union[DirEntry, SkippableDirEntry]
+	MyDirEntryT = Union[DirEntry, MyDirEntry]
 
 def mdatetime(path):
 	# type: (PathType, ) -> datetime
@@ -237,24 +263,24 @@ def scandir_error_ignore(entry, exception):
 	pass
 
 def _scandir_rec_skippable(rootentry, files=True, others=False, follow_symlinks=True, errorfunc=scandir_error_raise):
-	# type: (DirEntry, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[SkippableDirEntry]
+	# type: (DirEntry, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[MyDirEntry]
 
 	try:
 		with scandir(rootentry.path) as it: # python 3.6
 			for entry in it:
 				if files and entry.is_file(follow_symlinks=follow_symlinks):
-					yield SkippableDirEntry(entry)
+					yield MyDirEntry(entry)
 				elif entry.is_dir(follow_symlinks=follow_symlinks):
 					if not follow_symlinks and islink(entry): # must be a windows junction
 						continue
-					se = SkippableDirEntry(entry)
+					se = MyDirEntry(entry)
 					yield se
 					if se.follow:
 						for e in _scandir_rec_skippable(entry, files, others, follow_symlinks, errorfunc):
 							yield e
 				else:
 					if others:
-						yield SkippableDirEntry(entry)
+						yield MyDirEntry(entry)
 	except OSError as e:
 		errorfunc(rootentry, e)
 
@@ -299,24 +325,46 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 	else:
 		basepath = uncabspath(path)
 		if not allow_skip:
+			# entry is a `os.DirEntry`
 			def modpathrelative(entry):
-				entry = RelativeDirEntry(entry)
+				entry = MyDirEntry(entry)
 				entry.basepath = basepath
 				return entry
 		else:
-			# entry is already a SkippableDirEntry
+			# entry is a `MyDirEntry`
 			def modpathrelative(entry):
 				entry.basepath = basepath
 				return entry
 
 		return map(modpathrelative, it)
 
-def join_ext(name, ext):
-	# type: (str, str) -> str
+def _scandir_depth(rootentry, depth, errorfunc):
 
-	""" adds extenions to name, eg. `join_ext("picture", "jpg") -> "picture.jpg" """
+	try:
+		for entry in scandir(rootentry):
+			if entry.is_dir():
+				yield depth, entry
+				for depth_entry in _scandir_depth(entry, depth + 1, errorfunc):
+					yield depth_entry
 
-	return name + "." + ext
+		for entry in scandir(rootentry):
+			if entry.is_file():
+				yield depth, entry
+
+	except OSError as e:
+		errorfunc(rootentry, e)
+
+def scandir_depth(path, depth=0, onerror=scandir_error_log):
+	# type: (str, int, Callable) -> Iterator[Tuple[int, DirEntry]]
+
+	""" Recursive version of `scandir` which yields the current path depth
+		along with the DirEntry.
+		Directories are returned first, then files.
+		The order is arbitrary otherwise.
+	"""
+
+	entry = DirEntryStub(os.path.basename(path), uncabspath(path)) # for python 2 compat. and long filename support
+	return _scandir_depth(entry, depth, onerror)
 
 def make_readonly(path, stats=None):
 	# type: (PathType, Optional[os.stat_result]) -> None
@@ -611,3 +659,79 @@ def iter_links(path):
 			joined = os.path.join(dirpath, dirname)
 			if islink(joined):
 				yield joined
+
+def normalize_seps(path):
+	# type: (str, ) -> str
+
+	""" Converts \ to /
+	"""
+
+	return path.replace("\\", "/")
+
+def entrysuffix(entry):
+	# type: (MyDirEntryT, ) -> str
+
+	return os.path.splitext(entry.name)[1]
+
+class Counts(object):
+	__slots__ = ("dirs", "files", "others")
+
+	def __init__(self):
+		self.dirs = 0
+		self.files = 0
+		self.others = 0
+
+	def __iadd__(self, other):
+		# type: (Counts, ) -> None
+
+		self.dirs += other.dirs
+		self.files += other.files
+		self.others += other.others
+
+	def null(self):
+		# type: () -> bool
+
+		return self.dirs == 0 and self.files == 0 and self.others == 0
+
+def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, errorfunc=scandir_error_raise):
+	# type: (MyDirEntryT, bool, bool, bool, bool, Callable) -> Iterator[DirEntry, Optional[Counts]]
+
+	counts = Counts()
+
+	try:
+		for entry in scandir(rootentry.path):
+
+			if entry.is_dir():
+				counts.dirs += 1
+				if rec:
+					for subentry, subcounts in _scandir_counts(entry, files, others, rec, total, errorfunc):
+						yield subentry, subcounts
+
+						if total:
+							counts += subcounts
+
+			elif entry.is_file():
+				counts.files += 1
+				if files:
+					yield entry, None
+
+			else:
+				counts.others += 1
+				if others:
+					yield entry, None
+
+		yield rootentry, counts  # yield after the loop
+
+	except OSError as e:
+		errorfunc(rootentry, e)
+
+def scandir_counts(path, files=True, others=True, rec=True, total=False, onerror=scandir_error_log):
+	# type: (PathType, bool, bool, bool, bool, Callable) -> Iterator[DirEntry, Optional[Counts]]
+
+	""" A recursive variant of scandir() which also returns the number of files/directories
+		within directories.
+		If total is True, the numbers will be calculated recursively as well.
+	"""
+
+	entry = DirEntryStub(os.path.basename(path), uncabspath(path)) # for python 2 compat. and long filename support
+	return _scandir_counts(entry, files, others, rec, total, onerror)
