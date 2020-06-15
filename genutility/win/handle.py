@@ -9,10 +9,17 @@ from cwinsdk.um.winnt import GENERIC_READ, GENERIC_WRITE
 
 _mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "w+": GENERIC_READ | GENERIC_WRITE}
 
+
 class WindowsHandle(object):
 
-	def __init__(self):
-		self.doclose = True
+	def __init__(self, handle, doclose):
+		# type: (int, bool) -> None
+
+		if not isinstance(handle, int):
+			raise ValueError("handle must be an int")
+
+		self.handle = handle
+		self.doclose = doclose
 
 	@classmethod
 	def from_file(cls, fp):
@@ -20,10 +27,7 @@ class WindowsHandle(object):
 
 	@classmethod
 	def from_fd(cls, fd):
-		ret = cls.__new__(cls)
-		ret.handle = get_osfhandle(fd)
-		ret.doclose = False
-		return ret
+		return cls(get_osfhandle(fd), doclose=False)
 
 	def get_fd(self, flags):
 		return open_osfhandle(self.handle, flags)
@@ -32,10 +36,14 @@ class WindowsHandle(object):
 		return fdopen(self.get_fd(flags), mode, buffering, encoding, errors, newline, closefd)
 
 	def close(self):
+		# type: () -> None
+
 		if CloseHandle(self.handle) == 0:
 			raise WinError()
 
 	def __enter__(self):
+		# type: () -> None
+
 		return self
 
 	def __exit__(self, exc_type, exc_value, traceback):

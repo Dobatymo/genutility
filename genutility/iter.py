@@ -259,11 +259,11 @@ def last(it):
 	except IndexError:
 		raise_from(EmptyIterable("Empty iterable"), None)
 
-def batch(it, n, filter=None):
+def batch(it, n, func=None):
 	# type: (Iterable[Any], int, Optional[Callable]) -> Iterator[Any] # return type cannot be more specific because of filter()
 
 	""" Batches iterable `it` into batches of size `n`.
-		Optionally post-processes batch with `filter`.
+		Optionally post-processes batch with `func`.
 	"""
 
 	it = iter(it)
@@ -273,10 +273,13 @@ def batch(it, n, filter=None):
 			first_el = next(chunk_it)
 		except StopIteration:
 			return
-		if filter:
-			yield filter(chain((first_el,), chunk_it))
-		else:
-			yield chain((first_el,), chunk_it)
+
+		batch_iter = chain((first_el,), chunk_it)
+
+		if func:
+			batch_iter = func(batch_iter)
+
+		yield batch_iter
 
 def advance(it, n):
 	# type: (Iterable[T], int) -> None

@@ -120,7 +120,7 @@ class AriaDownloader(object):
 				Does using a multi/batch-call fix this?
 			"""
 
-			entries = self._entries(self.query("tell_stopped", 0, self.max_num_results)) # complete or error
+			entries = self._entries(self.query("tell_stopped", 0, self.max_num_results))  # complete or error
 			if entries:
 				gid, entry = entries.popitem()
 
@@ -135,7 +135,7 @@ class AriaDownloader(object):
 				finally:
 					self.remove_stopped(gid)
 
-			entries = self._entries(self.query("tell_active")) # active
+			entries = self._entries(self.query("tell_active"))  # active
 			if entries:
 				if progress_file:
 					completed = sum(int(entry["completedLength"]) for entry in viewvalues(entries))
@@ -165,7 +165,7 @@ class AriaDownloader(object):
 	def block_all(self):
 		# type: () -> List[Tuple[Any, Any]]
 
-		ret = [] # type: Tuple[Any, Any]
+		ret = []  # type: Tuple[Any, Any]
 
 		while True:
 			try:
@@ -210,11 +210,11 @@ class AriaDownloader(object):
 
 				elif status == "waiting":
 					if progress_file:
-						print("waiting")
+						print("waiting", file=progress_file, end="\r")
 
 				elif status == "paused":
 					if progress_file:
-						print("paused")
+						print("paused", file=progress_file, end="\r")
 
 				elif status == "error":
 					raise DownloadFailed(gid, s["errorCode"], s["errorMessage"]) # RuntimeError: No URI available. errorCode=8 handle
@@ -339,22 +339,18 @@ class DownloadManager(object):
 		return self.block_uid(uid)
 
 if __name__ == "__main__":
-	'''from argparse import ArgumentParser
-	parser = ArgumentParser()
-	parser.add_argument("uri")
-	parser.add_argument("path", default=".")
-	args = parser.parse_args()'''
 
-	uris = [
-		"http://tinycorelinux.net/10.x/x86/release/CorePlus-current.iso",
-		"http://tinycorelinux.net/10.x/x86/release/Core-current.iso",
-		"http://tinycorelinux.net/10.x/x86/release/TinyCore-current.iso",
-	]
-	#basepath = args.path
-	basepath = "D:\\"
+	from argparse import ArgumentParser
+	parser = ArgumentParser()
+	parser.add_argument("uris", metavar="URI", nargs="+", help="URLs to download")
+	parser.add_argument("--outpath", default=".", help="Output directory")
+	parser.add_argument("--max", default=2, type=int, help="Maximum concurrent downloads")
+	args = parser.parse_args()
+
 	d = AriaDownloader()
-	for uri in uris:
-		path = d.download_x(2, uri, basepath)
+	for uri in args.uris:
+		path = d.download_x(args.max, uri, args.path)
 		print("Downloaded {} to {}".format(uri, path))
+
 	for a in d.block_all():
 		print(a)

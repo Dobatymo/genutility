@@ -4,35 +4,40 @@ from ctypes import byref, sizeof, GetLastError, FormatError, WinError
 from errno import EACCES
 
 from cwinsdk.windows import (
-	CloseHandle, CreateFileW, OpenFileById, GetFileInformationByHandleEx,
-	GENERIC_READ, GENERIC_WRITE, OPEN_EXISTING, ERROR_SHARING_VIOLATION,
-	FILE_ID_DESCRIPTOR, FILE_ID_INFO, # structs
-	FILE_ID_TYPE, FILE_INFO_BY_HANDLE_CLASS, # enums
+	CreateFileW, OpenFileById, GetFileInformationByHandleEx,
+	GENERIC_READ, OPEN_EXISTING, ERROR_SHARING_VIOLATION,
+	FILE_ID_DESCRIPTOR, FILE_ID_INFO,  # structs
+	FILE_ID_TYPE, FILE_INFO_BY_HANDLE_CLASS,  # enums
 )
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
-from cwinsdk.um.winnt import FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_SHARE_WRITE
+from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
 
 from .handle import WindowsHandle, _mode2access
 
+
 class SharingViolation(OSError):
 	pass
+
 
 class WindowsFile(WindowsHandle):
 
 	def __init__(self, handle):
 		# type: (int, ) -> None
 
-		assert isinstance(handle, int)
-		self.handle = handle
+		WindowsHandle.__init__(self, handle, doclose=True)
 
 	@classmethod
 	def from_path(cls, path, mode="r", shared=False):
-		# shared: allow write access from other processes
+		# type: (str, str, bool) -> WindowsFile
+
+		""" Create a Windows file objects from `path`.
+			If shared is False: allow write access from other processes.
+		"""
 
 		DesiredAccess = _mode2access[mode]
 
 		if shared:
-			ShareMode = FILE_SHARE_READ|FILE_SHARE_WRITE
+			ShareMode = FILE_SHARE_READ | FILE_SHARE_WRITE
 		else:
 			ShareMode = FILE_SHARE_READ
 
@@ -56,23 +61,30 @@ class WindowsFile(WindowsHandle):
 
 	@classmethod
 	def from_fileid(cls, volume, fileid):
-		VolumeHint = None # open volume handle here
+		VolumeHint = None  # open volume handle here
 		FileId = FILE_ID_DESCRIPTOR(Size=..., Type=FILE_ID_TYPE.ExtendedFileIdType)
 		DesiredAccess = GENERIC_READ
-		ShareMode = FILE_SHARE_READ|FILE_SHARE_WRITE
+		ShareMode = FILE_SHARE_READ | FILE_SHARE_WRITE
 		lpSecurityAttributes = None
 		FlagsAndAttributes = 0
 
-		handle = OpenFileById(VolumeHint, byref(FileId), DesiredAccess, ShareMode, lpSecurityAttributes, FlagsAndAttributes)
+		handle = OpenFileById(VolumeHint, byref(FileId), DesiredAccess, ShareMode,
+			lpSecurityAttributes, FlagsAndAttributes)
 		return cls(handle)
 
 	def info(self):
 		FileInformation = FILE_ID_INFO()
-		GetFileInformationByHandleEx(self.handle, FILE_INFO_BY_HANDLE_CLASS.FileIdInfo, byref(FileInformation), sizeof(FileInformation))
+		GetFileInformationByHandleEx(self.handle, FILE_INFO_BY_HANDLE_CLASS.FileIdInfo,
+			byref(FileInformation), sizeof(FileInformation))
 		return FileInformation
+
 
 def is_open_for_write(path):
 	# type: (str, ) -> bool
+
+	""" Tests if file is already open for write
+		by trying to open it in exclusive read model.
+	"""
 
 	try:
 		with WindowsFile.from_path(path, mode="r", shared=False):
@@ -80,8 +92,14 @@ def is_open_for_write(path):
 	except SharingViolation:
 		return True
 
+
 if __name__ == "__main__":
-	path = "E:/empty.txt"
-	with WindowsFile.from_path(path, mode="r", shared=False) as wf:
-		print(wf.info().VolumeSerialNumber)
-		print(bytes(wf.info().FileId))
+
+	from argparse import ArgumentParser
+	parser = ArgumentParser()
+	parser.add_argument("path")
+	args = parser.parse_args()
+
+	with WindowsFile.from_path(args.path, mode="r", shared=False) as wf:
+		print("Volume serial number:", wf.info().VolumeSerialNumber)
+		print("File id:", bytes(wf.info().FileId).hex())

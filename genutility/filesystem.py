@@ -18,11 +18,8 @@ from .compat import FileExistsError
 from .compat.os import PathLike, fspath, scandir
 from .compat.pathlib import Path
 
-if __debug__:
-	from .compat import gzip, bz2
-
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable, List, Set
+	from typing import Any, Callable, Optional, Iterator, Iterable, List, Set, Tuple, Union
 	from datetime import datetime
 	PathType = Union[str, PathLike]
 	from .compat.os import DirEntry

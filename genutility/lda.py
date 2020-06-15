@@ -15,12 +15,12 @@ from .iter import progress
 from .object import cast
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, List, Tuple, MutableMapping, Iterator
+	from typing import Any, Dict, Iterable, List, Tuple, MutableMapping, Iterator, Union
 
 	RawDocument = List[int]
 	IterableDocuments = Iterable[Iterable[int]]
 	TopicsMapping = MutableMapping[Tuple[int, int], int]
-	# fixme: where are Indices ?
+	Indices = Union[slice, np.ndarray]
 
 def top_topics(id2word, term_topic_matrix, num_words=10, decimals=2):
 	# type: (Dict[int, str], float[K, V], int) -> Iterator[List[Tuple[str, float]]]

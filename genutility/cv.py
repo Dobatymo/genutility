@@ -18,7 +18,7 @@ def wx_to_cv_image(wximage):
 	buf = wximage.GetDataBuffer()
 	arr = np.asarray(buf, dtype=np.uint8)
 
-	return np.reshape(arr, (wximage.Height, wximage.Width, 3))[:,:,::-1] #RGB => BGR
+	return np.reshape(arr, (wximage.Height, wximage.Width, 3))[:,:,::-1]  # RGB => BGR
 
 def grayscale(cvimg):
 	# type: (np.ndarray, ) -> np.ndarray
@@ -38,7 +38,7 @@ def iter_video(input=0, show=False):
 				yield image
 			else:
 				break
-			
+
 			if show:
 				cv2.imshow("iter_video", image)
 				if cv2.waitKey(1) & 0xFF == ord('q'):

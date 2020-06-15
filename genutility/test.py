@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import range, input
+from builtins import range
 from future.moves.itertools import zip_longest
 from future.utils import PY2
 
@@ -16,7 +16,6 @@ from time import sleep
 from io import TextIOWrapper
 from typing import TYPE_CHECKING
 
-from .ops import logical_xor, logical_implication
 from .file import equal_files, _check_arguments
 from .signal import HandleKeyboardInterrupt # problem here
 

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 	from PIL import Image
 
 def phash_antijpeg(image):
-	# type: (Image, ) -> nd.array
+	# type: (Image, ) -> np.ndarray
 
 	""" Source: An Anti-JPEG Compression Image Perceptual Hashing Algorithm
 		`image` is a RGB pillow image.

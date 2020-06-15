@@ -10,13 +10,15 @@ from orderedset import OrderedSet
 from .datetime import now
 
 if TYPE_CHECKING:
-	from typing import Any
+	from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 class DownloadTask(object):
 
 	def __init__(self, url, path="."):
+		# type: (str, str) -> None
+
 		self.url = url
 		self.path = path
 		self.downloaded = 0
@@ -28,16 +30,22 @@ class DownloadTask(object):
 		return hash((self.url, self.path))
 
 	def start(self):
+		# type: () -> None
+
 		logger.info("starting download")
 		self.dt_started = now()
 
 	def done(self):
+		# type: () -> None
+
 		logger.info("finished download")
 		self.dt_finished = now()
 
 class DownloadManager(object):
 
 	def __init__(self):
+		# type: () -> None
+
 		self.loop = asyncio.get_event_loop()
 		self.timeout = aiohttp.ClientTimeout(total=None, sock_read=60)
 		self.session = aiohttp.ClientSession(loop=self.loop, timeout=self.timeout, auto_decompress=False)
@@ -51,6 +59,7 @@ class DownloadManager(object):
 		self.error = OrderedSet()
 
 	def status(self):
+		# type: () -> str
 
 		total_active = sum(t.downloaded for t in self.active)
 		total_done = sum(t.downloaded for t in self.done)
@@ -61,14 +70,20 @@ class DownloadManager(object):
 		)
 
 	def _enqueue(self, task, priority):
+		# type: (DownloadTask, Any) -> None
+
 		self.queue.add(task)
 
 	def _start(self, task):
+		# type: (DownloadTask, ) -> asyncio.Task
+
 		self.active.add(task)
 		atask = asyncio.ensure_future(self._download(task))
 		return atask
 
 	def _trystart(self):
+		# type: () -> Optional[asyncio.Task]
+
 		if len(self.active) < self.concurrent_downloads:
 			try:
 				task = self.queue.pop()
@@ -80,6 +95,8 @@ class DownloadManager(object):
 					#task = asyncio.ensure_future(self._close())
 
 	async def _download(self, task):
+		# type: (DownloadTask, ) -> None
+
 		task.start()
 		#await asyncio.sleep(10)
 
@@ -121,6 +138,8 @@ class DownloadManager(object):
 		self._trystart()
 
 	def download(self, url, path="tmp.txt", priority=0, force=False):
+		# type: (str, str, int, bool) -> Optional[asyncio.Task]
+
 		logger.info("starting download")
 		task = DownloadTask(url, path)
 		if force:
@@ -141,7 +160,6 @@ if __name__ == "__main__":
 	import wx
 	from wxasync import AsyncBind, WxAsyncApp, StartCoroutine
 	from asyncio.events import get_event_loop
-	import time
 
 	DOWNLOAD_URL = "http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-live-server-amd64.iso"
 

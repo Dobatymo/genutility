@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-	from typing import Callable, Any, List, Optional, Iterator
+	from typing import Any, Callable, Dict, List, Iterator, Iterable, Optional, Set, Tuple
 	from graphviz import Digraph
 
 if __debug__:

@@ -4,7 +4,6 @@ from builtins import range
 from future.utils import viewitems
 
 from math import sqrt, exp
-from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -12,7 +11,7 @@ import numpy as np
 from .numba import opjit
 
 if TYPE_CHECKING:
-	from typing import Iterator, Tuple, Callable, TypeVar
+	from typing import Callable, Iterator, Tuple, TypeVar
 	T = TypeVar("T")
 
 RGB_YELLOW = (255, 255, 0)

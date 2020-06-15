@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.moves.urllib.parse import urlsplit
 from functools import partial
 from unittest import SkipTest
 

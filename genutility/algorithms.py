@@ -1,23 +1,21 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from past.builtins import cmp
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from typing import MutableSequence, Callable
 
-from past.builtins import cmp
-
 def _insertion(seq, cmp_, left, right, gap):
-	# type: (MutableSequence, Callable, int, int, int)
-
-	idx = list(range(left, right+1, gap))
+	# type: (MutableSequence, Callable, int, int, int) -> None
 
 	loc = left + gap
 	while loc <= right:
 		i = loc - gap
 		value = seq[loc]
 		while i >= left and cmp_(seq[i], value) > 0:
-			seq[i+gap] = seq[i]
+			seq[i + gap] = seq[i]
 			i -= gap
 		seq[i+gap] = value
 		loc += gap
@@ -32,7 +30,7 @@ def median_of_medians(seq, cmp_=None, left=0, right=None, depth=0):
 		Currently only works for len(seq) == GROUP_SIZE ** x
 	"""
 
-	offset = (GROUP_SIZE ** (depth+1) - GROUP_SIZE ** depth ) // 2
+	offset = (GROUP_SIZE ** (depth + 1) - GROUP_SIZE ** depth) // 2
 
 	gap = GROUP_SIZE ** depth
 
@@ -47,7 +45,7 @@ def median_of_medians(seq, cmp_=None, left=0, right=None, depth=0):
 	if num == 0:
 		_insertion(seq, cmp_, left, right, gap)
 		num = (right - left + 1) // gap
-		return left + gap*(num-1) // 2  # select median
+		return left + gap * (num - 1) // 2  # select median
 
 	s = left
 	while s < right:
@@ -56,6 +54,6 @@ def median_of_medians(seq, cmp_=None, left=0, right=None, depth=0):
 
 	if num < GROUP_SIZE:
 		_insertion(seq, cmp_, left + offset, right, span)
-		return left + offset + num*span // 2  # select median
+		return left + offset + num * span // 2  # select median
 	else:
-		return median_of_medians(seq, cmp_, left + offset, right, depth+1)
+		return median_of_medians(seq, cmp_, left + offset, right, depth + 1)

@@ -12,7 +12,7 @@ from .csv import iter_csv
 from .compat.os import fspath
 
 if TYPE_CHECKING:
-	from typing import Optional, BytesIO, Tuple, Iterator
+	from typing import BytesIO, Iterator, Tuple
 
 # http://mp4ra.org/#/atoms
 # https://wiki.multimedia.cx/index.php/QuickTime_container#QuickTime_Atom_Reference

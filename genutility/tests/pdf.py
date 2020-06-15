@@ -1,13 +1,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import unittest, os.path, sys
+import unittest, sys
 from genutility.test import MyTestCase, parametrize
 from genutility.pdf import join_pdfs_in_folder
 from genutility.compat.pathlib import Path
 
+LESSTHANPY36 = sys.version_info < (3, 6)
+
 class PdfTest(MyTestCase):
 
-	@unittest.skipIf(sys.version_info < (3, 6), "pdf key order is random")
+	@unittest.skipIf(LESSTHANPY36, "pdf key order is random")
 	@parametrize(
 		("testfiles/pdf/", "testtemp/joined.pdf", "testfiles/joined.pdf"),
 	)

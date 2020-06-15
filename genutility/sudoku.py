@@ -2,129 +2,46 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import range
 from copy import deepcopy
+from random import choice
+from typing import TYPE_CHECKING
 
 from .compat.math import isqrt
 from .indexing import row_indices, col_indices, subblock_indices
 from .set import get as setget
+from .iter import batch
+
+if TYPE_CHECKING:
+	from typing import Iterable, Set, TypeVar
+	T = TypeVar("T")
 
 class Unsolvable(Exception):
 	pass
 
-sudokus = {
-	"very_easy": [
-		5,4,2,0,1,7,0,9,8,
-		9,6,8,5,4,2,0,0,7,
-		7,0,1,6,9,8,2,5,0,
-		8,5,7,4,2,9,1,6,0,
-		1,2,3,8,7,6,9,0,5,
-		6,9,4,1,0,3,0,7,2,
-		4,1,0,2,0,5,7,0,9,
-		3,8,0,7,6,4,5,2,0,
-		2,0,5,9,3,1,4,8,6
-	],
-
-	"easy": [
-		4,8,5,1,0,6,9,0,0,
-		6,2,0,0,9,0,8,0,0,
-		0,1,0,2,0,8,0,7,0,
-		8,6,4,3,0,0,7,0,9,
-		2,0,0,9,0,5,0,0,4,
-		5,9,1,4,0,7,0,2,8,
-		0,4,8,0,5,9,2,6,3,
-		0,5,2,0,3,4,1,8,7,
-		0,0,6,8,0,1,4,0,5
-	],
-
-	"normal": [
-		5,0,1,3,4,2,0,0,0,
-		0,0,2,0,1,0,0,5,3,
-		3,0,7,5,0,0,0,0,0,
-		9,0,8,0,0,3,0,4,1,
-		0,0,0,0,9,0,0,0,0,
-		1,4,0,2,7,0,5,0,6,
-		0,0,0,0,2,4,8,0,9,
-		7,1,4,0,6,0,3,0,0,
-		0,0,0,0,3,0,0,0,4
-	],
-
-	"hard": [
-		0,2,0,0,6,5,0,0,3,
-		0,0,3,0,8,0,2,0,1,
-		4,0,0,0,0,0,0,0,0,
-		0,9,0,0,1,6,4,7,0,
-		0,0,1,0,0,0,6,0,0,
-		0,4,5,7,3,0,0,9,0,
-		0,0,0,0,0,0,0,0,4,
-		2,0,8,0,4,0,3,0,0,
-		1,0,0,5,9,0,0,2,0
-	],
-
-	"very": [
-		2,8,5,0,0,0,0,0,0,
-		0,7,0,0,2,5,0,0,9,
-		0,0,0,0,0,0,0,0,4,
-		1,9,0,0,0,0,0,0,0,
-		6,0,0,0,9,0,0,1,0,
-		0,0,0,7,0,4,0,8,0,
-		0,0,0,8,0,3,0,0,0,
-		0,0,3,6,0,0,0,4,0,
-		0,0,0,0,0,0,5,0,0
-	],
-
-	"suck": [
-		0,0,5,3,0,0,0,0,0,
-		8,0,0,0,0,0,0,2,0,
-		0,7,0,0,1,0,5,0,0,
-		4,0,0,0,0,5,3,0,0,
-		0,1,0,0,7,0,0,0,6,
-		0,0,3,2,0,0,0,8,0,
-		0,6,0,5,0,0,0,0,9,
-		0,0,4,0,0,0,0,3,0,
-		0,0,0,0,0,9,7,0,0
-	],
-
-	"Arto_Inkala": [
-		8,0,0,0,0,0,0,0,0,
-		0,0,3,6,0,0,0,0,0,
-		0,7,0,0,9,0,2,0,0,
-		0,5,0,0,0,7,0,0,0,
-		0,0,0,0,4,5,7,0,0,
-		0,0,0,1,0,0,0,3,0,
-		0,0,1,0,0,0,0,6,8,
-		0,0,8,5,0,0,0,1,0,
-		0,9,0,0,0,0,4,0,0
-	],
-	
-	"norvig": [# unsolvable, doesn't have a solution
-		0,0,0,0,0,5,0,8,0,
-		0,0,0,6,0,1,0,4,3,
-		0,0,0,0,0,0,0,0,0,
-		0,1,0,5,0,0,0,0,0,
-		0,0,0,1,0,6,0,0,0,
-		3,0,0,0,0,0,0,0,5,
-		5,3,0,0,0,0,0,6,1,
-		0,0,0,0,0,0,0,0,4,
-		0,0,0,0,0,0,0,0,0
-	],
-}
 
 class Sudoku(object):
 
-	def __init__(self, outer_square_size, square, sym_set, sym_free):
+	def __init__(self, square, sym_set, sym_free):
+		# type: (Iterable[T], Set[T], T) -> None
+
 		assert isinstance(sym_set, set)
 
-		self.outer_square_size = outer_square_size
-		self.outer_square_area = self.outer_square_size * self.outer_square_size
-		self.inner_square_size = isqrt(outer_square_size)
-		if self.inner_square_size ** 2 != self.outer_square_size:
-			raise ArithmeticError("outer_square_size is not a multiple of inner_square_size")
 		self.square = square
-		if len(self.square) != self.outer_square_area:
-			raise ArithmeticError("elements in list != sudoku size")
-
-		self.solved = False
 		self.sym_set = sym_set
 		self.sym_free = sym_free
+
+		self.outer_square_size = isqrt(len(square))
+		self.outer_square_area = self.outer_square_size ** 2
+		if self.outer_square_area != len(square):
+			raise ValueError("board has an invalid size")
+
+		if self.outer_square_size != len(sym_set):
+			raise ValueError("sym_set length must be equal to the edge length of the board: {} vs {}".format(len(sym_set), self.outer_square_area))
+
+		self.inner_square_size = isqrt(self.outer_square_size)
+		if self.inner_square_size ** 2 != self.outer_square_size:
+			raise ValueError("board has an invalid size")
+
+		self.solved = False
 
 	def init_square(self, sudoku):
 		raise NotImplementedError
@@ -134,14 +51,14 @@ class Sudoku(object):
 
 	def print_square(self):
 		for i, num in enumerate(self.get_square(), 1):
-			print(num, end=' ')
+			print(num, end=" ")
 			if i % self.outer_square_size == 0:
 				print()
-		print()
 
-	def solve(self):
+	def solve(self, strategy=None):
 		self.square = self.init_square(self.square)
-		return self._solve()
+		return self._solve(strategy)
+
 
 class SudokuRulebased(Sudoku):
 
@@ -190,7 +107,7 @@ class SudokuRulebased(Sudoku):
 		self.square[i] -= b
 		self.square[i] -= c
 
-	def _solve(self):
+	def _solve(self, strategy=None):
 		while not self.solved:
 			self.solved = True
 			square_old = deepcopy(self.square)
@@ -203,6 +120,7 @@ class SudokuRulebased(Sudoku):
 			if square_old == self.square and not self.solved:
 				raise NotImplementedError("Sudoku not solvable using this method")
 		return self.square
+
 
 class SudokuBruteforce(Sudoku):
 
@@ -234,18 +152,45 @@ class SudokuBruteforce(Sudoku):
 		return inner_square_set
 
 	def get_possible_nums(self, i):
+		# type: (int, ) -> Set[T]
+
 		all = self.get_row_nums(i) | self.get_column_nums(i) | self.get_inner_square_nums(i)
 		return self.sym_set - all
 
 	def get_next_higher_possible_num(self, i, num):
-		for pn in sorted(self.get_possible_nums(i)): # fixme: sorting is bad here
+		for pn in sorted(self.get_possible_nums(i)): # fixme: sorting is bad here. # why? for algorithmic performance or python performance?
 			if pn > num:
 				return pn
+
 		return self.sym_free
 
-	def _solve(self):
+	def get_next_lower_possible_num(self, i, num):
+		for pn in sorted(self.get_possible_nums(i), reverse=False): # see: get_next_higher_possible_num
+			if pn < num:
+				return pn
+
+		return self.sym_free
+
+	def _solve(self, strategy=None):
+
+		strategy = strategy or "inc"
+
+		try:
+			candidate_func = {
+				"inc": self.get_next_higher_possible_num,
+				"dec": self.get_next_lower_possible_num,
+			}[strategy]
+			
+			selection_func = {
+				"inc": min,
+				"dec": max,
+			}[strategy]
+
+		except KeyError:
+			raise ValueError("Invalid strategy")
+
 		i = 0
-		backtrack = []
+		backtrack = []  # type: Tuple[int, T]
 		backtracks = 0
 		steps = 0
 
@@ -254,8 +199,6 @@ class SudokuBruteforce(Sudoku):
 				i+=1
 				continue
 			pnums = self.get_possible_nums(i)
-			#print(pnums)
-			#self.print_square()
 
 			if len(pnums) == 0:
 				while True:
@@ -265,31 +208,78 @@ class SudokuBruteforce(Sudoku):
 					except IndexError:
 						raise Unsolvable
 
-					num = self.get_next_higher_possible_num(j, num)
+					num = candidate_func(j, num)
 					self.square[j] = num
 					if num != self.sym_free:
 						backtrack.append((j, num))
-						i = j+1
+						i = j + 1
 						break
 			else:
-				num = min(pnums)
+				num = selection_func(pnums)
 				self.square[i] = num
 				backtrack.append((i, num))
 				steps += 1
 
 		return backtracks, steps
 
+
+def is_valid_solution(board, sym_set):
+	# type: (Iterable[T], Set[T]) -> bool
+
+	""" Checks if `board` is a valid solved Sudoku configuration
+	"""
+
+	edge_len = isqrt(len(board))
+	square_len = isqrt(edge_len)
+
+	board = tuple(batch(board, edge_len, func=tuple))
+
+	# check rows
+	for j in range(edge_len):
+		row = set(board[j][i] for i in range(edge_len))
+		if set(row) != sym_set:
+			return False
+
+	# check cols
+	for i in range(edge_len):
+		col = set(board[j][i] for j in range(edge_len))
+		if col != sym_set:
+			return False
+
+	# check inner squares
+	for x in range(0, edge_len, square_len):
+		for y in range(0, edge_len, square_len):
+			square = set(board[i][j] for i in range(x, x + square_len) for j in range(y, y + square_len))
+			if square != sym_set:
+				return False
+
+	return True
+
+
 if __name__ == "__main__":
-	from future.utils import viewitems
+
+	from argparse import ArgumentParser
 	from genutility.time import MeasureTime
 
-	for name, sud in viewitems(sudokus):
-		s = SudokuBruteforce(9, sud, set(range(1, 10)), 0)
-		try:
-			with MeasureTime() as t:
-				steps, backtracks = s.solve()
-		except Unsolvable:
-			print("Cannot solve Sudoku")
+	parser = ArgumentParser()
+	parser.add_argument("board", metavar="N", type=int, nargs="+", help="Flat Sudoku board")
+	parser.add_argument("--symbols", default=set(range(1, 10)), type=int, nargs="+", help="Used symbols")
+	parser.add_argument("--free", default=0, help="Free marker symbol")
+	parser.add_argument("--strategy", choices=("inc", "dec"), default="linear")
+	args = parser.parse_args()
+
+	sym_set = set(args.symbols)
+
+	s = SudokuBruteforce(args.board, sym_set, args.free)
+
+	try:
+		with MeasureTime() as t:
+			steps, backtracks = s.solve(args.strategy)
+
+		s.print_square()
+		if is_valid_solution(args.board, sym_set):
+			print("Solved sudoku in {:.2} seconds, using {} steps and backtracked {} times.".format(t.get(), steps, backtracks))
 		else:
-			s.print_square()
-		print("%s: Schritte: %u, Backtracks: %u, time: %f" % (name, steps, backtracks, t.get()))
+			print("No valid solution was found in {:.2} seconds, using {} steps and backtracked {} times.".format(t.get(), steps, backtracks))
+	except Unsolvable:
+		print("Sudoku is not solvable")
