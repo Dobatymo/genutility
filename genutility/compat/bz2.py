@@ -4,7 +4,7 @@ import bz2, warnings
 from io import TextIOWrapper
 
 """
-most of his file is copied and modified from Python35/Lib/bz2.py file
+most of this file is copied and modified from Python35/Lib/bz2.py file
 """
 
 """
@@ -27,7 +27,11 @@ if PY2:
 
 		def __init__(self, filename, mode="r", buffering=0, compresslevel=9):
 			bz2.BZ2File.__init__(self, filename, mode, buffering, compresslevel)
-		
+
+		def _check_not_closed(self):
+			if self.closed:
+				raise ValueError("I/O operation on closed file")
+
 		"""
 		def __getattribute__(self, name):
 			import logging
@@ -50,27 +54,27 @@ if PY2:
 		"""
 
 		def fileno(self):
-			assert False
+			raise RuntimeError("Method not available")
 
 		def seekable(self):
 			return self.readable()
 
 		def readable(self):
-			assert not self.closed
+			self._check_not_closed()
 			return "r" in self.mode
 
 		def writable(self):
-			assert not self.closed
+			self._check_not_closed()
 			return "w" in self.mode
 
-		def flush(self): # needed by fileinput.py
+		def flush(self):  # needed by fileinput.py
 			pass
 
 		def read1(self, size=-1):
 			return self.read(size)
 
 		def readinto(self, b):
-			assert False
+			raise RuntimeError("Method not available")
 
 		def __enter__(self):
 			return self

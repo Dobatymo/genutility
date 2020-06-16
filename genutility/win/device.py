@@ -17,6 +17,7 @@ from cwinsdk.um.winioctl import (PARTITION_IFS, PARTITION_MSFT_RECOVERY, DISK_GE
 	SMART_GET_VERSION, GETVERSIONINPARAMS, IOCTL_DISK_VERIFY, VERIFY_INFORMATION, FSCTL_ALLOW_EXTENDED_DASD_IO)
 
 from .handle import WindowsHandle, _mode2access
+from ..exceptions import assert_true
 
 if TYPE_CHECKING:
 	from typing import Any
@@ -164,7 +165,7 @@ def MyDeviceIoControl(DeviceHandle, IoControlCode, InBuffer, OutBuffer, check_ou
 
 	BytesReturned = wintypes.DWORD()
 
-	assert IoControlCode
+	assert_true("IoControlCode", IoControlCode)
 
 	ret = DeviceIoControl(
 		DeviceHandle,

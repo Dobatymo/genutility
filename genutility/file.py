@@ -78,13 +78,6 @@ def read_or_raise(fin, size):
 
 	return data
 
-def linefileiter(fin, check_last=True): # kinda unnecessary
-	last = None
-	for line in fin:
-		yield line
-		last = line
-	assert last.endswith("\n"), "File does not end in newline: {}".format(last)
-
 def get_file_range(path, start, size):
 	# type: (PathType, int, int) -> bytes
 
@@ -718,6 +711,37 @@ def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
 			if ti.isfile(): # fixme: what about links?
 				with tf.extractfile(ti) as bf: # no `mode` for `extractfile`
 					yield wrap_text(bf, mode, encoding, errors, newline)
+
+def iter_lines(path, encoding="utf-8", errors="strict", newline=None, verbose=False):
+	# type: (str, str, str, Optional[str], bool) -> Iterator[str]
+
+	""" Yield lines from text file. Handles compressed files as well.
+		if verbose is True, print a progress bar
+	"""
+
+	with copen(path, "rt", encoding=encoding, errors=errors, newline=newline) as fr:
+
+		if verbose:
+			from tqdm import tqdm
+
+			prev_pos = 0
+
+			fr.seek(0, os.SEEK_END)
+			total = fr.tell()
+			fr.seek(0, os.SEEK_SET)
+
+			with tqdm(total=total, leave=False, unit="B", unit_scale=True) as pbar:
+				while True:  # cannot use `for line in fr` here
+					line = fr.readline()
+					if not line:
+						break
+					cur_pos = fr.tell()
+					pbar.update(cur_pos - prev_pos)
+					yield line
+					prev_pos = cur_pos
+		else:
+			for line in fr:
+				yield line
 
 # is this still needed?
 def file_byte_reader(filename, inputblocksize, outputblocksize, DEBUG=True):

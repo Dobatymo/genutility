@@ -306,7 +306,8 @@ def _scandir_rec(rootentry, files=True, dirs=False, others=False, rec=True, foll
 def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_symlinks=True, relative=False, allow_skip=False, errorfunc=scandir_error_log):
 	# type: (PathType, bool, bool, bool, bool, bool, bool, bool, Callable[[MyDirEntryT, Exception], None]) -> Iterator[MyDirEntryT]
 
-	assert logical_implication(allow_skip, dirs and rec)
+	if not logical_implication(allow_skip, dirs and rec):
+		raise ValueError("allow_skip implies dirs and rec")
 
 	if isinstance(path, PathLike):
 		path = fspath(path)
@@ -732,3 +733,16 @@ def scandir_counts(path, files=True, others=True, rec=True, total=False, onerror
 
 	entry = DirEntryStub(os.path.basename(path), uncabspath(path)) # for python 2 compat. and long filename support
 	return _scandir_counts(entry, files, others, rec, total, onerror)
+
+def shutil_onerror_remove_readonly(func, path, exc_info):
+
+	""" onerror function for the `shutil.rmtree` function.
+		Makes read-only files writable and tries again.
+	"""
+
+	stats = os.stat(path)
+	if is_readable(stats):
+		make_writeable(path, stats)
+		func(path)
+	else:
+		raise

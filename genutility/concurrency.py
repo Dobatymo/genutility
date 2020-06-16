@@ -4,7 +4,7 @@ import threading, logging
 from queue import Queue, Empty
 from typing import TYPE_CHECKING
 
-from .exceptions import NoResult
+from .exceptions import NoResult, assert_choice
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Iterable, Optional, Tuple, Union, Iterator
@@ -228,7 +228,8 @@ class IterWorker(threading.Thread):
 	def state(self, value):
 		# type: (int, ) -> None
 
-		assert value in [0, 1, 2, 3, 4]
+		assert_choice("value", value, (0, 1, 2, 3, 4))
+
 		self._state = value
 		if self.onstatechange:
 			self.onstatechange(value)

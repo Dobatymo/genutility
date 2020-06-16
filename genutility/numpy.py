@@ -17,6 +17,15 @@ if TYPE_CHECKING:
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
+def assert_square(name, value):
+	# type: (str, np.ndarray) -> None
+
+	""" Raises a ValueError if matrix `value` is not square.
+	"""
+
+	if not len(value.shape) == 2 or value.shape[0] != value.shape[1]:
+		raise ValueError("{} must be a square".format(name))
+
 def normalized_choice(p_ind, p_prob):  # is this neccessary? I think `np.random.choice` can handle unnormalized probabilities
 	return np.random.choice(p_ind, p=p_prob/np.sum(p_prob))
 
@@ -156,7 +165,7 @@ def batch_outer(a, b):
 	return np.einsum("...i,...j->...ij", a, b) # slightly faster than np.multiply(a[...,:,None], b[...,None,:])
 
 def batchtopk(probs, k=None, axis=-1, reverse=False):
-	# type: (np.ndarray, np.ndarray, int) -> np.ndarray
+	# type: (np.ndarray, np.ndarray, int, bool) -> np.ndarray
 
 	""" `probs` values ndarray
 		`k` take the smallest `k` elements, if `reverse` is False
@@ -164,9 +173,14 @@ def batchtopk(probs, k=None, axis=-1, reverse=False):
 		`axis` sorting and selection axis.
 	"""
 
-	assert k is None or k > 0, "k must be larger than zero. Use None to chose all elements."
-	assert axis == -1, "Only last axis supported atm"
-	assert len(probs.shape) > 1
+	if k is not None and k <= 0:
+		raise ValueError("k must be larger than 0. Use None to chose all elements.")
+
+	if axis != -1:
+		raise ValueError("Only last axis supported atm")
+
+	if len(probs.shape) <= 1:
+		raise ValueError("probs must be at least 2-dimensional")
 
 	if reverse:
 		sign = -1
@@ -299,15 +313,22 @@ def pmf2cdf(pdf):
 	return cdf / cdf[-1]
 
 def _two_sample_kolmogorov_smirnov_same_length(cdf1, cdf2, n1, n2):
+	# type: (np.ndarray, np.ndarray, int, int) -> Tuple[float, float]
+
 	# note: yields different results as `scipy.stats.ks_2samp`
-	assert len(cdf1) == len(cdf2)
+
+	if len(cdf1) != len(cdf2):
+		raise ValueError("Both CDFs must have the same length")
 
 	D = np.amax(np.abs(cdf1 - cdf2)) # K-S statistic
 	level = exp(-2 * (D / sqrt((n1 + n2) / (n1 * n2)))**2)
 	return D, level
 
 def _two_sample_kolmogorov_smirnov_population(p1, p2, alpha=0.05):
+	# type: (np.ndarray, np.ndarray, float) -> Tuple[float, float, bool]
+
 	# note: yields different results as `scipy.stats.ks_2samp`
+
 	cdf1 = population2cdf(p1)
 	cdf2 = population2cdf(p2)
 

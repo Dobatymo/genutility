@@ -82,3 +82,19 @@ class MalformedFile(ValueError):
 	""" Raised when a malformed File is passes as input.
 		In contrast to `ParseError` this is usually a file we have control over.
 	"""
+
+def assert_choice(name, value, choices):
+	# type: (str, T, Set[T]) -> None
+
+	if value not in choices:
+		raise ValueError("{} must be one of {}".format(name, ", ".join(choices)))
+
+def assert_type(name, value, types):
+	# type: (str, Any, Sequence[Any]) -> None
+
+	if not isinstance(value, types):
+		raise TypeError("{} must be one of these types: {}".format(name, ", ".join(types)))
+
+def assert_true(name, value):
+	if not value:
+		raise ValueError("{} must be set".format(name))

@@ -257,8 +257,10 @@ def floordiv2(n):
 		n = n // 2
 
 def isintlog(num, base):
+	# type: (int, int) -> bool
 
-	assert num > 0
+	if num <= 0 or base <= 0:
+		raise ValueError("num and base must be larger than 0")
 
 	if num == 1:
 		return False

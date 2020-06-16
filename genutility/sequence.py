@@ -60,7 +60,8 @@ def sliding_window(seq, size):
 	# type: (Sequence, int) -> Iterator[Sequence]
 
 	seqlen = len(seq)
-	assert size <= seqlen
+	if size > seqlen:
+		raise ValueError("size must be less or equal the length of the sequence")
 
 	for i in range(0, seqlen-size+1):
 		yield seq[i:i+size]

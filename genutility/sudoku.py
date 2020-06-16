@@ -6,9 +6,10 @@ from random import choice
 from typing import TYPE_CHECKING
 
 from .compat.math import isqrt
+from .exceptions import assert_type
 from .indexing import row_indices, col_indices, subblock_indices
-from .set import get as setget
 from .iter import batch
+from .set import get as setget
 
 if TYPE_CHECKING:
 	from typing import Iterable, Set, TypeVar
@@ -20,18 +21,18 @@ class Unsolvable(Exception):
 
 class Sudoku(object):
 
-	def __init__(self, square, sym_set, sym_free):
+	def __init__(self, board, sym_set, sym_free):
 		# type: (Iterable[T], Set[T], T) -> None
 
-		assert isinstance(sym_set, set)
+		assert_type("sym_set", sym_set, set)
 
-		self.square = square
+		self.square = board
 		self.sym_set = sym_set
 		self.sym_free = sym_free
 
-		self.outer_square_size = isqrt(len(square))
+		self.outer_square_size = isqrt(len(board))
 		self.outer_square_area = self.outer_square_size ** 2
-		if self.outer_square_area != len(square):
+		if self.outer_square_area != len(board):
 			raise ValueError("board has an invalid size")
 
 		if self.outer_square_size != len(sym_set):
@@ -43,35 +44,35 @@ class Sudoku(object):
 
 		self.solved = False
 
-	def init_square(self, sudoku):
+	def init_board(self, board):
 		raise NotImplementedError
 
-	def get_square(self):
+	def get_board(self):
 		raise NotImplementedError
 
 	def print_square(self):
-		for i, num in enumerate(self.get_square(), 1):
+		for i, num in enumerate(self.get_board(), 1):
 			print(num, end=" ")
 			if i % self.outer_square_size == 0:
 				print()
 
 	def solve(self, strategy=None):
-		self.square = self.init_square(self.square)
+		self.square = self.init_board(self.square)
 		return self._solve(strategy)
 
 
 class SudokuRulebased(Sudoku):
 
-	def init_square(self, sudoku):
+	def init_board(self, board):
 		square = []
-		for i in sudoku:
+		for i in board:
 			if i != self.sym_free:
 				square.append({i})
 			else:
 				square.append(self.sym_set.copy())
 		return square
 
-	def get_square(self):
+	def get_board(self):
 		for num in self.square:
 			if len(num) == 1:
 				yield setget(num)
@@ -124,10 +125,10 @@ class SudokuRulebased(Sudoku):
 
 class SudokuBruteforce(Sudoku):
 
-	def init_square(self, sudoku):
-		return sudoku
+	def init_board(self, board):
+		return board
 
-	def get_square(self):
+	def get_board(self):
 		return self.square
 
 	def get_row_nums(self, i):

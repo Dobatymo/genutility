@@ -9,7 +9,10 @@ class LinearRegression(object):
 	def __init__(self, X, y, alpha=0.01):
 		# type: (float[A, B], float[A], float) -> None
 
-		assert len(X.shape) == 2
+		if len(X.shape) != 2:
+			raise ValueError("X must be 2-dimensional")
+		if len(y.shape) != 1:
+			raise ValueError("y must be 1-dimensional")
 
 		self.K = X.shape[1] + 1  # one extra dimension for the bias term
 		self.M = len(y)

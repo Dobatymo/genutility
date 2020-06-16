@@ -8,6 +8,8 @@ from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_der_private_key
 from cryptography.hazmat.backends import default_backend
 
+from .exceptions import assert_choice
+
 if TYPE_CHECKING:
 	from typing import Union
 	from OpenSSL.crypto import X509
@@ -32,17 +34,18 @@ def get_pubkey_from_x509(x509):
 def load_keyfile(filename, encoding="PEM"):
 	# type: (str, str) -> PrivateKey
 
-	encodings = {
-		"PEM": load_pem_private_key,
-		"DER": load_der_private_key,
-	}
-
-	assert encoding in encodings
+	try:
+		load_func = {
+			"PEM": load_pem_private_key,
+			"DER": load_der_private_key,
+		}[encoding]
+	except KeyError:
+		raise ValueError("Invalid encoding")
 
 	with open(filename, "rb") as fr:
 		password = None
 		backend = default_backend()
-		return encodings[encoding](fr.read(), password, backend)
+		return load_func(fr.read(), password, backend)
 
 def generate_rsa_keyfile_pair(priv_key, pub_key, key_size=4096, encoding="PEM", format="modern"):
 	# type: (str, str, int, str, str) -> RSAPrivateKey
@@ -51,14 +54,17 @@ def generate_rsa_keyfile_pair(priv_key, pub_key, key_size=4096, encoding="PEM", 
 		encoding: "PEM" -> ASN.1 encoding, "DER" -> base64 PEM
 	"""
 
+	if key_size < 2048:
+		raise ValueError("key_size must be atleast 2048")
+
 	encodings = {
 		"PEM": Encoding.PEM,
 		"DER": Encoding.DER,
 	}
 
 	private_formats = {
-		"legacy": PrivateFormat.TraditionalOpenSSL,
 		"modern": PrivateFormat.PKCS8,
+		"legacy": PrivateFormat.TraditionalOpenSSL,
 	}
 
 	public_formats = {
@@ -66,9 +72,8 @@ def generate_rsa_keyfile_pair(priv_key, pub_key, key_size=4096, encoding="PEM", 
 		"legacy": PublicFormat.PKCS1,
 	}
 
-	assert key_size >= 2048
-	assert encoding in encodings
-	assert format in private_formats
+	assert_choice("encoding", encoding, encodings)
+	assert_choice("format", format, private_formats)
 
 	public_exponent = 65537
 	backend = default_backend()

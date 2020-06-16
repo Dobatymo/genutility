@@ -145,7 +145,8 @@ def _disk_usage_windows(path):
 def _volume_info_windows(path):
 	# type: (str, ) -> _volumeinfotuple
 
-	assert path.endswith("\\"), "X: usually doesn't work. X:\\ does."
+	if not path.endswith("\\"):
+		raise ValueError("X: usually doesn't work. X:\\ does.")
 
 	RootPathName = LPCWSTR(path)
 	VolumeNameBuffer = create_unicode_buffer(MAX_PATH+1)

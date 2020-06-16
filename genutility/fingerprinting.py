@@ -97,7 +97,8 @@ def phash_moments(image):
 		`image` is a RGB pillow image. Results should be compared with L^2-Norm of difference vector.
 	"""
 
-	assert image.mode == "RGB"
+	if image.mode != "RGB":
+		raise ValueError("Only RGB images are supported")
 
 	# preprocessing
 	image = image.resize((512, 512), Image.BICUBIC)

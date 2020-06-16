@@ -7,6 +7,7 @@ from bencode import bdecode, bencode
 
 from .file import read_file, blockfileiter, blockfilesiter
 from .filesystem import FileProperties
+from .exceptions import assert_choice
 
 if TYPE_CHECKING:
 	from typing import Optional
@@ -40,7 +41,8 @@ def pieces_field(pieces):
 def create_torrent_info_dict(path, piece_size, private=None):
 	# type: (Path, int, Optional[int]) -> dict
 
-	assert private is None or private in {0, 1}
+	if private is not None:
+		assert_choice("private", private, (0, 1))
 
 	if path.is_file():
 		ret = {

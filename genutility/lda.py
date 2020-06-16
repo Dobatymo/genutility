@@ -91,9 +91,14 @@ class LDABase(object):
 		self.nk[k] -= 1
 
 	def _validate(self, M, K, V):
-		assert M > 0, "Number of documents must be larger than zero"
-		assert K > 0, "Number of topics must be larger than zero"
-		assert V > 0, "Vocabulary size must be larger than zero"
+		# type: (int, int, int) -> None
+
+		if M <= 0:
+			raise ValueError("Number of documents must be larger than zero")
+		if K <= 0:
+			raise ValueError("Number of topics must be larger than zero")
+		if V <= 0:
+			raise ValueError("Vocabulary size must be larger than zero")
 
 		assert self.nmk.shape == (M, K)
 		assert self.nm.shape == (M, )

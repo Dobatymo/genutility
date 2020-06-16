@@ -45,9 +45,11 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 			self.InsertColumn(i, col)
 
 	def Append(self, items):
-		assert(len(items) == self.columns)
+		if len(items) != self.columns:
+			raise ValueError("Length of items doesn't match available columns")
+
 		pos = self.InsertItem(self.rows, items[0])
-		assert(pos == self.rows)
+		assert pos == self.rows
 		#logger.debug("Appending Item on rows->pos: {}->{}".format(self.rows, pos))
 
 		self.rows += 1

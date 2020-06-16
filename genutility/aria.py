@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from .dict import update
-from .exceptions import InconsistentState, DownloadFailed, WouldBlockForever, ExternalProcedureUnavailable
+from .exceptions import InconsistentState, DownloadFailed, WouldBlockForever, ExternalProcedureUnavailable, assert_type
 
 from aria2p import Client
 from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
@@ -131,7 +131,8 @@ class AriaDownloader(object):
 					elif entry["status"] == "error":
 						raise DownloadFailed(gid, entry["errorCode"], entry["errorMessage"])
 					else:
-						assert False, "Unexpected status"
+						raise RuntimeError("Unexpected status: {}".format(entry["status"]))
+
 				finally:
 					self.remove_stopped(gid)
 
@@ -227,7 +228,7 @@ class AriaDownloader(object):
 					raise RuntimeError("Someone removed our download...")
 
 				else:
-					assert False, "Unexpected status"
+					raise RuntimeError("Unexpected status: {}".format(status))
 
 				sleep(self.poll)
 		finally:
@@ -240,7 +241,8 @@ class AriaDownloader(object):
 			Does not block. Returns a download identifier.
 		"""
 
-		assert headers is None or isinstance(headers, Sequence)
+		if headers is not None:
+			assert_type("headers", headers, Sequence)
 
 		options = self.default_options.copy()
 		update(options, {

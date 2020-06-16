@@ -96,7 +96,8 @@ def call_repeated(num):
 		Returns the results of the last call.
 	"""
 
-	assert num > 0
+	if num < 1:
+		raise ValueError("num must be larger than 0")
 
 	def dec(func):
 		@wraps(func)

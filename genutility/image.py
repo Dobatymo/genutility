@@ -50,7 +50,8 @@ def histogram_2d(arr, levels):
 		Output shape: [batch..., levels]
 	"""
 
-	assert len(arr.shape) >= 2
+	if len(arr.shape) < 2:
+		raise ValueError("arr must be at least 2-dimensional")
 
 	newshape = arr.shape[:-2] + (arr.shape[-2] * arr.shape[-1], )
 	flattened = np.reshape(arr, newshape)
@@ -78,7 +79,8 @@ def image_histogram(arr, levels=256):
 		Output shape: [batch..., levels]
 	"""
 
-	assert len(arr.shape) >= 3
+	if len(arr.shape) < 3:
+		raise ValueError("arr must be at least 3-dimensional")
 
 	gray = grayscale(arr)
 	return histogram_2d(gray, levels)
@@ -91,7 +93,8 @@ def image_block_histogram(arr, bx, by, levels=256):
 		Output shape: [batch..., bx, by, levels]
 	"""
 
-	assert len(arr.shape) >= 3
+	if len(arr.shape) < 3:
+		raise ValueError("arr must be at least 3-dimensional")
 
 	gray = grayscale(arr)
 	return block_histogram_2d(gray, bx, by, levels)
