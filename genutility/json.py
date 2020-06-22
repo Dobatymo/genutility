@@ -75,12 +75,13 @@ def read_json(path, schema=None, cls=None, object_hook=None):
 	validate(obj, schema)
 	return obj
 
-def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None):
+def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False):
 	# type: (Any, str, Optional[Union[str, JsonDict]], bool, Optional[str], bool, Optional[Callable]) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
 		The remaining optional parameters are passed through to `json.dump`.
+		`safe`: if True, don't overwrite original file in case any error occurs
 	"""
 
 	if schema:
@@ -91,7 +92,12 @@ def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None
 
 		validate(obj, schema)
 
-	with copen(path, "wt", encoding="utf-8") as fw:
+	if safe:
+		context = TransactionalCreateFile
+	else:
+		context = copen
+
+	with context(path, "wt", encoding="utf-8") as fw:
 		json.dump(obj, fw, ensure_ascii=ensure_ascii, cls=cls, indent=indent, sort_keys=sort_keys, default=default)
 
 class json_lines(object):
@@ -239,7 +245,7 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
 			if invalid:
 				path.mkdir(parents=True, exist_ok=True)
 				ret = func(*args, **kwargs)
-				write_json(ret, fullpath, ensure_ascii=ensure_ascii, indent=indent, sort_keys=sort_keys, default=default)
+				write_json(ret, fullpath, ensure_ascii=ensure_ascii, indent=indent, sort_keys=sort_keys, default=default, safe=True)
 				return ret
 			else:
 				return read_json(fullpath, object_hook=object_hook)

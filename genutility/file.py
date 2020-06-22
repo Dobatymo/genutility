@@ -111,7 +111,7 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 			to enable transparent compression
 
 		Returns a file-like object. If `file` was a fd,
-			it will be closed if the file-like object is closed.
+			it will be closed when the file-like object is closed.
 	"""
 
 	encoding = _check_arguments(mode, encoding)
@@ -147,6 +147,9 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 				bf = zf.open(archive_file, newmode)
 
 		return wrap_text(bf, mode, encoding, errors, newline)
+
+	if isinstance(file, TextIOWrapper):
+		return file
 
 	if hasattr(file, "read") or hasattr(file, "write"): # file should be in binary mode here
 		return wrap_text(file, mode, encoding, errors, newline)

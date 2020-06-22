@@ -3,11 +3,61 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.utils import viewitems
 from random import shuffle
 
+from hypothesis import given, strategies
+
 from genutility.test import MyTestCase, parametrize
-from genutility.string import replace_list, replace_pairs, are_parentheses_matched, replace_pairs_chars, \
-	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, removesuffix, toint
+from genutility.string import (are_parentheses_matched, replace_pairs_chars,
+	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, removesuffix, toint, backslash_unescape,
+	backslashquote_unescape, backslashquote_escape, backslashcontrol_unescape, backslashcontrol_escape)
 
 class StringTest(MyTestCase):
+
+	@parametrize(
+		("", ""),
+		("\\\\", "\\"),
+		("\\n", "\n"),
+		("\\u1234", "\u1234"),
+		("asd\\nasd", "asd\nasd"),
+		("\u1234\\n\u1234", "\u1234\n\u1234"),
+		("a \\0 \0 \\000 \000 \\x00 \x00 \\u9999 \u9999", "a \0 \0 \000 \000 \x00 \x00 \u9999 \u9999"),
+	)
+	def test_backslashunescape(self, s, truth):
+		result = backslash_unescape(s)
+		self.assertEqual(truth, result)
+
+	@parametrize(
+		('',),
+		('"',),
+		('\\',),
+		('\\\\',),
+		('""',),
+		('asd',),
+		('"asd"',),
+		('\\asd\\',),
+		('"asd\\',),
+		('\\"\\"',)
+	)
+	def test_backslashquote_escaping(self, s):
+		self.assertEqual(s, backslashquote_unescape(backslashquote_escape(s)))
+
+	@given(strategies.text())
+	def test_backslashquote_escaping_2(self, s):
+		self.assertEqual(s, backslashquote_unescape(backslashquote_escape(s)))
+
+	@parametrize(
+		("asd",),
+		("\n",),
+		("\\n",),
+		("\u1234",),
+		("\r\\\\r\u1234",),
+		("\\\\t",),
+	)
+	def test_backslashcontrol_escaping(self, s):
+		self.assertEqual(s, backslashcontrol_unescape(backslashcontrol_escape(s)))
+
+	@given(strategies.text())
+	def test_backslashcontrol_escaping_2(self, s):
+		self.assertEqual(s, backslashcontrol_unescape(backslashcontrol_escape(s)))
 
 	@parametrize(
 		(("asd",), None),
@@ -17,7 +67,8 @@ class StringTest(MyTestCase):
 		((None, None), None)
 	)
 	def test_toint(self, inputs, truth):
-		self.assertEqual(truth, toint(*inputs))
+		result = toint(*inputs)
+		self.assertEqual(truth, result)
 
 	@parametrize(
 		("", "", ""),
@@ -37,10 +88,10 @@ class StringTest(MyTestCase):
 	def test_locale_sorted(self):
 		seq = ["a", "b", "c", "A", "B", "C", "aa", "Aa", "aA", "ab", "aB", "BC"]
 		truths = {
-			(True, True): ['a', 'A', 'aa', 'aA', 'Aa', 'ab', 'aB', 'b', 'B', 'BC', 'c', 'C'],
-			(True, False): ['A', 'a', 'Aa', 'aA', 'aa', 'aB', 'ab', 'B', 'b', 'BC', 'C', 'c'],
-			(False, True): ['a', 'aa', 'ab', 'aA', 'aB', 'b', 'c', 'A', 'Aa', 'B', 'BC', 'C'],
-			(False, False): ['A', 'Aa', 'B', 'BC', 'C', 'a', 'aA', 'aB', 'aa', 'ab', 'b', 'c'],
+			(True, True): ["a", "A", "aa", "aA", "Aa", "ab", "aB", "b", "B", "BC", "c", "C"],
+			(True, False): ["A", "a", "Aa", "aA", "aa", "aB", "ab", "B", "b", "BC", "C", "c"],
+			(False, True): ["a", "aa", "ab", "aA", "aB", "b", "c", "A", "Aa", "B", "BC", "C"],
+			(False, False): ["A", "Aa", "B", "BC", "C", "a", "aA", "aB", "aa", "ab", "b", "c"],
 		}
 
 		for i in range(10):
@@ -50,22 +101,6 @@ class StringTest(MyTestCase):
 				b = locale_sorted(reversed(seq), ci, lbu)
 				self.assertEqual(a, truth)
 				self.assertEqual(b, truth)
-
-	@parametrize(
-		("asd", "as", "_", "__d"),
-		("asd", "sd", "_", "a__"),
-	)
-	def test_replace_list(self, string, chr_list, replace_char, truth):
-		result = replace_list(string, chr_list, replace_char)
-		self.assertEqual(truth, result)
-
-	@parametrize(
-		("abc", (("a","x"), ("b","y")), "xyc"),
-		("abc", (("b","y"), ("c","z")), "ayz"),
-	)
-	def test_replace_pairs(self, string, items, truth):
-		result = replace_pairs(string, items)
-		self.assertEqual(truth, result)
 
 	@parametrize(
 		("", True),
@@ -130,6 +165,6 @@ class StringTest(MyTestCase):
 		result = replace_pairs_bytes(s, items)
 		self.assertEqual(truth, result)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 	import unittest
 	unittest.main()

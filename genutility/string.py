@@ -7,13 +7,14 @@ import re
 from itertools import chain
 from locale import strxfrm
 from functools import partial
+from collections import OrderedDict
 from typing import TYPE_CHECKING
 
 from .iter import switched_enumerate
 from .binary import encode_binary, decode_binary
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, Tuple, Callable, Optional, Sequence, TypeVar, Union
+	from typing import Any, Dict, Iterable, Tuple, Callable, Optional, Sequence, TypeVar, Union, Mapping
 	T = TypeVar("T")
 
 english_consonants = "bcdfghjklmnpqrstvwxz" # y?
@@ -36,7 +37,6 @@ def toint(obj, default=None):
 	except (ValueError, TypeError):
 		return default
 
-# was: startcut
 def removeprefix(s, prefix):
 	# type: (str, str) -> str
 
@@ -47,7 +47,6 @@ def removeprefix(s, prefix):
 	else:
 		return s
 
-# was: endcut
 def removesuffix(s, suffix):
 	# type: (str, str) -> str
 
@@ -100,7 +99,15 @@ def locale_sorted(seq, case_insensitive=True, lower_before_upper=True):
 	return sorted(seq, key=key)
 
 def build_multiple_replace(d, escape=True):
-	# type: (Dict[str, str], bool) -> Callable
+	# type: (Mapping[str, str], bool) -> Callable[[str], str]
+
+	""" Returns a callable, which when applied to a string,
+		replaces all the keys in `d` with the corresponding values.
+		The replacement happens in iteration order of the mapping.
+		If the order of replacement is important, an OrderedDict should
+		be used instead of a dict for Python < 3.7.
+		The complexity then is linear in  the length of the input string.
+	"""
 
 	if escape:
 		it = map(re.escape, viewkeys(d))
@@ -110,16 +117,89 @@ def build_multiple_replace(d, escape=True):
 	cp = re.compile("(" + "|".join(it) + ")")
 	return partial(cp.sub, lambda m: d[m.group(0)])
 
-def replace_multiple(s, d): # cython candidate...
-	# type: (Iterable[str], Dict[str, str]) -> str
+def multiple_replace(d, s):
+	# type: (Mapping[str, str], str) -> str
 
-	""" Use dictionary d to replace instances of key with value.
-		If input is a string, the keys must be strings of length 1.
+	""" Uses mapping `d` to replace keys with values in `s`.
+		This is a wrapper for `build_multiple_replace`,
+		which should be used directly for improved performance
+		in case the same `d` is used for multiple `s`.
+	"""
+
+	f = build_multiple_replace(d)
+	return f(s)
+
+def replace_multiple(s, d): # cython candidate...
+	# type: (Iterable[str], Mapping[str, str]) -> str
+
+	""" Use dictionary `d` to replace instances of key with value.
+		If input `s` is a string, the keys must be strings of length 1.
 		If the input is an iterable of strings,
-		the strings will be compared to the keys for equality
+		the strings will be compared to the keys for equality.
+		The complexity is linear in the length of the iterable/string.
+		For string inputs and keys of length > 1 see `multiple_replace`.
 	"""
 
 	return "".join(d.get(c, c) for c in s)
+
+def backslash_unescape(s):
+	# type: (str, ) -> str
+
+	""" Converts strings with backslash-escaped entities like \n or \u1234
+		to a string with these entities.
+		Example: backslash_unescape("\\n") -> "\n"
+	"""
+
+	# for some reason unicode_escape is based on latin-1
+	# ascii also works, but the intermittent string would be longer
+	# because more things will be backslash-escaped
+	return s.encode("latin-1", "backslashreplace").decode("unicode_escape")
+
+_backslashquote_escape = build_multiple_replace(OrderedDict([
+	("\\", "\\\\"),
+	("\"", "\\\"")
+]))
+def backslashquote_escape(s):
+	# type: (str, ) -> str
+
+	""" Converts \ to \\ and " to \"
+	"""
+
+	return _backslashquote_escape(s)
+
+_backslashquote_unescape = build_multiple_replace(OrderedDict([
+	("\\\"", "\""),
+	("\\\\", "\\")
+]))
+def backslashquote_unescape(s):
+	# type: (str, ) -> str
+
+	""" Unescapes \\ and \" in `s`.
+	"""
+
+	return _backslashquote_unescape(s)
+
+_backslashcontrol_escape = build_multiple_replace(OrderedDict([
+	("\\", "\\\\"),
+	("\t" ,"\\t"),
+	("\n", "\\n"),
+	("\r", "\\r")
+]))
+def backslashcontrol_escape(s):
+	# type: (str, ) -> str
+
+	return _backslashcontrol_escape(s)
+
+_backslashcontrol_unescape = build_multiple_replace(OrderedDict([
+	("\\\\", "\\"),
+	("\\t", "\t"),
+	("\\n", "\n"),
+	("\\r", "\r")
+]))
+def backslashcontrol_unescape(s):
+	# type: (str, ) -> str
+
+	return _backslashcontrol_unescape(s)
 
 def are_parentheses_matched(s, open="([{", close=")]}"):
 	# type: (str, str, str) -> bool
@@ -140,7 +220,6 @@ def are_parentheses_matched(s, open="([{", close=")]}"):
 
 	return len(stack) == 0 # unclosed parentheses left
 
-# was: cond_join
 def filter_join(s, it, func=None):
 	# type: (str, Iterable[str], Optional[Callable]) -> str
 
@@ -155,17 +234,10 @@ def surrounding_join(j, it, l="", r=""):
 	""" Example: surrounding_join(", ", ("a", "b", "c"), l="[", r="]") -> "[a], [b], [c]"
 	"""
 
-	s = (r+j+l).join(it)
+	s = (r + j + l).join(it)
 	if s != "":
-		return l+s+r
+		return l + s + r
 	return ""
-
-def replace_pairs(s, items):
-	# type: (str, Iterable[Tuple[str, str]]) -> str
-
-	for key, value in items:
-		s = s.replace(key, value)
-	return s
 
 def replace_pairs_bytes(s, items):
 	# type: (bytes, Dict[bytes, Optional[bytes]]) -> bytes
@@ -193,11 +265,11 @@ def replace_pairs_chars(s, items):
 
 	return s.translate(table)
 
-def replace_list(s, character_list, replace_char):
-	# type: (str, Sequence[str], str) -> str
+_contains_digit = re.compile(r"\d")
+def contains_digit(s):
+	# type: (str, ) -> bool
 
-	""" should work with CaseInsensitiveString also and replace replace_list_insensitive"""
+	""" Tests if a digit is contained in string `s`.
+	"""
 
-	for find_char in character_list:
-		s = s.replace(find_char, replace_char)
-	return s
+	return _contains_digit.search(s) is not None
