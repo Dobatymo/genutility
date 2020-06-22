@@ -93,7 +93,9 @@ def truncate_file(path, size):
 
 def wrap_text(bf, mode, encoding, errors, newline):
 	if "t" in mode:
-		return TextIOWrapper(bf, encoding, errors, newline)
+		tf = TextIOWrapper(bf, encoding, errors, newline)
+		tf.mode = mode
+		return tf
 	return bf
 
 def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9, ext=None):
