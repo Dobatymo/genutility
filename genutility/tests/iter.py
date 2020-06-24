@@ -13,7 +13,8 @@ from genutility.iter import (product_range_repeat, every_n, any_in_common, split
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
 	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, findfirst,
-	is_empty, switch, multi_join, first_not_none, lastdefault, last, EmptyIterable)
+	is_empty, switch, multi_join, first_not_none, lastdefault, last, EmptyIterable, collapse_any,
+	collapse_all, extrema, switched_enumerate, list_except)
 from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
@@ -221,6 +222,14 @@ class IterTest(MyTestCase):
 			next(switch(it))
 
 	@parametrize(
+		([], []),
+		("abc", [("a", 0), ("b", 1), ("c", 2)]),
+	)
+	def test_switched_enumerate(self, it, truth):
+		result = switched_enumerate(it)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
 		((1, 2), (3, 4), lambda x, y: x*y, (3, 6, 4, 8)),
 		((1, 2), (3, 4), lambda x, y: str(x)+str(y), ('13', '23', '14', '24')),
 	)
@@ -311,9 +320,20 @@ class IterTest(MyTestCase):
 	def test_iter_except_it(self):
 		m = Mock(return_value=None)
 		result = tuple(iter_except(IteratorWithException(), {ZeroDivisionError: m}))
-		truth = (1,2)
+		truth = (1, 2)
 		self.assertEqual(truth, result)
 		self.assertEqual(1, m.call_count)
+
+	@parametrize(
+		([], (None, [])),
+		([1, 2, 3], (None, [1, 2, 3])),
+		(GeneratorWithException(), (ValueError(), [1])),
+	)
+	def test_list_except(self, it, truth):
+		exc, result = list_except(it)
+		exc_truth, truth = truth
+		self.assertEqual(truth, result)
+		self.assertTypeEqual(exc_truth, exc)
 
 	def test_iter_except_ignore_it(self):
 		with self.assertRaises(ZeroDivisionError):
@@ -509,6 +529,32 @@ class IterTest(MyTestCase):
 		results = []
 		result = tuple(retrier(waitfunc=results.append, **kwargs))
 		self.assertIterEqual(truth, results)
+
+	@parametrize(
+		((), set(), ()),
+		((1,1,2,2,3,3,4,4), {1,2}, (1, 2, 3, 3, 4, 4)),
+	)
+	def test_collapse_any(self, it, set, truth):
+		result = collapse_any(it, set)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		((1,1,2,2,3,3,4,4), {1,2}, 5, (5, 3, 3, 4, 4))
+	)
+	def test_collapse_all(self, it, set, replacement, truth):
+		result = collapse_all(it, set, replacement)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		((), ()),
+		((1, 2, 3), ()),
+		((1, 2, 3, 2, 1), (3, )),
+		((1, 2, 1, 2), (2, 1)),
+		((2, 1, 2, 1), (1, 2)),
+	)
+	def test_extrema(self, it, truth):
+		result = extrema(it, {}, {})
+		self.assertIterEqual(truth, result)
 
 if __name__ == "__main__":
 	import unittest

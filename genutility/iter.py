@@ -14,6 +14,7 @@ from types import GeneratorType
 from typing import TYPE_CHECKING
 
 from .exceptions import IteratorExhausted, EmptyIterable
+from .ops import operator_in
 
 if TYPE_CHECKING:
 	from typing import (Any, Callable, Iterable, Iterator, TypeVar, Tuple, Sequence,
@@ -27,7 +28,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-# was: iterrandint
 def iterrandrange(a, b):
 	# type: (int, int) -> Iterator[int]
 
@@ -184,20 +184,25 @@ def asc_peaks(iterable):
 		cur = x
 	yield cur
 
-def extrema(iterable, first=None, last=None, derivatives={1, -1}):
+def extrema(iterable, first={1, -1}, last={1, -1}, derivatives={1, -1}):
+	# type: (Iterable[T], Set[int], Set[int], Set[int]) -> Iterator[T]
+
 	it = iter(iterable)
 	try:
 		old = next(it)
 	except StopIteration:
 		return
 	try:
-		old_d = diffsgn(old, next(it))
+		old_2 = next(it)
+		old_d = diffsgn(old, old_2)
 	except StopIteration:
 		yield old # fixme: should this be returned?
 		return
 
-	if old_d == first:
+	if old_d in first:
 		yield old
+
+	old = old_2
 
 	for new in it:
 		new_d = diffsgn(old, new)
@@ -206,7 +211,7 @@ def extrema(iterable, first=None, last=None, derivatives={1, -1}):
 		old = new
 		old_d = new_d
 
-	if old_d == last:
+	if old_d in last:
 		yield old
 
 def peaks(it):
@@ -214,14 +219,14 @@ def peaks(it):
 
 	""" Yields peaks of `it`. """
 
-	return extrema(it, -1, 1, {1})
+	return extrema(it, {-1}, {1}, {1})
 
 def valleys(it):
 	# type: (Iterable[T], ) -> Iterator[T]
 
 	""" Yields valleys of `it`. """
 
-	return extrema(it, 1, -1, {-1})
+	return extrema(it, {1}, {-1}, {-1})
 
 def empty():
 	# type: () -> Iterator
@@ -246,7 +251,6 @@ def lastdefault(it, default=None):
 		ret = i
 	return ret
 
-# was: iterlast
 def last(it):
 	# type: (Iterable[T], ) -> T
 
@@ -343,7 +347,6 @@ def findfirst(func, it, default=(None, None)):
 
 	return default
 
-#was: isempty
 def is_empty(it):
 	# type: (Iterator, ) -> bool
 
@@ -649,3 +652,36 @@ def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter
 
 		waittime *= multiplier
 		jitter *= multiplier
+
+def collapse_any(it, col_set):
+	# type: (Iterable[T], Set[T]) -> Iterator[T]
+
+	""" Removes consecutive elements from iterable `it` if element is in `col_set`.
+		([1,1,2,2,3,3,4,4], {1,2}) -> 1, 2, 3, 3, 4, 4
+	"""
+
+	assert isinstance(col_set, set)
+
+	for key, g in groupby(it):
+		if key in col_set:
+			yield key
+		else:
+			for i in g: # yield from g
+				yield i
+
+def collapse_all(it, col_set, replacement):
+	# type: (Iterable[T], Set[T], T) -> Iterator[T]
+
+	""" Removes consecutive elements from iterable `it` if element is in `col_set`
+		and replace `replacement`.
+		([1,1,2,2,3,3,4,4], {1,2}, 5) -> 5, 3, 3, 4, 4
+	"""
+
+	assert isinstance(col_set, set)
+
+	for key, g in groupby(it, key=operator_in(col_set)):
+		if key:
+			yield replacement
+		else:
+			for i in g: # yield from g
+				yield i

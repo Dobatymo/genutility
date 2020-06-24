@@ -113,6 +113,9 @@ class MyTestCase(TestCase):
 
 		self.assertTrue(first and second, msg)
 
+	def assertTypeEqual(self, first, second, msg=None):
+		self.assertEqual(type(first), type(second), msg)
+
 	def assertFilesEqual(self, first_path, second_path):
 		self.assertTrue(equal_files(first_path, second_path))
 

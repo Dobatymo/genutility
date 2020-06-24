@@ -2,9 +2,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from genutility.test import MyTestCase, parametrize
 from genutility.ops import (bit_or, converse_implication, converse_nonimplication, logical_xor,
-	logical_implication)
+	logical_implication, operator_in)
 
 class OpsTest(MyTestCase):
+
+	@parametrize(
+		([1,2,3], 1, True),
+		({1,2,3}, 4, False)
+	)
+	def test_operator_in(self, s, elm, truth):
+		result = operator_in(s)(elm)
+		self.assertEqual(truth, result)
 
 	@parametrize(
 		(0, 0, 0),

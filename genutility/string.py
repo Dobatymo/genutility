@@ -32,10 +32,24 @@ german_vowels = "aeiou"
 def toint(obj, default=None):
 	# type: (Any, Optional[T]) -> Union[int, Optional[T]]
 
+	""" Converts `obj` to int if possible and returns `default` otherwise.
+	"""
+
 	try:
 		return int(obj)
 	except (ValueError, TypeError):
 		return default
+
+def tryint(obj):
+	# type: (T, ) -> Union[int, T]
+
+	""" Converts `obj` to int if possible and returns the original object otherwise.
+	"""
+
+	try:
+		return int(obj)
+	except (ValueError, TypeError):
+		return obj
 
 def removeprefix(s, prefix):
 	# type: (str, str) -> str
@@ -72,17 +86,6 @@ def decode_case(s, key):
 	"""
 
 	return "".join(c.upper() if b else c for c, b in zip(s, decode_binary(key)))
-
-def tryint(obj):
-	# type: (Any, ) -> Any
-
-	""" Converts `obj` to int if possible and returns the original object otherwise.
-	"""
-
-	try:
-		return int(obj)
-	except (ValueError, TypeError):
-		return obj
 
 def locale_sorted(seq, case_insensitive=True, lower_before_upper=True):
 	if case_insensitive:

@@ -23,6 +23,16 @@ def not_in(s):
 
 	return lambda x: x not in s
 
+def operator_in(s):
+	# type: (Container[T], ) -> Callable[[T], bool]
+
+	""" Comparable to stdlib `operator.itemgetter` type functions.
+		It returns a function which will return a boolean indicating if
+		its argument if in `s`. `s` should be a set-like for better performance.
+	"""
+
+	return lambda x: x in s
+
 def logical_xor(a, b):
 	# type: (Any, Any) -> bool
 	# this is just the != operator for bools
