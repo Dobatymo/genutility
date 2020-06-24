@@ -686,7 +686,7 @@ def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password
 
 	with ZipFile(file, newmode) as zf:
 		for zi in zf.infolist():
-			if not zi.is_dir():  # fixeme: Py3.5 AttributeError: 'ZipInfo' object has no attribute 'is_dir'
+			if not zi.is_dir():  # fixme: Py3.5 AttributeError: 'ZipInfo' object has no attribute 'is_dir'
 				with zf.open(zi, newmode, password) as bf:
 					yield wrap_text(bf, mode, encoding, errors, newline)
 
@@ -747,6 +747,17 @@ def iter_lines(path, encoding="utf-8", errors="strict", newline=None, verbose=Fa
 		else:
 			for line in fr:
 				yield line
+
+def iter_stripped(path, encoding="utf-8", errors="strict", newline=None):
+	# type: (str, str, str, Optional[str]) -> Iterator[str]
+
+	""" Yield lines from text file with trailing newlines stripped.
+		Handles compressed files as well.
+	"""
+
+	with copen(path, "rt", encoding=encoding, errors=errors, newline=newline) as fr:
+		for line in fr:
+			yield line.rstrip("\r\n")
 
 # is this still needed?
 def file_byte_reader(filename, inputblocksize, outputblocksize, DEBUG=True):

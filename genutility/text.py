@@ -15,6 +15,10 @@ if TYPE_CHECKING:
 uni_cats = unicode_categories()
 
 def extract_urls(text):
+	# type: (str, ) -> Iterator[str]
+
+	""" Yields URLs from `text`. """
+
 	pattern = r"https?\:\/\/[" + re.escape(valid_uri_characters) + r"]+"
 	for match in re.finditer(pattern, text):
 		url = match.group(0)
@@ -84,6 +88,9 @@ def collapse_space(s, space=" "):
 
 def collapse_punctuation_symbols(s):
 	# type: (str, ) -> str
+
+	""" Collapses any successive Unicode punctuation symbol in `s`.
+	"""
 
 	punctuation_cats = ("Pc", "Pd", "Pe", "Pf", "Pi", "Po", "Ps")
 	symbol_cats = ("Sc", "Sk", "Sm", "So")

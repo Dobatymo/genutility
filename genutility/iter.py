@@ -513,7 +513,6 @@ def decompress(selectors, data, default=None):
 	except StopIteration: # exception converted because StopIterations raised in generators will cause RuntimeErrors
 		raise IteratorExhausted
 
-#was: get_first_non_none
 def first_not_none(it, default=None):
 	# type: (Iterable[T], Optional[T]) -> Optional[T]
 
@@ -568,7 +567,6 @@ def all_equal_to(it, cmp):
 
 	return all(elm == cmp for elm in it)
 
-# was: iter_same
 def iter_equal(*its):
 	# type: (*Iterable, ) -> bool
 
@@ -606,7 +604,7 @@ def split(it, size):
 	copies = tee(it, size)
 	return tuple(every_n(it, size, pos) for it, pos in zip(copies, range(size)))
 
-def remove_all_dupes(it): # was: remove_dup_list
+def remove_all_dupes(it):
 	# type: (Iterable[T], ) -> Iterable[T]
 
 	""" Removes all duplicates from `it` while preserving order. """

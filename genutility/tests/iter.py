@@ -14,7 +14,7 @@ from genutility.iter import (product_range_repeat, every_n, any_in_common, split
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
 	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, findfirst,
 	is_empty, switch, multi_join, first_not_none, lastdefault, last, EmptyIterable, collapse_any,
-	collapse_all, extrema, switched_enumerate, list_except)
+	collapse_all, extrema, switched_enumerate, list_except, all_equal_to, iter_different)
 from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
@@ -485,6 +485,18 @@ class IterTest(MyTestCase):
 		self.assertEqual(truth, result)
 
 	@parametrize(
+		(([], []), False),
+		(([True], [True]), False),
+		(([True], [False]), True),
+		(([True], [True, False]), True),
+		(([True, False], [True, True]), True),
+		(([True, False], [False, False]), True),
+	)
+	def test_iter_different(self, its, truth):
+		result = iter_different(*its)
+		self.assertEqual(truth, result)
+
+	@parametrize(
 		([], []),
 		([1, 2, 1], [2, 1]),
 		([2, 1, 2], [2, 2]),
@@ -539,7 +551,8 @@ class IterTest(MyTestCase):
 		self.assertIterEqual(truth, result)
 
 	@parametrize(
-		((1,1,2,2,3,3,4,4), {1,2}, 5, (5, 3, 3, 4, 4))
+		((), set(), None, ()),
+		((1,1,2,2,3,3,4,4), {1,2}, 5, (5, 3, 3, 4, 4)),
 	)
 	def test_collapse_all(self, it, set, replacement, truth):
 		result = collapse_all(it, set, replacement)
@@ -555,6 +568,18 @@ class IterTest(MyTestCase):
 	def test_extrema(self, it, truth):
 		result = extrema(it, {}, {})
 		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		((), 0, True),
+		((1, ), 1, True),
+		((1, 1), 1, True),
+		((1, ), 2, False),
+		((1, 2), 1, False),
+		((1, 2), 2, False),
+	)
+	def test_all_equal_to(self, it, elm, truth):
+		result = all_equal_to(it, elm)
+		self.assertEqual(truth, result)
 
 if __name__ == "__main__":
 	import unittest
