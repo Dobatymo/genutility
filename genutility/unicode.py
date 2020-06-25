@@ -7,7 +7,7 @@ from sys import maxunicode
 from collections import defaultdict
 from tempfile import gettempdir
 
-from .pickle import cache
+from .pickle import cache  # nosec
 
 @cache(gettempdir() + "/unicode_categories.{ppv}.pkl", ignoreargs=True)
 def unicode_categories():

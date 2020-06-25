@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import pickle  # nosec
-from pickle import HIGHEST_PROTOCOL
+from pickle import HIGHEST_PROTOCOL  # nosec
 from functools import wraps
 from datetime import timedelta
 from typing import TYPE_CHECKING
