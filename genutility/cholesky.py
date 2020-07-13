@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from math import sqrt
 
-from .numpy import issquare
+from .numpy import is_square
 from .numba import opjit
 
 @opjit(["void(f4[:,:], f4[:], f4)", "void(f8[:,:], f8[:], f8)"])
@@ -27,7 +27,7 @@ def choldate(L, x, sign):
 		L: square lower triangular matrix
 	"""
 
-	if not issquare(L) or x.shape != (L.shape[0], ):
+	if not is_square(L) or x.shape != (L.shape[0], ):
 		raise ValueError("Invalid dimensions")
 
 	try:

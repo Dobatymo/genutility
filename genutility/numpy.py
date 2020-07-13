@@ -60,7 +60,7 @@ def rgb_to_hsi(image):
 
 	#allequal = (img == img[:, :, 0, np.newaxis]).all(axis=-1)
 
-	with np.errstate(invalid="ignore"): 
+	with np.errstate(invalid="ignore"):
 		tmp = (2.*r - g - b) / 2. / np.sqrt((r-g)**2 + (r-b)*(g-b)) # if r==g==b then 0/0
 
 		theta = np.arccos(np.clip(tmp, -1., +1.))
@@ -113,7 +113,7 @@ def random_triangular_matrix(size, lower=True):
 
 	return a
 
-def issquare(A):
+def is_square(A):
 	# type: (np.ndarray, ) -> bool
 
 	if len(A.shape) != 2:
@@ -138,28 +138,30 @@ def batch_vTAv(A, v):
 
 	return np.einsum("...k,...kl,...l->...", v, A, v)
 
-# was: inner1d
-def batch_inner(a, b):
-	# type: (np.ndarray, np.ndarray) -> np.ndarray
+def batch_inner(a, b, verify=True):
+	# type: (np.ndarray, np.ndarray, bool) -> np.ndarray
 
 	""" Performs a batched inner product over the last dimension.
 		Replacement for deprecated `from numpy.core.umath_tests import inner1d`.
-		Shapes: (A, B), (A, B) -> (A, )
+		Shapes: (B, X), (B, X) -> (B, )
 	"""
 
-	if a.shape != b.shape:
+	if verify and a.shape != b.shape:
 		raise ValueError("All dimensions have to be equal")
+
+	if a.shape[-1] == 0:
+		return np.empty_like(a)
 
 	return np.einsum("...i,...i->...", a, b) # faster than np.sum(a * b, axis=-1)
 
-def batch_outer(a, b):
-	# type: (np.ndarray, np.ndarry) -> np.ndarray
+def batch_outer(a, b, verify=True):
+	# type: (np.ndarray, np.ndarry, bool) -> np.ndarray
 
 	""" Performs a batched outer product over the last dimension.
-		Shapes: (A, B), (A, C) -> (A, B, C)
+		Shapes: (B, X), (B, Y) -> (B, X, Y)
 	"""
 
-	if a.shape[:-1] != b.shape[:-1]:
+	if verify and a.shape[:-1] != b.shape[:-1]:
 		raise ValueError("All except the last dimension have to be equal")
 
 	return np.einsum("...i,...j->...ij", a, b) # slightly faster than np.multiply(a[...,:,None], b[...,None,:])
@@ -192,13 +194,14 @@ def batchtopk(probs, k=None, axis=-1, reverse=False):
 
 	return indices, probs
 
+#@opjit()
 def logtrace(m):
-	""" Calcuates the sum of the logs of the diagonal elements (batchwise if neccessary)
+	""" Calcuates the sum of the logs of the diagonal elements (batchwise if necessary)
 		m: [..., x, x]
 	"""
-	
+
 	""" note: performance cannot easily be improve by numba.
-		`np.diagonal` not supported by numba 0.46.0
+		`np.diagonal` not supported by numba 0.50.0
 	"""
 
 	return np.sum(np.log(np.diagonal(m, axis1=-2, axis2=-1)), axis=-1)
@@ -206,10 +209,15 @@ def logtrace(m):
 def shiftedexp(pvals):
 	# type: (np.ndarray, ) -> np.ndarray
 
-	""" Prevents overflow. Can be used if probabilities are normalized again later.
+	""" Shifts `pvals` by the largest value in the last dimension
+		before the exp is calculated to prevent overflow (batchwise if necessary).
+		Can be used if probabilities are normalized again later.
 	"""
 
-	return np.exp(pvals - np.max(pvals))
+	if pvals.shape[-1] == 0:
+		return np.empty_like(pvals)
+
+	return np.exp(pvals - np.amax(pvals, axis=-1)[...,None])
 
 class Sampler(object):
 
@@ -299,7 +307,7 @@ def categorical(pvals):
 def population2cdf(population):
 	# type: (np.ndarray, ) -> np.ndarray
 
-	""" Convert a population (list of observations) to a CDF. """ 
+	""" Convert a population (list of observations) to a CDF. """
 
 	population = np.sort(population)
 	return np.searchsorted(population, population, side='right') / len(population)
@@ -457,24 +465,3 @@ def histogram_correlation(hist1, hist2):
 	num = np.sum(h1norm * h2norm, axis=-1)
 	denom = np.sqrt(np.sum(h1norm**2, axis=-1)*np.sum(h2norm**2, axis=-1))
 	return num / denom
-
-if __name__ == "__main__":
-	import timeit
-
-	#image = np.random.randint(0, 255, (1000, 1000))
-	#list(sliding_window_2d(image, (100, 100), (1, 1))) # warmup
-	#print(min(timeit.repeat('list(sliding_window_2d(image, (100, 100), (1, 1)))', number=10, repeat=5, globals=globals())))
-
-	from unclog import logtrace as logtrace_cython, logtrace_batch as logtrace_batch_cython
-
-	a = np.random.uniform(0, 1, (100, 100)).astype(np.float64)
-	out = np.empty((), dtype=np.float64)
-
-	print(min(timeit.repeat('logtrace(a)', number=10000, globals=globals())))
-	print(min(timeit.repeat('logtrace_cython(a)', number=10000, globals=globals())))
-
-	a = np.random.uniform(0, 1, (100, 100, 100)).astype(np.float64)
-	out = np.empty(100, dtype=np.float64)
-
-	print(min(timeit.repeat('logtrace(a)', number=10000, globals=globals())))
-	print(min(timeit.repeat('logtrace_batch_cython(a, out)', number=10000, globals=globals())))

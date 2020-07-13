@@ -9,12 +9,12 @@ from os import devnull
 from hypothesis import given, strategies
 
 from genutility.test import MyTestCase, parametrize
-from genutility.iter import (product_range_repeat, every_n, any_in_common, split, remove_all_dupes,
+from genutility.iter import (product_range_repeat, every_n, any_in_common, split, no_dupes,
 	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
 	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, findfirst,
 	is_empty, switch, multi_join, first_not_none, lastdefault, last, EmptyIterable, collapse_any,
-	collapse_all, extrema, switched_enumerate, list_except, all_equal_to, iter_different)
+	collapse_all, extrema, switched_enumerate, list_except, all_equal_to, iter_different, any_in)
 from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
@@ -269,6 +269,16 @@ class IterTest(MyTestCase):
 		self.assertEqual(truth, result)
 
 	@parametrize(
+		([], {}, False),
+		([1,2], {2,3}, True),
+		([1,2], {3,4}, False)
+	)
+	def test_any_in(self, a, b, truth):
+		result = any_in(a, b)
+		self.assertEqual(truth, result)
+
+
+	@parametrize(
 		((1,2,3,4,5,6), 1, ((1,2,3,4,5,6),)),
 		((1,2,3,4,5,6), 2, ((1,3,5),(2,4,6))),
 		((1,2,3,4,5,6), 3, ((1,4),(2,5),(3, 6)))
@@ -285,8 +295,18 @@ class IterTest(MyTestCase):
 		((1,2,3,1), (1,2,3)),
 		((3,2,1,3), (3,2,1)),
 	)
-	def test_remove_all_dupes(self, input, truth):
-		result = remove_all_dupes(input)
+	def test_no_dupes(self, input, truth):
+		result = no_dupes(input)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		((1, 2), (3, 4), (1, 2, 3, 4)),
+		((1, 2), (2, 3), (1, 2, 3)),
+		((4, 1), (2, 3), (4, 1, 2, 3)),
+		((4, 1), (2, 1), (4, 1, 2)),
+	)
+	def test_no_dupes_2(self, input_a, input_b, truth):
+		result = no_dupes(input_a, input_b)
 		self.assertIterEqual(truth, result)
 
 	@parametrize(

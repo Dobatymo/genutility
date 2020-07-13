@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from genutility.test import MyTestCase, parametrize
-from genutility.numpy import remove_color, unblock, decompress, batchtopk, sliding_window_2d, rgb_to_hsi, shannon_entropy
+from genutility.numpy import (remove_color, unblock, decompress, batchtopk, sliding_window_2d, rgb_to_hsi,
+	shannon_entropy, is_rgb, is_square, batch_vTAv, batch_inner, batch_outer, logtrace, shiftedexp)
 from genutility.math import shannon_entropy as shannon_entropy_python
 
 RED = [255, 0, 0]
@@ -27,6 +28,130 @@ class NumpyTest(MyTestCase):
 		remove_color(img, ratio) # inplace
 		truth = np.array(truth)
 		self.assertTrue(np.array_equal(truth, img))
+
+	@parametrize(
+		([], False),
+		([0, 0, 0], True),
+		([[0, 0, 0]], True),
+		([[0, 0, 0], [0, 0, 0]], True),
+		([[0], [0], [0]], False),
+	)
+	def test_is_rgb(self, arr, truth):
+		arr = np.array(arr)
+		result = is_rgb(arr)
+		self.assertEqual(truth, result)
+
+	@parametrize(
+		([], False),
+		([[]], False),  # fixme: what about this one?
+		([[0]], True),
+		([[0, 0], [0, 0]], True),
+		([[0, 0]], False),
+		([[0], [0]], False),
+	)
+	def test_is_square(self, arr, truth):
+		arr = np.array(arr)
+		result = is_square(arr)
+		self.assertEqual(truth, result)
+
+	@parametrize(
+		([[0, 0], [0, 0]], [0, 0], 0),
+		([[1, 2], [3, 4]], [5, 6], 319),
+		([[[0, 0], [0, 0]]], [[0, 0]], [0]),
+		([[[1, 2], [3, 4]]], [[5, 6]], [319]),
+		([[[0, 0], [0, 0]], [[1, 2], [3, 4]]], [[0, 0], [5, 6]], [0, 319]),
+	)
+	def test_batch_vTAv(self, A, v, truth):
+		A = np.array(A)
+		v = np.array(v)
+		result = batch_vTAv(A, v)
+		np.testing.assert_equal(truth, result)
+
+	@parametrize(
+		([[1, 2], [3, 4]], [5], 250),
+		([[[0, 0], [0, 0]], [[1, 2], [3, 4]]], [[5, 6]], [0, 319]),
+	)
+	def test_batch_vTAv_broadcast(self, A, v, truth):
+		A = np.array(A)
+		v = np.array(v)
+		result = batch_vTAv(A, v)
+		np.testing.assert_equal(truth, result)
+
+	@parametrize(
+		([], []),
+	)
+	def test_batch_vTAv_valueerror(self, A, v):
+		A = np.array(A)
+		v = np.array(v)
+		with self.assertRaises(ValueError):
+			batch_vTAv(A, v)
+
+	@parametrize(
+		([], [], []),
+		([0, 0], [0, 0], 0),
+		([1, 2], [3, 4], 11),
+		([[0, 0]], [[0, 0]], [0]),
+		([[1, 2]], [[3, 4]], [11]),
+		([[0, 0], [1, 2]], [[0, 0], [3, 4]], [0, 11]),
+	)
+	def test_batch_inner(self, A, B, truth):
+		A = np.array(A)
+		B = np.array(B)
+		result = batch_inner(A, B)
+		np.testing.assert_equal(truth, result)
+
+	@parametrize(
+		([1, 2], [2]),
+		([[0, 0], [1, 2]], [[3, 4]]),
+	)
+	def test_batch_inner_valueerror(self, A, B):
+		A = np.array(A)
+		B = np.array(B)
+		with self.assertRaises(ValueError):
+			batch_inner(A, B)
+
+	@parametrize(
+		([], [], np.empty(shape=(0, 0))),
+		([0, 0], [0, 0], [[0, 0], [0, 0]]),
+		([1, 2], [3, 4], [[3, 4], [6, 8]]),
+		([1, 2], [3], [[3], [6]]),
+		([[0, 0], [1, 2]], [[0, 0], [3, 4]], [[[0, 0], [0, 0]], [[3, 4], [6, 8]]]),
+	)
+	def test_batch_outer(self, A, B, truth):
+		A = np.array(A)
+		B = np.array(B)
+		result = batch_outer(A, B)
+		np.testing.assert_equal(truth, result)
+
+	@parametrize(
+		([[0], [0]], [0]),
+	)
+	def test_batch_outer_valueerror(self, A, B):
+		A = np.array(A)
+		B = np.array(B)
+		with self.assertRaises(ValueError):
+			batch_outer(A, B)
+
+	@parametrize(
+		([[1, 1], [1, 1]], 0.),
+		([[1, 2], [3, 4]], 1.3862943611198906),
+		([[[1, 1], [1, 1]], [[1, 2], [3, 4]]], [0., 1.3862943611198906]),
+	)
+	def test_logtrace(self, arr, truth):
+		arr = np.array(arr)
+		result = logtrace(arr)
+		np.testing.assert_allclose(truth, result)
+
+	@parametrize(
+		([], []),
+		([0, 0], [1., 1.]),
+		([1, 2], [0.36787944117144233, 1.]),
+		([[0, 0], [1, 2]], [[1., 1.], [0.36787944117144233, 1.]]),
+	)
+	def test_shiftedexp(self, pvals, truth):
+		pvals = np.array(pvals)
+		result = shiftedexp(pvals)
+		np.testing.assert_allclose(truth, result)
 
 	@parametrize(
 		([1/3, 2/3], 0.9182958340544896),

@@ -77,7 +77,10 @@ def _islink(path):
 def _uncabspath(path):
 	# type: (str, )-> str
 
-	return unc_prefix + os.path.abspath(path)
+	if path.startswith(unc_prefix):
+		return os.path.abspath(path)
+	else:
+		return unc_prefix + os.path.abspath(path)
 
 def _lock(fp, exclusive=True, block=False):
 	# type: (IO, bool, bool) -> None

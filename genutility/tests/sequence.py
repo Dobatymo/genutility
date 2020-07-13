@@ -4,34 +4,78 @@ from operator import itemgetter
 
 from genutility.test import MyTestCase, parametrize
 from genutility.func import identity
-from genutility.sequence import merge, cycle_sort, delete_duplicates_from_sorted_sequence, sliding_window
+from genutility.sequence import (cycle_sort, delete_duplicates_from_sorted_sequence, sliding_window,
+	batch, triangular, pop_many, pop_many_2)
 
 class SequenceTest(MyTestCase):
 
 	@parametrize(
-		([], 0, [[]]),
-		([1, 2, 3], 1, [[1], [2], [3]]),
-		([1, 2, 3], 2, [[1, 2], [2, 3]]),
-		([1, 2, 3], 3, [[1, 2, 3]]),
+		([], []),
+		([1, 2, 3, 4], [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]),
 	)
-	def test_sliding_window(self, input, size, truth):
-		result = list(sliding_window(input, size))
-		self.assertEqual(truth, result)
+	def test_triangular(self, seq, truth):
+		result = triangular(seq)
+		self.assertIterEqual(truth, result)
 
 	@parametrize(
-		([], []),
-		([[1, 2], [3, 4]], [1, 2, 3, 4]),
-		([[1, 2], [2, 3]], [1, 2, 3]),
-		([[4, 1], [2, 3]], [4, 1, 2, 3]),
-		([[4, 1], [2, 1]], [4, 1, 2]),
+		([], lambda x: True, [], []),
+		([1, 2, 3], lambda x: True, [], [1, 2, 3]),
+		([1, 2, 3], lambda x: False, [1, 2, 3], []),
 	)
-	def test_merge(self, input, truth):
-		result = merge(input)
+	def test_pop_many(self, seq, func, truth_a, truth_b):
+		result = list(pop_many(seq, func))
+		self.assertEqual(truth_a, seq)
+		self.assertEqual(truth_b, result)
+
+	@parametrize(
+		([], lambda x: True, [], []),
+		([1, 2, 3], lambda x: True, [], [1, 2, 3]),
+		([1, 2, 3], lambda x: False, [1, 2, 3], []),
+	)
+	def test_pop_many_2(self, seq, func, truth_a, truth_b):
+		result = list(pop_many_2(seq, func))
+		self.assertEqual(truth_a, seq)
+		self.assertEqual(truth_b, result)
+
+	@parametrize(
+		([], 0, 1, [[]]),
+		([1, 2, 3], 1, 1, [[1], [2], [3]]),
+		([1, 2, 3], 2, 1, [[1, 2], [2, 3]]),
+		([1, 2, 3], 3, 1, [[1, 2, 3]]),
+		([1, 2, 3, 4, 5], 2, 3, [[1, 2], [4, 5]]),
+	)
+	def test_sliding_window(self, seq, size, step, truth):
+		result = sliding_window(seq, size, step)
 		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		([], 0, 0, [[]]),
+	)
+	def test_sliding_window_valueerror(self, seq, size, step, truth):
+		with self.assertRaises(ValueError):
+			list(sliding_window(seq, size, step))
+
+	@parametrize(
+		([], 1, []),
+		([1, 2, 3], 1, [[1], [2], [3]]),
+		([1, 2, 3], 2, [[1, 2], [3]]),
+		([1, 2, 3], 3, [[1, 2, 3]]),
+	)
+	def test_batch(self, seq, size, truth):
+		result = batch(seq, size)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		([], 0, [[]]),
+	)
+	def test_batch_valueerror(self, seq, size, truth):
+		with self.assertRaises(ValueError):
+			list(batch(seq, size))
 
 	@parametrize(
 		([1, 2, 3], ()),
 		([1, 3, 2], ((1, 2),)),
+		([3, 2, 1], ((0, 2),)),
 		([2, 1, 3], ((0, 1),)),
 		([4, 3, 2, 1], ((0, 3), (1, 2))),
 	)

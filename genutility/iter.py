@@ -550,14 +550,6 @@ def powerset(sit):
 
 	return chain.from_iterable(combinations(sit, r) for r in range(len(sit)+1))
 
-def any_in_common(a, b):
-	# type: (Iterable[T], Iterable[T]) -> bool
-
-	""" Tests if iterables `a` and `b` have any elements in common.
-	"""
-
-	return any(i == j for i, j in product(a, b))
-
 # had cmp=b"\0" default before
 def all_equal_to(it, cmp):
 	# type: (Iterable[T], T) -> bool
@@ -604,14 +596,18 @@ def split(it, size):
 	copies = tee(it, size)
 	return tuple(every_n(it, size, pos) for it, pos in zip(copies, range(size)))
 
-def remove_all_dupes(it):
-	# type: (Iterable[T], ) -> Iterable[T]
+def no_dupes(*its):
+	# type: (*Iterable[T], ) -> Iterator[T]
 
-	""" Removes all duplicates from `it` while preserving order. """
+	""" Merge `its` and removes all duplicates while preserving order. """
 
-	# Dave Kirby
-	seen = set()
-	return (x for x in it if x not in seen and not seen.add(x))
+	seen = set()  # type: Set[T]
+
+	for it in its:
+		for x in it:
+			if x not in seen:
+				yield x
+				seen.add(x)
 
 def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter_dist="uniform", waitfunc=sleep):
 	# type: (float, int, float, float, Optional[float], str, Callable[[float], Any]) -> Iterator[None]
@@ -683,3 +679,25 @@ def collapse_all(it, col_set, replacement):
 		else:
 			for i in g: # yield from g
 				yield i
+
+def any_in_common(a, b):
+	# type: (Iterable[T], Iterable[T]) -> bool
+
+	""" Tests if iterables `a` and `b` have any elements in common.
+		See also: `any_in`.
+	"""
+
+	return any(i == j for i, j in product(a, b))
+
+def any_in(it, container):
+	# type: (Iterable[T], Container[T]) -> bool
+
+	""" Tests if any elements of `it` are in `container`.
+		For best performance, `container` should be a set.
+		See also: `any_in_common`.
+	"""
+
+	if isinstance(it, set) and isinstance(container, set):
+		return not it.isdisjoint(set)
+
+	return any(elm in container for elm in it)

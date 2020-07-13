@@ -1,5 +1,6 @@
 import logging, re, csv
 from time import sleep
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 import requests
@@ -225,19 +226,47 @@ class LiveAgent(object):
 
 	# high level
 
-	def connect(self, visitor_name):
-		# type: (str, ) -> None
+	def connect(self, visitor_name, slots=None):
+		# type: (str, Optional[Union[Dict[str, str], Sequence[Dict[str, Any]]]]) -> None
 
 		""" Connect using `visitor_name` as name.
 		"""
 
 		response = self.sessionid()
+		slots = slots or {}
 
 		self.key = response["key"]
 		self.affinity_token = response["affinityToken"]
 		session_id = response["id"]
 
-		self.chasitorinit(self.key, self.affinity_token, session_id, visitor_name)
+		if isinstance(slots, dict):
+			prechat_details = []  # type: List[Dict[str, Any]]
+
+			for label, value in slots.items():
+				custom_detail = {
+					"label": label,
+					"value": value,
+					"displayToAgent": True,
+					"transcriptFields": [],
+					"entityFieldMaps": [],
+				}
+				prechat_details.append(custom_detail)
+
+		elif isinstance(slots, Sequence):
+			try:
+				for custom_detail in slots:
+					custom_detail["label"]
+					custom_detail["value"]
+					custom_detail["displayToAgent"]
+			except KeyError:
+				raise ValueError("slots is missing fields")
+
+			prechat_details = slots
+
+		else:
+			raise ValueError("slots must be dict or Sequence")
+
+		self.chasitorinit(self.key, self.affinity_token, session_id, visitor_name, prechat_details=prechat_details)
 
 	def is_available(self):
 		# type: () -> bool
@@ -307,8 +336,8 @@ class LiveAgent(object):
 		return r.json()
 
 	def chasitorinit(self, key, affinity_token, session_id, visitor_name,
-		user_agent="", language="en-US", screen_resolution="1920x1080"):
-		# type: (str, str, str, str, str, str, str) -> requests.Request
+		user_agent="", language="en-US", screen_resolution="1920x1080", prechat_details=()):
+		# type: (str, str, str, str, str, str, str, Sequence[Dict[str, Any]]) -> requests.Request
 
 		endpoint = "/chat/rest/Chasitor/ChasitorInit"
 
@@ -328,12 +357,12 @@ class LiveAgent(object):
 			"language": language,
 			"screenResolution": screen_resolution,
 			"visitorName": visitor_name,
-			"prechatDetails": [],
+			"prechatDetails": prechat_details,
 			"prechatEntities": [],
 			"receiveQueueUpdates": True,
 			"isPost": True,
 		}
-
+		print(params)
 		r = requests.post(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)
 		r.raise_for_status()
 		return r

@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 	from datetime import datetime
 	PathType = Union[str, PathLike]
 	from .compat.os import DirEntry
+	EntryType = Union[Path, DirEntry]
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,9 @@ class BaseDirEntry(object):
 
 	def __repr__(self):
 		return repr(self.entry)
+
+	def __fspath__(self):
+		return self.entry.path
 
 class MyDirEntry(BaseDirEntry):
 	__slots__ = ("basepath", "_relpath", "follow")
@@ -313,6 +317,7 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 		path = fspath(path)
 
 	entry = DirEntryStub(os.path.basename(path), uncabspath(path)) # for python 2 compat. and long filename support
+
 	if not allow_skip:
 		it = _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, errorfunc)
 	else:
