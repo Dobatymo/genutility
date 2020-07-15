@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 
 from genutility.test import MyTestCase, parametrize
-from genutility.image import grayscale, histogram_1d, histogram_2d, resize_oar
+from genutility.image import (grayscale, histogram_1d, histogram_2d, resize_oar,
+	block_histogram_2d)
 
 class ImageTest(MyTestCase):
 
@@ -50,6 +51,16 @@ class ImageTest(MyTestCase):
 	def test_histogram_2d(self, img, levels, truth):
 		img = np.array(img)
 		result = histogram_2d(img, levels)
+		truth = np.array(truth)
+		self.assertTrue(np.array_equal(truth, result))
+
+	@parametrize(
+		([[1,2],[3,4]], 1, 1, 8, [[[0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0]], [[0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0]]]),
+		([[1,2],[3,4]], 2, 2, 8, [[[0, 1, 1, 1, 1, 0, 0, 0]]]),
+	)
+	def test_block_histogram_2d(self, img, bx, by, levels, truth):
+		img = np.array(img)
+		result = block_histogram_2d(img, bx, by, levels)
 		truth = np.array(truth)
 		self.assertTrue(np.array_equal(truth, result))
 

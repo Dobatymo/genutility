@@ -45,7 +45,7 @@ def resize_maxsize(max_width, max_height, width, height):
 def histogram_2d(arr, levels):
 	# type: (np.ndarray, int) -> np.ndarray
 
-	""" Input shape of `arr`: [batch..., x, y]. Histogrammed over x and y and batched over
+	""" Input shape of `arr`: [batch..., y, x]. Histogrammed over x and y and batched over
 		the remaining dimensions.
 		Output shape: [batch..., levels]
 	"""
@@ -55,14 +55,16 @@ def histogram_2d(arr, levels):
 
 	newshape = arr.shape[:-2] + (arr.shape[-2] * arr.shape[-1], )
 	flattened = np.reshape(arr, newshape)
+
+	# fixme: see here for vectorized bincount: https://stackoverflow.com/a/46256361
 	return np.apply_along_axis(np.bincount, -1, flattened, minlength=levels)
 
-def block_histogram_2d(arr, bx, by, levels):
+def block_histogram_2d(arr, by, bx, levels):
 	# type: (np.ndarray, int, int, int) -> np.ndarray
 
-	""" Input shape of `arr`: [batch..., x, y]. Histogrammed over x and y and batched over
-		the remaining dimensions.
-		Output shape: [batch..., bx, by, levels]
+	""" Input shape of `arr`: [batch..., y, x]. Histogrammed over blocks of size bx and by
+		and batched over the remaining dimensions.
+		Output shape: [batch..., y/by, x/bx, levels]
 	"""
 
 	invx = arr.shape[-1] // bx  # dimensions in unblock go from innerst to outerst
