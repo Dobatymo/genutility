@@ -5,7 +5,8 @@ from operator import itemgetter
 from genutility.test import MyTestCase, parametrize
 from genutility.func import identity
 from genutility.sequence import (cycle_sort, delete_duplicates_from_sorted_sequence, sliding_window,
-	batch, triangular, pop_many, pop_many_2)
+	batch, triangular, pop_many)
+from genutility.benchmarks.sequence import pop_many_2
 
 class SequenceTest(MyTestCase):
 
@@ -19,7 +20,7 @@ class SequenceTest(MyTestCase):
 
 	@parametrize(
 		([], lambda x: True, [], []),
-		([1, 2, 3], lambda x: True, [], [1, 2, 3]),
+		([1, 2, 3], lambda x: True, [], [3, 2, 1]),
 		([1, 2, 3], lambda x: False, [1, 2, 3], []),
 	)
 	def test_pop_many(self, seq, func, truth_a, truth_b):

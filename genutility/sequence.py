@@ -50,7 +50,7 @@ def pop_many(seq, func):
 	idx = [i for i, elm in enumerate(seq) if func(elm)]
 
 	for i in reversed(idx):
-		return seq.pop(i)
+		yield seq.pop(i)
 
 def triangular(seq):
 	# type: (Sequence[T], ) -> Iterator[Tuple[T, T]]

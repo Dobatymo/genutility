@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 def pop_many_2(seq, func):
-	# type: (MutableSequence[T], Callable) -> List[T]
+	# type: (MutableSequence[T], Callable) -> Iterator[T]
 
 	""" pop()s a values from `seq` where func(value) is true.
 	"""
