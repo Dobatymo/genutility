@@ -465,3 +465,12 @@ def histogram_correlation(hist1, hist2):
 	num = np.sum(h1norm * h2norm, axis=-1)
 	denom = np.sqrt(np.sum(h1norm**2, axis=-1)*np.sum(h2norm**2, axis=-1))
 	return num / denom
+
+def bincount_batch(x, axis=-1, minlength=0):
+	# type: (np.ndarray, int, int) -> np.ndarray
+
+	if x.shape[axis] == 0:
+		raise ValueError("Specified axis of x cannot be 0")
+
+	minlength = max(minlength, x.max() + 1)
+	return np.apply_along_axis(np.bincount, axis, x, minlength=minlength)

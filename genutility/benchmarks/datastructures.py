@@ -67,9 +67,6 @@ benchmarks = {
 }
 
 if __name__ == "__main__":
-
-	from timeit import repeat
-
 	"""
 	all_equal index_lol 16.247700299999998
 	all_equal index_sm 41.017197399999986
@@ -78,6 +75,5 @@ if __name__ == "__main__":
 	all_equal index_d_2 74.64404740000009
 	"""
 
-	for funcname, benchs in benchmarks.items():
-		for benchname, kwargs in benchs.items():
-			print(funcname, benchname, min(repeat(**kwargs)))
+	from genutility.benchmarks import run
+	run(benchmarks)

@@ -2,10 +2,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from genutility.test import MyTestCase, parametrize
+from genutility.test import MyTestCase, parametrize, repeat
 from genutility.numpy import (remove_color, unblock, decompress, batchtopk, sliding_window_2d, rgb_to_hsi,
-	shannon_entropy, is_rgb, is_square, batch_vTAv, batch_inner, batch_outer, logtrace, shiftedexp)
+	shannon_entropy, is_rgb, is_square, batch_vTAv, batch_inner, batch_outer, logtrace, shiftedexp,
+	bincount_batch)
 from genutility.math import shannon_entropy as shannon_entropy_python
+from genutility.benchmarks.numpy import bincount_batch_2
 
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
@@ -220,6 +222,28 @@ class NumpyTest(MyTestCase):
 		selectors, data, truth = np.array(selectors, dtype=bool), np.array(data), np.array(truth)
 		result = decompress(selectors, data, default)
 		np.testing.assert_equal(truth, result)
+
+	@parametrize(
+		([[1, 2], [3, 4]], 0, [[0, 1, 1, 0 ,0], [0, 0, 0, 1, 1]]),
+		([[1, 2], [3, 4]], 8, [[0, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0]]),
+		([[0]], 0, [[1]]),
+	)
+	def test_bincount_batch(self, arr, minlength, truth):
+		arr, truth = np.array(arr), np.array(truth)
+
+		result = bincount_batch(arr, minlength=minlength)
+		np.testing.assert_equal(truth, result)
+
+		result = bincount_batch_2(arr, minlength=minlength)
+		np.testing.assert_equal(truth, result)
+
+	@repeat(3)
+	def test_bincount_batch_random(self):
+		arr = np.random.randint(0, 10000, (1000, 1000))
+
+		result_1 = bincount_batch(arr)
+		result_2 = bincount_batch_2(arr)
+		np.testing.assert_equal(result_1, result_2)
 
 if __name__ == "__main__":
 	import unittest

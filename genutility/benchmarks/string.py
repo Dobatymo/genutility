@@ -35,9 +35,5 @@ benchmarks = {
 }
 
 if __name__ == "__main__":
-
-	from timeit import repeat
-
-	for funcname, benchs in benchmarks.items():
-		for benchname, kwargs in benchs.items():
-			print(funcname, benchname, min(repeat(**kwargs)))
+	from genutility.benchmarks import run
+	run(benchmarks)

@@ -41,5 +41,5 @@ def selection_sort_max(l):
 			l[m], l[n] = l[n], l[m]
 
 def selection_sort_ll(l):
-	#inplace, stable, on linked lists
+	# inplace, stable, on linked lists
 	raise NotImplementedError

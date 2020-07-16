@@ -41,9 +41,6 @@ benchmarks = {
 }
 
 if __name__ == "__main__":
-
-	from timeit import repeat
-
 	"""
 	pop_many all 5.294865000000001
 	pop_many none 2.5507518000000005
@@ -51,6 +48,5 @@ if __name__ == "__main__":
 	pop_many_2 none 3.891317099999924
 	"""
 
-	for funcname, benchs in benchmarks.items():
-		for benchname, kwargs in benchs.items():
-			print(funcname, benchname, min(repeat(**kwargs)))
+	from genutility.benchmarks import run
+	run(benchmarks)

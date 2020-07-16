@@ -28,7 +28,7 @@ class StreamWatcher(object):
 		for user_id in online:
 			if not self.followed_online[user_id]:
 				self.followed_online[user_id] = True
-				notify_started(user_id, self.followed_names[user_id], streams[user_id].get('title', None))
+				notify_started(user_id, self.followed_names[user_id], streams[user_id].get("title", None))
 
 		for user_id in offline:
 			if self.followed_online[user_id]:
@@ -66,7 +66,7 @@ class TwitchAPI(object):
 		# type: (str, ) -> str
 
 		d = self.req(self.base + self.login, [("login", username)])
-		return d['data'][0]['id']
+		return d["data"][0]["id"]
 
 	def get_followed(self):
 		d = self.req(self.base + self.follows, [("from_id", self.userid)])
@@ -74,8 +74,8 @@ class TwitchAPI(object):
 
 	def get_streams(self, user_ids):
 		d = self.req(self.base + self.streams, [("user_id", user_id) for user_id in user_ids])
-		ret = {stream['user_id']: stream for stream in d['data']}
-		assert len(d['data']) == len(ret), "More than one stream per user"
+		ret = {stream["user_id"]: stream for stream in d["data"]}
+		assert len(d["data"]) == len(ret), "More than one stream per user"
 		return ret
 
 	def watcher(self):

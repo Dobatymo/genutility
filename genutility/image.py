@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .numpy import unblock
+from .numpy import unblock, bincount_batch
 
 if TYPE_CHECKING:
 	from typing import Union, Tuple
@@ -21,7 +21,7 @@ def histogram_1d(arr, levels):
 		Output shape: [batch..., levels]
 	"""
 
-	return np.apply_along_axis(np.bincount, -1, arr, minlength=levels)
+	return bincount_batch(arr, -1, levels)
 
 def resize_oar(max_width, max_height, dar):
 	# type: (int, int, Rational) -> Tuple[int, int]
@@ -56,8 +56,7 @@ def histogram_2d(arr, levels):
 	newshape = arr.shape[:-2] + (arr.shape[-2] * arr.shape[-1], )
 	flattened = np.reshape(arr, newshape)
 
-	# fixme: see here for vectorized bincount: https://stackoverflow.com/a/46256361
-	return np.apply_along_axis(np.bincount, -1, flattened, minlength=levels)
+	return bincount_batch(flattened, -1, levels)
 
 def block_histogram_2d(arr, by, bx, levels):
 	# type: (np.ndarray, int, int, int) -> np.ndarray

@@ -58,10 +58,23 @@ class CursorContext(object):
 def upsert(cursor, primary, values, table):
 	# type: (Cursor, dict, dict, str) -> bool
 
+	""" Inserts `table` fields specified by `primary` and `values` keys,
+		with the corresponding values.
+		If all the values specified by `primary` already exist,
+		they are updated instead.
+
+		`table`, `primary.keys()` and `values.keys()` are not escaped.
+		`primary.values()` and `values.values()` are escaped.
+	"""
+
 	# use INSERT ... ON DUPLICATE KEY UPDATE instead?
+
+	if not primary:
+		raise ValueError("Empty primary mapping would result in an empty WHERE condition which would affect all rows")
 
 	set_str = ",".join("{}=?".format(k) for k in viewkeys(values))
 	where_str = " AND ".join("{}=?".format(k) for k in viewkeys(primary))
+
 	cursor.execute("UPDATE {} SET {} WHERE {}".format(table, set_str, where_str),  # nosec
 		chain(viewvalues(values), viewvalues(primary))
 	)
@@ -79,6 +92,9 @@ def upsert(cursor, primary, values, table):
 def fetchone(cursor):
 	# type: (Cursor, ) -> Any
 
+	""" Fetch results from `cursor` and assure only one result was returned.
+	"""
+
 	rows = cursor.fetchall()
 	if len(rows) == 0:
 		raise NoResult("No result found")
@@ -89,6 +105,9 @@ def fetchone(cursor):
 
 def iterfetch(cursor, batchsize=1000):
 	# type: (Cursor, int) -> Iterator[Any]
+
+	""" Iterate all results from `cursor`.
+	"""
 
 	while True:
 		results = cursor.fetchmany(batchsize)
