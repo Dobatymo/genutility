@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from numba import prange
-from genutility.numba import opjit
+from genutility.numba import opjit, oprange
 
 #image = np.random.randint(0, 255, (1000, 1000))
 #list(sliding_window_2d(image, (100, 100), (1, 1))) # warmup
@@ -37,7 +36,7 @@ def bincount_batch_2(x, axis=-1, minlength=0):
 @opjit(parallel=True)
 def _bincount_batch_3(arr, out):
 	B, X = arr.shape
-	for b in prange(B):
+	for b in oprange(B):
 		for x in range(X):
 			out[b, arr[b, x]] += 1
 

@@ -7,6 +7,15 @@ from .func import identity
 if TYPE_CHECKING:
 	from typing import Any, Callable
 
+try:
+	from numba import prange as oprange
+
+except ImportError:
+	from warnings import warn
+	warn("Numba not found.", stacklevel=2)
+
+	oprange = range
+
 def opjit(*args, **kwargs):
 	# type: (*Any, **Any) -> Callable
 
