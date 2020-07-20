@@ -701,3 +701,24 @@ def any_in(it, container):
 		return not it.isdisjoint(set)
 
 	return any(elm in container for elm in it)
+
+class CountIter(object):
+	
+	""" Example:
+		c = CountIter()
+		with open("asd.txt", "rt", encoding="utf-8") as fr:
+			for line in c.count(fr):
+				func(line)  # do something with line
+		print("Processed", c.get(), "lines")
+	"""
+
+	def __init__(self):
+		self.i = 0
+	
+	def count(self, it):
+		for elm in it:
+			self.i += 1
+			yield elm
+	
+	def get(self):
+		return self.i

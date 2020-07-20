@@ -98,6 +98,29 @@ class NoRaise(object):
 			else:
 				self.testcase.fail(exc_value)
 
+def make_comparable(d):
+
+	if isinstance(d, (str, int, type(None))):
+		return d
+	elif isinstance(d, list):
+		return list(make_comparable(i) for i in d)
+	elif isinstance(d, tuple):
+		return tuple(make_comparable(i) for i in d)
+	elif isinstance(d, dict):
+		return make_comparable(list(d.items()))
+	else:
+		raise ValueError("must be list, tuple or dict, not {}".format(type(d)))
+
+def is_equal_unordered(seq_a, seq_b):
+	# type: (Collection, Collection) -> bool
+
+	if isinstance(seq_a, set) and isinstance(seq_b, set):
+		return seq_a == seq_b
+
+	seq_a = sorted(make_comparable(seq_a))
+	seq_b = sorted(make_comparable(seq_b))
+	return seq_a == seq_b
+
 class MyTestCase(TestCase):
 
 	def subTest(self, msg=None, **params):
@@ -182,6 +205,8 @@ class MyTestCase(TestCase):
 
 	def assertUnorderedSeqEqual(self, first, second, msg=None):
 		# type: (Iterable, Iterable, Optional[str]) -> None
+
+		# fixme: use is_equal_unordered
 
 		first = sorted(first)
 		second = sorted(second)
