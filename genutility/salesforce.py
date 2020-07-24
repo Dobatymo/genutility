@@ -130,6 +130,26 @@ class MySalesforce(object):
 			logger.debug("Salesforce session expired")
 			return self.session(True).search(s)
 
+	def rest_post(self, endpoint, params):
+		# type: (str, dict) -> dict
+
+		sess = self.session()
+		headers = {"Authorization": "Bearer " + sess.session_id}
+
+		r = requests.post("https://" + sess.sf_instance + endpoint, headers=headers, json=params)
+		r.raise_for_status()
+		return r.json()
+
+	def rest_get(self, endpoint):
+		# type: (str, ) -> dict
+
+		sess = self.session()
+		headers = {"Authorization": "Bearer " + sess.session_id}
+
+		r = requests.get("https://" + sess.sf_instance + endpoint, headers=headers)
+		r.raise_for_status()
+		return r.json()
+
 	# actual methods
 
 	def query(self, query_str):

@@ -15,8 +15,8 @@ from .exceptions import EmptyIterable
 
 if TYPE_CHECKING:
 	from typing import TypeVar, Iterable, Tuple, Optional, Callable, Sequence, SupportsFloat
-	from .typing import Computable, Comparable
-	C = TypeVar("C", bound=Comparable)
+	from .typing import Computable, Orderable
+	O = TypeVar("O", bound=Orderable)
 
 inf = float("inf")
 
@@ -66,7 +66,7 @@ def cosine_similarity(a, b):
 	return dot(a, b)/euclidean_norm(a)/euclidean_norm(b)
 
 def argmin(l, s=0, e=None):
-	# type: (Sequence[C], int, Optional[int]) -> C
+	# type: (Sequence[O], int, Optional[int]) -> O
 
 	if not l:
 		raise EmptyIterable()
@@ -79,7 +79,7 @@ def argmin(l, s=0, e=None):
 	return arg
 
 def argmax(l, s=0, e=None):
-	# type: (Sequence[C], int, Optional[int]) -> C
+	# type: (Sequence[O], int, Optional[int]) -> O
 
 	if not l:
 		raise EmptyIterable()
@@ -92,7 +92,7 @@ def argmax(l, s=0, e=None):
 	return arg
 
 def argmax_pair(iterable):
-	# type: (Iterable[C], ) -> Tuple[int, C]
+	# type: (Iterable[O], ) -> Tuple[int, O]
 
 	it = iter(iterable)
 	arg = 0
@@ -111,13 +111,13 @@ def argmax_pair(iterable):
 from itertools import count
 from operator import itemgetter
 def argmax_v2(iterable):
-	# type: (Iterable[C], ) -> Tuple[int, C]
+	# type: (Iterable[O], ) -> Tuple[int, O]
 
 	""" nicer, but almost 2 times slower than above"""
 	return max(zip(count(), iterable), key=itemgetter(1))[0]
 
 def minmax(a, b):
-	# type: (C, C) -> C
+	# type: (O, O) -> O
 
 	""" `default` argument cannot be used, because the C level function doesn't have a default value
 		but an overload.
@@ -129,7 +129,7 @@ def minmax(a, b):
 		return b, a
 
 def _argfind_cmp(it, target, op1, op2, pos=0):
-	# type: (Iterable[C], C, Callable[[C, C], bool], Callable[[C, C], bool], int) -> Tuple[int, C]
+	# type: (Iterable[O], O, Callable[[O, O], bool], Callable[[O, O], bool], int) -> Tuple[int, O]
 
 	""" Find the largest element in `it` less than or equal to `target` and return the index and value.
 		Return (-1, None) if no such element can be found.

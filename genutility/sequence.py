@@ -9,7 +9,7 @@ from .indexing import triangular_indices
 
 if TYPE_CHECKING:
 	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple, Sequence, TypeVar
-	from .typing import Equatable
+	from .typing import Comparable
 	T = TypeVar("T")
 
 class LazyStringList(object):
@@ -94,7 +94,7 @@ def batch(seq, size):
 		yield seq[i*size:(i+1)*size]
 
 def delete_duplicates_from_sorted_sequence(seq, key=None):
-	# type: (MutableSequence[T], Optional[Callable[[T], Equatable]) -> None
+	# type: (MutableSequence[T], Optional[Callable[[T], Comparable]) -> None
 
 	""" Deletes duplicates from a sorted sequence `seq` based on `key`.
 		Works in-place.

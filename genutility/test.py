@@ -85,6 +85,8 @@ class MyTestRunner(TextTestRunner):
 class NoRaise(object):
 
 	def __init__(self, testcase, message=None):
+		# type: (TestCase, Optional[str]) -> None
+
 		self.testcase = testcase
 		self.message = message
 
@@ -99,6 +101,7 @@ class NoRaise(object):
 				self.testcase.fail(exc_value)
 
 def make_comparable(d):
+	# type: (Any, ) -> Any
 
 	if isinstance(d, (str, int, type(None))):
 		return d
@@ -137,10 +140,14 @@ class MyTestCase(TestCase):
 		self.assertTrue(first and second, msg)
 
 	def assertTypeEqual(self, first, second, msg=None):
+		# type: (Any, Any, Optional[str]) -> None
+
 		self.assertEqual(type(first), type(second), msg)
 
-	def assertFilesEqual(self, first_path, second_path):
-		self.assertTrue(equal_files(first_path, second_path))
+	def assertFilesEqual(self, first_path, second_path, msg=None):
+		# type: (Any, Any, Optional[str]) -> None
+
+		self.assertTrue(equal_files(first_path, second_path), msg)
 
 	def assertIterEqual(self, first, second, msg=None):
 		# type: (Iterable, Iterable, Optional[str]) -> None
@@ -213,7 +220,18 @@ class MyTestCase(TestCase):
 		self.assertEqual(first, second, msg)
 
 	def assertNoRaise(self, msg=None):
+		# type: (Optional[str], ) -> NoRaise
+
 		return NoRaise(self, msg)
+
+	def assertEqualsOneOf(self, result, truths):
+		# type: (T, Iterable[T]) -> None
+
+		for truth in truths:
+			if result == truth:
+				return
+
+		raise AssertionError("Result does not match one of the provided truths") # from None
 
 def random_arguments(n, *funcs):
 	# type: (int, *Callable[[], Any]) -> Callable[[Callable], Callable]

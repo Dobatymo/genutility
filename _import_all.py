@@ -60,3 +60,4 @@ import genutility.toml
 import genutility.torrent
 import genutility.widgets
 import genutility.win32
+import genutility.yaml

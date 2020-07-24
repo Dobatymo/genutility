@@ -14,13 +14,25 @@ if TYPE_CHECKING:
 
 	Number = Union[int, float]
 
-	class Equatable(Protocol):
+	class Comparable(Protocol):
 
 		def __eq__(self, other):
 			# type: (Any, ) -> bool
 			...
 
-	class Comparable(Protocol):
+		def __ne__(self, other):
+			# type: (Any, ) -> bool
+			...
+
+	class Orderable(Protocol):
+
+		def __lt__(self, other):
+			# type: (Any, ) -> bool
+			...
+
+		def __gt__(self, other):
+			# type: (Any, ) -> bool
+			...
 
 		def __le__(self, other):
 			# type: (Any, ) -> bool

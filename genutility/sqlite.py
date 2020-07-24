@@ -1,15 +1,31 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging
+import logging, codecs, sqlite3
 from typing import TYPE_CHECKING
-
-import sqlite3
 
 from .iter import batch, progress
 from .signal import safe_for_loop
 
 if TYPE_CHECKING:
 	from sqlite3 import Cursor, Iterable
+
+def quote_identifier(s, errors="strict"):
+	# type: (str, str) -> str
+
+	""" Escapes sqlite identifiers (like table or column names).
+		Copied from: https://stackoverflow.com/a/6701665
+	"""
+
+	encodable = s.encode("utf-8", errors).decode("utf-8")
+	nul_index = encodable.find("\x00")
+
+	if nul_index >= 0:
+		error = UnicodeEncodeError("NUL-terminated utf-8", encodable, nul_index, nul_index + 1, "NUL not allowed")
+		error_handler = codecs.lookup_error(errors)
+		replacement, _ = error_handler(error)
+		encodable = encodable.replace("\x00", replacement)
+
+	return "\"" + encodable.replace("\"", "\"\"") + "\""
 
 def vacuum(db_path):
 	# type: (str, ) -> None
@@ -56,7 +72,7 @@ def safe_batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True)
 	"""
 
 	if exclusive:
-		cursor.execute("PRAGMA locking_mode=EXCLUSIVE") # might speed things up
+		cursor.execute("PRAGMA locking_mode=EXCLUSIVE")  # might speed things up
 
 	source = batch(progress(it), batch_size)
 

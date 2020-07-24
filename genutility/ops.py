@@ -39,12 +39,25 @@ def logical_xor(a, b):
 
 	return not (a and b) and (a or b)
 
+def logical_xnor(a, b):
+	# type: (Any, Any) -> bool
+	# this is just the == operator for bools
+
+	return not (a or b) or (a and b)
+
 def logical_implication(a, b):
 	# type: (Any, Any) -> bool
 
 	""" if a is True, b must be True """
 
 	return (not a) or b
+
+def logical_nonimplication(a, b):
+	# type: (Any, Any) -> bool
+
+	""" if a is True, b must be False """
+
+	return a and (not b)
 
 def converse_implication(a, b):
 	# type: (Any, Any) -> bool

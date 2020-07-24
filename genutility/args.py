@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from .iter import is_empty
 from .stdio import confirm
 from .compat.pathlib import Path
+from .compat.os import makedirs
 
 if TYPE_CHECKING:
 	from typing import Callable
@@ -121,6 +122,13 @@ def suffix(s):
 
 	return s
 
+def lowercase(s):
+	# type: (str, ) -> str
+
+	""" Converts argument to lowercase. """
+
+	return s.lower()
+
 @arg_to_path
 def existing_path(path):
 	# type: (Path, ) -> Path
@@ -140,7 +148,7 @@ def new_path(path):
 	""" Checks if a path exists. """
 
 	if path.exists():
-		msg = "{0} does not exist".format(path)
+		msg = "{0} already exists".format(path)
 		raise ArgumentTypeError(msg)
 
 	return path
@@ -191,6 +199,22 @@ def future_file(path):
 	if path.is_file():
 		msg = "file {0} already exists".format(path)
 		raise ArgumentTypeError(msg)
+	return path
+
+@arg_to_path
+def out_dir(path):
+	# type: (Path, ) -> Path
+
+	""" Tests if `path` is a directory. If not it tries to create one.
+	"""
+
+	if not path.is_dir():
+		try:
+			makedirs(path)
+		except OSError:
+			msg = "Error: '{}' is not a valid directory.".format(path)
+			raise ArgumentTypeError(msg)
+
 	return path
 
 @arg_to_path

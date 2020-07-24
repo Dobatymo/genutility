@@ -72,3 +72,4 @@ py -m genutility.twisted
 py -m genutility.typing
 py -m genutility.widgets
 py -m genutility.win32
+py -m genutility.yaml
