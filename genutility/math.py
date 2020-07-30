@@ -8,6 +8,7 @@ from collections import defaultdict, Counter
 from itertools import islice
 from operator import lt, gt, mul
 from typing import TYPE_CHECKING
+from random import sample
 
 from .compat.math import prod, isqrt, nan as NaN
 from .iter import range_count
@@ -431,6 +432,13 @@ def absolute_difference(a, b):
 	# type: (Computable, Computable) -> Computable
 
 	return abs(b - a)
+
+def sortedsample(n, k):
+	# type: (int, int) -> List[int]
+
+	""" Sorted random sample without replacements. """
+
+	return sorted(sample(range(n), k))
 
 number_metric = absolute_difference
 

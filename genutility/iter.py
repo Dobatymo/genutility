@@ -703,7 +703,7 @@ def any_in(it, container):
 	return any(elm in container for elm in it)
 
 class CountIter(object):
-	
+
 	""" Example:
 		c = CountIter()
 		with open("asd.txt", "rt", encoding="utf-8") as fr:
@@ -714,11 +714,42 @@ class CountIter(object):
 
 	def __init__(self):
 		self.i = 0
-	
+
 	def count(self, it):
 		for elm in it:
 			self.i += 1
 			yield elm
-	
+
 	def get(self):
 		return self.i
+
+def select_by_indices(it, indices):
+	# type: (Iterable[T], Iterator[int]) -> Iterator[T]
+
+	try:
+		sel_ind = next(indices)
+		for i, elem in enumerate(it):
+			if i == sel_ind:
+				yield elem
+				sel_ind = next(indices)
+	except StopIteration:
+		pass
+
+def skip_by_indices(it, indices):
+	# type: (Iterator[T], Iterator[int]) -> Iterator[int, T]
+
+	i = 0
+	try:
+		sel_ind = next(indices)
+		for elem in it:
+			if i == sel_ind:
+				sel_ind = next(indices)
+				continue
+
+			yield i, elem
+			i += 1
+	except StopIteration:
+		pass
+
+	for ii, elem in enumerate(it, i):
+		yield ii, elem
