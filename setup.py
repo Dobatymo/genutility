@@ -105,6 +105,7 @@ extras_require = {
 	"pdf": ["PyPDF2"],
 	"pillow": ["pillow", "piexif"],
 	"powerpoint": ["python-pptx"],
+	"rasa": ["requests"],
 	"salesforce": ["simple_salesforce>=1.1.0", "simplejson"],
 	"scipy": ["numpy", "scipy"],
 	"toml": ["toml"],
@@ -119,7 +120,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.41",
+	version="0.0.42",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,
