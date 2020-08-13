@@ -1,9 +1,45 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from future.utils import PY2
+from builtins import bytes, str
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from typing import Union
+
+if PY2:
+	from os import fdopen as _fdopen
+	from io import TextIOWrapper
+
+	class _FileWrapper(object):
+		def __init__(self, raw):
+			self._raw = raw
+
+		def readable(self):
+			return True
+
+		def writable(self):
+			return True
+
+		def seekable(self):
+			return True
+
+		def __getattr__(self, name):
+			return getattr(self._raw, name)
+
+	def fdopen(file, mode, encoding, errors, newline):
+		bf = _fdopen(file, mode)
+
+		# copy pasted from genutility.file.wrap_text
+		if "t" in mode:
+			f = _FileWrapper(bf)
+			tf = TextIOWrapper(f, encoding, errors, newline)
+			tf.mode = mode
+			return tf
+		return bf
+
+else:
+	from os import fdopen
 
 try:
 	from os import makedirs
@@ -105,4 +141,17 @@ try:
 
 except ImportError:
 
-	fspath = str # bad, but at least works for `Path`s.
+	def fspath(path):
+
+		if isinstance(path, (bytes, str)):
+			return path
+
+		try:
+			path = path.__fspath__()
+			if isinstance(path, (bytes, str)):
+				return path
+
+		except AttributeError:
+			pass
+
+		raise TypeError("Not a path-like object")

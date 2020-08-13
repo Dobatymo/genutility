@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from builtins import str
 import re
 from string import whitespace
 from typing import TYPE_CHECKING
@@ -53,7 +54,7 @@ def newlines_to_spaces(s):
 	d = {
 		"\r": "",
 		"\n": " ",
-		"\N{NEXT LINE}": " ",
+		"\u0085": " ",  # should be \N{Next Line} or "\N{NEL}", but python 2.7 doesn't know that name
 	}
 	return replace_multiple(s, d)
 

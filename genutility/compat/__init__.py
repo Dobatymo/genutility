@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 try:
 	from builtins import FileNotFoundError
 except ImportError:
-	FileNotFoundError = IOError
+	FileNotFoundError = OSError
 
 try:
 	from builtins import FileExistsError
 except ImportError:
-	FileExistsError = IOError
+	FileExistsError = OSError

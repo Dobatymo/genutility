@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from builtins import str, bytes
+from future.utils import PY2
 
 import os.path
 from tempfile import mkstemp
 from os import remove
+from sys import getfilesystemencoding
 from typing import TYPE_CHECKING
 
 from .file import copen
@@ -26,6 +28,9 @@ class TransactionalCreateFile(object):
 		suffix = os.path.splitext(self.path)[1].lower()
 		curdir = os.path.dirname(self.path)
 		fd, self.tmppath = mkstemp(suffix, prefix, curdir, is_text)
+		if PY2:
+			self.tmppath = self.tmppath.decode(getfilesystemencoding())
+
 		self.fp = copen(fd, mode, encoding=encoding, errors=errors, newline=newline, ext=suffix)
 
 	def commit(self):
