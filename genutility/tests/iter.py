@@ -14,7 +14,8 @@ from genutility.iter import (product_range_repeat, every_n, any_in_common, split
 	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
 	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, findfirst,
 	is_empty, switch, multi_join, first_not_none, lastdefault, last, EmptyIterable, collapse_any,
-	collapse_all, extrema, switched_enumerate, list_except, all_equal_to, iter_different, any_in)
+	collapse_all, extrema, switched_enumerate, list_except, all_equal_to, iter_different, any_in,
+	x_wise, triples)
 from genutility.compat.unittest.mock import Mock
 
 nulllogger = logging.getLogger("null")
@@ -403,6 +404,26 @@ class IterTest(MyTestCase):
 	def test_pairwise_2(self):
 		with self.assertRaises(TypeError):
 			next(pairwise(1))
+
+	@parametrize(
+		((1,2,3,4,5), 2, ((1,2),(2,3),(3,4),(4,5))),
+		((1,2,3,4,5), 3, ((1,2,3),(2,3,4),(3,4,5))),
+		((1,2,3,4,5), 4, ((1,2,3,4),(2,3,4,5))),
+	)
+	def test_x_wise(self, it, n, truth):
+		result = x_wise(it, n)
+		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		(tuple(), tuple()),
+		(range(1), tuple()),
+		(range(2), tuple()),
+		(range(3), ((0, 1, 2),)),
+		(range(4), ((0, 1, 2), (1, 2, 3)))
+	)
+	def test_triples(self, input, truth):
+		result = tuple(triples(input))
+		self.assertEqual(truth, result)
 
 	@parametrize(
 		(lambda x: x, [], (None, None)),

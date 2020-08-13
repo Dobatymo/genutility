@@ -246,7 +246,7 @@ class LiveAgent(object):
 
 	# high level
 
-	def connect(self, visitor_name, slots=None):
+	def connect(self, visitor_name, slots=None, prechat_details=None, prechat_entities=None):
 		# type: (str, Optional[Union[Dict[str, str], Sequence[Dict[str, Any]]]]) -> None
 
 		""" Connect using `visitor_name` as name.
@@ -259,34 +259,39 @@ class LiveAgent(object):
 		self.affinity_token = response["affinityToken"]
 		session_id = response["id"]
 
-		if isinstance(slots, dict):
-			prechat_details = []  # type: List[Dict[str, Any]]
+		if not prechat_details:
 
-			for label, value in slots.items():
-				custom_detail = {
-					"label": label,
-					"value": value,
-					"displayToAgent": True,
-					"transcriptFields": [],
-					"entityFieldMaps": [],
-				}
-				prechat_details.append(custom_detail)
+			if isinstance(slots, dict):
+				prechat_details = []  # type: List[Dict[str, Any]]
 
-		elif isinstance(slots, Sequence):
-			try:
-				for custom_detail in slots:
-					custom_detail["label"]
-					custom_detail["value"]
-					custom_detail["displayToAgent"]
-			except KeyError:
-				raise ValueError("slots is missing fields")
+				for label, value in slots.items():
+					custom_detail = {
+						"label": label,
+						"value": value,
+						"displayToAgent": True,
+						"transcriptFields": [],
+						"entityFieldMaps": [],
+					}
+					prechat_details.append(custom_detail)
 
-			prechat_details = slots
+			elif isinstance(slots, Sequence):
+				try:
+					for custom_detail in slots:
+						custom_detail["label"]
+						custom_detail["value"]
+						custom_detail.setdefault("displayToAgent", True)
+						custom_detail.setdefault("transcriptFields", [])
+						custom_detail.setdefault("entityFieldMaps", [])
+				except KeyError as e:
+					raise ValueError("slots is missing fields: {}".format(e))
 
-		else:
-			raise ValueError("slots must be dict or Sequence")
+				prechat_details = slots
 
-		self.chasitorinit(self.key, self.affinity_token, session_id, visitor_name, prechat_details=prechat_details)
+			else:
+				raise ValueError("slots must be dict or Sequence")
+
+		self.chasitorinit(self.key, self.affinity_token, session_id, visitor_name,
+			prechat_details=prechat_details, prechat_entities=prechat_entities)
 
 	def is_available(self):
 		# type: () -> bool
@@ -355,8 +360,9 @@ class LiveAgent(object):
 		r.raise_for_status()
 		return r.json()
 
-	def chasitorinit(self, key, affinity_token, session_id, visitor_name,
-		user_agent="", language="en-US", screen_resolution="1920x1080", prechat_details=()):
+	def chasitorinit(self, key, affinity_token, session_id, visitor_name, user_agent="", language="en-US",
+		screen_resolution="1920x1080", prechat_details=None, prechat_entities=None,
+		receive_queue_updates=True, is_post=True):
 		# type: (str, str, str, str, str, str, str, Sequence[Dict[str, Any]]) -> requests.Request
 
 		endpoint = "/chat/rest/Chasitor/ChasitorInit"
@@ -377,10 +383,10 @@ class LiveAgent(object):
 			"language": language,
 			"screenResolution": screen_resolution,
 			"visitorName": visitor_name,
-			"prechatDetails": prechat_details,
-			"prechatEntities": [],
-			"receiveQueueUpdates": True,
-			"isPost": True,
+			"prechatDetails": prechat_details or [],
+			"prechatEntities": prechat_entities or [],
+			"receiveQueueUpdates": receive_queue_updates,
+			"isPost": is_post,
 		}
 		print(params)
 		r = requests.post(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)

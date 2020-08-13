@@ -27,6 +27,9 @@ logger = logging.getLogger(__name__)
 class BuiltinEncoder(json.JSONEncoder):
 
 	def default(self, obj):
+	
+		# collections.OrderedDict is supported by default
+
 		from datetime import date, timedelta
 		from uuid import UUID
 		from base64 import b85encode

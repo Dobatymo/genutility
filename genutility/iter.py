@@ -11,6 +11,7 @@ from operator import add
 from time import time, sleep
 from random import randrange
 from types import GeneratorType
+from functools import partial
 from typing import TYPE_CHECKING
 
 from .exceptions import IteratorExhausted, EmptyIterable
@@ -333,6 +334,23 @@ def pairwise(it):
 	a, b = tee(it, 2)
 	next(b, None)
 	return zip(a, b)
+
+def x_wise(it, size):
+	# type: (Iterable, int) -> Iterator
+
+	""" Returns `size` elements of iterable `it`, but only advances the iterable by 1 each time.
+		([1,2,3,4,5], 2) -> [1,2], [2,3], [3,4], [4,5]
+		([1,2,3,4,5], 3) -> [1,2,3], [2,3,4], [3,4,5]
+		([1,2,3,4,5], 4) -> [1,2,3,4], [2,3,4,5]
+		and so only
+	"""
+
+	copies = tee(it, size)
+	for copy, pos in zip(copies, range(size)):
+		advance(copy, pos)
+	return zip(*copies)
+
+triples = partial(x_wise, size=3)
 
 def findfirst(func, it, default=(None, None)):
 	# type: (Callable[[T], bool], Iterable[T], Tuple[Optional[int], Optional[T]]) -> Tuple[Optional[int], Optional[T]]
