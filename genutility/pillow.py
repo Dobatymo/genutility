@@ -103,10 +103,8 @@ def write_text(img, text, alignment="TL", fillcolor=(255, 255, 255), outlinecolo
 
 	text_with_outline(d, pos, text, font, fillcolor, outlinecolor, 2)
 
-def fix_orientation(img, exif):
-	# type (Image, dict) -> dict
-
-	orientation = exif["0th"][piexif.ImageIFD.Orientation]
+def _fix_orientation(img, orientation):
+	# type (Image, int) -> Image
 
 	if orientation == 1:
 		raise NoActionNeeded("File already properly rotated")
@@ -127,6 +125,13 @@ def fix_orientation(img, exif):
 	else:
 		raise ValueError("Unsupported orientation")
 
-	exif["0th"][piexif.ImageIFD.Orientation] = 1
-	return img, exif
+	return img
 
+def fix_orientation(img, exif):
+	# type (Image, dict) -> Image
+
+	orientation = exif["0th"][piexif.ImageIFD.Orientation]
+	img = _fix_orientation(img, orientation)
+	exif["0th"][piexif.ImageIFD.Orientation] = 1
+
+	return img
