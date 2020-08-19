@@ -89,6 +89,14 @@ def assert_choice(name, value, choices):
 	if value not in choices:
 		raise ValueError("{} must be one of {}".format(name, ", ".join(choices)))
 
+def assert_choice_map(name, value, choices):
+	# type: (str, T, Dict[T, U]) -> U
+
+	try:
+		return choices[value]
+	except KeyError:
+		raise ValueError("{} must be one of {}".format(name, ", ".join(choices.keys())))
+
 def assert_type(name, value, types):
 	# type: (str, Any, Sequence[Any]) -> None
 
