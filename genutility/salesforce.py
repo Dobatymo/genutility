@@ -252,6 +252,7 @@ class LiveAgent(object):
 		""" Connect using `visitor_name` as name.
 		"""
 
+		self._sequence = 0
 		response = self.sessionid()
 		slots = slots or {}
 
@@ -389,6 +390,7 @@ class LiveAgent(object):
 			"isPost": is_post,
 		}
 		print(params)
+
 		r = requests.post(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)
 		r.raise_for_status()
 		return r
