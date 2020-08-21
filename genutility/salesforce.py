@@ -270,7 +270,7 @@ class LiveAgent(object):
 						"value": value,
 						"displayToAgent": True,
 						"transcriptFields": [],
-						"entityFieldMaps": [],
+						"entityMaps": [],
 					}
 					prechat_details.append(custom_detail)
 
@@ -281,7 +281,7 @@ class LiveAgent(object):
 						custom_detail["value"]
 						custom_detail.setdefault("displayToAgent", True)
 						custom_detail.setdefault("transcriptFields", [])
-						custom_detail.setdefault("entityFieldMaps", [])
+						custom_detail.setdefault("entityMaps", [])
 				except KeyError as e:
 					raise ValueError("slots is missing fields: {}".format(e))
 
