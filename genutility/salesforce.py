@@ -259,6 +259,7 @@ class LiveAgent(object):
 		self.key = response["key"]
 		self.affinity_token = response["affinityToken"]
 		session_id = response["id"]
+		client_poll_timeout = response["clientPollTimeout"]
 
 		if not prechat_details:
 
@@ -330,15 +331,15 @@ class LiveAgent(object):
 				pass
 
 	def send(self, text):
-		# type: (str, ) -> None
+		# type: (str, ) -> bytes
 
 		""" Send text message to agent.
 		"""
 
-		self.chatmessage(self.key, self.affinity_token, text)
+		return self.chatmessage(self.key, self.affinity_token, text)
 
 	def close(self):
-		# type: () -> dict
+		# type: () -> bytes
 
 		""" Close live chat.
 		"""
@@ -410,6 +411,7 @@ class LiveAgent(object):
 		return r
 
 	def chatmessage(self, key, affinity_token, text):
+		# type: (str, str) -> bytes
 
 		endpoint = "/chat/rest/Chasitor/ChatMessage"
 
@@ -426,10 +428,10 @@ class LiveAgent(object):
 
 		r = requests.post(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)
 		r.raise_for_status()
-		return r
+		return r.content
 
 	def chatend(self, key, affinity_token):
-		# type: (str, str) -> dict
+		# type: (str, str) -> bytes
 
 		endpoint = "/chat/rest/Chasitor/ChatEnd"
 
@@ -441,15 +443,13 @@ class LiveAgent(object):
 		}
 
 		params = {
-			"reason": "client",
+			"type": "ChatEndReason",
+			"reason": "client"
 		}
 
 		r = requests.post(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)
 		r.raise_for_status()
-		try:
-			return r.json()  # fixme: does this always throw?
-		except JSONDecodeError:
-			return {}
+		return r.content
 
 	def availability(self, estimated_wait_time=False):
 		# type: (bool, ) -> dict

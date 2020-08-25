@@ -120,7 +120,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.44",
+	version="0.0.45",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,
@@ -137,11 +137,12 @@ setup(
 	python_requires=">=2.7",
 	install_requires=[
 		"future",
-		"typing;python_version<'3.5'",
-		"scandir;python_version<'3.5'",
-		"pathlib2;python_version<'3.4'",
-		"mock;python_version<'3.3'",
-		"contextlib2;python_version<'3.3'",
+		"ctypes-windows-sdk>=0.0.7; sys_platform=='win32'",
+		"typing; python_version<'3.5'",
+		"scandir; python_version<'3.5'",
+		"pathlib2; python_version<'3.4'",
+		"mock; python_version<'3.3'",
+		"contextlib2; python_version<'3.3'",
 	],
 	extras_require=extras_require,
 	use_2to3=False
