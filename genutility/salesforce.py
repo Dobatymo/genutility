@@ -233,6 +233,7 @@ class LiveAgent(object):
 		self.key = None
 		self.affinity_token = None
 		self._sequence = 0
+		self.last_offset = 0
 
 	# helper
 
@@ -253,7 +254,7 @@ class LiveAgent(object):
 		"""
 
 		self._sequence = 0
-		response = self.sessionid()
+		response = self.rest_session_id()
 		slots = slots or {}
 
 		self.key = response["key"]
@@ -292,8 +293,25 @@ class LiveAgent(object):
 			else:
 				raise ValueError("slots must be dict or Sequence")
 
-		self.chasitorinit(self.key, self.affinity_token, session_id, visitor_name,
+		self.rest_chasitor_init(self.key, self.affinity_token, session_id, visitor_name,
 			prechat_details=prechat_details, prechat_entities=prechat_entities)
+
+	def reconnect(self):
+		# type: () -> None
+
+		""" Use `reconnect()` whenever a 503 error is encounted. """
+
+		d = self.rest_reconnect_session(self.key, "null", self.last_offset)
+
+		msg = d["messages"][0]
+		assert msg["type"] == "ReconnectSession"
+
+		self.affinity_token = msg["affinityToken"]
+		reset = msg.get("resetSequence", True)
+		if reset:
+			self._sequence = 0
+
+		self.rest_chasitor_resync_state(self.key, self.affinity_token)
 
 	def is_available(self):
 		# type: () -> bool
@@ -301,7 +319,7 @@ class LiveAgent(object):
 		""" Check for agent availability.
 		"""
 
-		res = self.availability()
+		res = self.rest_availability()
 		for msg in res["messages"]:
 			if msg["type"] == "Availability":
 				return msg["message"]["results"][0].get("isAvailable", False)
@@ -317,18 +335,23 @@ class LiveAgent(object):
 
 			sleep(wait)
 
-	def receive(self):
+	def receive(self, wait_forever=False):
 		# type: () -> List[dict]
 
 		""" Long poll messages.
 		"""
 
 		while True:
-			r = self.messages(self.key, self.affinity_token)
-			try:
-				return r.json()["messages"]
-			except JSONDecodeError:
-				pass
+			res = self.rest_messages(self.key, self.affinity_token)
+			if res.status_code == 204:
+				if wait_forever:
+					continue
+				else:
+					return []
+
+			d = res.json()
+			self.last_offset = d["offset"]
+			return d["messages"]
 
 	def send(self, text):
 		# type: (str, ) -> bytes
@@ -336,7 +359,7 @@ class LiveAgent(object):
 		""" Send text message to agent.
 		"""
 
-		return self.chatmessage(self.key, self.affinity_token, text)
+		return self.rest_chat_message(self.key, self.affinity_token, text)
 
 	def close(self):
 		# type: () -> bytes
@@ -344,11 +367,11 @@ class LiveAgent(object):
 		""" Close live chat.
 		"""
 
-		return self.chatend(self.key, self.affinity_token)
+		return self.rest_chat_end(self.key, self.affinity_token)
 
 	# low level
 
-	def sessionid(self):
+	def rest_session_id(self):
 		# type: () -> dict
 
 		endpoint = "/chat/rest/System/SessionId"
@@ -362,10 +385,10 @@ class LiveAgent(object):
 		r.raise_for_status()
 		return r.json()
 
-	def chasitorinit(self, key, affinity_token, session_id, visitor_name, user_agent="", language="en-US",
+	def rest_chasitor_init(self, key, affinity_token, session_id, visitor_name, user_agent="", language="en-US",
 		screen_resolution="1920x1080", prechat_details=None, prechat_entities=None,
 		receive_queue_updates=True, is_post=True):
-		# type: (str, str, str, str, str, str, str, Sequence[Dict[str, Any]]) -> requests.Request
+		# type: (str, str, str, str, str, str, str, Sequence[Dict[str, Any]]) -> bytes
 
 		endpoint = "/chat/rest/Chasitor/ChasitorInit"
 
@@ -390,13 +413,51 @@ class LiveAgent(object):
 			"receiveQueueUpdates": receive_queue_updates,
 			"isPost": is_post,
 		}
-		print(params)
 
 		r = requests.post(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)
 		r.raise_for_status()
-		return r
+		return r.content
 
-	def messages(self, key, affinity_token):
+	def rest_reconnect_session(self, key, affinity_token, offset):
+		# type: (str, str, int) -> dict
+
+		endpoint = "/chat/rest/System/ReconnectSession"
+
+		headers = {
+			"X-LIVEAGENT-API-VERSION": self.api_version,
+			"X-LIVEAGENT-AFFINITY": affinity_token,
+			"X-LIVEAGENT-SESSION-KEY": key,
+		}
+
+		params = {
+			"ReconnectSession.offset": offset
+		}
+
+		r = requests.get(self.urljoin(endpoint), headers=headers, params=params, timeout=self.timeout)
+		r.raise_for_status()
+		return r.json()
+
+	def rest_chasitor_resync_state(self, key, affinity_token):
+		# type: (str, str) -> bytes
+
+		endpoint = "/chat/rest/Chasitor/ChasitorResyncState"
+
+		headers = {
+			"X-LIVEAGENT-API-VERSION": self.api_version,
+			"X-LIVEAGENT-AFFINITY": affinity_token,
+			"X-LIVEAGENT-SESSION-KEY": key,
+		}
+
+		params = {
+			"organizationId": self.organization_id
+		}
+
+		r = requests.get(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)
+		r.raise_for_status()
+		return r.content
+
+	def rest_messages(self, key, affinity_token):
+		# type: (str, str) -> requests.Response
 
 		endpoint = "/chat/rest/System/Messages"
 
@@ -410,8 +471,8 @@ class LiveAgent(object):
 		r.raise_for_status()
 		return r
 
-	def chatmessage(self, key, affinity_token, text):
-		# type: (str, str) -> bytes
+	def rest_chat_message(self, key, affinity_token, text):
+		# type: (str, str, str) -> bytes
 
 		endpoint = "/chat/rest/Chasitor/ChatMessage"
 
@@ -430,7 +491,28 @@ class LiveAgent(object):
 		r.raise_for_status()
 		return r.content
 
-	def chatend(self, key, affinity_token):
+	def rest_chasitor_sneak_peek(self, key, affinity_token, position, text):
+		# type: (str, str, int, str) -> bytes
+
+		endpoint = "/chat/rest/Chasitor/ChasitorSneakPeek"
+
+		headers = {
+			"X-LIVEAGENT-API-VERSION": self.api_version,
+			"X-LIVEAGENT-AFFINITY": affinity_token,
+			"X-LIVEAGENT-SESSION-KEY": key,
+			"X-LIVEAGENT-SEQUENCE": self.sequence,
+		}
+
+		params = {
+			"position": position,
+			"text": text
+		}
+
+		r = requests.get(self.urljoin(endpoint), headers=headers, json=params, timeout=self.timeout)
+		r.raise_for_status()
+		return r.content
+
+	def rest_chat_end(self, key, affinity_token):
 		# type: (str, str) -> bytes
 
 		endpoint = "/chat/rest/Chasitor/ChatEnd"
@@ -451,7 +533,7 @@ class LiveAgent(object):
 		r.raise_for_status()
 		return r.content
 
-	def availability(self, estimated_wait_time=False):
+	def rest_availability(self, estimated_wait_time=False):
 		# type: (bool, ) -> dict
 
 		endpoint = "/chat/rest/Visitor/Availability"
