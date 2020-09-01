@@ -104,7 +104,7 @@ markerp = re.compile(b"\xFF[^\x00]")  # don't use raw literals
 metadata_segments = {"COM", "TRAILER", } | set("APP{}".format(i) for i in range(16))
 
 def iter_jpeg_fp(fr, translate=True):
-	# type: (BytesIO, bool, bool) -> Iterator[Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]]
+	# type: (BytesIO, bool) -> Iterator[Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]]
 
 	""" Iterate over JPEG file given in binary stream `fr` and yield the segments.
 		`translate=False` can be used to reconstruct the file in a bit-identical way.
@@ -261,23 +261,22 @@ if __name__ == "__main__":
 	else:
 		logging.basicConfig(level=logging.INFO)
 
-	valid = 0
-	invalid = 0
-
 	if args.recursive:
 		it = args.path.rglob("*.jpg")
 	else:
 		it = args.path.glob("*.jpg")
 
+	valid = 0
+	invalid = 0
+
 	for path in it:
 		try:
 			if args.hash:
-				hashobj = sha1()
+				hashobj = sha1()  # nosec
 				hash_raw_jpeg(path, hashobj)
 				print(format_file_hash(hashobj, path))
 			else:
 				consume(iter_jpeg(path))
-			valid += 1
 
 		except ParseError as e:
 			logging.debug("Parse error in %s: %s", path, e)
@@ -286,5 +285,8 @@ if __name__ == "__main__":
 		except EOFError as e:
 			logging.debug("Truncated file %s", path)
 			invalid += 1
+
+		else:
+			valid += 1
 
 	print("valid", valid, "invalid", invalid)
