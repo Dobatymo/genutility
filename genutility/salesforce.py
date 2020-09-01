@@ -350,7 +350,7 @@ class LiveAgent(object):
 					return []
 
 			d = res.json()
-			self.last_offset = d["offset"]
+			self.last_offset = d.get("offset", 0)
 			return d["messages"]
 
 	def send(self, text):

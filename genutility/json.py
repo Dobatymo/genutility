@@ -310,19 +310,25 @@ class JsonLinesFormatter(logging.Formatter):
 	"""
 
 	myfields = {
-		"datetime": now,
+		"datetime": now, # requires non-default json serializer
+		"datetime-str": lambda: now().isoformat(),
 	}
 
-	def __init__(self, include=frozenset(), default=None):
+	def __init__(self, include=frozenset(), builtins=frozenset(), default=None):
 		logging.Formatter.__init__(self)
 		self.include_b = include & viewkeys(self.myfields)
+		self.builtins = builtins
 		self.dumps = partial(json.dumps, ensure_ascii=False, indent=None, sort_keys=True, default=default)
 
 	def format(self, record):
+		# add builtins logger fields
+		row = {name: getattr(record, name) for name in self.builtins}
+
+		# add custom logger fields
 		if self.include_b:
-			row = {k: self.myfields[k]() for k in self.include_b}
-			row.update(record.msg)
-		else:
-			row = record.msg
+			row.update({k: self.myfields[k]() for k in self.include_b})
+
+		# add message fields
+		row.update(record.msg)
 
 		return self.dumps(row)
