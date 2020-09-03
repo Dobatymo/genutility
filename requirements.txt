@@ -20,6 +20,7 @@ pyOpenSSL>=17.5.0 # OpenSSL
 pywin32; sys_platform == 'win32' # win32evtlog, winerror
 rhash; sys_platform == 'win32'
 ruamel.yaml
+tls-property>=1.0.1
 toml
 unidecode
 werkzeug>=0.11.11
