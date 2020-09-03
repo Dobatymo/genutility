@@ -127,7 +127,7 @@ class GenericFileDb(object):
 		else:
 			fields = ", ".join(n for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived) if n not in no)
 
-		self.cursor.execute("SELECT {} FROM {}".format(fields, self.table))
+		self.cursor.execute("SELECT {} FROM {}".format(fields, self.table))  # nosec
 		return iterfetch(self.cursor)
 
 	def get_latest(self, path, filesize, mod_date, derived=None, ignore_null=True, only=frozenset(), no=frozenset()):
@@ -166,7 +166,7 @@ class GenericFileDb(object):
 
 		conditions = " AND ".join("{} IS ?".format(n) for n, t, v in chain(self._mandatory, _derived))
 		order_by = "entry_date DESC"
-		sql = "SELECT {} FROM {} WHERE {} ORDER BY {} LIMIT 1".format(fields, self.table, conditions, order_by)
+		sql = "SELECT {} FROM {} WHERE {} ORDER BY {} LIMIT 1".format(fields, self.table, conditions, order_by)  # nosec
 
 		self.cursor.execute(sql, args)
 
