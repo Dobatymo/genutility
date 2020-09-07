@@ -1,10 +1,10 @@
 future
 
 # av # no simple build
-aiohttp>=0.16.3; python_version >= '3.5'
+aiohttp>=0.16.3; python_version>='3.5'
 bencode.py>=2.0.0 # bencode
 cryptography>=1.5.3
-ctypes-windows-sdk>=0.0.7; sys_platform == 'win32'
+ctypes-windows-sdk>=0.0.7; sys_platform=='win32'
 flask>=0.12.3
 jsonschema
 msgpack>=0.6.0
@@ -15,17 +15,18 @@ numpy
 --prefer-binary opencv-python # cv2
 orderedset
 pillow
-polyleven
+polyleven; python_version>='3'
+python-Levenshtein; python_version<'3'
 PyPDF2
 pyOpenSSL>=17.5.0 # OpenSSL
-pywin32; sys_platform == 'win32' # win32evtlog, winerror
-rhash; sys_platform == 'win32'
+pywin32; sys_platform=='win32' # win32evtlog, winerror
+rhash; sys_platform=='win32'
 ruamel.yaml
 tls-property>=1.0.1
 toml
 unidecode
 werkzeug>=0.11.11
-wmi; sys_platform == 'win32'
+wmi; sys_platform=='win32'
 
 #wxasync
 #wxPython # wx

@@ -68,7 +68,7 @@ extras_require = {
 	"encoder": ["numpy", "nltk; python_version>='3'", "nltk<3.5; python_version<'3'"],
 	"filesdb": ["tls-property"],
 	"fingerprinting": ["numpy", "numba", "pillow"],
-	"fuzzy": ["polyleven"],
+	"fuzzy": ["polyleven; python_version>='3'", "python-Levenshtein; python_version<'3'"],
 	"html": ["beautifulsoup4"],
 	"http": ["requests"],
 	"http2": ["hyper"],

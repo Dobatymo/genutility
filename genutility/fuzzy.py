@@ -4,7 +4,13 @@ from heapq import nsmallest
 from operator import itemgetter
 from typing import TYPE_CHECKING
 
-from polyleven import levenshtein
+try:
+	from polyleven import levenshtein as levenshtein_distance
+except ImportError:
+	from Levenshtein import distance as _distance
+
+	def levenshtein_distance(s1, s2, max_distance):
+		return _distance(s1, s2)
 
 if TYPE_CHECKING:
 	from typing import Callable, List, Iterable, Tuple
@@ -34,7 +40,7 @@ def distances(query, choices, distance_func, max_distance, preprocess_func):
 		if max_distance < 0 or score <= max_distance:
 			yield choice, score
 
-def extract(query, choices, max_distance=-1, limit=-1, distance_func=levenshtein, preprocess_func=preprocess):
+def extract(query, choices, max_distance=-1, limit=-1, distance_func=levenshtein_distance, preprocess_func=preprocess):
 	# type: (str, Iterable[str], int, int, Callable[[str, str, int], int], Callable[[str], str]) -> List[Tuple[str, int]]
 
 	return limitedsort(distances(query, choices, distance_func, max_distance, preprocess_func), limit)
