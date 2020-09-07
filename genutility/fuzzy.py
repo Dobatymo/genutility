@@ -26,7 +26,10 @@ def limitedsort(it, limit):
 	elif limit == 0:
 		return []
 	elif limit == 1:
-		return [min(it, key=itemgetter(1))]
+		try:
+			return [min(it, key=itemgetter(1))]
+		except ValueError:
+			return []
 	else:
 		return nsmallest(limit, it, key=itemgetter(1))
 
