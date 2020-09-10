@@ -8,20 +8,43 @@ from .compat.datetime import datetime, timezone
 utcmin = datetime.min.replace(tzinfo=timezone.utc)
 utcmax = datetime.max.replace(tzinfo=timezone.utc)
 
-def now():
-	# type: () -> datetime
+def now(aslocal=False):
+	# type: (bool, ) -> datetime
 
-	""" Returns the current datetime as timezone aware object in UTC timezone. """
+	""" Returns the current datetime as timezone aware object in
+		UTC timezone if `aslocal=False` (the default)
+		or local timezone if `aslocal=True`.
+	"""
 
-	return datetime.now(timezone.utc)
+	dt = datetime.now(timezone.utc)
+	if aslocal:
+		dt = dt.astimezone(None)
+	return dt
 
-# was: datetime_from_utc_timestamp
-def datetime_from_utc_timestamp(epoch):
-	# type: (int, ) -> datetime
+def datetime_from_utc_timestamp(epoch, aslocal=False):
+	# type: (int, bool) -> datetime
 
-	""" Converts a UNIX epoch time to a timezone aware datetime. """
+	""" Converts a UNIX epoch time in seconds to a timezone aware datetime. """
 
-	return datetime.fromtimestamp(epoch, timezone.utc)
+	dt = datetime.fromtimestamp(epoch, timezone.utc)
+	if aslocal:
+		dt = dt.astimezone(None)
+	return dt
+
+def datetime_from_utc_timestamp_ns(epoch, aslocal=False):
+	# type: (int, bool) -> datetime
+
+	""" Converts a UNIX epoch time in nano seconds to a timezone aware datetime. """
+
+	seconds, ns = divmod(epoch, 1000000000)
+
+	dt = datetime.fromtimestamp(seconds, timezone.utc)
+	dt.microsecond = ns // 1000
+
+	if aslocal:
+		dt = dt.astimezone(None)
+
+	return dt
 
 class LocalTimezone(tzinfo):
 
@@ -49,6 +72,7 @@ class LocalTimezone(tzinfo):
 
 localtimezone = LocalTimezone()
 
+# deprecated
 def localnow():
 	# type: () -> datetime
 

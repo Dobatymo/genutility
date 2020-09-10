@@ -15,14 +15,13 @@ from .os import islink, uncabspath, _not_available
 from .ops import logical_implication
 from .datetime import datetime_from_utc_timestamp
 from .compat import FileExistsError
-from .compat.os import PathLike, fspath, scandir
+from .compat.os import PathLike, fspath, scandir, DirEntry
 from .compat.pathlib import Path
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Optional, Iterator, Iterable, List, Set, Tuple, Union
 	from datetime import datetime
 	PathType = Union[str, PathLike]
-	from .compat.os import DirEntry
 	EntryType = Union[Path, DirEntry]
 
 logger = logging.getLogger(__name__)
@@ -101,7 +100,7 @@ class FileProperties(object):
 	def __repr__(self):
 		# type: () -> str
 
-		args = ("{}={!r}".format(k, v) for k, v in zip(self.keys(), self.values.values()) if v is not None)
+		args = ("{}={!r}".format(k, v) for k, v in zip(self.keys(), self.values()) if v is not None)
 		return "FileProperties({})".format(", ".join(args))
 
 class DirEntryStub(object):
@@ -181,17 +180,22 @@ class MyDirEntry(BaseDirEntry):
 if TYPE_CHECKING:
 	MyDirEntryT = Union[DirEntry, MyDirEntry]
 
-def mdatetime(path):
-	# type: (PathType, ) -> datetime
+def mdatetime(path, aslocal=False):
+	# type: (PathType, bool) -> datetime
 
-	""" Returns the last modified date of `path`. """
+	""" Returns the last modified date of `path`
+		as a timezone aware datetime object.
 
-	if isinstance(path, Path):
+		If `aslocal=True` it will be formatted as local time,
+		and UTC otherwise (the default).
+	"""
+
+	if isinstance(path, (Path, DirEntry)):
 		mtime = path.stat().st_mtime
 	else:
 		mtime = os.stat(path).st_mtime
 
-	return datetime_from_utc_timestamp(mtime)
+	return datetime_from_utc_timestamp(mtime, aslocal)
 
 def rename(old, new):
 	# type: (PathType, PathType) -> None

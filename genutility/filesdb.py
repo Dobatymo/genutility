@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging, os.path, sqlite3
 from itertools import chain
+from typing import TYPE_CHECKING
 
 from tls_property import tls_property
 
@@ -12,6 +13,10 @@ from .sql import iterfetch, fetchone
 from .sqlite import quote_identifier
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+	from typing import Any, Dict, Optional, Iterable, Iterator
+	from .filesystem import EntryType
 
 class GenericFileDb(object):
 
@@ -90,6 +95,8 @@ class GenericFileDb(object):
 		self.connection.close()
 
 	def setup(self):
+		# type: () -> None
+
 		fields = ", ".join("{} {}".format(n, t) for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived))
 
 		# unique = "UNIQUE({})".format(n for n, t, v in chain(self._mandatory, self._derived))
@@ -173,7 +180,7 @@ class GenericFileDb(object):
 		return fetchone(self.cursor)
 
 	def get(self, path, only=frozenset(), no=frozenset()):
-		# type: (Path, Set[str], Set[str]) -> tuple
+		# type: (EntryType, Set[str], Set[str]) -> tuple
 
 		""" Retrieves latest row based on mandatory information
 			which is solely based on the `path`.
@@ -214,7 +221,7 @@ class GenericFileDb(object):
 			return True
 
 	def add(self, path, derived=None, commit=True):
-		# type: (Path, Optional[Dict[str, Any]]) -> None
+		# type: (EntryType, Optional[Dict[str, Any]]) -> None
 
 		stats = path.stat()
 		self._add_file(fspath(path), stats.st_size, stats.st_mtime_ns, derived)
