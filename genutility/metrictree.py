@@ -4,8 +4,6 @@ from future.utils import viewitems, viewvalues
 
 from typing import TYPE_CHECKING
 
-import numpy as np
-
 if TYPE_CHECKING:
 	from typing import Any, Callable, Dict, List, Iterator, Iterable, Optional, Set, Tuple
 	from graphviz import Digraph
