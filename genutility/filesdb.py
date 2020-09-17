@@ -48,6 +48,10 @@ class GenericFileDb(object):
 		logger.debug("SQL trace: %s", query)
 
 	@classmethod
+	def latest_order_by(cls):
+		return "entry_date DESC"
+
+	@classmethod
 	def primary(cls):
 		""" Never explicitly specified.
 			Not needed if there is a PRIMARY KEY in one of the other fields.
@@ -172,7 +176,7 @@ class GenericFileDb(object):
 			raise ValueError("No output fields selected")
 
 		conditions = " AND ".join("{} IS ?".format(n) for n, t, v in chain(self._mandatory, _derived))
-		order_by = "entry_date DESC"
+		order_by = self.latest_order_by()
 		sql = "SELECT {} FROM {} WHERE {} ORDER BY {} LIMIT 1".format(fields, self.table, conditions, order_by)  # nosec
 
 		self.cursor.execute(sql, args)
