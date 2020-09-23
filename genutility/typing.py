@@ -174,6 +174,6 @@ if TYPE_CHECKING:
 			# type: () -> None
 			...
 
-		def cursor():
+		def cursor(self):
 			# type: () -> Cursor
 			...

@@ -422,7 +422,7 @@ def euclidean_distance(a, b):
 	return abs(b-a)
 
 def closest(numbers, number, distance_func=euclidean_distance):
-	# type: (Iterable, Computable) -> Computable
+	# type: (Iterable, Computable, Callable[[Computable, Computable], Computable]) -> Computable
 
 	""" For a list of `numbers`, return the closest number to `number`. """
 

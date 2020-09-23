@@ -56,7 +56,7 @@ def read_json_schema(path):
 		return json.load(fr)
 
 def read_json(path, schema=None, cls=None, object_hook=None):
-	# type: (str, Optional[Union[str, JsonDict]]) -> Any
+	# type: (str, Optional[Union[str, JsonDict]], Any, Any) -> Any
 
 	""" Read the json file at `path` and optionally validates the input according to `schema`.
 		The validation requires `jsonschema`.
@@ -79,7 +79,7 @@ def read_json(path, schema=None, cls=None, object_hook=None):
 	return obj
 
 def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False):
-	# type: (Any, str, Optional[Union[str, JsonDict]], bool, Optional[str], bool, Optional[Callable]) -> None
+	# type: (Any, str, Optional[Union[str, JsonDict]], bool, Optional[Callable], Optional[str], bool, Optional[Callable], bool) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
@@ -140,7 +140,7 @@ class json_lines(object):
 		file, mode="rt", encoding="utf-8", errors="strict", newline=None,
 		cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
 	):
-		# type: (str, str, int, str, str, Optional[str], bool, Optional[Callable], Optional[json.JSONEncoder], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
+		# type: (str, str, str, str, Optional[str], Optional[json.JSONEncoder], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
 
 		stream = copen(file, mode, encoding=encoding, errors=errors, newline=newline)
 		return json_lines(stream, True, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw)
@@ -209,7 +209,7 @@ def read_json_lines(file, object_hook=None):
 			yield obj
 
 def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt"):
-	# type: (str, str, Callable[[JsonDict], Sequence[str]], str, str) -> None
+	# type: (str, str, Callable[[JsonDict], Sequence[str]], str) -> None
 
 	with json_lines.from_path(jlpath, "rt") as fr:
 		with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
@@ -257,7 +257,7 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
 	return decorator
 
 def jsonlines_cache(path, duration=None, ensure_ascii=False, sort_keys=False, default=None, object_hook=None):
-	# type: (Path, Optional[timedelta], bool, Optional[str], bool, Optional[Callable], Optional[Callable]) -> Callable
+	# type: (Path, Optional[timedelta], bool, bool, Optional[Callable], Optional[Callable]) -> Callable
 
 	""" Decorator to cache results of function to jsonlines files at `path` for `duration`.
 		The remaining parameters are passed through to `json_lines.from_path`.

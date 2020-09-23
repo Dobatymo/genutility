@@ -56,7 +56,7 @@ def exifinfo(image):
 	return ret
 
 def text_with_outline(draw, pos, text, font, fillcolor, outlinecolor, outlinesize=1):
-	# type: (ImageDraw, Tuple[int, int], str, ImageFont, Color, Color) -> None
+	# type: (ImageDraw, Tuple[int, int], str, ImageFont, Color, Color, int) -> None
 
 	x, y = pos
 	delta = outlinesize

@@ -29,6 +29,11 @@ german_vowels = "aeiou"
 #def cycleright(s, start=0, end=-1): # bad
 #	return s[:start] + s[end] + s[start:end] + s[end+1:]
 
+def backslash_escaped_ascii(text):
+	# type: (bytes, ) -> str
+
+	return text.decode("ascii", "backslashreplace")
+
 def truncate(text, width, placeholder="..."):
 	# type: (str, int, str) -> str
 

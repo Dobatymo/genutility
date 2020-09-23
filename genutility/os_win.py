@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 	from ctypes.wintypes import HANDLE
 	from .compat.os import PathLike
 
+	PathType = Union[str, PathLike]
+
 unc_prefix = "\\\\?\\"
 
 def get_stdout_handle():
@@ -59,7 +61,7 @@ class EnableAnsi(object): # doesn't work for some reason...
 		self.close()
 
 def _islink(path):
-	# type: (PathLike, ) -> bool
+	# type: (PathType, ) -> bool
 
 	""" Tests if `path` refers to a symlink or a junction.
 		- Python >= 3.2 `os.path.islink()` only supports symlinks, not junctions.
@@ -75,7 +77,7 @@ def _islink(path):
 	return FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT == FILE_ATTRIBUTE_REPARSE_POINT
 
 def _uncabspath(path):
-	# type: (str, )-> str
+	# type: (PathType, )-> str
 
 	if path.startswith(unc_prefix):
 		return os.path.abspath(path)
@@ -100,7 +102,7 @@ def _lock(fp, exclusive=True, block=False):
 	LockFileEx(handle, flags, 0, 0xffffffff, 0xffffffff, overlapped)
 
 def _unlock(fp):
-	# type: (IO, bool, bool) -> None
+	# type: (IO) -> None
 
 	fd = fp.fileno()
 	handle = get_osfhandle(fd)

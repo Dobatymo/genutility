@@ -10,6 +10,7 @@ __pycache__/
 build/
 dist/
 .hypothesis/
+.mypy_cache/
 
 # C extensions
 *.so

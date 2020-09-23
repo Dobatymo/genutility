@@ -7,10 +7,12 @@ from typing import TYPE_CHECKING
 
 from ..exceptions import ParseError
 from ..file import read_or_raise
+from ..string import backslash_escaped_ascii
 
 if TYPE_CHECKING:
-	from typing import BytesIO, Iterator, Tuple, Union
+	from typing import BinaryIO, Iterator, Tuple, Union, Set
 	from _hashlib import HASH as Hashobj
+	Segment = Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]
 
 segments = {
 	# ISO/IEC 10918-1 : 1993(E), Table B.1
@@ -104,7 +106,7 @@ markerp = re.compile(b"\xFF[^\x00]")  # don't use raw literals
 metadata_segments = {"COM", "TRAILER", } | set("APP{}".format(i) for i in range(16))
 
 def iter_jpeg_fp(fr, translate=True):
-	# type: (BytesIO, bool) -> Iterator[Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]]
+	# type: (BinaryIO, bool) -> Iterator[Segment]
 
 	""" Iterate over JPEG file given in binary stream `fr` and yield the segments.
 		`translate=False` can be used to reconstruct the file in a bit-identical way.
@@ -131,7 +133,7 @@ def iter_jpeg_fp(fr, translate=True):
 			try:
 				info = segments[marker]
 			except KeyError:
-				raise ParseError("Invalid segment marker: {} at {}".format(marker, mm.tell()))
+				raise ParseError("Invalid segment marker: {} at {}".format(backslash_escaped_ascii(marker), mm.tell()))
 
 			name = info[0]
 			hasdata = info[1]
@@ -147,7 +149,7 @@ def iter_jpeg_fp(fr, translate=True):
 					yield name, marker, size, data
 
 				prevenv = mm.tell()
-				for m in markerp.finditer(mm, prevenv, fs):
+				for m in markerp.finditer(mm, prevenv, fs):  # type: ignore
 					start, end = m.span(0)
 					if translate:
 						yield "ENTROPY", mm[prevenv:start]
@@ -160,7 +162,7 @@ def iter_jpeg_fp(fr, translate=True):
 					try:
 						info = segments[marker]
 					except KeyError:
-						raise ParseError("Invalid segment marker: {} at {}".format(marker, start))
+						raise ParseError("Invalid segment marker: {} at {}".format(backslash_escaped_ascii(marker), start))
 
 					name = info[0]
 
@@ -190,7 +192,7 @@ def iter_jpeg_fp(fr, translate=True):
 					yield name, marker, size, data
 
 def iter_jpeg(path, translate=True):
-	# type: (str, bool) -> Iterator[tuple]
+	# type: (str, bool) -> Iterator[Segment]
 
 	""" Same as `iter_jpeg_fp()` except that it accepts a path.
 	"""
@@ -200,7 +202,7 @@ def iter_jpeg(path, translate=True):
 
 
 def copy_jpeg_fp(fin, fout, ignore_segments=None):
-	# type: (BytesIO, BytesIO, Set[str]) -> None
+	# type: (BinaryIO, BinaryIO, Set[str]) -> None
 
 	""" Same as `copy_jpeg()` except that it accepts file-like objects.
 	"""

@@ -69,7 +69,7 @@ def authenticate():
 	)
 
 def do_basic_auth(user_dict):
-	# type: (dict, ) -> Optional[bool]
+	# type: (dict, ) -> Optional[Response]
 
 	auth = request.authorization
 	if not auth or not check_auth(auth.username, auth.password, user_dict):

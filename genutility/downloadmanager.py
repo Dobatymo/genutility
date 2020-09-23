@@ -11,6 +11,7 @@ from .datetime import now
 
 if TYPE_CHECKING:
 	from typing import Any, Optional
+	from .datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class DownloadTask(object):
 		self.path = path
 		self.downloaded = 0
 		self.resumable = False
-		self.dt_started = None
+		self.dt_started = None # type: Optional[datetime]
 		self.dt_finished = now()
 
 	def __hash__(self):
@@ -75,14 +76,14 @@ class DownloadManager(object):
 		self.queue.add(task)
 
 	def _start(self, task):
-		# type: (DownloadTask, ) -> asyncio.Task
+		# type: (DownloadTask, ) -> asyncio.Future
 
 		self.active.add(task)
 		atask = asyncio.ensure_future(self._download(task))
 		return atask
 
 	def _trystart(self):
-		# type: () -> Optional[asyncio.Task]
+		# type: () -> Optional[asyncio.Future]
 
 		if len(self.active) < self.concurrent_downloads:
 			try:
@@ -108,7 +109,7 @@ class DownloadManager(object):
 			async with self.session.get(task.url, headers={}) as response:
 				stream = response.content
 				try:
-					size = int(response.headers.get('content-length'))
+					size = int(response.headers.get('content-length')) # type: Optional[int]
 				except (ValueError, TypeError):
 					size = None
 

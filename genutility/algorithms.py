@@ -23,7 +23,7 @@ def _insertion(seq, cmp_, left, right, gap):
 GROUP_SIZE = 5
 
 def median_of_medians(seq, cmp_=None, left=0, right=None, depth=0):
-	# type: (MutableSequence, Callable, int, int, int)
+	# type: (MutableSequence, Callable, int, int, int) -> int
 
 	""" Approximate median selection algorithm.
 		This is not the full median of medians algorithm.

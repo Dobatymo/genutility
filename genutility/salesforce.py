@@ -67,7 +67,7 @@ class MySalesforce(object):
 		return response["instance_url"], response["access_token"]
 
 	def session(self, fresh=False):
-		# type: () -> Salesforce
+		# type: (bool, ) -> Salesforce
 
 		if self._session is not None and not fresh:
 			return self._session
@@ -97,7 +97,7 @@ class MySalesforce(object):
 	# internal query/search
 
 	def _query(self, s, attributes=False):
-		# type: (str, ) -> List[dict]
+		# type: (str, bool) -> List[dict]
 
 		try:
 			results = self.session().query(s).get("records", [])
@@ -112,7 +112,7 @@ class MySalesforce(object):
 		return results
 
 	def _query_all(self, s, attributes=False):
-		# type: (str, ) -> Iterator[dict]
+		# type: (str, bool) -> Iterator[dict]
 
 		reconnect = True
 
@@ -260,7 +260,7 @@ class LiveAgent(object):
 	# high level
 
 	def connect(self, visitor_name, slots=None, prechat_details=None, prechat_entities=None):
-		# type: (str, Optional[Union[Dict[str, str], Sequence[Dict[str, Any]]]]) -> None
+		# type: (str, Optional[Union[Dict[str, str], Sequence[Dict[str, Any]]]], Sequence[Dict[str, Any]], Sequence[Dict[str, Any]]) -> None
 
 		""" Connect using `visitor_name` as name.
 		"""
@@ -348,7 +348,7 @@ class LiveAgent(object):
 			sleep(wait)
 
 	def receive(self, wait_forever=False):
-		# type: () -> List[dict]
+		# type: (bool, ) -> List[dict]
 
 		""" Long poll messages.
 		"""
@@ -400,7 +400,7 @@ class LiveAgent(object):
 	def rest_chasitor_init(self, key, affinity_token, session_id, visitor_name, user_agent="", language="en-US",
 		screen_resolution="1920x1080", prechat_details=None, prechat_entities=None,
 		receive_queue_updates=True, is_post=True):
-		# type: (str, str, str, str, str, str, str, Sequence[Dict[str, Any]]) -> bytes
+		# type: (str, str, str, str, str, str, str, Sequence[Dict[str, Any]], Sequence[Dict[str, Any]], bool, bool) -> bytes
 
 		endpoint = "/chat/rest/Chasitor/ChasitorInit"
 

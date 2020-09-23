@@ -9,7 +9,7 @@ from ..exceptions import ParseError
 from ..file import read_or_raise
 
 if TYPE_CHECKING:
-	from typing import BytesIO, Iterator, Tuple, Union
+	from typing import BytesIO, Iterator, Tuple, Union, Callable
 
 png_sig = b"\x89PNG\r\n\x1a\n"
 chunk_type_p = re.compile(br"^[a-zA-Z]{4}$")

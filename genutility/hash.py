@@ -71,18 +71,18 @@ def format_file_hash(hashobj, path):
 	return "{} *{}".format(hashobj.hexdigest(), path)
 
 def hash_dir_str(path, hashcls=hashlib.sha1, include_names=False):
-	# type: (PathType, Callable[[], Hashobj], bool) -> str
+	# type: (PathType, Callable[[], Hashobj], bool) -> Iterator[str]
 
 	""" sorts names naively, e.g. all uppercase chars come before lowercase """
 
 	m = hashcls()
 	for entry in sorted(scandir_rec(path), key=lambda x: x.path):
 		filehash = hash_file(entry.path, hashcls)
-		yield format_file_hash(filehash, entry.path)
+		yield format_file_hash(filehash, fspath(entry))
 		if include_names:
 			m.update(entry.name.encode("utf-8"))
 		m.update(filehash.digest())
-	yield format_file_hash(m, path)
+	yield format_file_hash(m, fspath(path))
 
 ed2k_chunksize = 9728000
 

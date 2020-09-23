@@ -578,7 +578,7 @@ def all_equal_to(it, cmp):
 	return all(elm == cmp for elm in it)
 
 def iter_equal(*its):
-	# type: (*Iterable, ) -> bool
+	# type: (*Iterable) -> bool
 
 	""" Test if the contents of all iterables `its` is the same.
 	"""
@@ -615,7 +615,7 @@ def split(it, size):
 	return tuple(every_n(it, size, pos) for it, pos in zip(copies, range(size)))
 
 def no_dupes(*its):
-	# type: (*Iterable[T], ) -> Iterator[T]
+	# type: (*Iterable[T]) -> Iterator[T]
 
 	""" Merge `its` and removes all duplicates while preserving order. """
 

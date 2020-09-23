@@ -135,7 +135,7 @@ setup(
 		"Topic :: Utilities",
 	],
 	packages=["genutility", "genutility/compat", "genutility/fileformats", "genutility/hardware", "genutility/twothree"],
-	package_data={str("genutility"): ["data/*.tsv"]},
+	package_data={str("genutility"): ["py.typed", "data/*.tsv"]},
 	python_requires=">=2.7",
 	install_requires=[
 		"future",

@@ -15,9 +15,11 @@ if __debug__:
 	import zipfile, tarfile
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable
+	from typing import overload, Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable, TypeVar
+	from mmap import mmap
 
 	PathType = Union[str, PathLike]
+	Data = TypeVar('D', str, bytes)
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
@@ -42,7 +44,7 @@ def _stripmode(mode):
 	return "".join(set(mode) - {"t", "b"})
 
 def read_file(path, mode="b", encoding=None, errors=None):
-	# type: (PathType, str, Optional[str]) -> bytes
+	# type: (PathType, str, Optional[str], Optional[str]) -> bytes
 
 	""" Reads and returns whole file. If content is not needed use consume_file()"""
 
@@ -55,7 +57,7 @@ def read_file(path, mode="b", encoding=None, errors=None):
 		return fr.read()
 
 def write_file(data, path, mode="wb", encoding=None, errors=None):
-	# type: (Union[str, bytes], PathType, str, Optional[str]) -> None
+	# type: (Union[str, bytes], PathType, str, Optional[str], Optional[str]) -> None
 
 	""" Writes file. """
 
@@ -64,8 +66,19 @@ def write_file(data, path, mode="wb", encoding=None, errors=None):
 	with open(path, mode, encoding=encoding, errors=errors) as fw:
 		fw.write(data)
 
+@overload
 def read_or_raise(fin, size):
-	# type: (IO, int) -> Union[str, bytes]
+	# type: (IO[Data], int) -> Data
+
+	...
+
+@overload
+def read_or_raise(fin, size):
+	# type: (mmap, int) -> bytes
+
+	...
+
+def read_or_raise(fin, size):
 
 	""" Instead of returning a result smaller than `size` like `io.read()`,
 		it raises and EOFError.
@@ -98,7 +111,7 @@ def wrap_text(bf, mode, encoding, errors, newline):
 	return bf
 
 def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9, ext=None):
-	# type: (Union[PathType, BinaryIO, int], str, Optional[str], Optional[str], Optional[str], Optional[str], int, Optional[str]) -> IO
+	# type: (Union[PathType, IO, int], str, Optional[str], Optional[str], Optional[str], Optional[str], int, Optional[str]) -> IO
 
 	""" Generic file open method. It supports transparent compression and improved text-mode handling.
 
@@ -198,7 +211,7 @@ class OptionalWriteOnlyFile(object):
 		# type: (Optional[PathType], str, Optional[str], Optional[str], Optional[str], int) -> None
 
 		if path:
-			self.fp = copen(path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel)
+			self.fp = copen(path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel)  # type: Optional[IO]
 		else:
 			self.fp = None
 
@@ -245,7 +258,7 @@ class StdoutFile(object):
 class PathOrBinaryIO(object):
 
 	def __init__(self, fname, mode="rb", close=False):
-		# type: (Union[PathType, BinaryIO],  str, str, str, Optional[str], bool) -> None
+		# type: (Union[PathType, BinaryIO], str, bool) -> None
 
 		if isinstance(fname, (RawIOBase, BufferedIOBase)):
 			self.doclose = close
@@ -255,6 +268,8 @@ class PathOrBinaryIO(object):
 			self.fp = copen(fname, mode)
 
 	def __enter__(self):
+		# type: () -> IO
+
 		return self.fp
 
 	def __exit__(self, exc_type, exc_value, traceback):
@@ -554,7 +569,7 @@ def limited_file_iter(fr, amount, chunk_size=FILE_IO_BUFFER_SIZE):
 		amount -= len(data)
 
 def iterfilelike(fr, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (IO, Optional[int], int) -> Iterator
+	# type: (IO, int, Optional[int], int) -> Iterator
 
 	""" Iterate file-like object `fr` and yield chunks of size `chunk_size`.
 		Starts reading at `start` and optionally limit output to `amount` bytes.
@@ -569,7 +584,7 @@ def iterfilelike(fr, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
 		return limited_file_iter(fr, amount, chunk_size)
 
 def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (PathType, str, Optional[str], Optional[int], int) -> Iterator
+	# type: (PathType, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterator
 
 	""" Iterate over file at `path` and yield chunks of size `chunk_size`.
 		Optionally limit output to `amount` bytes.
@@ -615,7 +630,7 @@ def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
 		yield chunk
 
 def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, amount=None, buffer_size=FILE_IO_BUFFER_SIZE):
-	# type: (PathType, int, str, Optional[str], Optional[int], int) -> Iterator
+	# type: (PathType, int, str, Optional[str], Optional[str], Optional[int], int) -> Iterator
 
 	""" Iterate over file at `path` reading chunks of size `buffer_size` at a time.
 		Yields data chunks of `chunk_size` and optionally limits output to `amount` bytes.
@@ -639,18 +654,18 @@ def consume_file(filename, buffer_size=FILE_IO_BUFFER_SIZE):
 
 # was: same_files, textfile_equal: equal_files(*paths, mode="rt")
 def equal_files(*paths, **kwargs):
-	# type: (*PathType, str, int) -> bool
+	# type: (*PathType, **Any) -> bool
 
 	""" Check if files at `*paths` are equal. Chunks of size `chunk_size` are read at a time.
 		Data can be optionally limited to `amount`.
 	"""
 
 	# python2 fix for `equal_files(*paths, mode="rb", encoding=None, errors=None, amount=None, chunk_size=FILE_IO_BUFFER_SIZE)`
-	mode = kwargs.pop("mode", "rb")
-	encoding = kwargs.pop("encoding", None)
-	errors = kwargs.pop("errors", None)
-	amount = kwargs.pop("amount", None)
-	chunk_size = kwargs.pop("chunk_size", FILE_IO_BUFFER_SIZE)
+	mode = kwargs.pop("mode", "rb")  # type: str
+	encoding = kwargs.pop("encoding", None)  # type: Optional[str]
+	errors = kwargs.pop("errors", None)  # type: Optional[str]
+	amount = kwargs.pop("amount", None)  # type: Optional[int]
+	chunk_size = kwargs.pop("chunk_size", FILE_IO_BUFFER_SIZE)  # type: int
 	assert not kwargs, "Invalid keyword arguments"
 
 	its = tuple(blockfileiter(path, mode=mode, encoding=encoding, errors=errors, amount=amount, chunk_size=chunk_size) for path in paths)
@@ -670,7 +685,7 @@ def is_all_byte(fr, thebyte=b"\0", chunk_size=FILE_IO_BUFFER_SIZE):
 	return True
 
 def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password=None):
-	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
 
 	"""
 		Iterate file-pointers to archived files. They are valid for one iteration step each.

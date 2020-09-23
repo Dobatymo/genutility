@@ -14,7 +14,7 @@ def linear_sum_assignment_cost(cost_matrix):
 
 #@opjit(["f4[:,:](f4[:,:,:], f4[:,:], b1, b1, b1)", "f8[:,:](f8[:,:,:], f8[:,:], b1, b1, b1)"])
 def batch_solve_triangular(matrices, vectors, lower=False, overwrite_b=False, check_finite=False):
-	# type: (np.ndarray, np.ndarry, bool, bool) -> np.ndarray
+	# type: (np.ndarray, np.ndarry, bool, bool, bool) -> np.ndarray
 
 	B, M1, M2 = matrices.shape
 	B2, V = vectors.shape

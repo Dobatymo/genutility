@@ -36,7 +36,7 @@ class LinearRegression(object):
 		self.weights -= self.α * np.matmul(self.X.T, self.predict(self.X) - self.y) # [K]
 
 	def fit(self, n_iter=100, verbose=False):
-		# type: () -> None
+		# type: (int, bool) -> None
 
 		for i in range(n_iter):
 			if verbose:

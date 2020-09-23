@@ -28,7 +28,7 @@ def make_binary_search(target):
 	return binary_search_func
 
 def make_binary_search_sequence(seq, target, key=None):
-	# type: (Sequence, Any) -> Callable[[int], BisectRetVal]
+	# type: (Sequence, Any, Optional[Callable]) -> Callable[[int], BisectRetVal]
 
 	key = key or identity
 

@@ -392,12 +392,12 @@ def make_writeable(path, stats=None):
 def is_writeable(stats):
 	# type: (os.stat_result, ) -> bool
 
-	return stats.st_mode & stat.S_IWRITE
+	return stats.st_mode & stat.S_IWRITE != 0
 
 def is_readable(stats):
 	# type: (os.stat_result, ) -> bool
 
-	return stats.st_mode & stat.S_IREAD
+	return stats.st_mode & stat.S_IREAD != 0
 
 def isfile(stats):
 	# type: (os.stat_result, ) -> bool
@@ -445,7 +445,7 @@ def _char_subber(s, illegal_chars, replacement):
 	return re.sub(regex, replacement, s)
 
 def _char_splitter(s, chars):
-	# type: (str, Set[str]) -> str
+	# type: (str, Set[str]) -> List[str]
 
 	regex = "[" + re.escape("".join(chars)) + "]"
 	return re.split(regex, s)
@@ -701,7 +701,7 @@ class Counts(object):
 		return self.dirs == 0 and self.files == 0 and self.others == 0
 
 def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, errorfunc=scandir_error_raise):
-	# type: (MyDirEntryT, bool, bool, bool, bool, Callable) -> Iterator[DirEntry, Optional[Counts]]
+	# type: (MyDirEntryT, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
 
 	counts = Counts()
 
@@ -733,7 +733,7 @@ def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, e
 		errorfunc(rootentry, e)
 
 def scandir_counts(path, files=True, others=True, rec=True, total=False, onerror=scandir_error_log):
-	# type: (PathType, bool, bool, bool, bool, Callable) -> Iterator[DirEntry, Optional[Counts]]
+	# type: (PathType, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
 
 	""" A recursive variant of scandir() which also returns the number of files/directories
 		within directories.

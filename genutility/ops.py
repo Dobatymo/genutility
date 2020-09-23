@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 	T = TypeVar("T")
 
 def extract_indexes(d):
-	# type: (dict, ) -> Callable([Sequence], dict)
+	# type: (dict, ) -> Callable[[Sequence], dict]
 
 	return lambda seq: {name: seq[index] for index, name in viewitems(d)}
 
