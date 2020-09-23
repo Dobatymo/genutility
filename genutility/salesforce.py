@@ -96,28 +96,38 @@ class MySalesforce(object):
 
 	# internal query/search
 
-	def _query(self, s):
-		# type: (str, ) -> dict
+	def _query(self, s, attributes=False):
+		# type: (str, ) -> List[dict]
 
 		try:
-			return self.session().query(s)
+			results = self.session().query(s).get("records", [])
 		except SalesforceExpiredSession:
 			logger.debug("Salesforce session expired")
-			return self.session(True).query(s)
+			results = self.session(True).query(s).get("records", [])
 
-	def _query_all(self, s):
+		if not attributes:
+			for row in results:
+				del row["attributes"]
+
+		return results
+
+	def _query_all(self, s, attributes=False):
 		# type: (str, ) -> Iterator[dict]
 
 		reconnect = True
 
 		try:
 			for row in self.session().query_all_iter(s):
+				if not attributes:
+					del row["attributes"]
 				yield row
 				reconnect = False
 		except SalesforceExpiredSession:
 			logger.debug("Salesforce session expired")
 			if reconnect:
 				for row in self.session(True).query_all_iter(s):
+					if not attributes:
+						del row["attributes"]
 					yield row
 			else:
 				raise RuntimeError("Cannot reconnect Salesforce session after partial query")
@@ -153,24 +163,28 @@ class MySalesforce(object):
 	# actual methods
 
 	def query(self, query_str):
-		# type: (str, ) -> dict
+		# type: (str, ) -> List[dict]
+
+		return self._query(query_str)
+
+	def _get_one_field(self, results, name):
+		return [row[name] for row in results]
+
+	def get_all_objects(self):
+		# type: () -> List[dict]
+
+		query_str = "SELECT QualifiedApiName, Label FROM EntityDefinition ORDER BY QualifiedApiName"
 
 		return self._query(query_str)
 
 	def get_all_fields(self, object_name):
-		# type: (str, ) -> dict
+		# type: (str, ) -> List[dict]
 
 		""" Retrieves all fields of `object_name`.
 			Warning: `object_name` is not escaped!
 		"""
 
-		query_str = "SELECT QualifiedApiName FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{}'".format(object_name)  # nosec
-
-		return self._query(query_str)
-
-	def get_all_objects(self):
-
-		query_str = "SELECT QualifiedApiName FROM EntityDefinition ORDER BY QualifiedApiName"
+		query_str = "SELECT QualifiedApiName, DataType, Label FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{}'".format(object_name)  # nosec
 
 		return self._query(query_str)
 
@@ -202,13 +216,11 @@ class MySalesforce(object):
 				it = self._query_all(query_str)
 
 			row = next(it)
-			del row["attributes"]
 			csvwriter.writerow(row.keys())
 			csvwriter.writerow(row.values())
 			i += 1
 
 			for row in it:
-				del row["attributes"]
 				csvwriter.writerow(row.values())
 				i += 1
 

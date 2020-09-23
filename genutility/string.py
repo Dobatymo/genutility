@@ -29,6 +29,24 @@ german_vowels = "aeiou"
 #def cycleright(s, start=0, end=-1): # bad
 #	return s[:start] + s[end] + s[start:end] + s[end+1:]
 
+def truncate(text, width, placeholder="..."):
+	# type: (str, int, str) -> str
+
+	""" Simple character based truncate method.
+		To truncate at word boundaries use `textwrap.shorten`.
+	"""
+
+	if width < 0:
+		raise ValueError("width cannot be negative")
+
+	if len(placeholder) > width:
+		raise ValueError("placeholder cannot be longer then width")
+
+	if len(text) <= width:
+		return text
+	else:
+		return text[0:width - len(placeholder)] + placeholder
+
 def toint(obj, default=None):
 	# type: (Any, Optional[T]) -> Union[int, Optional[T]]
 
