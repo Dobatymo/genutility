@@ -359,8 +359,11 @@ class MTree(object):
 	""" See: M-tree: An Efficient Access Method for Similarity Search in Metric Spaces (1997)
 	"""
 
-	def __init__(self, distance_func, promote=None, partition=None):
+	def __init__(self, distance_func, promote=None, partition=None, does_not_work_yet=None):
 		# type: (Callable, Optional[str], Optional[str]) -> None
+
+		if does_not_work_yet != "OK":
+			raise RuntimeError("MTree is work in progress")
 
 		self.distance_func = distance_func
 
@@ -502,7 +505,7 @@ class MTreeTests(TestCase):
 	def test_mtree_one_layer(self):
 		values = vals(1, 4)
 
-		mt = MTree(len_dist)
+		mt = MTree(len_dist, does_not_work_yet="OK")
 		for i in values:
 			mt.add(i)
 
@@ -512,7 +515,7 @@ class MTreeTests(TestCase):
 	def test_mtree_two_layer(self):
 		values = vals(1, 5)
 
-		mt = MTree(len_dist)
+		mt = MTree(len_dist, does_not_work_yet="OK")
 		for i in values:
 			mt.add(i)
 
@@ -521,7 +524,7 @@ class MTreeTests(TestCase):
 	def test_mtree_three_layer(self):
 		values = vals(1, 9)
 
-		mt = MTree(len_dist)
+		mt = MTree(len_dist, does_not_work_yet="OK")
 		for i in values:
 			mt.add(i)
 
