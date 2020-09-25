@@ -84,8 +84,11 @@ class MalformedFile(ValueError):
 		In contrast to `ParseError` this is usually a file we have control over.
 	"""
 
-def assert_choice(name, value, choices):
+def assert_choice(name, value, choices, optional=False):
 	# type: (str, T, Set[T]) -> None
+
+	if optional and value is None:
+		return
 
 	if value not in choices:
 		raise ValueError("{} must be one of {}".format(name, ", ".join(choices)))
