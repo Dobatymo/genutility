@@ -382,7 +382,8 @@ class MTree(object):
 	def _keys(self, node):
 		if isinstance(node, InternalNode):
 			for ro in node.objects:
-				yield from self._keys(ro.subtree)
+				for value in self._keys(ro.subtree):
+					yield value
 		else:
 			for lo in node.objects:
 				yield lo.value
@@ -460,7 +461,8 @@ class MTree(object):
 			for ro in node.objects:
 				if abs(distance_parent_to_value - ro.distance_to_parent) <= radius + ro.covering_radius:
 					if self.distance_func(ro.value, value) <= radius + ro.covering_radius:
-						yield from self._find(ro.subtree, value, radius)
+						for value in self._find(ro.subtree, value, radius):
+							yield value
 		else:
 			for lo in node.objects:
 				if abs(distance_parent_to_value - lo.distance_to_parent) <= radius:
@@ -468,7 +470,8 @@ class MTree(object):
 						yield lo.value
 
 	def keys(self):
-		yield from self._keys(self.root)
+		for value in self._keys(self.root):
+			yield value
 
 	def add(self, value):
 		# type: (T, ) -> None
@@ -483,7 +486,8 @@ class MTree(object):
 		if not isinstance(node, LeafNode):
 			for ro in node.objects:
 				if self.distance_func(ro.value, value) <= radius + ro.covering_radius:
-					yield from self._find(ro.subtree, value, radius)
+					for value in self._find(ro.subtree, value, radius):
+						yield value
 		else:
 			for lo in node.objects:
 				if self.distance_func(lo.value, value) <= radius:
