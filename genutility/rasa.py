@@ -4,18 +4,39 @@ from .exceptions import assert_choice
 
 class RasaRest(object):
 
-	def __init__(self, sender, scheme="http", netloc="localhost:5005", timeout=60):
-		# type: (str, str, str, int) -> None
+	def __init__(self, sender, scheme="http", netloc="localhost:5005", token=None, timeout=60):
+		# type: (str, str, str, Optional[str], int) -> None
 
 		self.sender = sender
 		self.scheme = scheme
 		self.netloc = netloc
+		self.token = token
 		self.timeout = timeout
 
 	def get_endpoint(self, path):
 		# type: (str, ) -> str
 
 		return self.scheme + "://" + self.netloc + path
+
+	def get_request(self, url, params=None):
+		# type: (str, Optional[dict]) -> dict
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		r = requests.get(url, timeout=self.timeout, params=params)
+		r.raise_for_status()
+		return r.json()
+
+	def post_request(self, url, params=None, json=None):
+		# type: (str, Optional[dict], Optional[dict]) -> dict
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		r = requests.post(url, timeout=self.timeout, params=params, json=json)
+		r.raise_for_status()
+		return r.json()
 
 INCLUDE_EVENTS_ENUM = {"AFTER_RESTART", "ALL", "APPLIED", "NONE"}
 
@@ -28,12 +49,10 @@ class RasaRestConversations(RasaRest):
 
 		url = self.get_endpoint("/conversations/{}/tracker".format(self.sender))
 
-		r = requests.get(url, timeout=self.timeout, params={
+		return self.get_request(url, params={
 			"include_events": include_events,
 			"until": until,
 		})
-		r.raise_for_status()
-		return r.json()
 
 	def post_events(self, event, timestamp, include_events=None):
 		# type: (str, int, Optional[str]) -> dict
@@ -42,23 +61,19 @@ class RasaRestConversations(RasaRest):
 
 		url = self.get_endpoint("/conversations/{}/tracker/events".format(self.sender))
 
-		r = requests.post(url, json={
+		return self.post_request(url, json={
 			"event": event,
 			"timestamp": timestamp,
-		}, timeout=self.timeout)
-		r.raise_for_status()
-		return r.json()
+		})
 
 	def get_story(self, until=None):
 		# type: (Optional[int], ) -> dict
 
 		url = self.get_endpoint("/conversations/{}/story".format(self.sender))
 
-		r = requests.get(url, timeout=self.timeout, params={
+		return self.get_request(url, params={
 			"until": until,
 		})
-		r.raise_for_status()
-		return r.json()
 
 class RasaRestWebhook(RasaRest):
 
@@ -67,18 +82,14 @@ class RasaRestWebhook(RasaRest):
 
 		url = self.get_endpoint("/webhooks/rest/")
 
-		r = requests.get(url, timeout=self.timeout)
-		r.raise_for_status()
-		return r.json()
+		return self.get_request(url)
 
 	def send_message(self, message):
 		# type: (str, ) -> List[dict]
 
 		url = self.get_endpoint("/webhooks/rest/webhook")
 
-		r = requests.post(url, json={
+		return self.post_request(url, json={
 			"sender": self.sender,
 			"message": message,
-		}, timeout=self.timeout)
-		r.raise_for_status()
-		return r.json()
+		})

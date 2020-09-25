@@ -12,7 +12,8 @@ netifaces
 nltk; python_version>='3'
 nltk<3.5; python_version<'3'
 numpy
---prefer-binary opencv-python # cv2
+opencv-python; python_version>='3' # cv2
+opencv-python<=4.2.0.32; python_version<'3' # cv2
 orderedset
 pillow
 PyPDF2

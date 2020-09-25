@@ -72,13 +72,13 @@ def write_file(data, path, mode="wb", encoding=None, errors=None):
 def read_or_raise(fin, size):
 	# type: (IO[Data], int) -> Data
 
-	...
+	pass
 
 @overload
 def read_or_raise(fin, size):
 	# type: (mmap, int) -> bytes
 
-	...
+	pass
 
 def read_or_raise(fin, size):
 
