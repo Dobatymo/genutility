@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from genutility.test import MyTestCase
 from genutility.compat.contextlib import nullcontext
+from genutility.test import MyTestCase
+
 
 class ContextTest(MyTestCase):
 

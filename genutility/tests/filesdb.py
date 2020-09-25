@@ -2,9 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from time import sleep
 
-from genutility.test import MyTestCase
 from genutility.exceptions import NoResult
-from genutility.filesdb import FileDbSimple, FileDbHistory
+from genutility.filesdb import FileDbHistory, FileDbSimple
+from genutility.test import MyTestCase
+
 
 class Simple(FileDbSimple):
 

@@ -2,9 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
+from genutility.image import block_histogram_2d, grayscale, histogram_1d, histogram_2d, resize_oar
 from genutility.test import MyTestCase, parametrize
-from genutility.image import (grayscale, histogram_1d, histogram_2d, resize_oar,
-	block_histogram_2d)
+
 
 class ImageTest(MyTestCase):
 

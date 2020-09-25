@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import socket, re
+import re
+import socket
 from typing import TYPE_CHECKING
 
 import netifaces

@@ -1,14 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from math import pi, cos, sin
 from itertools import islice
+from math import cos, pi, sin
 
-import numpy as np
 import cv2
+import numpy as np
 from sklearn.cluster import MeanShift
 
-from .rand import rgb_colors
 from .math import degree_to_rad, inf
+from .rand import rgb_colors
 
 ## UNFINISHED
 ## BASED ON: Resizing by Symmetry-Summarization (2010)

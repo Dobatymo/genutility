@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from genutility.test import MyTestCase, parametrize, closeable_tempfile
+from genutility.test import MyTestCase, closeable_tempfile, parametrize
 from genutility.yaml import read_yaml, write_yaml
+
 
 class YamlTest(MyTestCase):
 

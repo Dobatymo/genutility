@@ -1,17 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import str
+
 import re
 from string import whitespace
 from typing import TYPE_CHECKING
 
-from .url import valid_uri_characters, get_url_pattern
+from .iter import collapse_all, collapse_any
 from .string import replace_multiple
-from .iter import collapse_any, collapse_all
 from .unicode import unicode_categories
+from .url import get_url_pattern, valid_uri_characters
 
 if TYPE_CHECKING:
-	from typing import Iterable, Iterator, Union, Callable, Optional, Sequence
+	from typing import Callable, Iterable, Iterator, Optional, Sequence, Union
 
 uni_cats = unicode_categories()
 

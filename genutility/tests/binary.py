@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import PY2
+
+from genutility.binary import decode_binary, encode_binary
 from genutility.test import MyTestCase, parametrize
-from genutility.binary import encode_binary, decode_binary
 
 if PY2:
 	bytes = bytearray

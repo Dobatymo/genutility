@@ -10,7 +10,8 @@ from .compat.contextlib import ExitStack
 from .compat.pathlib import Path
 
 if TYPE_CHECKING:
-	from typing import Union, Iterator
+	from typing import Iterator, Union
+
 	from .compat.os import PathLike
 
 def join_pdfs_in_folder(path_in, file_out, overwrite=False):

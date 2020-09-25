@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import zip, range
+from builtins import range, zip
 
+from genutility.indexing import subblock_indices, window_combinations_indices
 from genutility.test import MyTestCase, parametrize
-from genutility.indexing import window_combinations_indices, subblock_indices
+
 
 class IndexingTest(MyTestCase):
 

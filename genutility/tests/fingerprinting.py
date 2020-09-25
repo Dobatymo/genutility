@@ -4,8 +4,10 @@ from functools import partial
 from unittest import SkipTest
 
 import numpy as np
-from genutility.test import MyTestCase, parametrize, random_arguments
+
 from genutility.fingerprinting import hu_moments, phash_blockmean_array
+from genutility.test import MyTestCase, parametrize, random_arguments
+
 
 class FingerprintingTest(MyTestCase):
 

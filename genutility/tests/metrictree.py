@@ -1,11 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import range
+
 from unittest import SkipTest
 
-from genutility.test import MyTestCase, parametrize
 from genutility.math import number_metric
 from genutility.metrictree import BKTree
+from genutility.test import MyTestCase, parametrize
 
 
 class BKTreeTest(MyTestCase):
@@ -21,8 +22,8 @@ class BKTreeTest(MyTestCase):
 
 	def test_words(self):
 		try:
-			from nltk.corpus import words
 			from Levenshtein import distance as levenshtein_distance
+			from nltk.corpus import words
 		except ImportError:
 			raise SkipTest("Missing imports. pip install python-Levenshtein nltk")
 

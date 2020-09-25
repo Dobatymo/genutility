@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import range
+
 from operator import itemgetter
 from typing import TYPE_CHECKING
 
@@ -8,7 +9,8 @@ from .func import identity
 from .indexing import triangular_indices
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Iterator, MutableSequence, Tuple, Sequence, TypeVar
+	from typing import Callable, Iterable, Iterator, MutableSequence, Sequence, Tuple, TypeVar
+
 	from .typing import Comparable
 	T = TypeVar("T")
 

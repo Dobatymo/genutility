@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import range
 
+
 class RingList:
 
 	""" bad complexity, moves all data if ring is full """

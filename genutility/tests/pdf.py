@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import unittest, sys
-from genutility.test import MyTestCase, parametrize
-from genutility.pdf import join_pdfs_in_folder
+import sys
+import unittest
+
 from genutility.compat.pathlib import Path
+from genutility.pdf import join_pdfs_in_folder
+from genutility.test import MyTestCase, parametrize
 
 LESSTHANPY36 = sys.version_info < (3, 6)
 

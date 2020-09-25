@@ -1,13 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import viewitems
+
 import logging
-from functools import wraps
 from collections import defaultdict
+from functools import wraps
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Callable, Collection, Optional, Any
+	from typing import Any, Callable, Collection, Optional
 
 def _to_union(types):
 	# type: (Collection[str], ) -> str

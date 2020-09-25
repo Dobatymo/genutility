@@ -7,7 +7,7 @@ import numpy as np
 from PIL import ImageFilter
 
 #from .numba import opjit
-from .numpy import unblock, rgb_to_hsi, rgb_to_ycbcr
+from .numpy import rgb_to_hsi, rgb_to_ycbcr, unblock
 
 # fingerprinting aka perceptual hashing
 

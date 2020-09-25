@@ -1,16 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-# needs python 3.4
-
-import sys, asyncio
+import asyncio
+import sys
 from time import time
 from typing import TYPE_CHECKING
 
-from .iter import progressdata, _lstr
+from .iter import _lstr, progressdata
+
+# needs python 3.4
+
 
 if TYPE_CHECKING:
-	from typing import Union, Iterable, Sequence, Optional, IO
 	from numbers import Number
+	from typing import IO, Iterable, Optional, Sequence, Union
 
 class progress_content(object):
 

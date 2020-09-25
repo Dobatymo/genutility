@@ -6,11 +6,12 @@ if TYPE_CHECKING:
 	from typing import Optional
 
 try:
-	from secrets import token_urlsafe # pylint: disable=unused-import
+	from secrets import token_urlsafe  # pylint: disable=unused-import
 
 except ImportError: # python 3.5 and lower
 
-	import os, base64
+	import base64
+	import os
 
 	DEFAULT_ENTROPY = 32
 

@@ -1,13 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import map, chr, range
+from builtins import chr, map, range
 
-from unicodedata import category
-from sys import maxunicode
 from collections import defaultdict
+from sys import maxunicode
 from tempfile import gettempdir
+from unicodedata import category
 
 from .pickle import cache  # nosec
+
 
 @cache(gettempdir() + "/unicode_categories.{ppv}.pkl", ignoreargs=True)
 def unicode_categories():

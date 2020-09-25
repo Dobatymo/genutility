@@ -1,14 +1,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.moves.urllib.parse import urlsplit, urlunsplit, parse_qs, urlencode
+from future.moves.urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import re
 from string import ascii_letters, digits
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Optional, Dict, Iterable
 	from future.moves.urllib.parse import SplitResult
+
+	from typing import Dict, Iterable, Optional
 
 # URI RFC
 gen_delims = ":/?#[]@"

@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import pickle  # nosec
-from pickle import HIGHEST_PROTOCOL  # nosec
-from functools import wraps
 from datetime import timedelta
+from functools import wraps
+from pickle import HIGHEST_PROTOCOL  # nosec
 from typing import TYPE_CHECKING
 
 from .atomic import TransactionalCreateFile
@@ -17,7 +17,8 @@ from .object import args_to_key
 from .time import PrintStatementTime
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Optional, Iterator, Iterable
+	from typing import Any, Callable, Iterable, Iterator, Optional
+
 	from .compat.pathlib import Path
 
 def read_pickle(path):

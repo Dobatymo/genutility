@@ -3,24 +3,31 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import chr, zip
 from future.moves.itertools import zip_longest
 
-import os, platform, stat, os.path, re, logging, shutil, errno
-from operator import attrgetter
+import errno
+import logging
+import os
+import os.path
+import platform
+import re
+import shutil
+import stat
 from fnmatch import fnmatch
 from functools import partial
+from operator import attrgetter
 from typing import TYPE_CHECKING
 
-from .file import equal_files, iterfilelike, FILE_IO_BUFFER_SIZE
-from .iter import is_empty
-from .os import islink, uncabspath, _not_available
-from .ops import logical_implication
-from .datetime import datetime_from_utc_timestamp
 from .compat import FileExistsError
-from .compat.os import PathLike, fspath, scandir, DirEntry
+from .compat.os import DirEntry, PathLike, fspath, scandir
 from .compat.pathlib import Path
+from .datetime import datetime_from_utc_timestamp
+from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
+from .iter import is_empty
+from .ops import logical_implication
+from .os import _not_available, islink, uncabspath
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Optional, Iterator, Iterable, List, Set, Tuple, Union
 	from datetime import datetime
+	from typing import Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 	PathType = Union[str, PathLike]
 	EntryType = Union[Path, DirEntry]
 

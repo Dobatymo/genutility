@@ -1,23 +1,41 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import re
-from ctypes import wintypes, Structure, create_unicode_buffer, WinError, sizeof, byref
+from ctypes import Structure, WinError, byref, create_unicode_buffer, sizeof, wintypes
 from ctypes.wintypes import BYTE
 from typing import TYPE_CHECKING
 
 from cwinsdk import struct2dict
-from cwinsdk.um.fileapi import CreateFileW, OPEN_EXISTING
-from cwinsdk.um.ioapiset import DeviceIoControl
-from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
+from cwinsdk.um.fileapi import OPEN_EXISTING, CreateFileW
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE, CloseHandle
-from cwinsdk.um.winioctl import (PARTITION_IFS, PARTITION_MSFT_RECOVERY, DISK_GEOMETRY, IOCTL_DISK_GET_DRIVE_GEOMETRY,
-	IOCTL_DISK_GET_LENGTH_INFO, GET_LENGTH_INFORMATION, STORAGE_READ_CAPACITY, IOCTL_STORAGE_READ_CAPACITY,
-	STORAGE_PROPERTY_QUERY, STORAGE_PROPERTY_ID, STORAGE_QUERY_TYPE, STORAGE_ACCESS_ALIGNMENT_DESCRIPTOR,
-	IOCTL_STORAGE_QUERY_PROPERTY, FSCTL_LOCK_VOLUME, FSCTL_UNLOCK_VOLUME, STORAGE_DEVICE_DESCRIPTOR,
-	SMART_GET_VERSION, GETVERSIONINPARAMS, IOCTL_DISK_VERIFY, VERIFY_INFORMATION, FSCTL_ALLOW_EXTENDED_DASD_IO)
+from cwinsdk.um.ioapiset import DeviceIoControl
+from cwinsdk.um.winioctl import (
+    DISK_GEOMETRY,
+    FSCTL_ALLOW_EXTENDED_DASD_IO,
+    FSCTL_LOCK_VOLUME,
+    FSCTL_UNLOCK_VOLUME,
+    GET_LENGTH_INFORMATION,
+    GETVERSIONINPARAMS,
+    IOCTL_DISK_GET_DRIVE_GEOMETRY,
+    IOCTL_DISK_GET_LENGTH_INFO,
+    IOCTL_DISK_VERIFY,
+    IOCTL_STORAGE_QUERY_PROPERTY,
+    IOCTL_STORAGE_READ_CAPACITY,
+    PARTITION_IFS,
+    PARTITION_MSFT_RECOVERY,
+    SMART_GET_VERSION,
+    STORAGE_ACCESS_ALIGNMENT_DESCRIPTOR,
+    STORAGE_DEVICE_DESCRIPTOR,
+    STORAGE_PROPERTY_ID,
+    STORAGE_PROPERTY_QUERY,
+    STORAGE_QUERY_TYPE,
+    STORAGE_READ_CAPACITY,
+    VERIFY_INFORMATION,
+)
+from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
 
-from .handle import WindowsHandle, _mode2access
 from ..exceptions import assert_true
+from .handle import WindowsHandle, _mode2access
 
 if TYPE_CHECKING:
 	from typing import Any

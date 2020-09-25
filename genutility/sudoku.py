@@ -1,13 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import range
+
 from copy import deepcopy
 from random import choice
 from typing import TYPE_CHECKING
 
 from .compat.math import isqrt
 from .exceptions import assert_type
-from .indexing import row_indices, col_indices, subblock_indices
+from .indexing import col_indices, row_indices, subblock_indices
 from .iter import batch
 from .set import get as setget
 
@@ -260,6 +261,7 @@ def is_valid_solution(board, sym_set):
 if __name__ == "__main__":
 
 	from argparse import ArgumentParser
+
 	from genutility.time import MeasureTime
 
 	parser = ArgumentParser()

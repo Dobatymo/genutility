@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.utils import viewkeys, viewitems
 from builtins import sum
+from future.utils import viewitems, viewkeys
 
 from itertools import islice
 from typing import TYPE_CHECKING
@@ -11,7 +11,8 @@ from nltk.tokenize import word_tokenize as tokenize
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
-	from typing import Dict, Iterator, Iterable, List, TextIO, Union
+	from typing import Dict, Iterable, Iterator, List, TextIO, Union
+
 	from .gensim import KeyedVectors
 
 def gensim_indexer(embeddings, doc, ignore=True):

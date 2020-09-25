@@ -1,5 +1,6 @@
 import requests
 
+
 class RasaRestWebhook(object):
 
 	def __init__(self, sender, scheme="http", netloc="localhost:5005", timeout=60):

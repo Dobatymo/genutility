@@ -6,7 +6,8 @@ from operator import itemgetter
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, List, Iterator, Iterable, Optional, Set, Tuple
+	from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Set, Tuple
+
 	from graphviz import Digraph
 
 if __debug__:
@@ -329,6 +330,7 @@ NodeType = Union[InternalNode, LeafNode]
 
 from random import sample
 
+
 def _promote_random(distance_func, objects):
 	# type: (Callable, Set[ObjectType]) -> Tuple[ObjectType, ObjectType]
 
@@ -493,6 +495,7 @@ def vals(start, end):
 	return set(str(i)*i for i in range(start, end+1))
 
 from unittest import TestCase
+
 
 class MTreeTests(TestCase):
 

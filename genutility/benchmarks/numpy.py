@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+
 from genutility.numba import opjit, oprange
 
 #image = np.random.randint(0, 255, (1000, 1000))

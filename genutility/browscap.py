@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import csv, fnmatch
-from itertools import islice
+import csv
+import fnmatch
 from io import open
+from itertools import islice
 
 import re2 as re
 

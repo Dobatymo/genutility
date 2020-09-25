@@ -1,11 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import zip
-import time, threading
 
+import threading
+import time
+
+from genutility.concurrency import NotThreadSafe, ThreadPool, gather_all_unsorted, gather_any
 from genutility.test import MyTestCase
 from genutility.time import MeasureTime, iter_timer
-from genutility.concurrency import ThreadPool, gather_all_unsorted, gather_any, NotThreadSafe
+
 
 class ConcurrencyTest(MyTestCase):
 
@@ -85,6 +88,7 @@ class ConcurrencyTest(MyTestCase):
 		t.join()
 
 if __name__ == '__main__':
-	import unittest, logging
+	import logging
+	import unittest
 	logging.warning("These unittests are time critical, they might fail if the system is under heavy load")
 	unittest.main()

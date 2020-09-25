@@ -1,12 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import map
+
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .image import image_block_histogram, image_histogram
 from .iter import pairwise
-from .image import image_histogram, image_block_histogram
 from .numpy import histogram_correlation
 
 if TYPE_CHECKING:
@@ -67,6 +68,7 @@ def test_scene_change_detection_block_histogram():
 
 if __name__ == "__main__":
 	from PIL import Image
+
 	#test_image_histogram_gray()
 	#test_scene_change_detection_histogram_correlation()
 	test_scene_change_detection_block_histogram()

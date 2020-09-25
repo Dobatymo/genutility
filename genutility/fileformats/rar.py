@@ -2,15 +2,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import filter, range
 
-import sys, os, logging
+import logging
+import os
 import subprocess  # nosec
+import sys
 from typing import TYPE_CHECKING
 
+from ..compat.os import scandir
+from ..compat.pathlib import Path
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
-from ..compat.pathlib import Path
-from ..compat.os import scandir
-from ..twothree.filesystem import tofs, fromfs
+from ..twothree.filesystem import fromfs, tofs
 
 if TYPE_CHECKING:
 	from typing import Callable

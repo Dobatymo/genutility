@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from ctypes import LittleEndianStructure
-from ctypes.wintypes import USHORT, ULONG
+from ctypes.wintypes import ULONG, USHORT
 
 from cwinsdk.shared.ntdef import UCHAR
 

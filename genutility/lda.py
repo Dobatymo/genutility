@@ -1,21 +1,21 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from math import log2, exp
-from itertools import chain
 from collections import Counter
+from itertools import chain
+from math import exp, log2
 from sys import stderr
 from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .numpy import categorical, batchtopk
 from .datastructures import VariableRowMatrix
 from .encoder import BatchLabelEncoder
 from .iter import progress
+from .numpy import batchtopk, categorical
 from .object import cast
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, List, Tuple, MutableMapping, Iterator, Union
+	from typing import Any, Dict, Iterable, Iterator, List, MutableMapping, Tuple, Union
 
 	RawDocument = List[int]
 	IterableDocuments = Iterable[Iterable[int]]

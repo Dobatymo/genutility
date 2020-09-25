@@ -46,6 +46,7 @@ except AttributeError:
 
 	import re
 	from datetime import timedelta
+
 	from ..string import tryint
 
 	isoformatre = re.compile(r"^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})\.(\d{6})(\+|-)(\d{2}):(\d{2})$")

@@ -4,11 +4,13 @@ from typing import TYPE_CHECKING
 
 from pymediainfo import MediaInfo
 
-from .compat.os import fspath, PathLike
+from .compat.os import PathLike, fspath
 
 if TYPE_CHECKING:
 	from typing import Union
+
 	from pymediainfo import Track
+
 	from .compat.pathlib import Path
 
 class MediaInfoHelper(object):

@@ -1,12 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from time import sleep
-from datetime import timedelta
 from collections import defaultdict
+from datetime import timedelta
+from time import sleep
 from typing import TYPE_CHECKING
 
 try:
-	from time import monotonic # Python 3.5+
+	from time import monotonic  # Python 3.5+
 except ImportError:
 	from time import clock as monotonic
 

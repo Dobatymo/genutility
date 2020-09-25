@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from timeit import repeat
 from argparse import ArgumentParser
+from timeit import repeat
+
 
 def run(benchmarks):
 	# type: (dict, ) -> None

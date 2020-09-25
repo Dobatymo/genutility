@@ -5,6 +5,7 @@ from networkx import Graph, connected_components
 
 if TYPE_CHECKING:
 	from typing import Sequence, TypeVar
+
 	import numpy as np
 	T = TypeVar("T")
 

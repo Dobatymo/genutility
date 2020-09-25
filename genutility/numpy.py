@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import range
 from future.utils import viewitems
 
-from math import sqrt, exp
+from math import exp, sqrt
 from typing import TYPE_CHECKING
 
 import numpy as np

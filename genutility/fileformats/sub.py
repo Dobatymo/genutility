@@ -5,6 +5,7 @@ from io import open
 
 from ..exceptions import MalformedFile
 
+
 class Subtitle(object):
 
 	def __init__(self, start, end, lines):

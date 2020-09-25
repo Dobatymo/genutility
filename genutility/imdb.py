@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from io import open
 import csv
+from io import open
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

@@ -1,18 +1,20 @@
-import logging, re, csv
-from time import sleep
+import csv
+import logging
+import re
 from collections.abc import Sequence
+from time import sleep
 from typing import TYPE_CHECKING
 
 import requests
 from simple_salesforce import Salesforce
-from simple_salesforce.exceptions import SalesforceExpiredSession, SalesforceAuthenticationFailed
+from simple_salesforce.exceptions import SalesforceAuthenticationFailed, SalesforceExpiredSession
 from simplejson.errors import JSONDecodeError
 
 from .iter import progress
 from .json import read_json, write_json
 
 if TYPE_CHECKING:
-	from typing import List, Iterable, Optional, Tuple, Iterator
+	from typing import Iterable, Iterator, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

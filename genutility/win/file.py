@@ -1,16 +1,22 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from ctypes import byref, sizeof, GetLastError, FormatError, WinError
+from ctypes import FormatError, GetLastError, WinError, byref, sizeof
 from errno import EACCES
 
-from cwinsdk.windows import (
-	CreateFileW, OpenFileById, GetFileInformationByHandleEx,
-	GENERIC_READ, OPEN_EXISTING, ERROR_SHARING_VIOLATION,
-	FILE_ID_DESCRIPTOR, FILE_ID_INFO,  # structs
-	FILE_ID_TYPE, FILE_INFO_BY_HANDLE_CLASS,  # enums
-)
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
 from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
+from cwinsdk.windows import ERROR_SHARING_VIOLATION  # structs; enums
+from cwinsdk.windows import (
+    FILE_ID_DESCRIPTOR,
+    FILE_ID_INFO,
+    FILE_ID_TYPE,
+    FILE_INFO_BY_HANDLE_CLASS,
+    GENERIC_READ,
+    OPEN_EXISTING,
+    CreateFileW,
+    GetFileInformationByHandleEx,
+    OpenFileById,
+)
 
 from .handle import WindowsHandle, _mode2access
 

@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import range, str
 from future.utils import PY2
+
 from typing import TYPE_CHECKING
 
 from .exceptions import assert_choice

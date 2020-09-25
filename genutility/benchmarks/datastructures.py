@@ -1,4 +1,5 @@
 import numpy as np
+
 from genutility.datastructures import VariableRowMatrix
 
 num = 9999999

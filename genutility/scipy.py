@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from scipy.optimize import linear_sum_assignment
 from scipy.linalg import solve_triangular
+from scipy.optimize import linear_sum_assignment
 
 # from .numba import opjit
 
@@ -31,6 +31,7 @@ def batch_solve_triangular(matrices, vectors, lower=False, overwrite_b=False, ch
 
 if __name__ == "__main__":
 	import timeit
+
 	from .numpy import random_triangular_matrix
 
 	size = 100

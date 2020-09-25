@@ -1,15 +1,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, os.path
+import logging
+import os.path
+from functools import partial, reduce, wraps
 from sys import stdout
-from functools import wraps, reduce, partial
 from time import sleep
 from typing import TYPE_CHECKING
 
 from .iter import retrier
 
 if TYPE_CHECKING:
-	from typing import Callable, Any, TextIO, Iterable, Iterator, Optional, TypeVar, Tuple, Sequence
+	from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, TypeVar
 	T = TypeVar("T")
 	U = TypeVar("U")
 

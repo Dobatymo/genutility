@@ -2,21 +2,64 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import range
 from future.utils import PY2, PY3
+
 import logging
 from itertools import chain, islice
 from os import devnull
 
 from hypothesis import given, strategies
 
-from genutility.test import MyTestCase, parametrize
-from genutility.iter import (product_range_repeat, every_n, any_in_common, split, no_dupes,
-	powerset, iter_except, iter_except_ignore, decompress, iter_equal, IteratorExhausted, consume,
-	pairwise, resizer, filternone, all_equal, advance, batch, empty, asc_peaks, peaks, valleys,
-	retrier, progress, iterrandrange, repeatfunc, count_distinct, reversedzip, flatten, findfirst,
-	is_empty, switch, multi_join, first_not_none, lastdefault, last, EmptyIterable, collapse_any,
-	collapse_all, extrema, switched_enumerate, list_except, all_equal_to, iter_different, any_in,
-	x_wise, triples)
 from genutility.compat.unittest.mock import Mock
+from genutility.iter import (
+    EmptyIterable,
+    IteratorExhausted,
+    advance,
+    all_equal,
+    all_equal_to,
+    any_in,
+    any_in_common,
+    asc_peaks,
+    batch,
+    collapse_all,
+    collapse_any,
+    consume,
+    count_distinct,
+    decompress,
+    empty,
+    every_n,
+    extrema,
+    filternone,
+    findfirst,
+    first_not_none,
+    flatten,
+    is_empty,
+    iter_different,
+    iter_equal,
+    iter_except,
+    iter_except_ignore,
+    iterrandrange,
+    last,
+    lastdefault,
+    list_except,
+    multi_join,
+    no_dupes,
+    pairwise,
+    peaks,
+    powerset,
+    product_range_repeat,
+    progress,
+    repeatfunc,
+    resizer,
+    retrier,
+    reversedzip,
+    split,
+    switch,
+    switched_enumerate,
+    triples,
+    valleys,
+    x_wise,
+)
+from genutility.test import MyTestCase, parametrize
 
 nulllogger = logging.getLogger("null")
 nulllogger.addHandler(logging.NullHandler())
@@ -501,13 +544,10 @@ class IterTest(MyTestCase):
 	def test_empty(self):
 
 		if PY2:
-			from collections import Iterable
-			from collections import Iterator
+			from collections import Iterable, Iterator
 			Generator = Iterator
 		elif PY3:
-			from collections.abc import Iterable
-			from collections.abc import Iterator
-			from collections.abc import Generator
+			from collections.abc import Generator, Iterable, Iterator
 
 		it = empty()
 		self.assertTrue(isinstance(it, Iterable))

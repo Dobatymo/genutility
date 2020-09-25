@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, re, mmap
-from struct import unpack
+import logging
+import mmap
+import re
 from io import open
+from struct import unpack
 from typing import TYPE_CHECKING
 
 from ..exceptions import ParseError
@@ -10,7 +12,8 @@ from ..file import read_or_raise
 from ..string import backslash_escaped_ascii
 
 if TYPE_CHECKING:
-	from typing import BinaryIO, Iterator, Tuple, Union, Set
+	from typing import BinaryIO, Iterator, Set, Tuple, Union
+
 	from _hashlib import HASH as Hashobj
 	Segment = Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]
 
@@ -246,10 +249,10 @@ if __name__ == "__main__":
 	from argparse import ArgumentParser
 	from hashlib import sha1
 
-	from genutility.file import equal_files
 	from genutility.args import is_dir
-	from genutility.iter import consume
+	from genutility.file import equal_files
 	from genutility.hash import format_file_hash
+	from genutility.iter import consume
 
 	parser = ArgumentParser()
 	parser.add_argument("path", type=is_dir)

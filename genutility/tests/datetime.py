@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from genutility.test import MyTestCase, parametrize
-from genutility.datetime import now, datetime_from_utc_timestamp
 from genutility.compat.datetime import datetime, timezone
+from genutility.datetime import datetime_from_utc_timestamp, now
+from genutility.test import MyTestCase, parametrize
+
 
 class DatetimeTest(MyTestCase):
 

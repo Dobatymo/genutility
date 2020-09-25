@@ -2,8 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from ctypes import sizeof
 
-from genutility.test import MyTestCase
 from genutility.hardware.ata import IDENTIFY_DEVICE_DATA
+from genutility.test import MyTestCase
+
 
 class AtaTest(MyTestCase):
 

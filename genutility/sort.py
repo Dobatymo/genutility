@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from typing import TYPE_CHECKING
 
-from .math import argmin, argmax
+from .math import argmax, argmin
 
 if TYPE_CHECKING:
 	from typing import MutableSequence

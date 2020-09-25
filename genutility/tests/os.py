@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from time import sleep
-from genutility.test import MyTestCase
+
 from genutility.os import interrupt
+from genutility.test import MyTestCase
+
 
 class TestOS(MyTestCase):
 

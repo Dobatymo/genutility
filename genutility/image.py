@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .numpy import unblock, bincount_batch
+from .numpy import bincount_batch, unblock
 
 if TYPE_CHECKING:
-	from typing import Union, Tuple
 	from fractions import Fraction
+	from typing import Tuple, Union
 	Rational = Union[float, Fraction]
 
 def grayscale(arr):

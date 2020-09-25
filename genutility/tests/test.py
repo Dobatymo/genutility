@@ -1,11 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import input
-import unittest, os
-import os.path
 
-from genutility.test import MyTestCase, parametrize
-from genutility.test import closeable_tempfile
+import os
+import os.path
+import unittest
+
+from genutility.test import MyTestCase, closeable_tempfile, parametrize
+
 
 class MyTestCaseTest(MyTestCase):
 

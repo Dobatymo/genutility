@@ -4,7 +4,8 @@ import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-import win32evtlog, winerror
+import win32evtlog
+import winerror
 import wmi
 
 from .math import NaN
@@ -150,8 +151,9 @@ def event_logs(server="localhost", source="System"):
 
 if __name__ == "__main__":
 	from builtins import zip
-	from time import sleep
+
 	from argparse import ArgumentParser
+	from time import sleep
 
 	from genutility.stdio import print_line
 

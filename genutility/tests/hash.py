@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from genutility.test import MyTestCase, parametrize
 from genutility.file import write_file
-from genutility.hash import crc32_hash_file, sha1_hash_file, md5_hash_file, ed2k_hash_file_v1, ed2k_hash_file_v2
+from genutility.hash import crc32_hash_file, ed2k_hash_file_v1, ed2k_hash_file_v2, md5_hash_file, sha1_hash_file
+from genutility.test import MyTestCase, parametrize
+
 
 class HashTest(MyTestCase):
 

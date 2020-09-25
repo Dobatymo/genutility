@@ -1,21 +1,25 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 from builtins import map, range
-from future.utils import viewvalues, raise_from
+from future.utils import raise_from, viewvalues
 
+from collections import Counter, defaultdict
 from functools import partial
-from math import pi, factorial, sqrt, log
-from collections import defaultdict, Counter
 from itertools import islice
-from operator import lt, gt, mul
-from typing import TYPE_CHECKING
+from math import factorial, log, pi, sqrt
+from operator import gt, lt, mul
 from random import sample
+from typing import TYPE_CHECKING
 
-from .compat.math import prod, isqrt, nan as NaN
-from .iter import range_count
+from .compat.math import isqrt
+from .compat.math import nan as NaN
+from .compat.math import prod
 from .exceptions import EmptyIterable
+from .iter import range_count
 
 if TYPE_CHECKING:
-	from typing import TypeVar, Iterable, Tuple, Optional, Callable, Sequence, SupportsFloat
+	from typing import Callable, Iterable, Optional, Sequence, SupportsFloat, Tuple, TypeVar
+
 	from .typing import Computable, Orderable
 	O = TypeVar("O", bound=Orderable)
 
@@ -111,6 +115,8 @@ def argmax_pair(iterable):
 
 from itertools import count
 from operator import itemgetter
+
+
 def argmax_v2(iterable):
 	# type: (Iterable[O], ) -> Tuple[int, O]
 

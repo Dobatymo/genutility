@@ -1,20 +1,21 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import viewvalues
-import sys
-from time import sleep
-from collections.abc import Sequence
-from typing import TYPE_CHECKING
 
-from .dict import update
-from .exceptions import InconsistentState, DownloadFailed, WouldBlockForever, ExternalProcedureUnavailable, assert_type
+import sys
+from collections.abc import Sequence
+from time import sleep
+from typing import TYPE_CHECKING
 
 from aria2p import Client
 from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
 from requests.exceptions import ConnectionError
 
+from .dict import update
+from .exceptions import DownloadFailed, ExternalProcedureUnavailable, InconsistentState, WouldBlockForever, assert_type
+
 if TYPE_CHECKING:
-	from typing import Any, Optional, Tuple, TextIO, List
+	from typing import Any, List, Optional, TextIO, Tuple
 
 def aria_bool(value):
 	# type: (Optional[bool], ) -> Optional[str]

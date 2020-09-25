@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, codecs, sqlite3
+import codecs
+import logging
+import sqlite3
 from typing import TYPE_CHECKING
 
 from .iter import batch, progress

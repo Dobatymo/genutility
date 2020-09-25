@@ -1,9 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, json
+import json
+import logging
 from io import StringIO
-from genutility.test import MyTestCase, parametrize, closeable_tempfile
-from genutility.json import json_lines, read_json_lines, JsonLinesFormatter
+
+from genutility.json import JsonLinesFormatter, json_lines, read_json_lines
+from genutility.test import MyTestCase, closeable_tempfile, parametrize
+
 
 class JsonTest(MyTestCase):
 

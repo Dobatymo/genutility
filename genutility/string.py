@@ -1,20 +1,20 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import map, zip
-from future.utils import PY2, viewkeys, viewitems
+from future.utils import PY2, viewitems, viewkeys
 
 import re
+from collections import OrderedDict
+from functools import partial
 from itertools import chain
 from locale import strxfrm
-from functools import partial
-from collections import OrderedDict
 from typing import TYPE_CHECKING
 
+from .binary import decode_binary, encode_binary
 from .iter import switched_enumerate
-from .binary import encode_binary, decode_binary
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, Tuple, Callable, Optional, Sequence, TypeVar, Union, Mapping
+	from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple, TypeVar, Union
 	T = TypeVar("T")
 
 english_consonants = "bcdfghjklmnpqrstvwxz" # y?

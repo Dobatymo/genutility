@@ -7,7 +7,8 @@ import cv2
 import numpy as np
 
 if TYPE_CHECKING:
-	from typing import Union, Iterator
+	from typing import Iterator, Union
+
 	import wx
 
 logger = logging.getLogger(__name__)

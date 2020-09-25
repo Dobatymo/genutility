@@ -2,11 +2,18 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from operator import itemgetter
 
-from genutility.test import MyTestCase, parametrize
-from genutility.func import identity
-from genutility.sequence import (cycle_sort, delete_duplicates_from_sorted_sequence, sliding_window,
-	batch, triangular, pop_many)
 from genutility.benchmarks.sequence import pop_many_2
+from genutility.func import identity
+from genutility.sequence import (
+    batch,
+    cycle_sort,
+    delete_duplicates_from_sorted_sequence,
+    pop_many,
+    sliding_window,
+    triangular,
+)
+from genutility.test import MyTestCase, parametrize
+
 
 class SequenceTest(MyTestCase):
 

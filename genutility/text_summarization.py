@@ -2,8 +2,9 @@ from operator import itemgetter
 
 import spacy
 
-from .text_segmentation import split_paragraphs
 from .metrics import same_words_similarity
+from .text_segmentation import split_paragraphs
+
 
 def get_spacy_tokenizer(modelname, lemmatize=True):
 	nlu = spacy.load(modelname)
@@ -33,6 +34,7 @@ class QueryBasedParagraphExtraction(object):
 			raise NoParagraphsFound()
 
 from .test import MyTestCase
+
 
 class TextSummarizationTests(MyTestCase):
 

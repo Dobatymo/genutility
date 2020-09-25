@@ -2,10 +2,28 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from itertools import islice
 
+from genutility.math import (
+    PosInfInt,
+    additaet,
+    argfind_gte,
+    argfind_lte,
+    argmax,
+    argmax_v2,
+    argmin,
+    byte2size,
+    byte2size_str,
+    closest,
+    digitsum,
+    digitsum_base,
+    digitsum_small,
+    fibonacci,
+    fibonaccigen,
+    limit,
+    multinomial_coefficient,
+    primes,
+)
 from genutility.test import MyTestCase, parametrize
-from genutility.math import (PosInfInt, fibonaccigen, primes, additaet, digitsum_small, digitsum,
-	digitsum_base, closest, byte2size, byte2size_str, fibonacci, limit, multinomial_coefficient,
-	argfind_lte, argfind_gte, argmin, argmax, argmax_v2)
+
 
 class TestPosInfInt(MyTestCase):
 

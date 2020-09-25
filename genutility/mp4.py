@@ -1,15 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, re, struct, warnings
+import os
+import re
+import struct
+import warnings
 from io import open
 from typing import TYPE_CHECKING
 
 import pkg_resources
 
-from .exceptions import ParseError, Break
-from .file import read_or_raise
-from .csv import iter_csv
 from .compat.os import fspath
+from .csv import iter_csv
+from .exceptions import Break, ParseError
+from .file import read_or_raise
 
 if TYPE_CHECKING:
 	from typing import BytesIO, Iterator, Tuple
@@ -105,6 +108,7 @@ if __name__ == "__main__":
 
 	import logging
 	from argparse import ArgumentParser
+
 	from genutility.args import is_dir
 	from genutility.iter import list_except
 

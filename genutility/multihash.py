@@ -5,8 +5,9 @@ from functools import reduce
 import rhash
 
 from .file import blockfileiter
-from .ops import bit_or
 from .hash import FILE_IO_BUFFER_SIZE
+from .ops import bit_or
+
 
 def multi_hash_file(path, hash_types, base=None, mode="rb", encoding=None, errors=None, chunk_size=FILE_IO_BUFFER_SIZE):
 

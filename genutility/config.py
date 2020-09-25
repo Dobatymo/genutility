@@ -7,11 +7,10 @@ from typing import TYPE_CHECKING
 
 from .compat import FileNotFoundError
 from .compat.importlib.util import find_spec
-
 from .os import get_appdata_dir
 
 if TYPE_CHECKING:
-	from typing import Dict, Any, Optional, Union
+	from typing import Any, Dict, Optional, Union
 
 if __debug__:
 	import jsonschema

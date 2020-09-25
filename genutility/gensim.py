@@ -4,13 +4,13 @@ from itertools import islice
 from typing import TYPE_CHECKING
 
 import numpy as np
-from gensim.models.keyedvectors import Vocab
 from gensim.models.keyedvectors import KeyedVectors as KeyedVectorsOriginal
+from gensim.models.keyedvectors import Vocab
 
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
-	from typing import Iterator, Tuple, Optional, Callable, Collection, TextIO, Union
+	from typing import Callable, Collection, Iterator, Optional, TextIO, Tuple, Union
 
 class DuplicateEntry(ValueError):
 	pass

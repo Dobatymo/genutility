@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 from bencode import bdecode, bencode
 
-from .file import read_file, blockfileiter, blockfilesiter
-from .filesystem import FileProperties
 from .exceptions import assert_choice
+from .file import blockfileiter, blockfilesiter, read_file
+from .filesystem import FileProperties
 
 if TYPE_CHECKING:
 	from typing import Optional
+
 	from .compat.pathlib import Path
 
 def read_torrent(path):

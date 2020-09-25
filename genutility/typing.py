@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from collections.abc import Iterable, Sized
 from typing import TYPE_CHECKING
 
-from collections.abc import Iterable, Sized
 
 class SizedIterable(Iterable, Sized):
 	pass
@@ -10,6 +10,7 @@ class SizedIterable(Iterable, Sized):
 if TYPE_CHECKING:
 
 	from typing import Any, Optional, Sequence, Union
+
 	from typing_extensions import Protocol
 
 	Number = Union[int, float]

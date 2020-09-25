@@ -1,9 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from itertools import count
+
 from genutility.test import MyTestCase, parametrize
-from genutility.text import (collapse_space, collapse_whitespace, collapse_punctuation_symbols,
-	ReplaceURLs, newlines_to_spaces, replace_typographical_punctuation, extract_urls)
+from genutility.text import (
+    ReplaceURLs,
+    collapse_punctuation_symbols,
+    collapse_space,
+    collapse_whitespace,
+    extract_urls,
+    newlines_to_spaces,
+    replace_typographical_punctuation,
+)
+
 
 class TextTest(MyTestCase):
 

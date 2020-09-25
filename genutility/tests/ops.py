@@ -1,8 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from genutility.ops import (
+    bit_or,
+    converse_implication,
+    converse_nonimplication,
+    logical_implication,
+    logical_nonimplication,
+    logical_xnor,
+    logical_xor,
+    operator_in,
+)
 from genutility.test import MyTestCase, parametrize
-from genutility.ops import (bit_or, converse_implication, converse_nonimplication, logical_xor,
-	logical_implication, operator_in, logical_xnor, logical_nonimplication)
+
 
 class OpsTest(MyTestCase):
 

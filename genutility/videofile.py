@@ -9,9 +9,12 @@ from .compat import FileExistsError
 from .compat.os import PathLike, fspath
 
 if TYPE_CHECKING:
-	from typing import Any, Union, Iterator, Tuple, Sequence
+	from typing import Any, Iterator, Sequence, Tuple, Union
+
 	import numpy as np
+
 	from av import VideoFrame
+
 	from .compat.pathlib import Path
 	WsgiApp = Any
 

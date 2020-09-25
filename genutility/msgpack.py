@@ -1,11 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from functools import partial
 from datetime import datetime
+from functools import partial
 
 from msgpack import ExtType, packb, unpackb
 
 from .compat.datetime import datetime as compat_datetime
+
 
 class EXTID:
 	datetime = 1

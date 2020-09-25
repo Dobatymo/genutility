@@ -2,22 +2,28 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from typing import TYPE_CHECKING
 
-from OpenSSL import crypto  # pyOpenSSL
-from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption
-from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
-from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_der_private_key
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    PublicFormat,
+    load_der_private_key,
+    load_pem_private_key,
+)
+from OpenSSL import crypto  # pyOpenSSL
 
 from .exceptions import assert_choice
 
 if TYPE_CHECKING:
 	from typing import Union
-	from OpenSSL.crypto import X509
 
-	from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-	from cryptography.hazmat.primitives.asymmetric.dsa import DSAPrivateKey
 	from cryptography.hazmat.primitives.asymmetric.dh import DHPrivateKey
+	from cryptography.hazmat.primitives.asymmetric.dsa import DSAPrivateKey
 	from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
+	from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+	from OpenSSL.crypto import X509
 	PrivateKey = Union[RSAPrivateKey, DSAPrivateKey, DHPrivateKey, EllipticCurvePrivateKey]
 
 def load_certificate_file(filename):

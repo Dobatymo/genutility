@@ -1,12 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from builtins import bytes, str
 from future.utils import PY2
-from builtins import str, bytes
 
 if PY2:
 
 	import io
 	from gzip import GzipFile
+
 	from . import os
 
 	""" This function is copied from `Python36\Lib\gzip.py`.

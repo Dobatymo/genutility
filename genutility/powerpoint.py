@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from typing import TYPE_CHECKING
 
-from pptx import Presentation # python-pptx
+from pptx import Presentation  # python-pptx
 
 if TYPE_CHECKING:
 	from typing import Iterator, List

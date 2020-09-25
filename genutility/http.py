@@ -4,21 +4,27 @@ from builtins import map, str
 from future.moves.urllib import request
 from future.moves.urllib.error import URLError
 
-import os, os.path, logging, gzip, errno, json, socket
+import errno
+import gzip
+import json
+import logging
+import os
+import os.path
+import socket
 from io import open
 from typing import TYPE_CHECKING
 
 from .compat import FileExistsError
-from .file import copyfilelike, Tell
-from .iter import first_not_none
-from .filesystem import safe_filename
 from .exceptions import DownloadFailed
+from .file import Tell, copyfilelike
+from .filesystem import safe_filename
+from .iter import first_not_none
 from .url import get_filename_from_url
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Tuple, Mapping
-	from http.cookiejar import CookieJar
 	from http.client import HTTPMessage
+	from http.cookiejar import CookieJar
+	from typing import Callable, Mapping, Optional, Tuple
 
 if __debug__:
 	import requests
@@ -47,7 +53,7 @@ class NoRedirect(HTTPError):
 	pass
 
 try:
-	from email.utils import parsedate_to_datetime # new in 3.3
+	from email.utils import parsedate_to_datetime  # new in 3.3
 
 	def parsedate_to_timestamp(datestr): # correct timezone
 		return parsedate_to_datetime(datestr).timestamp()
@@ -66,7 +72,7 @@ except ImportError:
 			return time.mktime(time.strptime(datestr, str("%a, %d %b %Y %H:%M:%S +0000")))
 
 try:
-	from email.message import EmailMessage # new in 3.6
+	from email.message import EmailMessage  # new in 3.6
 
 	def get_filename(headers):
 		# type: (EmailMessage, ) -> str

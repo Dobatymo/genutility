@@ -1,27 +1,44 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from builtins import map, range, reversed, zip
 from future.moves.itertools import zip_longest
 from future.utils import raise_from
-from builtins import zip, map, range, reversed
 
-import sys, logging, random
+import logging
+import random
+import sys
 from collections import deque
-from itertools import groupby, chain, tee, islice, count, combinations, product, starmap, repeat
-from operator import add
-from time import time, sleep
-from random import randrange
-from types import GeneratorType
 from functools import partial
+from itertools import chain, combinations, count, groupby, islice, product, repeat, starmap, tee
+from operator import add
+from random import randrange
+from time import sleep, time
+from types import GeneratorType
 from typing import TYPE_CHECKING
 
-from .exceptions import IteratorExhausted, EmptyIterable
+from .exceptions import EmptyIterable, IteratorExhausted
 from .ops import operator_in
 
 if TYPE_CHECKING:
-	from typing import (Any, Callable, Iterable, Iterator, TypeVar, Tuple, Sequence,
-		Optional, Collection, List, Union, Type, Dict, TextIO)
 	from logging import Logger
-	from .typing import SizedIterable, Number
+	from typing import (
+	    Any,
+	    Callable,
+	    Collection,
+	    Dict,
+	    Iterable,
+	    Iterator,
+	    List,
+	    Optional,
+	    Sequence,
+	    TextIO,
+	    Tuple,
+	    Type,
+	    TypeVar,
+	    Union,
+	)
+
+	from .typing import Number, SizedIterable
 	T = TypeVar("T")
 	U = TypeVar("U")
 	V = TypeVar("V")

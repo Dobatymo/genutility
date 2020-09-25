@@ -6,6 +6,7 @@ from nltk.tokenize import word_tokenize
 
 from .compat.os import PathLike
 
+
 def count_words_in_file(path, encoding="utf-8"):
 	# type: (PathLike, ) -> int
 

@@ -1,0 +1,7 @@
+[tool.isort]
+profile = "black"
+src_paths = ["genutility"]
+line_length = 120
+known_thirdpartyfuture = ["builtins", "future", "past"]
+sections = ["FUTURE", "THIRDPARTYFUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_third_party = ["flask", "gensim", "networkx", "nltk", "numba", "numpy", "pandas", "rasa", "scipy", "tensorflow", "toml", "torch", "twisted"]

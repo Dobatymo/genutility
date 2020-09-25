@@ -1,10 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import PY2
+
 from unittest import skipIf
 
-from genutility.test import MyTestCase, parametrize, closeable_tempfile
+from genutility.test import MyTestCase, closeable_tempfile, parametrize
 from genutility.toml import read_toml, write_toml
+
 
 class TomlTest(MyTestCase):
 

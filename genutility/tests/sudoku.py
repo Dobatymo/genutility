@@ -2,12 +2,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from ctypes import sizeof
 
-from genutility.test import MyTestCase
-from genutility.time import MeasureTime
+import pkg_resources
+
 from genutility.json import read_json
 from genutility.sudoku import SudokuBruteforce, is_valid_solution
+from genutility.test import MyTestCase
+from genutility.time import MeasureTime
 
-import pkg_resources
 
 class SudokuTest(MyTestCase):
 

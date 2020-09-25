@@ -5,11 +5,11 @@ from future.moves.urllib.parse import quote, unquote
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from typing import TYPE_CHECKING
 
-from flask import request, Response
+from flask import Response, request
 from werkzeug.routing import BaseConverter
 
 if TYPE_CHECKING:
-	from typing import Optional, Dict, TypeVar, Hashable
+	from typing import Dict, Hashable, Optional, TypeVar
 	T = TypeVar("T")
 	H = TypeVar("H", bound=Hashable)
 

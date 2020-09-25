@@ -2,9 +2,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from genutility.test import MyTestCase, parametrize
 from genutility.datetime import now
 from genutility.msgpack import dumps, loads
+from genutility.test import MyTestCase, parametrize
+
 
 class MsgpackTest(MyTestCase):
 

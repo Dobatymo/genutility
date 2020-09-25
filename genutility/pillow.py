@@ -2,14 +2,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from typing import TYPE_CHECKING
 
-from PIL import Image, ImageDraw, ImageFont
-from PIL.ExifTags import TAGS, GPSTAGS
 import piexif
+from PIL import Image, ImageDraw, ImageFont
+from PIL.ExifTags import GPSTAGS, TAGS
 
 from .exceptions import NoActionNeeded
 
 if TYPE_CHECKING:
-	from typing import Any, Tuple, Union, Dict
+	from typing import Any, Dict, Tuple, Union
 	Color = Union[str, Tuple[int, int, int]]
 
 def multiline_textsize(text, ttf, spacing=4):

@@ -3,16 +3,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.utils import PY2
 
 import csv
-from itertools import islice
 from functools import partial
 from io import open
+from itertools import islice
 from typing import TYPE_CHECKING
 
 from .dict import itemgetter
-from .func import identity, zipmap, compose
+from .func import compose, identity, zipmap
 
 if TYPE_CHECKING:
-	from typing import Iterator, List, Optional, Sequence, Callable
+	from typing import Callable, Iterator, List, Optional, Sequence
 
 def iter_csv(path, delimiter=",", encoding="utf-8"):
 	# type: (str, str, str, str, str) -> Iterator[List[str]]

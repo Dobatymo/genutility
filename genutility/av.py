@@ -6,6 +6,7 @@ import av
 
 if TYPE_CHECKING:
 	from typing import Iterator
+
 	import numpy as np
 
 class CorruptFile(Exception):

@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from typing import TYPE_CHECKING
 
-from .exceptions import NoResult, InconsistentState
+from .exceptions import InconsistentState, NoResult
 
 if TYPE_CHECKING:
 	from pymongo.collection import Collection

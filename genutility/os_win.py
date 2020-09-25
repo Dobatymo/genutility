@@ -1,29 +1,39 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, signal, logging
-from ctypes import byref, sizeof, create_unicode_buffer, WinError, cast, c_wchar_p, memset
-from ctypes.wintypes import ULARGE_INTEGER, LPCWSTR, DWORD
+import logging
+import os
+import signal
+from ctypes import WinError, byref, c_wchar_p, cast, create_unicode_buffer, memset, sizeof
+from ctypes.wintypes import DWORD, LPCWSTR, ULARGE_INTEGER
 from msvcrt import get_osfhandle
 from typing import TYPE_CHECKING
 
 from cwinsdk.shared.ehstorioctl import MAX_PATH
 from cwinsdk.shared.ntdef import PWSTR
-from cwinsdk.um.consoleapi import SetConsoleMode, GetConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
-from cwinsdk.um.fileapi import INVALID_FILE_ATTRIBUTES, GetDiskFreeSpaceExW, GetVolumeInformationW, LockFileEx, UnlockFileEx, GetFileAttributesW
-from cwinsdk.um.processenv import GetStdHandle
 from cwinsdk.um.combaseapi import CoTaskMemFree
-from cwinsdk.um.ShlObj_core import SHGetKnownFolderPath
+from cwinsdk.um.consoleapi import ENABLE_VIRTUAL_TERMINAL_PROCESSING, GetConsoleMode, SetConsoleMode
+from cwinsdk.um.fileapi import (
+    INVALID_FILE_ATTRIBUTES,
+    GetDiskFreeSpaceExW,
+    GetFileAttributesW,
+    GetVolumeInformationW,
+    LockFileEx,
+    UnlockFileEx,
+)
 from cwinsdk.um.KnownFolders import FOLDERID_RoamingAppData
 from cwinsdk.um.minwinbase import LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY, OVERLAPPED
+from cwinsdk.um.processenv import GetStdHandle
+from cwinsdk.um.ShlObj_core import SHGetKnownFolderPath
 from cwinsdk.um.WinBase import STD_OUTPUT_HANDLE
 from cwinsdk.um.winnt import FILE_ATTRIBUTE_REPARSE_POINT
 
-from .os_shared import _usagetuple, _volumeinfotuple
 from .compat.os import fspath
+from .os_shared import _usagetuple, _volumeinfotuple
 
 if TYPE_CHECKING:
-	from typing import IO
 	from ctypes.wintypes import HANDLE
+	from typing import IO
+
 	from .compat.os import PathLike
 
 	PathType = Union[str, PathLike]

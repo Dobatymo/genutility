@@ -2,16 +2,20 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import str
 
-import hashlib, zlib, os.path
+import hashlib
+import os.path
+import zlib
 from functools import partial
 from typing import TYPE_CHECKING
 
-from .file import read_file, blockfileiter
+from .file import blockfileiter, read_file
 from .filesystem import scandir_rec
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, Union, Iterable
+	from typing import Callable, Iterable, Optional, Union
+
 	from _hashlib import HASH as Hashobj
+
 	from .filesystem import PathType
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024

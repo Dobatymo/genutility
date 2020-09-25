@@ -2,12 +2,26 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
-from genutility.test import MyTestCase, parametrize, repeat
-from genutility.numpy import (remove_color, unblock, decompress, batchtopk, sliding_window_2d, rgb_to_hsi,
-	shannon_entropy, is_rgb, is_square, batch_vTAv, batch_inner, batch_outer, logtrace, shiftedexp,
-	bincount_batch)
-from genutility.math import shannon_entropy as shannon_entropy_python
 from genutility.benchmarks.numpy import bincount_batch_2
+from genutility.math import shannon_entropy as shannon_entropy_python
+from genutility.numpy import (
+    batch_inner,
+    batch_outer,
+    batch_vTAv,
+    batchtopk,
+    bincount_batch,
+    decompress,
+    is_rgb,
+    is_square,
+    logtrace,
+    remove_color,
+    rgb_to_hsi,
+    shannon_entropy,
+    shiftedexp,
+    sliding_window_2d,
+    unblock,
+)
+from genutility.test import MyTestCase, parametrize, repeat
 
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]

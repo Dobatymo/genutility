@@ -8,12 +8,12 @@ except ImportError:
 	from contextlib2 import ExitStack
 
 try:
-	from contextlib import nullcontext # pylint: disable=no-name-in-module
+	from contextlib import nullcontext  # pylint: disable=no-name-in-module
 
 except ImportError:
 
 	if TYPE_CHECKING:
-		from typing import TypeVar, Optional
+		from typing import Optional, TypeVar
 		T = TypeVar("T")
 
 	try:

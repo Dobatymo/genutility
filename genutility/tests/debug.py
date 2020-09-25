@@ -2,8 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import sys
 from unittest import skipIf
-from genutility.test import MyTestCase, parametrize
+
 from genutility.debug import args_str
+from genutility.test import MyTestCase, parametrize
+
 
 def ustr(s):
 	if sys.version_info >= (3, 0):

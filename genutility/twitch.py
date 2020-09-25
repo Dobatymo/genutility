@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import viewkeys
+
 import json
 from typing import TYPE_CHECKING
 
@@ -8,7 +9,7 @@ from .http import URLRequest
 from .ops import logical_xor
 
 if TYPE_CHECKING:
-	from typing import Callable, Optional, List, Tuple
+	from typing import Callable, List, Optional, Tuple
 
 class StreamWatcher(object):
 

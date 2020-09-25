@@ -5,6 +5,7 @@ from future.moves.urllib.parse import urlsplit
 from genutility.test import MyTestCase, parametrize
 from genutility.url import get_url_argument, url_replace_query
 
+
 class UrlTest(MyTestCase):
 
 	@parametrize(

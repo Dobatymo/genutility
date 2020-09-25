@@ -1,11 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.utils import viewitems, PY2
+from future.utils import PY2, viewitems
+
 from math import factorial
 
+from genutility.factorial import SplitRecursive
 from genutility.test import MyTestCase, parametrize
 from genutility.time import PrintStatementTime
-from genutility.factorial import SplitRecursive
+
 
 class FactorialTest(MyTestCase):
 

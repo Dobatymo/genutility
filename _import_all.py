@@ -4,24 +4,28 @@ from future.utils import PY2
 
 import genutility.algorithms
 import genutility.args
+
 if not PY2:
 	import genutility.asynchronous
+
 import genutility.atomic
 import genutility.concurrency
 import genutility.config
 import genutility.constants_video
 import genutility.cv
 import genutility.dict
+
 if not PY2:
 	import genutility.downloadmanager
+
 import genutility.error
 import genutility.exceptions
 import genutility.file
-import genutility.filesystem
 import genutility.fileformats.png
 import genutility.fileformats.rar
 import genutility.fileformats.srt
 import genutility.fileformats.sub
+import genutility.filesystem
 import genutility.flask
 import genutility.func
 import genutility.gensim

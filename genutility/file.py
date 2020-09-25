@@ -1,22 +1,24 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path
-from sys import version_info, stdout
-from io import open, TextIOWrapper, TextIOBase, RawIOBase, BufferedIOBase, SEEK_SET, SEEK_END
-from typing import TYPE_CHECKING
+from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper, open
+from sys import stdout, version_info
+from typing import TYPE_CHECKING, overload
 
-from .iter import iter_equal, consume, resizer
+from .compat.os import PathLike, fdopen, fspath
+from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
-from .ops import logical_xor, logical_implication
-from .compat.os import PathLike, fspath, fdopen
+from .ops import logical_implication, logical_xor
 
 if __debug__:
-	from .compat import gzip, bz2
-	import zipfile, tarfile
+	import tarfile
+	import zipfile
+
+	from .compat import bz2, gzip
 
 if TYPE_CHECKING:
-	from typing import overload, Callable, Optional, Union, IO, TextIO, BinaryIO, Iterator, Iterable, TypeVar
 	from mmap import mmap
+	from typing import IO, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
 
 	PathType = Union[str, PathLike]
 	Data = TypeVar('D', str, bytes)
@@ -447,7 +449,9 @@ class Tell(object):
 		return self._fp.writable()
 
 from future.moves.urllib import response
+
 from collections import deque
+
 
 class BufferedTell(response.addinfourl): # fixme: untested!!!
 

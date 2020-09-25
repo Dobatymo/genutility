@@ -4,23 +4,23 @@ from builtins import range
 from future.moves.itertools import zip_longest
 from future.utils import PY2
 
-from unittest import TestCase
-from unittest.runner import TextTestRunner
-from unittest.result import TestResult
-from os import remove
 from collections import defaultdict
 from functools import wraps
+from io import TextIOWrapper
 from itertools import product
+from os import remove
 from tempfile import NamedTemporaryFile
 from time import sleep
-from io import TextIOWrapper
 from typing import TYPE_CHECKING
+from unittest import TestCase
+from unittest.result import TestResult
+from unittest.runner import TextTestRunner
 
-from .file import equal_files, _check_arguments
-from .signal import HandleKeyboardInterrupt # problem here
+from .file import _check_arguments, equal_files
+from .signal import HandleKeyboardInterrupt  # problem here
 
 if TYPE_CHECKING:
-	from typing import Any, Iterable, Optional, Hashable, Tuple, Callable, DefaultDict
+	from typing import Any, Callable, DefaultDict, Hashable, Iterable, Optional, Tuple
 
 class nullcontext(object): # see: .compat.contextlib
 

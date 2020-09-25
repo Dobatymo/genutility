@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # from builtins import str # don't do this here because of cookie construction!
-from future.utils import iteritems, PY2
+from future.utils import PY2, iteritems
+
 from http.cookies import SimpleCookie as IncompatibleSimpleCookie
 
 if PY2:

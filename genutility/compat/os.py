@@ -1,15 +1,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from future.utils import PY2
 from builtins import bytes, str
+from future.utils import PY2
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from typing import Union
 
 if PY2:
-	from os import fdopen as _fdopen
 	from io import TextIOWrapper
+	from os import fdopen as _fdopen
 
 	class _FileWrapper(object):
 		def __init__(self, raw):
@@ -45,7 +46,8 @@ try:
 	from os import makedirs
 
 except ImportError:
-	import os, errno
+	import errno
+	import os
 
 	def makedirs(name, mode=0o777, exist_ok=False):
 		try:
@@ -61,6 +63,7 @@ try:
 
 except ImportError:
 	from abc import abstractmethod
+
 	from .abc import ABC
 
 	class PathLike(ABC):
@@ -85,6 +88,7 @@ except ImportError:
 
 	if sys.platform == "win32":
 		from ctypes import WinError
+
 		from cwinsdk.um.WinBase import MOVEFILE_REPLACE_EXISTING
 
 		def replace(src, dst):
@@ -101,7 +105,7 @@ except ImportError:
 				raise WinError()
 
 	else:
-		from os import rename as replace # on posix rename can already replace existing files atomically
+		from os import rename as replace  # on posix rename can already replace existing files atomically
 
 try:
 	from os import scandir as _scandir

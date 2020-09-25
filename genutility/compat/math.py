@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 from builtins import zip
 
 from functools import reduce
@@ -7,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from typing import Iterable, TypeVar
+
 	from ..typing import Computable
 	T = TypeVar("T")
 

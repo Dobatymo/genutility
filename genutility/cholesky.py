@@ -2,8 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from math import sqrt
 
-from .numpy import is_square
 from .numba import opjit
+from .numpy import is_square
+
 
 @opjit(["void(f4[:,:], f4[:], f4)", "void(f8[:,:], f8[:], f8)"])
 def _choldate(L, x, sign):
@@ -39,7 +40,9 @@ def choldate(L, x, sign):
 
 if __name__ == "__main__":
 	import timeit
+
 	import numpy as np
+
 	from .numpy import random_triangular_matrix
 
 	size = 100

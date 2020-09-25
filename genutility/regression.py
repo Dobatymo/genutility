@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 
+
 class LinearRegression(object):
 
 	""" Linear regression optimized by gradient descent. """

@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-# don't do `from builtins import str`
-from setuptools import setup
 from io import open
 from itertools import chain
+
+# don't do `from builtins import str`
+from setuptools import setup
 
 # nltk.download("punkt")
 

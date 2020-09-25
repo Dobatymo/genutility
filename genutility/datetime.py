@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, time
-from datetime import tzinfo, timedelta
+import logging
+import time
+from datetime import timedelta, tzinfo
 
 from .compat.datetime import datetime, timezone
 

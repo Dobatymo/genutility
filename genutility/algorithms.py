@@ -5,7 +5,7 @@ from past.builtins import cmp
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import MutableSequence, Callable
+	from typing import Callable, MutableSequence
 
 def _insertion(seq, cmp_, left, right, gap):
 	# type: (MutableSequence, Callable, int, int, int) -> None

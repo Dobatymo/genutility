@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, os.path, sqlite3
+import logging
+import os.path
+import sqlite3
 from itertools import chain
 from typing import TYPE_CHECKING
 
@@ -9,13 +11,14 @@ from tls_property import tls_property
 from .compat.os import fspath
 from .exceptions import NoResult
 from .filesystem import normalize_seps
-from .sql import iterfetch, fetchone
+from .sql import fetchone, iterfetch
 from .sqlite import quote_identifier
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Optional, Iterable, Iterator
+	from typing import Any, Dict, Iterable, Iterator, Optional
+
 	from .filesystem import EntryType
 
 class GenericFileDb(object):

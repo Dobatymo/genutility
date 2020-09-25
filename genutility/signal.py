@@ -1,13 +1,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import signal, logging, sys
+import logging
+import signal
+import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import TypeVar, Any, Iterable, Callable, Union, Optional
 	from types import FrameType
+	from typing import Any, Callable, Iterable, Optional, TypeVar, Union
 	if sys.version_info >= (3, 5):
-		from signal import Signals # pylint: disable=no-name-in-module
+		from signal import Signals  # pylint: disable=no-name-in-module
 	else:
 		Signals = int
 

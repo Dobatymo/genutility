@@ -2,8 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from unittest import expectedFailure
 
-from genutility.test import MyTestCase, parametrize
 from genutility.algorithms import median_of_medians
+from genutility.test import MyTestCase, parametrize
+
 
 class AlgorithmsTest(MyTestCase):
 

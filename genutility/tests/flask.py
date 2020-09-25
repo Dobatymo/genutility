@@ -2,8 +2,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from genutility.test import MyTestCase, parametrize
 from genutility.flask import Base64Converter
+from genutility.test import MyTestCase, parametrize
+
 
 class FlaskTest(MyTestCase):
 

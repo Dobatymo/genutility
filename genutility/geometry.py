@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
-
 from math import sqrt
+
 
 # was: FindWidthToHeightRatio
 def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=None):

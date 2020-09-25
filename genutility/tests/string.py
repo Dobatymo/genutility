@@ -1,14 +1,28 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import viewitems
+
 from random import shuffle
 
 from hypothesis import given, strategies
 
+from genutility.string import (
+    are_parentheses_matched,
+    backslash_unescape,
+    backslashcontrol_escape,
+    backslashcontrol_unescape,
+    backslashquote_escape,
+    backslashquote_unescape,
+    filter_join,
+    locale_sorted,
+    removesuffix,
+    replace_pairs_bytes,
+    replace_pairs_chars,
+    surrounding_join,
+    toint,
+)
 from genutility.test import MyTestCase, parametrize
-from genutility.string import (are_parentheses_matched, replace_pairs_chars,
-	replace_pairs_bytes, filter_join, surrounding_join, locale_sorted, removesuffix, toint, backslash_unescape,
-	backslashquote_unescape, backslashquote_escape, backslashcontrol_unescape, backslashcontrol_escape)
+
 
 class StringTest(MyTestCase):
 

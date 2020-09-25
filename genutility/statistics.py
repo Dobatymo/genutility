@@ -1,12 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import map, range
+
 from math import pow
 from random import sample
 from typing import TYPE_CHECKING
 
-from .math import reciprocal
 from .compat.math import prod
+from .math import reciprocal
 
 if TYPE_CHECKING:
 	from collections.abc import Collection

@@ -2,8 +2,8 @@ from logging import Formatter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Dict
 	from logging import LogRecord
+	from typing import Any, Dict
 
 class OverwriteFormatter(Formatter):
 

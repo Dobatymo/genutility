@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, asyncio
+import asyncio
+import logging
 from io import open
 from typing import TYPE_CHECKING
 
@@ -11,6 +12,7 @@ from .datetime import now
 
 if TYPE_CHECKING:
 	from typing import Any, Optional
+
 	from .datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -158,9 +160,10 @@ if __name__ == "__main__":
 
 	dm = DownloadManager()
 
-	import wx
-	from wxasync import AsyncBind, WxAsyncApp, StartCoroutine
 	from asyncio.events import get_event_loop
+
+	import wx
+	from wxasync import AsyncBind, StartCoroutine, WxAsyncApp
 
 	DOWNLOAD_URL = "http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-live-server-amd64.iso"
 

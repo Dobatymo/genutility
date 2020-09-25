@@ -1,10 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from future.utils import viewkeys
-import logging, json, csv
-from itertools import islice
-from functools import partial, wraps
+
+import csv
+import json
+import logging
 from datetime import timedelta
+from functools import partial, wraps
+from itertools import islice
 from typing import TYPE_CHECKING
 
 from .atomic import TransactionalCreateFile
@@ -15,7 +18,8 @@ from .filesystem import mdatetime
 from .object import args_to_key
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Optional, TextIO, Union, Iterator, Sequence, Tuple
+	from typing import Any, Callable, Dict, Iterator, Optional, Sequence, TextIO, Tuple, Union
+
 	from .compat.pathlib import Path
 	JsonDict = Dict[str, Any]
 
@@ -30,9 +34,9 @@ class BuiltinEncoder(json.JSONEncoder):
 	
 		# collections.OrderedDict is supported by default
 
+		from base64 import b85encode
 		from datetime import date, timedelta
 		from uuid import UUID
-		from base64 import b85encode
 
 		if isinstance(obj, (set, frozenset)):
 			return tuple(obj)

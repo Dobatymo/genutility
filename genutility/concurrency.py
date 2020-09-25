@@ -1,13 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import threading, logging
-from queue import Queue, Empty
+import logging
+import threading
+from queue import Empty, Queue
 from typing import TYPE_CHECKING
 
 from .exceptions import NoResult, assert_choice
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Optional, Tuple, Union, Iterator
+	from typing import Any, Callable, Iterable, Iterator, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 

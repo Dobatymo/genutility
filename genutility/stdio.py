@@ -3,12 +3,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import input, str
 from future.utils import PY3
 
-import sys, logging
+import logging
+import sys
 from time import sleep
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, IO, Optional
+	from typing import IO, Any, Optional
 
 try:
 	from shutil import get_terminal_size

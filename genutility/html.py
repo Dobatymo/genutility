@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import bs4
 
+
 def simple_microdata_parser(bstree): # schema.org Microdata, replace with `extruct` module?
 	# type: (bs4.BeautifulSoup, ) -> dict
 

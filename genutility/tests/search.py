@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from genutility.test import MyTestCase, parametrize
 from genutility.search import bisect_left_generic, make_binary_search, make_binary_search_sequence
+from genutility.test import MyTestCase, parametrize
+
 
 class SearchTest(MyTestCase):
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from .func import identity
 
 if TYPE_CHECKING:
-	from typing import Any, Sequence, Callable, TypeVar
+	from typing import Any, Callable, Sequence, TypeVar
 	T = TypeVar("T")
 	U = TypeVar("U")
 

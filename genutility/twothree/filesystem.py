@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import sys
-
 from future.utils import PY2
+
+import sys
 
 if PY2:
 	def tofs(s):

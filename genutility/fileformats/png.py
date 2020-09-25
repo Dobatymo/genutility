@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import re, zlib, logging
+import logging
+import re
+import zlib
 from io import open
 from struct import pack, unpack
 from typing import TYPE_CHECKING
@@ -9,7 +11,7 @@ from ..exceptions import ParseError
 from ..file import read_or_raise
 
 if TYPE_CHECKING:
-	from typing import BytesIO, Iterator, Tuple, Union, Callable
+	from typing import BytesIO, Callable, Iterator, Tuple, Union
 
 png_sig = b"\x89PNG\r\n\x1a\n"
 chunk_type_p = re.compile(br"^[a-zA-Z]{4}$")

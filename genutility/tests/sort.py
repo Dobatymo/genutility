@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from genutility.sort import bubble_sort, selection_sort_max, selection_sort_min
 from genutility.test import MyTestCase
-from genutility.sort import bubble_sort, selection_sort_min, selection_sort_max
+
 
 class SortTest(MyTestCase):
 

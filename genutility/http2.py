@@ -1,13 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from time import sleep
 from itertools import count
 from socket import timeout as SocketTimeout
+from time import sleep
 
 from hyper import HTTP20Connection
 from hyper.http20.exceptions import StreamResetError
 
 from .http import HTTPError
+
 
 class WrappedHTTP20Connection(object):
 

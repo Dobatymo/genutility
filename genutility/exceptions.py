@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+
 class ParseError(Exception):
 	""" Raised when the content to be parsed is malformed.
 		Not a value error because usually the error is in some external resource

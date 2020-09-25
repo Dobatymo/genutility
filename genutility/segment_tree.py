@@ -1,4 +1,5 @@
-from typing import List, Callable, Optional
+from typing import Callable, List, Optional
+
 
 class SegmentTree(object):
 
@@ -56,10 +57,11 @@ class SegmentTree(object):
 
 		return res
 
-from unittest import TestCase
 import random
-from sys import maxsize
 from operator import add
+from sys import maxsize
+from unittest import TestCase
+
 
 def range_generator(size, tests):
 	ls = random.sample(range(size), tests)

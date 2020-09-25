@@ -1,18 +1,20 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from builtins import str, bytes
+
+from builtins import bytes, str
 from future.utils import PY2
 
 import os.path
-from tempfile import mkstemp
 from os import remove
 from sys import getfilesystemencoding
+from tempfile import mkstemp
 from typing import TYPE_CHECKING
 
+from .compat.os import fspath, replace
 from .file import copen
-from .compat.os import replace, fspath
 
 if TYPE_CHECKING:
-	from typing import Union, Optional, IO
+	from typing import IO, Optional, Union
+
 	from .compat.os import PathLike
 	PathType = Union[str, PathLike]
 

@@ -1,15 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import tempfile, os.path
+import os.path
+import tempfile
 
 try:
 	from os import scandir
 except ImportError:
 	from scandir import scandir # backport
 
+from genutility.file import write_file  # not tested, used to set up the tests
+from genutility.file import OpenFileAndDeleteOnError, blockfilesiter, equal_files, is_all_byte
 from genutility.test import MyTestCase, parametrize
-from genutility.file import write_file # not tested, used to set up the tests
-from genutility.file import equal_files, is_all_byte, OpenFileAndDeleteOnError, blockfilesiter
+
 
 class FileTest(MyTestCase):
 
