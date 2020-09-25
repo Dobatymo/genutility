@@ -21,6 +21,8 @@ class RasaRest(object):
 	def get_request(self, url, params=None):
 		# type: (str, Optional[dict]) -> dict
 
+		params = params or {}
+
 		if self.token:
 			params.setdefault("token", self.token)
 
@@ -30,6 +32,8 @@ class RasaRest(object):
 
 	def post_request(self, url, params=None, json=None):
 		# type: (str, Optional[dict], Optional[dict]) -> dict
+
+		params = params or {}
 
 		if self.token:
 			params.setdefault("token", self.token)
