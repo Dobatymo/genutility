@@ -76,13 +76,26 @@ def text_with_outline(draw, pos, text, font, fillcolor, outlinecolor, outlinesiz
 	# now draw the text over it
 	draw.text((x, y), text, font=font, fill=fillcolor)
 
-def write_text(img, text, alignment="TL", fillcolor=(255, 255, 255), outlinecolor=(0, 0, 0), fontratio=0.03, padding=(5, 5)):
-	# (Image, str, str, Color, Color, float, Tuple[int, int]) -> None
+def write_text(img, text, alignment="TL", fillcolor=(255, 255, 255), outlinecolor=(0, 0, 0), fontsize=0.03, padding=(5, 5)):
+	# (Image, str, str, Color, Color, Union[float, int], Union[float, Tuple[int, int]]) -> None
 
 	if alignment not in {"TL", "TC", "TR", "BL", "BC", "BR"}:
 		raise ValueError("Invalid alignment: {}".format(alignment))
 
-	fontsize = int(img.height * fontratio)
+	if isinstance(fontsize, int):
+		pass
+	elif isinstance(fontsize, float):
+		fontsize = int(img.height * fontsize)
+	else:
+		raise ValueError("fontsize must be float or int")
+
+	if isinstance(padding, tuple):
+		pass
+	elif isinstance(padding, float):
+		padding = int(img.width * padding), int(img.height * padding)
+	else:
+		raise ValueError("padding must be float or Tuple[int, int]")
+
 	font = ImageFont.truetype("arial.ttf", fontsize)
 
 	d = ImageDraw.Draw(img)

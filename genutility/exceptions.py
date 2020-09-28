@@ -85,7 +85,7 @@ class MalformedFile(ValueError):
 	"""
 
 def assert_choice(name, value, choices, optional=False):
-	# type: (str, T, Set[T]) -> None
+	# type: (str, T, Set[T], bool) -> None
 
 	if optional and value is None:
 		return
