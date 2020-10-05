@@ -65,6 +65,11 @@ class ExternalProcedureUnavailable(ExternalError):
 		correctly handled (or rather correctly not handled in thie case).
 	"""
 
+class DatabaseUnavailable(ExternalError):
+	""" Raised when the connection to a database fails because the database cannot be reached or
+		raises and error related to the database itself and not to the query.
+	"""
+
 # runtime, possible coding errors
 
 class ClosedObjectUsed(RuntimeError):

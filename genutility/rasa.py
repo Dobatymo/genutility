@@ -97,3 +97,15 @@ class RasaRestWebhook(RasaRest):
 			"sender": self.sender,
 			"message": message,
 		})
+
+class RasaCallbackWebhook(RasaRest):
+
+	def send_message(self, message):
+		# type: (str, ) -> List[dict]
+
+		url = self.get_endpoint("/webhooks/callback/webhook")
+
+		return self.post_request(url, json={
+			"sender": self.sender,
+			"message": message,
+		})
