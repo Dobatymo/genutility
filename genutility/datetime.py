@@ -3,8 +3,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import time
 from datetime import timedelta, tzinfo
+from typing import TYPE_CHECKING
 
 from .compat.datetime import datetime, timezone
+
+if TYPE_CHECKING:
+	from datetime import time as dtime
 
 utcmin = datetime.min.replace(tzinfo=timezone.utc)
 utcmax = datetime.max.replace(tzinfo=timezone.utc)
@@ -46,6 +50,14 @@ def datetime_from_utc_timestamp_ns(epoch, aslocal=False):
 		dt = dt.astimezone(None)
 
 	return dt
+
+def between_times(thetime, start, end):
+	# type: (dtime, dtime, dtime) -> bool
+
+	if start < end:
+		return start <= thetime and thetime <= end
+	else:
+		return start <= thetime or thetime <= end
 
 class LocalTimezone(tzinfo):
 
