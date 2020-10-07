@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from datetime import time
 
 from genutility.compat.datetime import datetime, timezone
-from genutility.datetime import datetime_from_utc_timestamp, now, between_times
+from genutility.datetime import between_times, datetime_from_utc_timestamp, now
 from genutility.test import MyTestCase, parametrize
 
 
@@ -29,6 +29,12 @@ class DatetimeTest(MyTestCase):
 		(time(12), time(13), time(15), False),
 		(time(12), time(11), time(9), True),
 		(time(12), time(9), time(11), False),
+
+		(time(11), time(11), time(13), True),
+		(time(13), time(11), time(13), True),
+		(time(15), time(15), time(13), True),
+		(time(13), time(15), time(13), True),
+		(time(13), time(0), time(0), True),
 	)
 	def test_between_times(self, t, a, b, truth):
 		result = between_times(t, a, b)

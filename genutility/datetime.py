@@ -54,6 +54,10 @@ def datetime_from_utc_timestamp_ns(epoch, aslocal=False):
 def between_times(thetime, start, end):
 	# type: (dtime, dtime, dtime) -> bool
 
+	""" Inclusive range.
+		If `start` equals `end`, return `True`.
+	"""
+
 	if start < end:
 		return start <= thetime and thetime <= end
 	else:
