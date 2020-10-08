@@ -1,14 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
+import signal
 import threading
-from queue import Empty, Queue
+from multiprocessing import Pool
+from queue import Empty, Full, Queue
 from typing import TYPE_CHECKING
 
 from .exceptions import NoResult, assert_choice
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Iterable, Iterator, Optional, Tuple, Union
+	T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -387,6 +390,88 @@ class ProgressThreadPool(object):
 
 	def get_running(self):  # no locks, inconsistent data
 		return list(task for task in (w.get() for w in self.workers) if task)
+
+class BoundedQueue(object):
+
+	# similar: pip install bounded-iterator
+
+	""" Semaphor bounded queue. Can be used with `multiprocessing.Pool` for example.
+		`imap()` calls iterable from same process but different thread.
+
+		Other semaphore classes like `multiprocessing.BoundedSemaphore` can be used as well.
+	"""
+
+	def __init__(self, size, it, timeout=None, semaphore=threading.BoundedSemaphore):
+		# type: (int, Iterable[T], Optional[float], Callable[[int], Any]) -> None
+
+		self.semaphore = semaphore(size)
+		self.iterable = it
+		self.timeout = timeout
+		self.iterator = None # type: Optional[Iterator[T]]
+
+	def __iter__(self):
+		# type: () -> Iterator[T]
+
+		self.iterator = iter(self.iterable)
+		return self
+
+	def __next__(self):
+		# type: () -> T
+
+		if self.iterator is None:
+			raise TypeError
+
+		if not self.semaphore.acquire(timeout=self.timeout):
+			raise Full("BoundedQueue semaphore acquisition timed out")
+
+		return next(self.iterator)
+
+	def done(self):
+		# type: () -> None
+
+		self.semaphore.release()
+
+def _ignore_sigint():
+	# type: () -> None
+
+	""" This need to be pickle'able to work with `multiprocessing.Pool`.
+	"""
+
+	signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+def parallel_map(func, it, ordered=True, parallel=True, processes=None, bufsize=1, chunksize=1):
+	# type: (Callable[[T], U], Iterable[T], bool, bool, Optional[int], int, int) -> Iterator[U]
+
+	""" Parallel map which uses multiprocessing to distribute tasks.
+		`bufsize` should be used to limit memory usage when the iterable `it`
+		can be processed faster than the output iterator is consumed.
+
+		Keyboard interrupts are ignored in child processes. They should however be terminated
+		correctly by the main thread.
+	"""
+
+	if parallel:
+
+		q = BoundedQueue(bufsize, it)
+
+		with Pool(processes, _ignore_sigint) as p:
+
+			if ordered:
+				process = p.imap
+			else:
+				process = p.imap_unordered
+
+			try:
+				for item in process(func, q, chunksize):
+					yield item
+					q.done()
+			except GeneratorExit:
+				logging.warning("interrupted")
+				q.done()  # the semaphore in the bounded queue might block otherwise
+				raise
+	else:
+		for item in it:
+			yield func(item)
 
 class ThreadsafeList(list):  # untested!!!
 
