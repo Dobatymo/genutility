@@ -29,9 +29,15 @@ def now(aslocal=False):
 def datetime_from_utc_timestamp(epoch, aslocal=False):
 	# type: (int, bool) -> datetime
 
-	""" Converts a UNIX epoch time in seconds to a timezone aware datetime. """
+	""" Converts a UNIX epoch time in seconds to a timezone aware datetime.
+		Negative values are supported and return a datetime counted backwards
+		from 1970-01-01 UTC.
+		`aslocal=True` doesn't work for negative values on Windows.
+	"""
 
-	dt = datetime.fromtimestamp(epoch, timezone.utc)
+	# don't use `fromtimestamp`, to have better cross platform support
+	dt = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=epoch)
+
 	if aslocal:
 		dt = dt.astimezone(None)
 	return dt
@@ -39,12 +45,16 @@ def datetime_from_utc_timestamp(epoch, aslocal=False):
 def datetime_from_utc_timestamp_ns(epoch, aslocal=False):
 	# type: (int, bool) -> datetime
 
-	""" Converts a UNIX epoch time in nano seconds to a timezone aware datetime. """
+	""" Converts a UNIX epoch time in nano seconds to a timezone aware datetime.
+		Negative values are supported and return a datetime counted backwards
+		from 1970-01-01 UTC.
+		`aslocal=True` doesn't work for negative values on Windows.
+	"""
 
 	seconds, ns = divmod(epoch, 1000000000)
 
-	dt = datetime.fromtimestamp(seconds, timezone.utc)
-	dt.microsecond = ns // 1000
+	# don't use `fromtimestamp`, to have better cross platform support
+	dt = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=seconds, microseconds=ns // 1000)
 
 	if aslocal:
 		dt = dt.astimezone(None)
