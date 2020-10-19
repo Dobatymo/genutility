@@ -1,13 +1,13 @@
+import asyncio
 import csv
 import logging
 import re
 import time
-import asyncio
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-import requests
 import aiohttp
+import requests
 from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceAuthenticationFailed, SalesforceExpiredSession
 from simplejson.errors import JSONDecodeError
@@ -239,13 +239,14 @@ class LiveAgentBase(object):
 
 	api_version = "42"
 
-	def __init__(self, hostname, organization_id, deployment_id, button_id, timeout=60):
-		# type: (str, str, str, str, int) -> None
+	def __init__(self, hostname, organization_id, deployment_id, button_id, scheme="https", timeout=60):
+		# type: (str, str, str, str, str, int) -> None
 
 		self.hostname = hostname
 		self.organization_id = organization_id
 		self.deployment_id = deployment_id
 		self.button_id = button_id
+		self.scheme = scheme
 		self.timeout = timeout
 
 		self.key = None
@@ -256,7 +257,7 @@ class LiveAgentBase(object):
 	# helper
 
 	def urljoin(self, endpoint):
-		return "https://" + self.hostname + endpoint
+		return self.scheme + "://" + self.hostname + endpoint
 
 	@property
 	def sequence(self):
@@ -265,7 +266,7 @@ class LiveAgentBase(object):
 
 	@staticmethod
 	def _make_prechat_details(prechat_details, slots):
-	
+
 		if prechat_details:
 			pass
 

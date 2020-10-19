@@ -2,3 +2,5 @@ hypothesis
 bandit
 flake8
 pre-commit
+requests-mock
+aioresponses
