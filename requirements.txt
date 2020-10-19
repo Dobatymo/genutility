@@ -19,8 +19,11 @@ pillow
 PyPDF2
 pyOpenSSL>=17.5.0 # OpenSSL
 pywin32; sys_platform=='win32' # win32evtlog, winerror
+requests
 rhash; sys_platform=='win32'
 ruamel.yaml
+simple_salesforce>=1.1.0
+simplejson
 tls-property>=1.0.1
 toml
 unidecode

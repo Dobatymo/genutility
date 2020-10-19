@@ -3,4 +3,4 @@ bandit
 flake8
 pre-commit
 requests-mock
-aioresponses
+aioresponses; python_version>='3.5'
