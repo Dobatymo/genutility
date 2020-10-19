@@ -5,3 +5,9 @@ line_length = 120
 known_thirdpartyfuture = ["builtins", "future", "past"]
 sections = ["FUTURE", "THIRDPARTYFUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 known_third_party = ["flask", "gensim", "networkx", "nltk", "numba", "numpy", "pandas", "rasa", "scipy", "tensorflow", "toml", "torch", "twisted"]
+
+[tool.coverage.report]
+exclude_lines =
+	pragma: no cover
+	if __name__ == .__main__.:
+sort = Cover
