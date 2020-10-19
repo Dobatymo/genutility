@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import range
 from future.moves.itertools import zip_longest
-from future.utils import PY2
+from future.utils import PY2, viewitems
 
 from collections import defaultdict
 from functools import wraps
@@ -110,7 +110,7 @@ def make_comparable(d):
 	elif isinstance(d, tuple):
 		return tuple(make_comparable(i) for i in d)
 	elif isinstance(d, dict):
-		return make_comparable(list(d.items()))
+		return make_comparable(list(viewitems(d)))
 	else:
 		raise ValueError("must be list, tuple or dict, not {}".format(type(d)))
 
@@ -232,6 +232,15 @@ class MyTestCase(TestCase):
 				return
 
 		raise AssertionError("Result does not match one of the provided truths") # from None
+
+	def assertUnorderedMappingEqual(self, first, second, msg=None):
+		# type: (Mapping[T], Mapping[T]) -> None
+
+		self.assertEqual(len(first), len(second), msg)
+
+		for a, b in zip(sorted(first.keys()), sorted(second.keys())):
+			self.assertEqual(a, b)
+			self.assertEqual(first[a], second[b])
 
 def random_arguments(n, *funcs):
 	# type: (int, *Callable[[], Any]) -> Callable[[Callable], Callable]

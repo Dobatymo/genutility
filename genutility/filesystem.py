@@ -56,10 +56,13 @@ class fileextensions(object):
 	images = ("bmp", "jpg", "jpeg", "png", "gif", "tif", "tiff", "tga")
 
 	archives = ("zip", "rar", "ace", "tar", "tgz", "tbz", "7z", "cab", "dmg", "wim")
-	executables = ("exe", "dll", "so", "scr", "msi", "pyd", "sys")
-	scripts = ("bat", "ps1", "sh", "py", "php")
-	documents = ("txt", "pdf", "doc", "docx", "ps")
+	bytecode = ("pyc", "class")
+	configuration = ("ini", "toml", "conf", "reg")
+	database = ("cat", "sqlite", "db")
+	documents = ("txt", "pdf", "doc", "docx", "ps", "rtf", "pgs")
+	executables = ("exe", "dll", "so", "scr", "msi", "pyd", "sys", "cpl")  # native code
 	image_archives = ("cbz", "cbr", "cb7", "cbt", "cba")
+	scripts = ("bat", "ps1", "sh", "c", "cpp", "cs", "py", "php", "js", "lua", "pl")  # and source code files
 
 	disc_images_binary = ("iso", "bin", "mdf", "img")
 	disc_images_sidecar = ("cue", "mds", "ccd")
@@ -68,8 +71,11 @@ class fileextensions(object):
 	game_images = ("gcn", "nds", "3ds", "wad", "xbx", "gba", "gb", "nes", "sfc", "n64", "z64")
 	compressed = ("gz", "bz2", "lzma", "xz", "z")
 	subtitles = ("srt", "sub", "idx", "sup", "ssa", "ass")
-
 	scene = ("nfo", "sfv")
+
+	windows = ("library-ms", "desklink", "lnk", "dmp")
+	macos = ("crash", )
+	os = windows + macos
 
 class IllegalFilename(ValueError):
 	pass

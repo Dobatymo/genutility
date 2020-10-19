@@ -2,8 +2,7 @@ import requests
 
 from .exceptions import assert_choice
 
-
-class RasaRest(object):
+class Rasa(object):
 
 	def __init__(self, sender, scheme="http", netloc="localhost:5005", token=None, timeout=60):
 		# type: (str, str, str, Optional[str], int) -> None
@@ -18,6 +17,8 @@ class RasaRest(object):
 		# type: (str, ) -> str
 
 		return self.scheme + "://" + self.netloc + path
+
+class RasaRest(Rasa):
 
 	def get_request(self, url, params=None):
 		# type: (str, Optional[dict]) -> dict
@@ -45,7 +46,7 @@ class RasaRest(object):
 
 INCLUDE_EVENTS_ENUM = {"AFTER_RESTART", "ALL", "APPLIED", "NONE"}
 
-class RasaRestConversations(RasaRest):
+class _RasaRestConversations(object):
 
 	def get_tracker(self, include_events=None, until=None):
 		# type: (Optional[str], Optional[int]) -> dict
@@ -80,7 +81,7 @@ class RasaRestConversations(RasaRest):
 			"until": until,
 		})
 
-class RasaRestWebhook(RasaRest):
+class _RasaRestWebhook(object):
 
 	def health(self):
 		# type: () -> dict
@@ -99,7 +100,7 @@ class RasaRestWebhook(RasaRest):
 			"message": message,
 		})
 
-class RasaCallbackWebhook(RasaRest):
+class _RasaCallbackWebhook(object):
 
 	def send_message(self, message):
 		# type: (str, ) -> List[dict]
@@ -110,3 +111,12 @@ class RasaCallbackWebhook(RasaRest):
 			"sender": self.sender,
 			"message": message,
 		})
+
+class RasaRestConversations(_RasaRestConversations, RasaRest):
+	pass
+
+class RasaRestWebhook(_RasaRestWebhook, RasaRest):
+	pass
+
+class RasaCallbackWebhook(_RasaCallbackWebhook, RasaRest):
+	pass
