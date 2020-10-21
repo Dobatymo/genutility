@@ -10,7 +10,7 @@ from functools import partial, wraps
 from itertools import islice
 from typing import TYPE_CHECKING
 
-from .atomic import TransactionalCreateFile
+from .atomic import TransactionalCreateFile, sopen
 from .compat import FileNotFoundError
 from .datetime import now
 from .file import copen
@@ -99,12 +99,7 @@ def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None
 
 		validate(obj, schema)
 
-	if safe:
-		context = TransactionalCreateFile
-	else:
-		context = copen
-
-	with context(path, "wt", encoding="utf-8") as fw:
+	with sopen(path, "wt", encoding="utf-8", safe=safe) as fw:
 		json.dump(obj, fw, ensure_ascii=ensure_ascii, cls=cls, indent=indent, sort_keys=sort_keys, default=default)
 
 class json_lines(object):

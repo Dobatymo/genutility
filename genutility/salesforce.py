@@ -12,6 +12,7 @@ from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceAuthenticationFailed, SalesforceExpiredSession
 from simplejson.errors import JSONDecodeError
 
+from .atomic import sopen
 from .iter import progress
 from .json import read_json, write_json
 
@@ -205,8 +206,8 @@ class MySalesforce(object):
 		s = sosl_escape(s)
 		return self._search("FIND {{{}}} RETURNING {}({})".format(s, object_name, ", ".join(object_fields)))
 
-	def dump_csv(self, query_str, path, verbose=False):
-		# type: (str, str, False) -> int
+	def dump_csv(self, query_str, path, verbose=False, safe=False):
+		# type: (str, str, False, bool) -> int
 
 		""" Run SOQL `query_str` and dump results to csv file `path`.
 			Returns the number of exported rows.
@@ -214,7 +215,7 @@ class MySalesforce(object):
 
 		i = 0
 
-		with open(path, "w", encoding="utf-8", newline="") as csvfile:
+		with sopen(path, "wt", encoding="utf-8", newline="", safe=safe) as csvfile:
 			csvwriter = csv.writer(csvfile)
 
 			if verbose:

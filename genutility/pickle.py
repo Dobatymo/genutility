@@ -6,7 +6,7 @@ from functools import wraps
 from pickle import HIGHEST_PROTOCOL  # nosec
 from typing import TYPE_CHECKING
 
-from .atomic import TransactionalCreateFile
+from .atomic import sopen
 from .compat import FileNotFoundError
 from .compat.contextlib import nullcontext
 from .compat.os import fspath
@@ -40,12 +40,7 @@ def write_pickle(result, path, protocol=None, safe=False):
 		`safe`: if True, don't overwrite original file in case any error occurs
 	"""
 
-	if safe:
-		context = TransactionalCreateFile
-	else:
-		context = copen
-
-	with context(path, "wb") as fw:
+	with sopen(path, "wb", safe=safe) as fw:
 		pickle.dump(result, fw, protocol=protocol)
 
 def read_iter(path):
@@ -71,12 +66,7 @@ def write_iter(it, path, protocol=None, safe=False):
 			to actually write anything to disk.
 	"""
 
-	if safe:
-		context = TransactionalCreateFile
-	else:
-		context = copen
-
-	with context(path, "wb") as fw:
+	with sopen(path, "wb", safe=safe) as fw:
 		pickler = pickle.Pickler(fw, protocol=protocol)
 		for result in it:
 			pickler.dump(result)

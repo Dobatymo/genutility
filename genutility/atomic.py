@@ -4,6 +4,7 @@ from builtins import bytes, str
 from future.utils import PY2
 
 import os.path
+from io import open
 from os import remove
 from sys import getfilesystemencoding
 from tempfile import mkstemp
@@ -13,7 +14,7 @@ from .compat.os import fspath, replace
 from .file import copen
 
 if TYPE_CHECKING:
-	from typing import IO, Optional, Union
+	from typing import IO, Optional, Union, ContextManager
 
 	from .compat.os import PathLike
 	PathType = Union[str, PathLike]
@@ -58,6 +59,14 @@ class TransactionalCreateFile(object):
 			self.rollback()
 		else:
 			self.commit()
+
+def sopen(path, mode="rb", encoding=None, errors=None, newline=None, safe=False):
+	# type: (PathType, str, Optional[str], Optional[str], Optional[str], bool) -> ContextManager[IO]
+
+	if safe:
+		return TransactionalCreateFile(path, mode, encoding=None, errors=None, newline=None)
+	else:
+		return copen(path, mode, encoding=None, errors=None, newline=None)
 
 def write_file(data, path, mode="wb", encoding=None, errors=None, newline=None):
 	# type: (Union[str, bytes], PathType, str, Optional[str], Optional[str], Optional[str]) -> None
