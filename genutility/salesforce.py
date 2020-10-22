@@ -342,6 +342,7 @@ class LiveAgentBase(object):
 		# type: () -> Union[bytes, Awaitable[bytes]]
 
 		""" Close live chat.
+			Can raise a 403 HTTP error in case the agent already ended the chat.
 		"""
 
 		return self.rest_chat_end(self.key, self.affinity_token)
