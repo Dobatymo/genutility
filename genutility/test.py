@@ -234,7 +234,7 @@ class MyTestCase(TestCase):
 		raise AssertionError("Result does not match one of the provided truths") # from None
 
 	def assertUnorderedMappingEqual(self, first, second, msg=None):
-		# type: (Mapping[T], Mapping[T]) -> None
+		# type: (Mapping[T], Mapping[T], Optional[str]) -> None
 
 		self.assertEqual(len(first), len(second), msg)
 
