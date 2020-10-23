@@ -4,3 +4,4 @@ flake8
 pre-commit
 requests-mock
 aioresponses; python_version>='3.5'
+asynctest; python_version>='3.5' and python_version<'3.8' # for aioresponses
