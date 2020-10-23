@@ -34,8 +34,6 @@ class SalesforceError(Exception):
 
 class MySalesforce(object):
 
-	timeout = 60
-
 	def __init__(self, username, password, security_token, consumer_key, consumer_secret, test=False, cache_file=None, timeout=60):
 		# type: (str, str, str, str, str, bool, Optional[str], int) -> None
 
@@ -240,7 +238,7 @@ class LiveAgentBase(object):
 
 	api_version = "42"
 
-	def __init__(self, hostname, organization_id, deployment_id, button_id, scheme="https", timeout=60):
+	def __init__(self, hostname, organization_id, deployment_id, button_id, scheme="https", timeout=30):
 		# type: (str, str, str, str, str, int) -> None
 
 		self.hostname = hostname
@@ -254,6 +252,7 @@ class LiveAgentBase(object):
 		self.affinity_token = None
 		self._sequence = 0
 		self.last_offset = 0
+		self.client_poll_timeout = None
 
 	# helper
 
@@ -327,6 +326,7 @@ class LiveAgentBase(object):
 	def _set_session_info(self, response):
 		self.key = response["key"]
 		self.affinity_token = response["affinityToken"]
+		self.client_poll_timeout = response["clientPollTimeout"]
 
 	# high level
 
@@ -431,7 +431,7 @@ class LiveAgentBase(object):
 			"X-LIVEAGENT-SESSION-KEY": key,
 		}
 
-		return self.get_request(endpoint, headers)
+		return self.get_request(endpoint, headers, timeout=self.client_poll_timeout)
 
 	def rest_chat_message(self, key, affinity_token, text):
 		# type: (str, str, str) -> Union[bytes, Awaitable[bytes]]
@@ -506,10 +506,11 @@ class LiveAgentBase(object):
 
 class LiveAgent(LiveAgentBase):
 
-	def get_request(self, endpoint, headers, params=None):
-		# type: (str, dict, Optional[dict]) -> dict
+	def get_request(self, endpoint, headers, params=None, timeout=None):
+		# type: (str, dict, Optional[dict], Optional[float]) -> dict
 
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
+		timeout = timeout or self.timeout
 
 		r = requests.get(self.urljoin(endpoint), headers=headers, params=params, timeout=self.timeout)
 		r.raise_for_status()
@@ -518,11 +519,12 @@ class LiveAgent(LiveAgentBase):
 		else:
 			return r.json()
 
-	def post_request(self, endpoint, headers, json=None):
-		# type: (str, dict, Optional[dict]) -> bytes
+	def post_request(self, endpoint, headers, json=None, timeout=None):
+		# type: (str, dict, Optional[dict], Optional[float]) -> bytes
 
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
 		headers.setdefault("X-LIVEAGENT-SEQUENCE", self.sequence)
+		timeout = timeout or self.timeout
 
 		r = requests.post(self.urljoin(endpoint), headers=headers, json=json, timeout=self.timeout)
 		r.raise_for_status()
@@ -541,7 +543,6 @@ class LiveAgent(LiveAgentBase):
 
 		self._set_session_info(response)
 		session_id = response["id"]
-		client_poll_timeout = response["clientPollTimeout"]
 		prechat_details = self._make_prechat_details(prechat_details, slots)
 
 		self.rest_chasitor_init(self.key, self.affinity_token, session_id, visitor_name,
@@ -596,29 +597,34 @@ class LiveAgent(LiveAgentBase):
 			return d["messages"]
 
 class LiveAgentAsync(LiveAgentBase):
-	async def get_request(self, endpoint, headers, params=None):
-		# type: (str, dict, Optional[dict]) -> dict
+
+	trust_env = True
+
+	async def get_request(self, endpoint, headers, params=None, timeout=None):
+		# type: (str, dict, Optional[dict], Optional[float]) -> dict
 
 		headers = headers or {}
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
+		timeout = timeout or self.timeout
 
-		async with aiohttp.ClientSession() as session:
-			async with session.get(self.urljoin(endpoint), headers=headers, params=params, timeout=self.timeout) as r:
+		async with aiohttp.ClientSession(trust_env=self.trust_env) as session:
+			async with session.get(self.urljoin(endpoint), headers=headers, params=params, timeout=timeout) as r:
 				r.raise_for_status()
 				if r.status == 204:
 					return {}
 				else:
 					return await r.json()
 
-	async def post_request(self, endpoint, headers, json=None):
-		# type: (str, dict, Optional[dict]) -> bytes
+	async def post_request(self, endpoint, headers, json=None, timeout=None):
+		# type: (str, dict, Optional[dict], Optional[float]) -> bytes
 
 		headers = headers or {}
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
 		headers.setdefault("X-LIVEAGENT-SEQUENCE", self.sequence)
+		timeout = timeout or self.timeout
 
-		async with aiohttp.ClientSession() as session:
-			async with session.post(self.urljoin(endpoint), headers=headers, json=json, timeout=self.timeout) as r:
+		async with aiohttp.ClientSession(trust_env=self.trust_env) as session:
+			async with session.post(self.urljoin(endpoint), headers=headers, json=json, timeout=timeout) as r:
 				r.raise_for_status()
 				return await r.read()
 
@@ -635,7 +641,6 @@ class LiveAgentAsync(LiveAgentBase):
 
 		self._set_session_info(response)
 		session_id = response["id"]
-		client_poll_timeout = response["clientPollTimeout"]
 		prechat_details = self._make_prechat_details(prechat_details, slots)
 
 		await self.rest_chasitor_init(self.key, self.affinity_token, session_id, visitor_name,
