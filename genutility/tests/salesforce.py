@@ -1,12 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import asyncio
 import re
 
-import aiohttp
 import requests_mock
 from aioresponses import aioresponses
-
 from genutility.salesforce import LiveAgent, LiveAgentAsync
 from genutility.test import MyTestCase
 
@@ -69,8 +67,6 @@ Messages = {
 	"sequence": 4
 }
 
-loop = asyncio.get_event_loop()
-
 class SalesforceTest(MyTestCase):
 
 	def test_connect(self):
@@ -104,6 +100,10 @@ class SalesforceTest(MyTestCase):
 
 class SalesforceAsyncTest(MyTestCase):
 
+	@classmethod
+	def setUpClass(cls):
+		cls.loop = asyncio.get_event_loop()
+
 	def test_connect(self):
 		la = LiveAgentAsync("sfdc", "org-id", "deploy-id", "button-id")
 
@@ -111,7 +111,7 @@ class SalesforceAsyncTest(MyTestCase):
 			m.get("https://sfdc/chat/rest/System/SessionId", payload=SessionId)
 			m.post("https://sfdc/chat/rest/Chasitor/ChasitorInit", body="OK")
 
-			loop.run_until_complete(la.connect("name"))
+			self.loop.run_until_complete(la.connect("name"))
 
 	def test_is_available(self):
 		la = LiveAgentAsync("sfdc", "org-id", "deploy-id", "button-id")
@@ -119,7 +119,7 @@ class SalesforceAsyncTest(MyTestCase):
 		with aioresponses() as m:
 			m.get(re.compile(r"^https:\/\/sfdc\/chat\/rest\/Visitor\/Availability\?"), payload=Availability)
 
-			result = loop.run_until_complete(la.is_available())
+			result = self.loop.run_until_complete(la.is_available())
 			truth = True
 			self.assertEqual(truth, result)
 
@@ -129,7 +129,7 @@ class SalesforceAsyncTest(MyTestCase):
 		with aioresponses() as m:
 			m.get("https://sfdc/chat/rest/System/Messages", payload=Messages)
 
-			result = loop.run_until_complete(la.receive())
+			result = self.loop.run_until_complete(la.receive())
 			truth = MessagesReceive
 			self.assertEqual(truth, result)
 

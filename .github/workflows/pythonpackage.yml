@@ -7,9 +7,8 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v1
@@ -41,7 +40,7 @@ jobs:
     - uses: actions/checkout@master
     - uses: actions/setup-python@v1
       with:
-        python-version: '3.7'
+        python-version: '3.8'
         architecture: 'x64'
     - name: Build dists
       run: |
