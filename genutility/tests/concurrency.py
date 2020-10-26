@@ -7,6 +7,7 @@ from genutility.concurrency import NotThreadSafe, ThreadPool, gather_all_unsorte
 from genutility.test import MyTestCase
 from genutility.time import MeasureTime, iter_timer
 
+TIME_DELTA = 0.2  # seconds
 
 class ConcurrencyTest(MyTestCase):
 
@@ -32,7 +33,7 @@ class ConcurrencyTest(MyTestCase):
 			zip(gather_all_unsorted(self.threadpool, self.sleep, inputs), truths, deltas)
 		):
 			self.assertEqual(result, truth)
-			self.assertAlmostEqual(messured_delta, delta, delta=0.1)
+			self.assertAlmostEqual(messured_delta, delta, delta=TIME_DELTA)
 
 	def test_gather_all_unsorted_inverse(self):
 		inputs = (3, 2, 1)
@@ -43,7 +44,7 @@ class ConcurrencyTest(MyTestCase):
 			zip(gather_all_unsorted(self.threadpool, self.sleep, inputs), truths, deltas)
 		):
 			self.assertEqual(result, truth)
-			self.assertAlmostEqual(messured_delta, delta, delta=0.1)
+			self.assertAlmostEqual(messured_delta, delta, delta=TIME_DELTA)
 
 	# gather_any
 
@@ -51,14 +52,14 @@ class ConcurrencyTest(MyTestCase):
 		truth = (0, 0)
 		with MeasureTime() as t:
 			result = gather_any(self.threadpool, self.sleep, (0, 1, 2))
-		self.assertAlmostEqual(t.get(), 0., delta=0.1)
+		self.assertAlmostEqual(t.get(), 0., delta=TIME_DELTA)
 		self.assertEqual(result, truth)
 
 	def test_gather_any_last(self):
 		truth = (2, 0)
 		with MeasureTime() as t:
 			result = gather_any(self.threadpool, self.sleep, (2, 1, 0))
-		self.assertAlmostEqual(t.get(), 0., delta=0.1)
+		self.assertAlmostEqual(t.get(), 0., delta=TIME_DELTA)
 		self.assertEqual(result, truth)
 
 	def test_NotThreadSafe(self):
