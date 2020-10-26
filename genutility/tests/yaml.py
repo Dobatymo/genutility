@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 from genutility.test import MyTestCase, closeable_tempfile, parametrize
 from genutility.yaml import read_yaml, write_yaml

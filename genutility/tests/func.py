@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 from genutility.func import call_repeated, compose, identity, retry, zipmap
 from genutility.test import MyTestCase, parametrize
@@ -51,6 +51,6 @@ class FuncTest(MyTestCase):
 			retry(raisefunc, 1, (RuntimeError,), 5, multiplier=2, max_wait=3, waitfunc=results.append)
 		self.assertIterEqual([1., 2., 3., 3.], results)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 	import unittest
 	unittest.main()

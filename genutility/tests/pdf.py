@@ -1,9 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import sys
 import unittest
+from pathlib import Path
 
-from genutility.compat.pathlib import Path
 from genutility.pdf import join_pdfs_in_folder
 from genutility.test import MyTestCase, parametrize
 

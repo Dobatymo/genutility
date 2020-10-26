@@ -1,5 +1,4 @@
-# encoding: utf-8
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 from genutility.markdown import markdown_urls
 from genutility.test import MyTestCase, parametrize

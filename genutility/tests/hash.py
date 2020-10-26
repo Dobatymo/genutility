@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 from genutility.file import write_file
 from genutility.hash import crc32_hash_file, ed2k_hash_file_v1, ed2k_hash_file_v2, md5_hash_file, sha1_hash_file

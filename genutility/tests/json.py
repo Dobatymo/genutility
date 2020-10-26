@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import json
 import logging
@@ -11,7 +11,7 @@ from genutility.test import MyTestCase, closeable_tempfile, parametrize
 class JsonTest(MyTestCase):
 
 	@parametrize(
-		('', tuple()),
+		("", tuple()),
 		('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1]))
 	)
 	def test_json_lines_from_stream(self, content, truth):
@@ -22,7 +22,7 @@ class JsonTest(MyTestCase):
 		self.assertEqual(truth, result)
 
 	@parametrize(
-		('', tuple()),
+		("", tuple()),
 		('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1]))
 	)
 	def test_read_json_lines(self, content, truth):

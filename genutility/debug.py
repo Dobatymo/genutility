@@ -63,7 +63,12 @@ def _kwarg_str(key, value, maxlen=None, app="...", repr_args=True):
 def args_str(args, kwargs, maxlen=20, app="...", repr_args=True):
 	# type: (tuple, dict, Optional[int], str, bool) -> str
 
-	""" Creates printable string from function arguments. """
+	""" Creates printable string from function arguments.
+		If the string needs to be truncated to fit `maxlen`, `app` will be appended.
+		The length of `app` is not included in `maxlen`.
+		If the original string is shorter or equal `maxlen + len(app)`,
+		it will be returned unmodified.
+	"""
 
 	args = ", ".join(_arg_str(arg, maxlen, app, repr_args) for arg in args)
 	kwargs = ", ".join(_kwarg_str(k, v, maxlen, app, repr_args) for k, v in viewitems(kwargs))

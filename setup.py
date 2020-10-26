@@ -1,9 +1,7 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
-from io import open
 from itertools import chain
 
-# don't do `from builtins import str`
 from setuptools import setup
 
 # nltk.download("punkt")
@@ -67,7 +65,7 @@ extras_require = {
 	"cholesky": ["numpy", "numba"],
 	"config": ["jsonschema", "sortedcontainers"],
 	"downloadmanager": ["aiohttp>=0.16.3", "orderedset"],
-	"encoder": ["numpy", "nltk; python_version>='3'", "nltk<3.5; python_version<'3'"],
+	"encoder": ["numpy", "nltk"],
 	"filesdb": ["tls-property"],
 	"fingerprinting": ["numpy", "numba", "pillow"],
 	"html": ["beautifulsoup4"],
@@ -75,12 +73,12 @@ extras_require = {
 	"http2": ["hyper"],
 	"image": ["numpy"],
 	"json": ["jsonschema"],
-	"lda": ["numpy", "nltk; python_version>='3'", "nltk<3.5; python_version<'3'"],
+	"lda": ["numpy", "nltk"],
 	"metrics": ["numpy"],
 	"mp4": ["setuptools"],
 	"multihash": ["rhash"],
 	"net": ["netifaces"],
-	"nlp": ["nltk; python_version>='3'", "nltk<3.5; python_version<'3'"],
+	"nlp": ["nltk"],
 	"regression": ["numpy"],
 	"resizing": ["numpy", "opencv-python", "scikit-learn"],
 	"scene_change_detection": ["numpy"],
@@ -102,7 +100,7 @@ extras_require = {
 	"mediainfo": ["pymediainfo"],
 	"numpy": ["numpy"],
 	"numba": ["numba"],
-	"nltk": ["nltk; python_version>='3'", "nltk<3.5; python_version<'3'"],
+	"nltk": ["nltk"],
 	"networkx": ["networkx"],
 	"pandas": ["pandas"],
 	"pdf": ["PyPDF2"],
@@ -137,15 +135,10 @@ setup(
 	],
 	packages=["genutility", "genutility/compat", "genutility/fileformats", "genutility/hardware", "genutility/twothree"],
 	package_data={str("genutility"): ["py.typed", "data/*.tsv"]},
-	python_requires=">=2.7",
+	python_requires=">=3.5",
 	install_requires=[
 		"future",
 		"ctypes-windows-sdk>=0.0.7; sys_platform=='win32'",
-		"typing; python_version<'3.5'",
-		"scandir; python_version<'3.5'",
-		"pathlib2; python_version<'3.4'",
-		"mock; python_version<'3.3'",
-		"contextlib2; python_version<'3.3'",
 	],
 	extras_require=extras_require,
 	use_2to3=False

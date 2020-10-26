@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import input
+from __future__ import generator_stop
 
 import os
 import os.path
@@ -98,7 +96,7 @@ class TestTest(MyTestCase):
 				raise EOFError
 		self.assertFalse(os.path.exists(name))
 
-	@unittest.skipIf(not os.environ.get('INTERACTIVE'), "non-interactive mode")
+	@unittest.skipIf(not os.environ.get("INTERACTIVE"), "non-interactive mode")
 	def test_closeable_tempfile_ctrlc(self):
 		name = None
 		with self.assertRaises(KeyboardInterrupt):
@@ -125,6 +123,6 @@ class TestTest(MyTestCase):
 				self.assertEqual(truth, fr.read())
 		self.assertFalse(os.path.exists(name))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 	import unittest
 	unittest.main()

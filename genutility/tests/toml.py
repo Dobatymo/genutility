@@ -1,8 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import PY2
-
-from unittest import skipIf
+from __future__ import generator_stop
 
 from genutility.test import MyTestCase, closeable_tempfile, parametrize
 from genutility.toml import read_toml, write_toml
@@ -22,7 +18,6 @@ class TomlTest(MyTestCase):
 
 		self.assertEqual(truth, result)
 
-	@skipIf(PY2, "toml.dumps returns inconsistent string types on Python 2")
 	@parametrize(
 		({}, ""),
 		({"asd": 1}, "asd = 1\n")

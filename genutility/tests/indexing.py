@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import range, zip
+from __future__ import generator_stop
 
 from genutility.indexing import subblock_indices, window_combinations_indices
 from genutility.test import MyTestCase, parametrize

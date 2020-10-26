@@ -1,6 +1,6 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
-from future.moves.urllib.parse import urlsplit
+from urllib.parse import urlsplit
 
 from genutility.test import MyTestCase, parametrize
 from genutility.url import get_url_argument, url_replace_query

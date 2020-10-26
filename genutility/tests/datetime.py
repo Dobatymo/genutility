@@ -1,8 +1,8 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
-from datetime import time
+from datetime import time, timezone
 
-from genutility.compat.datetime import datetime, timezone
+from genutility.compat.datetime import datetime
 from genutility.datetime import between_times, datetime_from_utc_timestamp, now
 from genutility.test import MyTestCase, parametrize
 

@@ -1,9 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import errno
 import time
+from unittest.mock import Mock
 
-from genutility.compat.unittest.mock import Mock
 from genutility.os import interrupt
 from genutility.signal import HandleKeyboardInterrupt
 from genutility.test import MyTestCase

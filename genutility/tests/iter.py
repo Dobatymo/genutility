@@ -1,15 +1,12 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import range
-from future.utils import PY2, PY3
+from __future__ import generator_stop
 
 import logging
 from itertools import chain, islice
 from os import devnull
+from unittest.mock import Mock
 
 from hypothesis import given, strategies
 
-from genutility.compat.unittest.mock import Mock
 from genutility.iter import (
     EmptyIterable,
     IteratorExhausted,
@@ -543,11 +540,7 @@ class IterTest(MyTestCase):
 
 	def test_empty(self):
 
-		if PY2:
-			from collections import Iterable, Iterator
-			Generator = Iterator
-		elif PY3:
-			from collections.abc import Generator, Iterable, Iterator
+		from collections.abc import Generator, Iterable, Iterator
 
 		it = empty()
 		self.assertTrue(isinstance(it, Iterable))
