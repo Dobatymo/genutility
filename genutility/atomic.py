@@ -14,7 +14,7 @@ from .compat.os import fspath, replace
 from .file import copen
 
 if TYPE_CHECKING:
-	from typing import IO, Optional, Union, ContextManager
+	from typing import IO, ContextManager, Optional, Union
 
 	from .compat.os import PathLike
 	PathType = Union[str, PathLike]

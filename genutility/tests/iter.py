@@ -272,7 +272,7 @@ class IterTest(MyTestCase):
 
 	@parametrize(
 		((1, 2), (3, 4), lambda x, y: x*y, (3, 6, 4, 8)),
-		((1, 2), (3, 4), lambda x, y: str(x)+str(y), ('13', '23', '14', '24')),
+		((1, 2), (3, 4), lambda x, y: str(x)+str(y), ("13", "23", "14", "24")),
 	)
 	def test_multi_join(self, it1, it2, func, truth):
 		result = multi_join(it1, it2, func)

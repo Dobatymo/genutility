@@ -127,14 +127,13 @@ setup(
 	long_description=long_description,
 	long_description_content_type="text/markdown",
 	classifiers=[
-		"Programming Language :: Python :: 2",
 		"Programming Language :: Python :: 3",
 		"License :: OSI Approved :: ISC License (ISCL)",
 		"Operating System :: OS Independent",
 		"Topic :: Utilities",
 	],
 	packages=["genutility", "genutility/compat", "genutility/fileformats", "genutility/hardware", "genutility/twothree"],
-	package_data={str("genutility"): ["py.typed", "data/*.tsv"]},
+	package_data={"genutility": ["py.typed", "data/*.tsv"]},
 	python_requires=">=3.5",
 	install_requires=[
 		"future",

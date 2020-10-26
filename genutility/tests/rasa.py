@@ -2,7 +2,7 @@ from __future__ import generator_stop
 
 import requests_mock
 
-from genutility.rasa import RasaRestWebhook, RasaRestConversations
+from genutility.rasa import RasaRestConversations, RasaRestWebhook
 from genutility.test import MyTestCase
 
 Webhook = [

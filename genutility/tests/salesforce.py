@@ -5,6 +5,7 @@ import re
 
 import requests_mock
 from aioresponses import aioresponses
+
 from genutility.salesforce import LiveAgent, LiveAgentAsync
 from genutility.test import MyTestCase
 
