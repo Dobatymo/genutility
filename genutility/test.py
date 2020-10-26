@@ -20,7 +20,8 @@ from .file import _check_arguments, equal_files
 from .signal import HandleKeyboardInterrupt  # problem here
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, DefaultDict, Hashable, Iterable, Optional, Tuple
+	from typing import Any, Callable, Collection, DefaultDict, Hashable, Iterable, Mapping, Optional, Tuple, TypeVar
+	T = TypeVar("T")
 
 class nullcontext(object): # see: .compat.contextlib
 

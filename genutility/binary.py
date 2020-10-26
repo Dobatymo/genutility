@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from .exceptions import assert_choice
 
 if TYPE_CHECKING:
-	from typing import Iterable, Iterator
+	from typing import Iterable, Iterator, Union
 
 if PY2:
 	bytes = bytearray

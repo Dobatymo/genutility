@@ -9,7 +9,7 @@ from .func import identity
 from .indexing import triangular_indices
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Iterator, MutableSequence, Sequence, Tuple, TypeVar
+	from typing import Callable, Iterable, Iterator, MutableSequence, Optional, Sequence, Tuple, TypeVar
 
 	from .typing import Comparable
 	T = TypeVar("T")

@@ -8,7 +8,12 @@ class LinearRegression(object):
 	""" Linear regression optimized by gradient descent. """
 
 	def __init__(self, X, y, alpha=0.01):
-		# type: (float[A, B], float[A], float) -> None
+		# type: (np.ndarray, np.ndarray, float) -> None
+
+		"""
+			X: float[A, B]
+			Y: float[A]
+		"""
 
 		if len(X.shape) != 2:
 			raise ValueError("X must be 2-dimensional")
@@ -27,7 +32,11 @@ class LinearRegression(object):
 		self.weights = np.random.random_sample(self.K)
 
 	def predict(self, x):
-		# type: (float[B], ) -> float
+		# type: (np.ndarray, ) -> float
+
+		"""
+			x: float[B]
+		"""
 
 		return np.matmul(x, self.weights)
 
@@ -45,7 +54,11 @@ class LinearRegression(object):
 			self.epoch()
 
 	def getParams(self):
-		# type: () -> float[B-1]
+		# type: (np.ndarray, ) -> float
+
+		"""
+			returns: float[B-1]
+		"""
 
 		return self.weights[1:]
 

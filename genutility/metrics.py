@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable
+	from typing import Callable, Iterable, List, Optional
 	Tokenizer = Callable[[str], Iterable[str]]
 
 def hamming_distance(a, b):

@@ -1,5 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Any, Dict, Sequence, Set, TypeVar
+	T = TypeVar("T")
+	U = TypeVar("U")
 
 class ParseError(Exception):
 	""" Raised when the content to be parsed is malformed.

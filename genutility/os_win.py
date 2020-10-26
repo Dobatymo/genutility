@@ -32,7 +32,7 @@ from .os_shared import _usagetuple, _volumeinfotuple
 
 if TYPE_CHECKING:
 	from ctypes.wintypes import HANDLE
-	from typing import IO
+	from typing import IO, Union
 
 	from .compat.os import PathLike
 

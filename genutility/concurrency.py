@@ -10,8 +10,9 @@ from typing import TYPE_CHECKING
 from .exceptions import NoResult, assert_choice
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Iterator, Optional, Tuple, Union
+	from typing import Any, Callable, Iterable, Iterator, Optional, Tuple, TypeVar, Union
 	T = TypeVar("T")
+	U = TypeVar("U")
 
 logger = logging.getLogger(__name__)
 

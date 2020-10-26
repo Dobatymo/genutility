@@ -23,7 +23,11 @@ if TYPE_CHECKING:
 	Indices = Union[slice, np.ndarray]
 
 def top_topics(id2word, term_topic_matrix, num_words=10, decimals=2):
-	# type: (Dict[int, str], float[K, V], int) -> Iterator[List[Tuple[str, float]]]
+	# type: (Dict[int, str], np.ndarray, int) -> Iterator[List[Tuple[str, float]]]
+
+	"""
+		term_topic_matrix: float[K, V]
+	"""
 
 	indices_list, probs_list = batchtopk(term_topic_matrix, num_words, reverse=True)
 	np.around(probs_list, decimals=2, out=probs_list)
@@ -114,14 +118,14 @@ class LDABase(object):
 				self.add_counts(m, t, k)
 
 	def calc_probs(self, m, t, k_select=slice(None)):
-		# type: (int, int, Indices) -> float[K]
+		# type: (int, int, Indices) -> np.ndarray
 
 		# notes: np.sum(self.nkt, axis=-1) == self.nk
 		# notes: np.sum(self.nmk[m], axis=-1) == self.nm[m]
 
-		""" This is eq1. in the DC-LDA paper. """
+		""" This is eq1. in the DC-LDA paper.
 
-		""" The α and β terms could be moved to `initialize`.
+			returns: float[K]
 		"""
 
 		""" The full term for left would be:
@@ -195,14 +199,22 @@ class LDABase(object):
 				print("Step #{}, metric: {}".format(i, self.metric()))
 
 	def theta(self):
-		# type: () -> float[M, K]
+		# type: () -> np.ndarray
+
+		"""
+			returns: float[M, K]
+		"""
 
 		num = self.nmk + self.α # [M, K]
 		denom = self.nm + self.αsum # [M]
 		return num / denom[:,None] # [M, K]
 
 	def phi(self):
-		# type: () -> float[K, V]
+		# type: () -> np.ndarray
+
+		"""
+			returns: float[K, V]
+		"""
 
 		num = self.nkt + self.β # [K, V]
 		denom = self.nk + self.βsum # [K]
@@ -225,7 +237,11 @@ class LDABase(object):
 		return exp(-num / denom)
 
 	def docs2topics(self):
-		# type: () -> int[M]
+		# type: () -> np.ndarray
+
+		"""
+			returns: int[M]
+		"""
 
 		return np.argmax(self.theta(), axis=-1) # [M]
 
@@ -237,7 +253,12 @@ class LDABase(object):
 
 	@staticmethod
 	def generate(theta, phi, doc_lens):
-		# type: (float[K, V], float[M, K], Iterable[int]) -> Tuple[dict, dict]
+		# type: (np.ndarray, np.ndarray, Iterable[int]) -> Tuple[dict, dict]
+
+		"""
+			theta: float[K, V]
+			phi: float[M, K]
+		"""
 
 		z = {} # sparse
 		w = {} # sparse
@@ -394,13 +415,21 @@ class LDATermWeight(LDABase):
 		self.inttype = np.int32
 
 	def _one(self, docs):
-		# type: (Any, ) -> int[M, V]
+		# type: (Any, ) -> np.ndarray
+
+		"""
+			returns: int[M, V]
+		"""
 
 		# return np.ones((self.M, self.V))
 		return np.broadcast_to(1, (self.M, self.V)) # is this slower for indexing later?
 
 	def _tf(self, docs):
-		# type: (IterableDocuments, ) -> float[M, V]
+		# type: (IterableDocuments, ) -> np.ndarray
+
+		"""
+			returns: float[M, V]
+		"""
 
 		all_counts = Counter(chain.from_iterable(docs))
 		num_counts = sum(all_counts.values())
@@ -411,7 +440,11 @@ class LDATermWeight(LDABase):
 		return np.broadcast_to(tw, (self.M, self.V))
 
 	def _idf(self, docs):
-		# type: (IterableDocuments, ) -> float[M, V]
+		# type: (IterableDocuments, ) -> np.ndarray
+
+		"""
+			returns: float[M, V]
+		"""
 
 		tw = np.zeros((self.V, ), dtype=self.floattype) # [V]
 
@@ -427,7 +460,11 @@ class LDATermWeight(LDABase):
 		raise NotImplementedError
 
 	def _pmi(self, docs):
-		# type: (IterableDocuments, ) -> float[M, V]
+		# type: (IterableDocuments, ) -> np.ndarray
+
+		"""
+			returns: float[M, V]
+		"""
 
 		tw = np.zeros((self.M, self.V), dtype=self.floattype) # [M, V] term weights
 
@@ -442,7 +479,11 @@ class LDATermWeight(LDABase):
 		return tw
 
 	def _rand(self, docs):
-		# type: (Any, ) -> float[M, V]
+		# type: (Any, ) -> np.ndarray
+
+		"""
+			returns: float[M, V]
+		"""
 
 		return np.random.uniform(0, 1, (self.M, self.V)).astype(self.floattype)
 
@@ -496,7 +537,11 @@ class LDATermWeight(LDABase):
 		self._initialize_topics(self.docs, self.topics)
 
 	def calc_probs(self, m, t):
-		# type: (int, int) -> float[K]
+		# type: (int, int) -> np.ndarray
+
+		"""
+			returns: float[K]
+		"""
 
 		# here using global weights works
 		#wmk = np.sum(self.tw[m, :][None, :] * self.nmkt[m], axis=-1, dtype=self.floattype)
@@ -596,7 +641,11 @@ class LDAInfer(LDA):
 		self.docs = []
 
 	def calc_probs(self, m, t, k_select=slice(None)):
-		# type: (int, int, Indices) -> float[K]
+		# type: (int, int, Indices) -> np.ndarray
+
+		"""
+			returns: float[K]
+		"""
 
 		left = (self.nmk[m, k_select] + self.α) # [K]
 		num = (self.nkt[k_select, t] + self.nkt_old[k_select, t] + self.β) # [K]

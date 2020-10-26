@@ -21,6 +21,7 @@ def assert_square(name, value):
 	# type: (str, np.ndarray) -> None
 
 	""" Raises a ValueError if matrix `value` is not square.
+		value: [A, A]
 	"""
 
 	if not len(value.shape) == 2 or value.shape[0] != value.shape[1]:
@@ -125,10 +126,15 @@ def is_square(A):
 	return True
 
 def batch_vTAv(A, v):
-	# type: (float[B, X, X], float[B, X]) -> float[B]
+	# type: (np.ndarray, np.ndarray) -> np.ndarray
 
 	""" Performs batched calculation of `v^T A v` transform.
 		Special case of bilinear form `x^T A y`
+
+		A: float[B, X, X]
+		v: float[B, X]
+
+		returns: float[B]
 	"""
 
 	""" Faster than

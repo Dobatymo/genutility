@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import logging
 import pickle  # nosec
 from datetime import timedelta
 from functools import wraps
@@ -20,6 +21,8 @@ if TYPE_CHECKING:
 	from typing import Any, Callable, Iterable, Iterator, Optional
 
 	from .compat.pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 def read_pickle(path):
 	# type: (str, ) -> Any

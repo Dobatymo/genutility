@@ -1,18 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import str
-
 import hashlib
-import os.path
 import zlib
 from functools import partial
+from os import fspath
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .file import blockfileiter, read_file
 from .filesystem import scandir_rec
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Optional, Union
+	from typing import Callable, Iterable, Iterator, Optional, Union
 
 	from _hashlib import HASH as Hashobj
 
@@ -91,6 +90,8 @@ def hash_dir_str(path, hashcls=hashlib.sha1, include_names=False):
 ed2k_chunksize = 9728000
 
 def ed2k_hash_file_v1(path):
+	# type: (Path, ) -> str
+
 	""" Returns ed2k hash.
 		This hashing method is used by
 		- MLDonkey
@@ -100,7 +101,7 @@ def ed2k_hash_file_v1(path):
 		This differs from `ed2k_hash_file_v2` only if the file size is a multiple of `ed2k_chunksize`.
 	"""
 
-	if os.path.getsize(path) <= ed2k_chunksize:
+	if path.stat().st_size <= ed2k_chunksize:
 		return md4_hash_data(read_file(path, "rb")).hexdigest()
 
 	ed2k_hashes = (
@@ -110,6 +111,8 @@ def ed2k_hash_file_v1(path):
 	return md4_hash_data(b"".join(ed2k_hashes)).hexdigest()
 
 def ed2k_hash_file_v2(path):
+	# type: (Path, ) -> str
+
 	""" Returns ed2k hash.
 		This hashing method is used by
 		- eMule
@@ -118,7 +121,7 @@ def ed2k_hash_file_v2(path):
 		This differs from `ed2k_hash_file_v1` only if the file size is a multiple of `ed2k_chunksize`.
 	"""
 
-	filesize = os.path.getsize(path)
+	filesize = path.stat().st_size
 	if filesize < ed2k_chunksize:
 		return md4_hash_data(read_file(path, "rb")).hexdigest()
 

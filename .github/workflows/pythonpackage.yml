@@ -19,10 +19,10 @@ jobs:
         pip install -r requirements-dev.txt
     - name: Security analysis with bandit
       run: |
-        python -m bandit -r . -c bandit.yml
+        bandit --ini .bandit --recursive .
     - name: Lint with flake8
       run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 --select=E9,F63,F7,F82 .
 
   test:
     needs: lint

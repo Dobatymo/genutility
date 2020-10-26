@@ -17,7 +17,7 @@ from .iter import progress
 from .json import read_json, write_json
 
 if TYPE_CHECKING:
-	from typing import Iterable, Iterator, List, Optional, Tuple
+	from typing import Any, Awaitable, Dict, Iterable, Iterator, List, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 

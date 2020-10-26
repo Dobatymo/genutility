@@ -13,7 +13,7 @@ from .iter import batch
 from .set import get as setget
 
 if TYPE_CHECKING:
-	from typing import Iterable, Set, TypeVar
+	from typing import Iterable, Set, Tuple, TypeVar
 	T = TypeVar("T")
 
 class Unsolvable(Exception):

@@ -17,7 +17,7 @@ from .sqlite import quote_identifier
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, Iterator, Optional
+	from typing import Any, Dict, Iterable, Iterator, Optional, Set
 
 	from .filesystem import EntryType
 

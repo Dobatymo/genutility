@@ -18,7 +18,7 @@ from .exceptions import EmptyIterable
 from .iter import range_count
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Optional, Sequence, SupportsFloat, Tuple, TypeVar
+	from typing import Callable, Iterable, List, Optional, Sequence, SupportsFloat, Tuple, TypeVar
 
 	from .typing import Computable, Orderable
 	O = TypeVar("O", bound=Orderable)

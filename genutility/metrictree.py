@@ -6,7 +6,8 @@ from operator import itemgetter
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Set, Tuple
+	from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar
+	T = TypeVar("T")
 
 	from graphviz import Digraph
 

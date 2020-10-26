@@ -1,4 +1,8 @@
 import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import List
 
 re_paragraphs = re.compile(r"((?:[^\n][\n]?)+)")
 

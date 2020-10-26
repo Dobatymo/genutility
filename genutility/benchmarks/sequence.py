@@ -1,5 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from typing import Callable, Iterator, MutableSequence, TypeVar
+	T = TypeVar("T")
 
 def pop_many_2(seq, func):
 	# type: (MutableSequence[T], Callable) -> Iterator[T]

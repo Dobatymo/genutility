@@ -1,4 +1,4 @@
+[bandit]
 # B101 : assert_used
 # B322 : input
-
-skips: ['B101', 'B322']
+skips: B101,B322

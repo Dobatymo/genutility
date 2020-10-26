@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
+
 import requests
 
 from .exceptions import assert_choice
 
+if TYPE_CHECKING:
+	from typing import List, Optional
 
 class Rasa(object):
 

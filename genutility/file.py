@@ -10,18 +10,18 @@ from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
 from .ops import logical_implication, logical_xor
 
+if TYPE_CHECKING:
+	from mmap import mmap
+	from typing import IO, Any, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
+
+	PathType = Union[str, PathLike]
+	Data = TypeVar('D', str, bytes)
+
 if __debug__:
 	import tarfile
 	import zipfile
 
 	from .compat import bz2, gzip
-
-if TYPE_CHECKING:
-	from mmap import mmap
-	from typing import IO, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
-
-	PathType = Union[str, PathLike]
-	Data = TypeVar('D', str, bytes)
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
