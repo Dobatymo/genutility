@@ -1,5 +1,7 @@
 from __future__ import generator_stop
 
+from pathlib import Path
+
 from genutility.file import write_file
 from genutility.hash import crc32_hash_file, ed2k_hash_file_v1, ed2k_hash_file_v2, md5_hash_file, sha1_hash_file
 from genutility.test import MyTestCase, parametrize
@@ -33,7 +35,7 @@ class HashTest(MyTestCase):
 		self.assertEqual(truth, result)
 
 	@parametrize(
-		("testtemp/hash.bin", "d79e1c308aa5bbcdeea8ed63df412da9"),
+		(Path("testtemp/hash.bin"), "d79e1c308aa5bbcdeea8ed63df412da9"),
 	)
 	def test_hash_file_v1v2(self, path, truth):
 		result = ed2k_hash_file_v1(path)
