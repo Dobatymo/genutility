@@ -3,5 +3,5 @@ bandit
 flake8
 pre-commit
 requests-mock
-aioresponses; python_version>='3.5'
-asynctest; python_version>='3.5' and python_version<'3.8' # for aioresponses
+aioresponses<0.7
+aiohttp<3.7.0
