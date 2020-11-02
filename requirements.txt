@@ -24,6 +24,7 @@ rhash; sys_platform=='win32'
 ruamel.yaml
 simple_salesforce>=1.1.0
 simplejson
+sortedcontainers
 tls-property>=1.0.1
 toml
 unidecode
