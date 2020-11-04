@@ -1,5 +1,5 @@
 import dbm
-import pickle
+import pickle  # nosec
 from typing import TYPE_CHECKING
 import gzip
 
@@ -11,6 +11,10 @@ if TYPE_CHECKING:
 def read_dbm_httpcache(path, open_func=dbm.open, decode=True):
 	# type: (str, Callable) -> Iterator[dict]
 
+	""" Loads scrapy dbm http cache files.
+		Uses pickle so only use on trusted file.
+	"""
+
 	with open_func(path, "r") as db:
 
 		time_pair = None
@@ -21,7 +25,7 @@ def read_dbm_httpcache(path, open_func=dbm.open, decode=True):
 			if key.endswith(b"_data"):
 				hash = key[:-5]
 				time = float(db[hash + b"_time"])
-				data = pickle.loads(value)
+				data = pickle.loads(value)  # nosec
 
 				if data["headers"].get(b"Content-Encoding", []) == [b"gzip"]:
 					data["body"] = gzip.decompress(data["body"])
