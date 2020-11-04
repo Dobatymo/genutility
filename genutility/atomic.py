@@ -64,9 +64,9 @@ def sopen(path, mode="rb", encoding=None, errors=None, newline=None, safe=False)
 	# type: (PathType, str, Optional[str], Optional[str], Optional[str], bool) -> ContextManager[IO]
 
 	if safe:
-		return TransactionalCreateFile(path, mode, encoding=None, errors=None, newline=None)
+		return TransactionalCreateFile(path, mode, encoding=encoding, errors=errors, newline=newline)
 	else:
-		return copen(path, mode, encoding=None, errors=None, newline=None)
+		return copen(path, mode, encoding=encoding, errors=errors, newline=newline)
 
 def write_file(data, path, mode="wb", encoding=None, errors=None, newline=None):
 	# type: (Union[str, bytes], PathType, str, Optional[str], Optional[str], Optional[str]) -> None
