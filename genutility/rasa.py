@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+import aiohttp
 import requests
 
 from .exceptions import assert_choice
@@ -21,7 +22,7 @@ class Rasa(object):
 	def get_endpoint(self, path):
 		# type: (str, ) -> str
 
-		return self.scheme + "://" + self.netloc + path
+		return f"{self.scheme}://{self.netloc}{path}"
 
 class RasaRest(Rasa):
 
@@ -49,41 +50,130 @@ class RasaRest(Rasa):
 		r.raise_for_status()
 		return r.json()
 
+class RasaRestAsync(Rasa):
+
+	async def get_request(self, url, params=None):
+		# type: (str, Optional[dict]) -> dict
+
+		params = params or {}
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		async with aiohttp.ClientSession() as session:
+			async with session.get(url, timeout=self.timeout, params=params) as response:
+				response.raise_for_status()
+				return await response.json()
+
+	async def post_request(self, url, params=None, json=None):
+		# type: (str, Optional[dict], Optional[dict]) -> dict
+
+		params = params or {}
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		async with aiohttp.ClientSession() as session:
+			async with session.post(url, timeout=self.timeout, params=params, json=json) as response:
+				response.raise_for_status()
+				return await response.json()
+
+
 INCLUDE_EVENTS_ENUM = {"AFTER_RESTART", "ALL", "APPLIED", "NONE"}
+OUTPUT_CHANNEL_ENUM = {"latest", "slack", "callback", "facebook", "rocketchat", "telegram", "twilio", "webexteams", "socketio"}
 
 class _RasaRestConversations(object):
 
 	def get_tracker(self, include_events=None, until=None):
 		# type: (Optional[str], Optional[int]) -> dict
 
+		""" Retrieve a conversations tracker
+			The tracker represents the state of the conversation. The state of the tracker is created by applying a sequence of events, which modify the state. These events can optionally be included in the response.
+		"""
+
 		assert_choice("include_events", include_events, INCLUDE_EVENTS_ENUM, True)
 
-		url = self.get_endpoint("/conversations/{}/tracker".format(self.sender))
+		url = self.get_endpoint(f"/conversations/{self.sender}/tracker")
 
 		return self.get_request(url, params={
 			"include_events": include_events,
 			"until": until,
 		})
 
-	def post_events(self, event, timestamp, include_events=None):
-		# type: (str, int, Optional[str]) -> dict
+	def post_events(self, event, timestamp, include_events=None, output_channel=None, execute_side_effects=False):
+		# type: (str, int, Optional[str], bool) -> dict
+
+		""" Append events to a tracker
+			Appends one or multiple new events to the tracker state of the conversation. Any existing events will be kept and the new events will be appended, updating the existing state. If events are appended to a new conversation ID, the tracker will be initialised with a new session.
+		"""
 
 		assert_choice("include_events", include_events, INCLUDE_EVENTS_ENUM, True)
+		assert_choice("output_channel", output_channel, OUTPUT_CHANNEL_ENUM, True)
 
-		url = self.get_endpoint("/conversations/{}/tracker/events".format(self.sender))
+		url = self.get_endpoint(f"/conversations/{self.sender}/tracker/events")
 
-		return self.post_request(url, json={
+		return self.post_request(url, params={
+			"include_events": include_events,
+			"output_channel": output_channel,
+			"execute_side_effects": execute_side_effects,
+		}, json={
 			"event": event,
 			"timestamp": timestamp,
 		})
 
-	def get_story(self, until=None):
-		# type: (Optional[int], ) -> dict
+	def get_story(self, until=None, all_sessions=False):
+		# type: (Optional[int], bool) -> dict
 
-		url = self.get_endpoint("/conversations/{}/story".format(self.sender))
+		""" Retrieve an end-to-end story corresponding to a conversation
+			The story represents the whole conversation in end-to-end format. This can be posted to the '/test/stories' endpoint and used as a test.
+		"""
+
+		url = self.get_endpoint(f"/conversations/{self.sender}/story")
 
 		return self.get_request(url, params={
 			"until": until,
+			"all_sessions": all_sessions,
+		})
+
+	def execute_action(self, name, policy=None, confidence=None, include_events=None, output_channel=None):
+		# type: (str, Optional[str], Optional[float], Optional[str], Optional[str]) -> dict
+
+		""" Run an action in a conversation.
+			DEPRECATED. Runs the action, calling the action server if necessary. Any responses sent by the executed action will be forwarded to the channel specified in the `output_channel` parameter. If no output channel is specified, any messages that should be sent to the user will be included in the response of this endpoint.
+		"""
+
+		assert_choice("include_events", include_events, INCLUDE_EVENTS_ENUM, True)
+		assert_choice("output_channel", output_channel, OUTPUT_CHANNEL_ENUM, True)
+
+		url = self.get_endpoint(f"/conversations/{self.sender}/execute")
+
+		return self.post_request(url, params={
+			"include_events": include_events,
+			"output_channel": output_channel,
+		}, json={
+			"name": name,
+			"policy": policy,
+			"confidence": confidence,
+		})
+
+	def trigger_intent(self, name, entities=None, include_events=None, output_channel=None):
+		# type: (str, Optional[dict], Optional[str], Optional[str]) -> dict
+
+		""" Inject an intent into a conversation
+			Sends a specified intent and list of entities in place of a user message. The bot then predicts and executes a response action. Any responses sent by the executed action will be forwarded to the channel specified in the output_channel parameter. If no output channel is specified, any messages that should be sent to the user will be included in the response of this endpoint.
+		"""
+
+		assert_choice("include_events", include_events, INCLUDE_EVENTS_ENUM, True)
+		assert_choice("output_channel", output_channel, OUTPUT_CHANNEL_ENUM, True)
+
+		url = self.get_endpoint(f"/conversations/{self.sender}/trigger_intent")
+
+		return self.post_request(url, params={
+			"include_events": include_events,
+			"output_channel": output_channel,
+		}, json={
+			"name": name,
+			"entities": entities,
 		})
 
 class _RasaRestWebhook(object):
@@ -124,4 +214,13 @@ class RasaRestWebhook(_RasaRestWebhook, RasaRest):
 	pass
 
 class RasaCallbackWebhook(_RasaCallbackWebhook, RasaRest):
+	pass
+
+class RasaRestConversationsAsync(_RasaRestConversations, RasaRestAsync):
+	pass
+
+class RasaRestWebhookAsync(_RasaRestWebhook, RasaRestAsync):
+	pass
+
+class RasaCallbackWebhookAsync(_RasaCallbackWebhook, RasaRestAsync):
 	pass

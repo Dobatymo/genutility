@@ -1,8 +1,11 @@
 from __future__ import generator_stop
 
-import requests_mock
+import asyncio
 
-from genutility.rasa import RasaRestConversations, RasaRestWebhook
+import requests_mock
+from aioresponses import aioresponses
+
+from genutility.rasa import RasaRestConversations, RasaRestConversationsAsync, RasaRestWebhook, RasaRestWebhookAsync
 from genutility.test import MyTestCase
 
 Webhook = [
@@ -74,6 +77,34 @@ class RasaTest(MyTestCase):
 			truth = GetTracker
 
 		self.assertEqual(truth, result)
+
+class RasaAsyncTest(MyTestCase):
+
+	@classmethod
+	def setUpClass(cls):
+		cls.loop = asyncio.get_event_loop()
+
+	def test_webhook(self):
+		c = RasaRestWebhookAsync("sender-id", netloc="rasa")
+
+		with aioresponses() as m:
+			m.post("http://rasa/webhooks/rest/webhook", payload=Webhook)
+
+			truth = Webhook
+			result = self.loop.run_until_complete(c.send_message("the message"))
+
+			self.assertEqual(truth, result)
+
+	def test_conversations_tracker(self):
+		c = RasaRestConversationsAsync("sender-id", netloc="rasa")
+
+		with aioresponses() as m:
+			m.get("http://rasa/conversations/sender-id/tracker?include_events=AFTER_RESTART", payload=GetTracker)
+
+			truth = GetTracker
+			result = self.loop.run_until_complete(c.get_tracker("AFTER_RESTART", ""))
+
+			self.assertEqual(truth, result)
 
 if __name__ == "__main__":
 	import unittest
