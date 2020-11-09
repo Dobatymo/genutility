@@ -3,7 +3,7 @@ from __future__ import generator_stop
 from datetime import time, timezone
 
 from genutility.compat.datetime import datetime
-from genutility.datetime import between_times, datetime_from_utc_timestamp, now
+from genutility.datetime import between, datetime_from_utc_timestamp, now
 from genutility.test import MyTestCase, parametrize
 
 
@@ -35,9 +35,16 @@ class DatetimeTest(MyTestCase):
 		(time(15), time(15), time(13), True),
 		(time(13), time(15), time(13), True),
 		(time(13), time(0), time(0), True),
+
+		(datetime(1970, 1, 2, tzinfo=timezone.utc), datetime(1970, 1, 1, tzinfo=timezone.utc), datetime(1970, 1, 3, tzinfo=timezone.utc), True),
+		(datetime(1970, 1, 2, tzinfo=timezone.utc), datetime(1970, 1, 1, tzinfo=timezone.utc), None, True),
+		(datetime(1970, 1, 2, tzinfo=timezone.utc), None, datetime(1970, 1, 3, tzinfo=timezone.utc), True),
+		(datetime(1970, 1, 3, tzinfo=timezone.utc), datetime(1970, 1, 1, tzinfo=timezone.utc), datetime(1970, 1, 2, tzinfo=timezone.utc), False),
+		(datetime(1970, 1, 1, tzinfo=timezone.utc), datetime(1970, 1, 2, tzinfo=timezone.utc), None, False),
+		(datetime(1970, 1, 3, tzinfo=timezone.utc), None, datetime(1970, 1, 2, tzinfo=timezone.utc), False),
 	)
-	def test_between_times(self, t, a, b, truth):
-		result = between_times(t, a, b)
+	def test_between(self, dt, start, end, truth):
+		result = between(dt, start, end)
 		self.assertEqual(result, truth)
 
 if __name__ == "__main__":

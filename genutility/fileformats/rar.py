@@ -178,8 +178,9 @@ def create_rar_from_folder(path, dest_path=".", profile_setter_func=None, filter
 			r = Rar(dest_path / "{}.rar".format(name_transform(path.name)))
 			if profile_setter_func:
 				profile_setter_func(r)
-			for entry in filter(filter_func, scandir(".")): #was: scandir_rec
-				r.add_file(entry.path)
+			with scandir(".") as it:
+				for entry in filter(filter_func, it): #was: scandir_rec
+					r.add_file(entry.path)
 			r.create()
 		except RarError as e:
 			logger.error("%s\n%s" % (str(e), e.output))

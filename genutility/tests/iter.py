@@ -55,6 +55,7 @@ from genutility.iter import (
     triples,
     valleys,
     x_wise,
+    remove_consecutive_dupes
 )
 from genutility.test import MyTestCase, parametrize
 
@@ -654,6 +655,18 @@ class IterTest(MyTestCase):
 	def test_all_equal_to(self, it, elm, truth):
 		result = all_equal_to(it, elm)
 		self.assertEqual(truth, result)
+
+	@parametrize(
+		(tuple(), tuple()),
+		((1,1,1), (1,)),
+		((1,1,2,2,3,3), (1,2,3)),
+		((3,3,2,2,1,1), (3,2,1)),
+		((1,2,3,1), (1,2,3,1)),
+		((3,2,1,3), (3,2,1,3)),
+	)
+	def test_remove_consecutive_dupes(self, input, truth):
+		result = remove_consecutive_dupes(input)
+		self.assertIterEqual(truth, result)
 
 if __name__ == "__main__":
 	import unittest

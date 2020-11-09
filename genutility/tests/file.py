@@ -59,7 +59,8 @@ class FileTest(MyTestCase):
 
 	def test_blockfilesiter(self):
 		base = "testfiles/chunks"
-		paths = sorted(e.path for e in scandir(base))
+		with scandir(base) as scan:
+			paths = sorted(e.path for e in scan)
 
 		result = blockfilesiter(paths, 2)
 		truth = [b"12", b"34", b"56", b"78", b"90", b"12", b"34", b"56", b"78", b"9"]

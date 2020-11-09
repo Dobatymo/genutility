@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from future.moves.urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import re
+import os.path
 from string import ascii_letters, digits
 from typing import TYPE_CHECKING
 
@@ -64,3 +65,14 @@ def url_replace_query(split_url, query, drop_fragment=True):
 		fragment = ""
 
 	return urlunsplit((scheme, netloc, path, query, fragment))
+
+def path_ext(path):
+	return os.path.splitext(path)[1][1:].lower()
+
+def url_ext(url):
+	# type: (str, ) -> str
+
+	""" Returns the lowercase file extension of the URI/URL. """
+
+	path = urlsplit(url).path
+	return path_ext(path)

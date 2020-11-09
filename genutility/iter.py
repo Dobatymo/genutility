@@ -10,7 +10,7 @@ import sys
 from collections import deque
 from functools import partial
 from itertools import chain, combinations, count, groupby, islice, product, repeat, starmap, tee
-from operator import add
+from operator import add, itemgetter
 from random import randrange
 from time import sleep, time
 from types import GeneratorType
@@ -790,3 +790,12 @@ def skip_by_indices(it, indices):
 
 	for ii, elem in enumerate(it, i):
 		yield ii, elem
+
+def remove_consecutive_dupes(it):
+	# type: (Iterable, ) -> Iterator
+
+	""" Removes consecutive duplicates from iterable `it`.
+		(a, a, b, b, a, b) -> a, b, a, b
+	"""
+
+	return map(itemgetter(0), groupby(it))

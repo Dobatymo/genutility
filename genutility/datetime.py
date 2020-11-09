@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import time
 from datetime import timedelta, tzinfo
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 from .compat.datetime import datetime, timezone
 
@@ -61,17 +61,40 @@ def datetime_from_utc_timestamp_ns(epoch, aslocal=False):
 
 	return dt
 
-def between_times(thetime, start, end):
-	# type: (dtime, dtime, dtime) -> bool
+@overload
+def between(dt, start, end):
+	# type: (datetime, Optional[datetime], Optional[datetime]) -> bool
 
-	""" Inclusive range.
+	pass
+
+@overload
+def between(dt, start, end):
+	# type: (dtime, Optional[dtime], Optional[dtime]) -> bool
+
+	pass
+
+def between(dt, start=None, end=None):
+
+	""" Tests if `dt` is in-between `start` and `end` (inclusive and optionally open ended).
+
+		If the parameters are datetimes, they all most be either offset-aware or native.
+		If `start` and `end` are `time` objects (without dates),
+		then `end` can come before `start` to specify ranges which overlap two days.
+
 		If `start` equals `end`, return `True`.
 	"""
 
-	if start < end:
-		return start <= thetime and thetime <= end
-	else:
-		return start <= thetime or thetime <= end
+	if start and end:
+		if start < end:
+			return start <= dt and dt <= end
+		else:
+			return start <= dt or dt <= end
+
+	if start and dt < start:
+		return False
+	if end and dt > end:
+		return False
+	return True
 
 class LocalTimezone(tzinfo):
 

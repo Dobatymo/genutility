@@ -108,36 +108,10 @@ except ImportError:
 		from os import rename as replace  # on posix rename can already replace existing files atomically
 
 try:
-	from os import scandir as _scandir
-except ImportError:
-	from scandir import scandir as _scandir
-
-if hasattr(_scandir, "__exit__"):
-	scandir = _scandir
-else:
-	class scandir(object):
-
-		def __init__(self, path="."):
-			self.it = _scandir(path)
-
-		def __enter__(self):
-			return self.it
-
-		def __exit__(self, *args):
-			pass
-
-		def __iter__(self):
-			return self.it
-
-		def __next__(self):
-			return next(self.it)
-
-		next = __next__
-
-try:
 	from os import DirEntry
 
 except ImportError:
+	from os import scandir
 	DirEntry = type(next(scandir()))
 
 try:

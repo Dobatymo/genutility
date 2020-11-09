@@ -284,7 +284,7 @@ def _scandir_rec_skippable(rootentry, files=True, others=False, follow_symlinks=
 	# type: (DirEntry, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[MyDirEntry]
 
 	try:
-		with scandir(rootentry.path) as it: # python 3.6
+		with scandir(rootentry.path) as it:
 			for entry in it:
 				if files and entry.is_file(follow_symlinks=follow_symlinks):
 					yield MyDirEntry(entry)
@@ -306,7 +306,7 @@ def _scandir_rec(rootentry, files=True, dirs=False, others=False, rec=True, foll
 	# type: (DirEntry, bool, bool, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[DirEntry]
 
 	try:
-		with scandir(rootentry.path) as it: # python 3.6
+		with scandir(rootentry.path) as it:
 			for entry in it:
 				if files and entry.is_file(follow_symlinks=follow_symlinks):
 					yield entry
@@ -361,15 +361,17 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 def _scandir_depth(rootentry, depth, errorfunc):
 
 	try:
-		for entry in scandir(rootentry):
-			if entry.is_dir():
-				yield depth, entry
-				for depth_entry in _scandir_depth(entry, depth + 1, errorfunc):
-					yield depth_entry
+		with scandir(rootentry.path) as it:
+			for entry in it:
+				if entry.is_dir():
+					yield depth, entry
+					for depth_entry in _scandir_depth(entry, depth + 1, errorfunc):
+						yield depth_entry
 
-		for entry in scandir(rootentry):
-			if entry.is_file():
-				yield depth, entry
+		with scandir(rootentry.path) as it:
+			for entry in it:
+				if entry.is_file():
+					yield depth, entry
 
 	except OSError as e:
 		errorfunc(rootentry, e)
@@ -719,26 +721,27 @@ def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, e
 	counts = Counts()
 
 	try:
-		for entry in scandir(rootentry.path):
+		with scandir(rootentry.path) as it:
+			for entry in it:
 
-			if entry.is_dir():
-				counts.dirs += 1
-				if rec:
-					for subentry, subcounts in _scandir_counts(entry, files, others, rec, total, errorfunc):
-						yield subentry, subcounts
+				if entry.is_dir():
+					counts.dirs += 1
+					if rec:
+						for subentry, subcounts in _scandir_counts(entry, files, others, rec, total, errorfunc):
+							yield subentry, subcounts
 
-						if total:
-							counts += subcounts
+							if total:
+								counts += subcounts
 
-			elif entry.is_file():
-				counts.files += 1
-				if files:
-					yield entry, None
+				elif entry.is_file():
+					counts.files += 1
+					if files:
+						yield entry, None
 
-			else:
-				counts.others += 1
-				if others:
-					yield entry, None
+				else:
+					counts.others += 1
+					if others:
+						yield entry, None
 
 		yield rootentry, counts  # yield after the loop
 

@@ -227,9 +227,10 @@ def empty_dir(dirname):
 
 	""" tests if directory is empty """
 
-	if not is_empty(os.scandir(dirname)):
-		msg = "directory {0} is not empty".format(dirname)
-		raise ArgumentTypeError(msg)
+	with os.scandir(dirname) as it:
+		if not is_empty(it):
+			msg = "directory {0} is not empty".format(dirname)
+			raise ArgumentTypeError(msg)
 
 	return dirname
 
