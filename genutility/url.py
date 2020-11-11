@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from future.moves.urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
-import re
 import os.path
+import re
 from string import ascii_letters, digits
 from typing import TYPE_CHECKING
 

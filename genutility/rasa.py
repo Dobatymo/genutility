@@ -1,9 +1,13 @@
+from __future__ import generator_stop
+
+import os.path
 from typing import TYPE_CHECKING
 
 import aiohttp
 import requests
 
 from .exceptions import assert_choice
+from .yaml import read_yaml
 
 if TYPE_CHECKING:
 	from typing import List, Optional
@@ -50,6 +54,37 @@ class RasaRest(Rasa):
 		r.raise_for_status()
 		return r.json()
 
+	def put_request(self, url, params=None, json=None):
+		# type: (str, Optional[dict], Optional[dict]) -> dict
+
+		params = params or {}
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		r = requests.put(url, timeout=self.timeout, params=params, json=json)
+		r.raise_for_status()
+		if r.status_code == 204:
+			return {}
+		else:
+			return r.json()
+
+	def delete_request(self, url, params=None, json=None):
+		# type: (str, Optional[dict], Optional[dict]) -> dict
+
+		params = params or {}
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		r = requests.delete(url, timeout=self.timeout, params=params, json=json)
+		r.raise_for_status()
+
+		if r.status_code == 204:
+			return {}
+		else:
+			return r.json()
+
 class RasaRestAsync(Rasa):
 
 	async def get_request(self, url, params=None):
@@ -61,9 +96,9 @@ class RasaRestAsync(Rasa):
 			params.setdefault("token", self.token)
 
 		async with aiohttp.ClientSession() as session:
-			async with session.get(url, timeout=self.timeout, params=params) as response:
-				response.raise_for_status()
-				return await response.json()
+			async with session.get(url, timeout=self.timeout, params=params) as r:
+				r.raise_for_status()
+				return await r.json()
 
 	async def post_request(self, url, params=None, json=None):
 		# type: (str, Optional[dict], Optional[dict]) -> dict
@@ -74,10 +109,41 @@ class RasaRestAsync(Rasa):
 			params.setdefault("token", self.token)
 
 		async with aiohttp.ClientSession() as session:
-			async with session.post(url, timeout=self.timeout, params=params, json=json) as response:
-				response.raise_for_status()
-				return await response.json()
+			async with session.post(url, timeout=self.timeout, params=params, json=json) as r:
+				r.raise_for_status()
+				return await r.json()
 
+	async def put_request(self, url, params=None, json=None):
+		# type: (str, Optional[dict], Optional[dict]) -> dict
+
+		params = params or {}
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		async with aiohttp.ClientSession() as session:
+			async with session.put(url, timeout=self.timeout, params=params, json=json) as r:
+				r.raise_for_status()
+				if r.status == 204:
+					return {}
+				else:
+					return await r.json()
+
+	async def delete_request(self, url, params=None, json=None):
+		# type: (str, Optional[dict], Optional[dict]) -> dict
+
+		params = params or {}
+
+		if self.token:
+			params.setdefault("token", self.token)
+
+		async with aiohttp.ClientSession() as session:
+			async with session.delete(url, timeout=self.timeout, params=params, json=json) as r:
+				r.raise_for_status()
+				if r.status == 204:
+					return {}
+				else:
+					return await r.json()
 
 INCLUDE_EVENTS_ENUM = {"AFTER_RESTART", "ALL", "APPLIED", "NONE"}
 OUTPUT_CHANNEL_ENUM = {"latest", "slack", "callback", "facebook", "rocketchat", "telegram", "twilio", "webexteams", "socketio"}
@@ -87,7 +153,8 @@ class _RasaRestConversations(object):
 	def get_tracker(self, include_events=None, until=None):
 		# type: (Optional[str], Optional[int]) -> dict
 
-		""" Retrieve a conversations tracker
+		""" Retrieve a conversations tracker.
+
 			The tracker represents the state of the conversation. The state of the tracker is created by applying a sequence of events, which modify the state. These events can optionally be included in the response.
 		"""
 
@@ -103,7 +170,8 @@ class _RasaRestConversations(object):
 	def post_events(self, event, timestamp, include_events=None, output_channel=None, execute_side_effects=False):
 		# type: (str, int, Optional[str], bool) -> dict
 
-		""" Append events to a tracker
+		""" Append events to a tracker.
+
 			Appends one or multiple new events to the tracker state of the conversation. Any existing events will be kept and the new events will be appended, updating the existing state. If events are appended to a new conversation ID, the tracker will be initialised with a new session.
 		"""
 
@@ -124,7 +192,8 @@ class _RasaRestConversations(object):
 	def get_story(self, until=None, all_sessions=False):
 		# type: (Optional[int], bool) -> dict
 
-		""" Retrieve an end-to-end story corresponding to a conversation
+		""" Retrieve an end-to-end story corresponding to a conversation.
+
 			The story represents the whole conversation in end-to-end format. This can be posted to the '/test/stories' endpoint and used as a test.
 		"""
 
@@ -139,6 +208,7 @@ class _RasaRestConversations(object):
 		# type: (str, Optional[str], Optional[float], Optional[str], Optional[str]) -> dict
 
 		""" Run an action in a conversation.
+
 			DEPRECATED. Runs the action, calling the action server if necessary. Any responses sent by the executed action will be forwarded to the channel specified in the `output_channel` parameter. If no output channel is specified, any messages that should be sent to the user will be included in the response of this endpoint.
 		"""
 
@@ -159,7 +229,8 @@ class _RasaRestConversations(object):
 	def trigger_intent(self, name, entities=None, include_events=None, output_channel=None):
 		# type: (str, Optional[dict], Optional[str], Optional[str]) -> dict
 
-		""" Inject an intent into a conversation
+		""" Inject an intent into a conversation.
+
 			Sends a specified intent and list of entities in place of a user message. The bot then predicts and executes a response action. Any responses sent by the executed action will be forwarded to the channel specified in the output_channel parameter. If no output channel is specified, any messages that should be sent to the user will be included in the response of this endpoint.
 		"""
 
@@ -175,6 +246,64 @@ class _RasaRestConversations(object):
 			"name": name,
 			"entities": entities,
 		})
+
+REMOTE_STORAGE_ENUM = {"aws", "gcs", "azure"}
+
+class _RasaRestModel(object):
+
+	def train(self, directory, config=None, domain=None, nlu=None, responses=None, stories=None, save_to_default_model_directory=True, force_training=False):
+
+		""" Train a Rasa model.
+
+			Trains a new Rasa model. Depending on the data given only a dialogue model, only a NLU model, or a model combining a trained dialogue model with an NLU model will be trained. The new model is not loaded by default.
+		"""
+
+		# use default values
+		json = {
+			"config": config or "config.yml",
+			"domain": domain or "domain.yml",
+			"nlu": nlu or "data/nlu.yml",
+			"responses": responses or "data/responses.yml",
+			"stories": stories or "data/stories.yml",
+		}
+
+		# check if files exist and read contents
+		json = {k: read_yaml(v) if os.path.exists(v) else None for k, v in json.items()}
+
+		url = self.get_endpoint("/model/train")
+
+		return self.post_request(url, params={
+			"save_to_default_model_directory": save_to_default_model_directory,
+			"force_training": force_training,
+		}, json=json)
+
+	def replace_model(self, model_file=None, model_server=None, remote_storage=None):
+		# type: (str, Optional[dict], Optional[str]) -> dict
+
+		""" Replace the currently loaded model.
+
+			Updates the currently loaded model. First, tries to load the model from the local storage system. Secondly, tries to load the model from the provided model server configuration. Last, tries to load the model from the provided remote storage.
+		"""
+
+		assert_choice("remote_storage", remote_storage, REMOTE_STORAGE_ENUM, True)
+
+		if model_file is None and model_server is None and remote_storage is None:
+			model_file = "models/"
+
+		url = self.get_endpoint("/model")
+
+		return self.put_request(url, json={
+			"model_file": model_file,
+			"model_server": model_server,
+			"remote_storage": remote_storage,
+		})
+
+	def unload_model(self):
+		# type: () -> dict
+
+		url = self.get_endpoint("/model")
+
+		return self.delete_request(url)
 
 class _RasaRestWebhook(object):
 
@@ -210,6 +339,9 @@ class _RasaCallbackWebhook(object):
 class RasaRestConversations(_RasaRestConversations, RasaRest):
 	pass
 
+class RasaRestModel(_RasaRestModel, RasaRest):
+	pass
+
 class RasaRestWebhook(_RasaRestWebhook, RasaRest):
 	pass
 
@@ -217,6 +349,9 @@ class RasaCallbackWebhook(_RasaCallbackWebhook, RasaRest):
 	pass
 
 class RasaRestConversationsAsync(_RasaRestConversations, RasaRestAsync):
+	pass
+
+class RasaRestModelAsync(_RasaRestModel, RasaRestAsync):
 	pass
 
 class RasaRestWebhookAsync(_RasaRestWebhook, RasaRestAsync):

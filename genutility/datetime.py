@@ -9,6 +9,7 @@ from .compat.datetime import datetime, timezone
 
 if TYPE_CHECKING:
 	from datetime import time as dtime
+	from typing import Optional
 
 utcmin = datetime.min.replace(tzinfo=timezone.utc)
 utcmax = datetime.max.replace(tzinfo=timezone.utc)

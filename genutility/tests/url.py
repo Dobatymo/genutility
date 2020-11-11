@@ -3,7 +3,7 @@ from __future__ import generator_stop
 from urllib.parse import urlsplit
 
 from genutility.test import MyTestCase, parametrize
-from genutility.url import get_url_argument, url_replace_query, url_ext, get_filename_from_url
+from genutility.url import get_filename_from_url, get_url_argument, url_ext, url_replace_query
 
 
 class UrlTest(MyTestCase):

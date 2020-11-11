@@ -1,12 +1,12 @@
 import dbm
+import gzip
 import pickle  # nosec
 from typing import TYPE_CHECKING
-import gzip
 
 from .dbm import dbm_items
 
 if TYPE_CHECKING:
-	from typing import Iterator, Callable
+	from typing import Callable, Iterator
 
 def read_dbm_httpcache(path, open_func=dbm.open, decode=True):
 	# type: (str, Callable) -> Iterator[dict]

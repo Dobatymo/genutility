@@ -45,6 +45,7 @@ from genutility.iter import (
     powerset,
     product_range_repeat,
     progress,
+    remove_consecutive_dupes,
     repeatfunc,
     resizer,
     retrier,
@@ -55,7 +56,6 @@ from genutility.iter import (
     triples,
     valleys,
     x_wise,
-    remove_consecutive_dupes
 )
 from genutility.test import MyTestCase, parametrize
 

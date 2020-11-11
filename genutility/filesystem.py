@@ -17,7 +17,7 @@ from operator import attrgetter
 from typing import TYPE_CHECKING
 
 from .compat import FileExistsError
-from .compat.os import DirEntry, PathLike, fspath, scandir
+from .compat.os import DirEntry, PathLike, fspath
 from .compat.pathlib import Path
 from .datetime import datetime_from_utc_timestamp
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
@@ -284,7 +284,7 @@ def _scandir_rec_skippable(rootentry, files=True, others=False, follow_symlinks=
 	# type: (DirEntry, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[MyDirEntry]
 
 	try:
-		with scandir(rootentry.path) as it:
+		with os.scandir(rootentry.path) as it:
 			for entry in it:
 				if files and entry.is_file(follow_symlinks=follow_symlinks):
 					yield MyDirEntry(entry)
@@ -306,7 +306,7 @@ def _scandir_rec(rootentry, files=True, dirs=False, others=False, rec=True, foll
 	# type: (DirEntry, bool, bool, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[DirEntry]
 
 	try:
-		with scandir(rootentry.path) as it:
+		with os.scandir(rootentry.path) as it:
 			for entry in it:
 				if files and entry.is_file(follow_symlinks=follow_symlinks):
 					yield entry
@@ -361,14 +361,14 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 def _scandir_depth(rootentry, depth, errorfunc):
 
 	try:
-		with scandir(rootentry.path) as it:
+		with os.scandir(rootentry.path) as it:
 			for entry in it:
 				if entry.is_dir():
 					yield depth, entry
 					for depth_entry in _scandir_depth(entry, depth + 1, errorfunc):
 						yield depth_entry
 
-		with scandir(rootentry.path) as it:
+		with os.scandir(rootentry.path) as it:
 			for entry in it:
 				if entry.is_file():
 					yield depth, entry
@@ -721,7 +721,7 @@ def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, e
 	counts = Counts()
 
 	try:
-		with scandir(rootentry.path) as it:
+		with os.scandir(rootentry.path) as it:
 			for entry in it:
 
 				if entry.is_dir():
