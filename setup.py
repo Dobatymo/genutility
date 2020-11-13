@@ -106,7 +106,7 @@ extras_require = {
 	"pdf": ["PyPDF2"],
 	"pillow": ["pillow", "piexif"],
 	"powerpoint": ["python-pptx"],
-	"rasa": ["requests", "aiohttp>=2.3"],
+	"rasa": ["requests", "aiohttp>=2.3", "ruamel.yaml"],
 	"salesforce": ["simple_salesforce>=1.1.0", "simplejson", "aiohttp>=2.3", "requests"],
 	"scipy": ["numpy", "scipy"],
 	"toml": ["toml"],
