@@ -11,12 +11,12 @@ from nltk.tokenize import word_tokenize as tokenize
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
-	from typing import Dict, Iterable, Iterator, List, TextIO, Union
+	from typing import Dict, Iterable, Iterator, List, Optional, TextIO, Union
 
 	from .gensim import KeyedVectors
 
 def gensim_indexer(embeddings, doc, ignore=True):
-	# type: (KeyedVectors, str) -> Iterator[int]
+	# type: (KeyedVectors, str, bool) -> Iterator[int]
 
 	for word in tokenize(doc):
 		try:
@@ -28,13 +28,13 @@ def gensim_indexer(embeddings, doc, ignore=True):
 				raise
 
 def batch_gensim_indexer(embeddings, docs, ignore=True):
-	# type: (KeyedVectors, Iterable[str]) -> Iterator[List[int]]
+	# type: (KeyedVectors, Iterable[str], bool) -> Iterator[List[int]]
 
 	for doc in docs:
 		yield list(gensim_indexer(embeddings, doc, ignore))
 
 def load_freqs(fname, normalize=False, limit=None):
-	# type: (Union[str, TextIO], ) -> Dict[str, int]
+	# type: (Union[str, TextIO], bool, Optional[int]) -> Dict[str, int]
 
 	with PathOrTextIO(fname, "rt", encoding="utf-8") as fin:
 		freqs = dict()

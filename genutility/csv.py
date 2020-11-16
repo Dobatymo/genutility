@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 	from typing import Callable, Iterator, List, Optional, Sequence
 
 def iter_csv(path, delimiter=",", encoding="utf-8"):
-	# type: (str, str, str, str, str) -> Iterator[List[str]]
+	# type: (str, str, str) -> Iterator[List[str]]
 
 	if PY2:
 		with open(path, "rb") as fr:

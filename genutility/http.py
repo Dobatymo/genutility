@@ -317,7 +317,7 @@ class URLRequest(object):
 			self.response.close()
 
 	def download(self, basepath, filename=None, fn_prio=None, overwrite=False, suffix=".partial", report=None):
-		# type: () -> Tuple[Optional[int], str]
+		# type: (str, Optional[str], Optional[Tuple[int, int, int, int]], bool, str, Optional[Callable[[int, int], None]]) -> Tuple[Optional[int], str]
 
 		try:
 			return self._download(basepath, filename, fn_prio, overwrite, suffix, report)

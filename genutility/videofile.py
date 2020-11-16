@@ -141,7 +141,7 @@ class CvVideo(VideoBase):
 		return offset / self.meta["fps"]
 
 	def _get_frame(self, offset, native=False):
-		# type: (int, ) -> Tuple[float, np.ndarray]
+		# type: (int, bool) -> Tuple[float, np.ndarray]
 
 		self.cap.set(self.cv2.CAP_PROP_POS_FRAMES, offset)
 

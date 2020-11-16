@@ -15,7 +15,7 @@ from .numpy import batchtopk, categorical
 from .object import cast
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, Iterator, List, MutableMapping, Tuple, Union
+	from typing import Any, Dict, Iterable, Iterator, List, MutableMapping, Optional, Tuple, Union
 
 	RawDocument = List[int]
 	IterableDocuments = Iterable[Iterable[int]]
@@ -23,20 +23,20 @@ if TYPE_CHECKING:
 	Indices = Union[slice, np.ndarray]
 
 def top_topics(id2word, term_topic_matrix, num_words=10, decimals=2):
-	# type: (Dict[int, str], np.ndarray, int) -> Iterator[List[Tuple[str, float]]]
+	# type: (Dict[int, str], np.ndarray, int, int) -> Iterator[List[Tuple[str, float]]]
 
 	"""
 		term_topic_matrix: float[K, V]
 	"""
 
 	indices_list, probs_list = batchtopk(term_topic_matrix, num_words, reverse=True)
-	np.around(probs_list, decimals=2, out=probs_list)
+	np.around(probs_list, decimals=decimals, out=probs_list)
 
 	for indices, probs in zip(indices_list, probs_list):
 		yield [(id2word[id], prob) for id, prob in zip(indices, probs)]
 
 def format_topics(topics, linesep="\n", tokensep="\t"):
-	# type: (Iterable[List[Tuple[str, float]]], ) -> str
+	# type: (Iterable[List[Tuple[str, float]]], str, str) -> str
 
 	buffer = []
 
@@ -70,7 +70,7 @@ class LDADocument(object):
 class LDABase(object):
 
 	def __init__(self, seed=None):
-		# type: () -> None
+		# type: (Optional[int], ) -> None
 
 		np.seterr(all="raise")
 		np.random.seed(seed)
@@ -286,7 +286,7 @@ class LDA(LDABase):
 	"""
 
 	def __init__(self, n_topics, alpha=0.1, beta=0.01, seed=None):
-		# type: (int, float, float) -> None
+		# type: (int, float, float, Optional[int]) -> None
 
 		LDABase.__init__(self, seed)
 

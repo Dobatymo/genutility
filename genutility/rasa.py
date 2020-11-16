@@ -1,7 +1,8 @@
 from __future__ import generator_stop
 
 import os.path
-from typing import TYPE_CHECKING
+from abc import ABCMeta, abstractmethod
+from typing import TYPE_CHECKING, Any, Coroutine, Dict, Generic, List, Optional, TypeVar, Union
 
 import aiohttp
 import requests
@@ -9,8 +10,42 @@ import requests
 from .exceptions import assert_choice
 from .yaml import read_yaml
 
-if TYPE_CHECKING:
-	from typing import List, Optional
+JsonDict = Dict[str, Any]
+JsonValue = Union[JsonDict, List[JsonDict]]
+ReturnT = TypeVar("ReturnT")
+
+SyncReturnT = JsonValue
+AsyncReturnT = Coroutine[Any, Any, JsonValue]
+
+class RasaABC(Generic[ReturnT], metaclass=ABCMeta):
+
+	sender: str
+
+	@abstractmethod
+	def get_endpoint(self, path):
+		# type: (str, ) -> str
+		raise NotImplementedError
+
+	@abstractmethod
+	def get_request(self, url, params=None):
+		# type: (str, Optional[JsonDict]) -> ReturnT
+		raise NotImplementedError
+
+	@abstractmethod
+	def post_request(self, url, params=None, json=None):
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> ReturnT
+		raise NotImplementedError
+
+	@abstractmethod
+	def put_request(self, url, params=None, json=None):
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> ReturnT
+		raise NotImplementedError
+
+	@abstractmethod
+	def delete_request(self, url, params=None, json=None):
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> ReturnT
+		raise NotImplementedError
+
 
 class Rasa(object):
 
@@ -31,7 +66,7 @@ class Rasa(object):
 class RasaRest(Rasa):
 
 	def get_request(self, url, params=None):
-		# type: (str, Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -43,7 +78,7 @@ class RasaRest(Rasa):
 		return r.json()
 
 	def post_request(self, url, params=None, json=None):
-		# type: (str, Optional[dict], Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -55,7 +90,7 @@ class RasaRest(Rasa):
 		return r.json()
 
 	def put_request(self, url, params=None, json=None):
-		# type: (str, Optional[dict], Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -70,7 +105,7 @@ class RasaRest(Rasa):
 			return r.json()
 
 	def delete_request(self, url, params=None, json=None):
-		# type: (str, Optional[dict], Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -88,7 +123,7 @@ class RasaRest(Rasa):
 class RasaRestAsync(Rasa):
 
 	async def get_request(self, url, params=None):
-		# type: (str, Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -101,7 +136,7 @@ class RasaRestAsync(Rasa):
 				return await r.json()
 
 	async def post_request(self, url, params=None, json=None):
-		# type: (str, Optional[dict], Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -114,7 +149,7 @@ class RasaRestAsync(Rasa):
 				return await r.json()
 
 	async def put_request(self, url, params=None, json=None):
-		# type: (str, Optional[dict], Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -130,7 +165,7 @@ class RasaRestAsync(Rasa):
 					return await r.json()
 
 	async def delete_request(self, url, params=None, json=None):
-		# type: (str, Optional[dict], Optional[dict]) -> dict
+		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
 
 		params = params or {}
 
@@ -148,10 +183,10 @@ class RasaRestAsync(Rasa):
 INCLUDE_EVENTS_ENUM = {"AFTER_RESTART", "ALL", "APPLIED", "NONE"}
 OUTPUT_CHANNEL_ENUM = {"latest", "slack", "callback", "facebook", "rocketchat", "telegram", "twilio", "webexteams", "socketio"}
 
-class _RasaRestConversations(object):
+class _RasaRestConversations(RasaABC[ReturnT]):
 
 	def get_tracker(self, include_events=None, until=None):
-		# type: (Optional[str], Optional[int]) -> dict
+		# type: (Optional[str], Optional[int]) -> ReturnT
 
 		""" Retrieve a conversations tracker.
 
@@ -168,7 +203,7 @@ class _RasaRestConversations(object):
 		})
 
 	def post_events(self, event, timestamp, include_events=None, output_channel=None, execute_side_effects=False):
-		# type: (str, int, Optional[str], bool) -> dict
+		# type: (str, int, Optional[str], Optional[str], bool) -> ReturnT
 
 		""" Append events to a tracker.
 
@@ -190,7 +225,7 @@ class _RasaRestConversations(object):
 		})
 
 	def get_story(self, until=None, all_sessions=False):
-		# type: (Optional[int], bool) -> dict
+		# type: (Optional[int], bool) -> ReturnT
 
 		""" Retrieve an end-to-end story corresponding to a conversation.
 
@@ -205,7 +240,7 @@ class _RasaRestConversations(object):
 		})
 
 	def execute_action(self, name, policy=None, confidence=None, include_events=None, output_channel=None):
-		# type: (str, Optional[str], Optional[float], Optional[str], Optional[str]) -> dict
+		# type: (str, Optional[str], Optional[float], Optional[str], Optional[str]) -> ReturnT
 
 		""" Run an action in a conversation.
 
@@ -227,7 +262,7 @@ class _RasaRestConversations(object):
 		})
 
 	def trigger_intent(self, name, entities=None, include_events=None, output_channel=None):
-		# type: (str, Optional[dict], Optional[str], Optional[str]) -> dict
+		# type: (str, Optional[JsonDict], Optional[str], Optional[str]) -> ReturnT
 
 		""" Inject an intent into a conversation.
 
@@ -249,9 +284,10 @@ class _RasaRestConversations(object):
 
 REMOTE_STORAGE_ENUM = {"aws", "gcs", "azure"}
 
-class _RasaRestModel(object):
+class _RasaRestModel(RasaABC[ReturnT]):
 
 	def train(self, directory, config=None, domain=None, nlu=None, responses=None, stories=None, save_to_default_model_directory=True, force_training=False):
+		# type: (str, Optional[str], Optional[str], Optional[str], Optional[str], Optional[str], bool, bool) -> ReturnT
 
 		""" Train a Rasa model.
 
@@ -278,7 +314,7 @@ class _RasaRestModel(object):
 		}, json=json)
 
 	def replace_model(self, model_file=None, model_server=None, remote_storage=None):
-		# type: (str, Optional[dict], Optional[str]) -> dict
+		# type: (str, Optional[JsonDict], Optional[str]) -> ReturnT
 
 		""" Replace the currently loaded model.
 
@@ -299,23 +335,23 @@ class _RasaRestModel(object):
 		})
 
 	def unload_model(self):
-		# type: () -> dict
+		# type: () -> ReturnT
 
 		url = self.get_endpoint("/model")
 
 		return self.delete_request(url)
 
-class _RasaRestWebhook(object):
+class _RasaRestWebhook(RasaABC[ReturnT]):
 
 	def health(self):
-		# type: () -> dict
+		# type: () -> ReturnT
 
 		url = self.get_endpoint("/webhooks/rest/")
 
 		return self.get_request(url)
 
 	def send_message(self, message):
-		# type: (str, ) -> List[dict]
+		# type: (str, ) -> ReturnT
 
 		url = self.get_endpoint("/webhooks/rest/webhook")
 
@@ -324,10 +360,10 @@ class _RasaRestWebhook(object):
 			"message": message,
 		})
 
-class _RasaCallbackWebhook(object):
+class _RasaCallbackWebhook(RasaABC[ReturnT]):
 
 	def send_message(self, message):
-		# type: (str, ) -> List[dict]
+		# type: (str, ) -> ReturnT
 
 		url = self.get_endpoint("/webhooks/callback/webhook")
 
@@ -336,26 +372,26 @@ class _RasaCallbackWebhook(object):
 			"message": message,
 		})
 
-class RasaRestConversations(_RasaRestConversations, RasaRest):
+class RasaRestConversations(RasaRest, _RasaRestConversations[SyncReturnT]):
 	pass
 
-class RasaRestModel(_RasaRestModel, RasaRest):
+class RasaRestModel(RasaRest, _RasaRestModel[SyncReturnT]):
 	pass
 
-class RasaRestWebhook(_RasaRestWebhook, RasaRest):
+class RasaRestWebhook(RasaRest, _RasaRestWebhook[SyncReturnT]):
 	pass
 
-class RasaCallbackWebhook(_RasaCallbackWebhook, RasaRest):
+class RasaCallbackWebhook(RasaRest, _RasaCallbackWebhook[SyncReturnT]):
 	pass
 
-class RasaRestConversationsAsync(_RasaRestConversations, RasaRestAsync):
+class RasaRestConversationsAsync(RasaRestAsync, _RasaRestConversations[AsyncReturnT]):
 	pass
 
-class RasaRestModelAsync(_RasaRestModel, RasaRestAsync):
+class RasaRestModelAsync(RasaRestAsync, _RasaRestModel[AsyncReturnT]):
 	pass
 
-class RasaRestWebhookAsync(_RasaRestWebhook, RasaRestAsync):
+class RasaRestWebhookAsync(RasaRestAsync, _RasaRestWebhook[AsyncReturnT]):
 	pass
 
-class RasaCallbackWebhookAsync(_RasaCallbackWebhook, RasaRestAsync):
+class RasaCallbackWebhookAsync(RasaRestAsync, _RasaCallbackWebhook[AsyncReturnT]):
 	pass

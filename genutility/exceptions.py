@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Sequence, Set, TypeVar
+	from typing import Any, Dict, Sequence, Set, Tuple, TypeVar, Union
 	T = TypeVar("T")
 	U = TypeVar("U")
 
@@ -102,7 +102,7 @@ def assert_choice(name, value, choices, optional=False):
 		return
 
 	if value not in choices:
-		raise ValueError("{} must be one of {}".format(name, ", ".join(choices)))
+		raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices))))
 
 def assert_choice_map(name, value, choices):
 	# type: (str, T, Dict[T, U]) -> U
@@ -110,13 +110,13 @@ def assert_choice_map(name, value, choices):
 	try:
 		return choices[value]
 	except KeyError:
-		raise ValueError("{} must be one of {}".format(name, ", ".join(choices.keys())))
+		raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices.keys()))))
 
 def assert_type(name, value, types):
-	# type: (str, Any, Sequence[Any]) -> None
+	# type: (str, Any, Tuple[Union[type, Tuple[Any, ...]], ...]) -> None
 
 	if not isinstance(value, types):
-		raise TypeError("{} must be one of these types: {}".format(name, ", ".join(types)))
+		raise TypeError("{} must be one of these types: {}".format(name, ", ".join(map(str, types))))
 
 def assert_true(name, value):
 	if not value:

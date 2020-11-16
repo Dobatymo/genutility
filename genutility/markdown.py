@@ -15,7 +15,7 @@ def markdown_newline(s):
 _markdown_urls_pat = re.compile(r"(?<![\<])((?:http|https|ftp):\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z0-9]{2,}(?:\/[\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\;\=a-zA-Z0-9\-\._\~\%]*)?)(?![\>])")
 
 def markdown_urls(s, ignore_trailing_dot=True):
-	# type: (str, ) -> str
+	# type: (str, bool) -> str
 
 	""" Converts text with URLs to text with markdown formatted URLs.
 		markdown_urls("Visit https://google.com") -> "Visit <https://google.com>"

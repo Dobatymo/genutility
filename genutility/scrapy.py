@@ -8,7 +8,7 @@ from .dbm import dbm_items
 if TYPE_CHECKING:
 	from typing import Callable, Iterator
 
-def read_dbm_httpcache(path, open_func=dbm.open, decode=True):
+def read_dbm_httpcache(path, open_func=dbm.open):
 	# type: (str, Callable) -> Iterator[dict]
 
 	""" Loads scrapy dbm http cache files.

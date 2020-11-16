@@ -40,7 +40,7 @@ def rec_repr(obj):
 		return _type_str(obj)
 
 def _arg_str(arg, maxlen=None, app="...", repr_args=True):
-	# type: (Any, Optional[int], bool) -> str
+	# type: (Any, Optional[int], str, bool) -> str
 
 	if repr_args:
 		arg = repr(arg)

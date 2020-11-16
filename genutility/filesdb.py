@@ -228,7 +228,7 @@ class GenericFileDb(object):
 			return True
 
 	def add(self, path, derived=None, commit=True):
-		# type: (EntryType, Optional[Dict[str, Any]]) -> None
+		# type: (EntryType, Optional[Dict[str, Any]], bool) -> None
 
 		stats = path.stat()
 		self._add_file(fspath(path), stats.st_size, stats.st_mtime_ns, derived)
