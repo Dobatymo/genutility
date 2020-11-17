@@ -44,6 +44,7 @@ if TYPE_CHECKING:
 	T = TypeVar("T")
 	U = TypeVar("U")
 	V = TypeVar("V")
+	ExceptionsType = Union[Type[Exception], Collection[Type[Exception]]]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -57,8 +58,8 @@ def iterrandrange(a, b):
 	while True:
 		yield randrange(a, b)  # nosec
 
-def repeatfunc(func, times=None, *args):
-	# type: (Callable[[*Any], T], Optional[int], *any) -> Iterator[T]
+def repeatfunc(func, *args, times=None):
+	# type: (Callable[[*Any], T], *Any, Optional[int]) -> Iterator[T]
 
 	""" Repeat calls to func with specified arguments.
 		Example:  repeatfunc(random.random)
@@ -405,7 +406,7 @@ def consume(it):
 	deque(it, maxlen=0)
 
 def resizer(it, size, pad=False, pad_elm=None):
-	# type: (Iterable[Sequence[T]], int, bool, Optional[T]) -> Iterable
+	# type: (Iterable[Sequence[T]], int, bool, Optional[T]) -> Iterable[List[Optional[T]]]
 
 	""" Cuts the input iterable `it` consisting of variable length slices
 		into slices of length `size`. If pad is True, the last slice
@@ -419,12 +420,12 @@ def resizer(it, size, pad=False, pad_elm=None):
 		raise ValueError("size must be larger than 0")
 
 	it = iter(it)
-	buf = "" # type: Sequence[T]
+	buf = [] # type: Sequence[T]
 	pos = 0
 	try:
 		while True:
 			to_read = size
-			out = []
+			out = []  # type: List[Optional[T]]
 			while to_read > 0:
 				if len(buf) == pos:
 					buf = next(it)
@@ -471,7 +472,7 @@ def multi_join(it_a, it_b, join_func=add):
 		multi_join((1, 2), (3, 4), lambda x, y: str(x)+str(y)) -> ('13', '23', '14', '24')
 	"""
 
-	return [join_func(a, b) for b in it_b for a in it_a]
+	return (join_func(a, b) for b in it_b for a in it_a)
 
 def iter_except(iterator, exception_callbacks, return_on_exception=False):
 	# type: (Iterator[T], Dict[Type, Callable[[Iterator[T], Exception], bool]], bool) -> Iterator[T]
@@ -499,7 +500,7 @@ def iter_except(iterator, exception_callbacks, return_on_exception=False):
 				return
 
 def list_except(it, catch=Exception):
-	# type: (Iterable[T], Union[Exception, Sequence[Exception]]) -> Tuple[Exception, List[T]]
+	# type: (Iterable[T], ExceptionsType) -> Tuple[Optional[Exception], List[T]]
 
 	""" Same as `list()` except in the case of an exception, the partial list which was collected
 		so far is returned. `catch` specifies which exceptions are caught. It can be an exception
@@ -518,7 +519,7 @@ def list_except(it, catch=Exception):
 	return exc, ret
 
 def iter_except_ignore(iterator, exceptions, logger=logger):
-	# type: (Iterator[T], Collection[Exception], Logger) -> Iterator[T]
+	# type: (Iterator[T], ExceptionsType, Logger) -> Iterator[T]
 
 	""" Ignores `exceptions` raised in `iterator`. Does not work for Generators.
 	"""
@@ -535,7 +536,7 @@ def iter_except_ignore(iterator, exceptions, logger=logger):
 			logger.warning("Error in iterable: %s", str(e))
 
 def decompress(selectors, data, default=None):
-	# type: (Iterable[bool], Iterator[T], Optional[T]) -> Iterator[T]
+	# type: (Iterable[bool], Iterator[T], Optional[T]) -> Iterator[Optional[T]]
 
 	""" Basically the opposite of `itertools.compress`.
 		decompress([True, False, True], iter(["A", "B"])) -> ("A", None, "B")
@@ -558,7 +559,7 @@ def first_not_none(it, default=None):
 	return next(filternone(it), default)
 
 def range_count(start=0, stop=None, step=1):
-	# type: (int, Optional[int], int) -> Iterator[int]
+	# type: (int, Optional[int], int) -> Iterable[int]
 
 	""" Similar to `range`, except it optionally allows for an infinite range. """
 
@@ -612,7 +613,7 @@ def iter_different(it_a, it_b):
 	return any(a != b for a, b in zip_longest(it_a, it_b))
 
 def every_n(it, n, pos=0):
-	# type: (Iterable[T], int, int) -> T
+	# type: (Iterable[T], int, int) -> Iterator[T]
 
 	""" Yields every `n`-th element from iterable `it` and starts at `pos`. """
 
@@ -647,7 +648,7 @@ def no_dupes(*its):
 				seen.add(x)
 
 def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter_dist="uniform", waitfunc=sleep):
-	# type: (float, int, float, float, Optional[float], str, Callable[[float], Any]) -> Iterator[None]
+	# type: (float, int, float, float, Optional[float], str, Callable[[float], Any]) -> Iterator[int]
 
 	""" Iterator which yields after predefined amounts of time.
 		Supports `multiplier` to implements linear or exponential backoff.
@@ -656,9 +657,13 @@ def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter
 	"""
 
 	if jitter_dist == "uniform":
-		rand = random.uniform
+		def rand(waittime, jitter):
+			return waittime + random.uniform(-jitter, jitter)
+
 	elif jitter_dist == "normal":
-		rand = random.normalvariate
+		def rand(waittime, jitter):
+			return random.normalvariate(waittime, jitter)
+
 	else:
 		raise ValueError("Unsupported jitter_dist")
 
@@ -676,7 +681,7 @@ def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter
 				waittime = max_wait
 				multiplier = 1
 
-			do_wait = max(0, waittime + rand(-jitter, jitter))
+			do_wait = max(0, rand(waittime, jitter))
 			waitfunc(do_wait)
 		else:
 			break
@@ -735,7 +740,7 @@ def any_in(it, container):
 	"""
 
 	if isinstance(it, set) and isinstance(container, set):
-		return not it.isdisjoint(set)
+		return not it.isdisjoint(container)
 
 	return any(elm in container for elm in it)
 
@@ -773,7 +778,7 @@ def select_by_indices(it, indices):
 		pass
 
 def skip_by_indices(it, indices):
-	# type: (Iterator[T], Iterator[int]) -> Iterator[int, T]
+	# type: (Iterator[T], Iterator[int]) -> Iterator[Tuple[int, T]]
 
 	i = 0
 	try:

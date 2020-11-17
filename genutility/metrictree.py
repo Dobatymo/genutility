@@ -361,7 +361,7 @@ class MTree(object):
 	"""
 
 	def __init__(self, distance_func, promote=None, partition=None, does_not_work_yet=None):
-		# type: (Callable, Optional[str], Optional[str]) -> None
+		# type: (Callable[[ObjectType, ObjectType], float], Optional[str], Optional[str], Optional[str]) -> None
 
 		if does_not_work_yet != "OK":
 			raise RuntimeError("MTree is work in progress")

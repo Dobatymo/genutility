@@ -28,7 +28,7 @@ def iter_timer(it):
 class TakeAtleast(object):
 
 	def __init__(self, delta, wait_on_error=False):
-		# type: (Union[float, timedelta], ) -> None
+		# type: (Union[float, timedelta], bool) -> None
 
 		if isinstance(delta, timedelta):
 			self.delta = delta.total_seconds()

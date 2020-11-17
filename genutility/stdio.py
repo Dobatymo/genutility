@@ -57,6 +57,7 @@ def safe_input(s, block=10):
 		return input(s)
 	except EOFError:
 		sleep(block) # can be interrupted by KeyboardInterrupt
+		raise
 
 def info_print(msg=None, args=tuple(), exception=None):
 	# type: (Optional[str], tuple, Exception) -> None
