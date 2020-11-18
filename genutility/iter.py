@@ -40,11 +40,12 @@ if TYPE_CHECKING:
 	    Union,
 	)
 
-	from .typing import Number, SizedIterable
+	from .typing import Number, Orderable, SizedIterable
 	T = TypeVar("T")
 	U = TypeVar("U")
 	V = TypeVar("V")
-	ExceptionsType = Union[Type[Exception], Collection[Type[Exception]]]
+	OrderableT = TypeVar("OrderableT", bound=Orderable)
+	ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -58,8 +59,8 @@ def iterrandrange(a, b):
 	while True:
 		yield randrange(a, b)  # nosec
 
-def repeatfunc(func, *args, times=None):
-	# type: (Callable[[*Any], T], *Any, Optional[int]) -> Iterator[T]
+def repeatfunc(func, times=None, *args):
+	# type: (Callable[..., T], Optional[int], *Any) -> Iterator[T]
 
 	""" Repeat calls to func with specified arguments.
 		Example:  repeatfunc(random.random)
@@ -180,7 +181,7 @@ def flatten(it):
 			yield elm
 
 def diffsgn(a, b):
-	# type: (Number, Number) -> int
+	# type: (OrderableT, OrderableT) -> int
 
 	""" Sign of the finite derivative.
 		Equal to `-cmp(a, b)` or `cmp(b, a).
@@ -189,7 +190,7 @@ def diffsgn(a, b):
 	return (a < b) - (a > b)
 
 def asc_peaks(iterable):
-	# type: (Iterable[T], ) -> Iterator[T]
+	# type: (Iterable[OrderableT], ) -> Iterator[OrderableT]
 
 	""" Yields ascending peaks from `iterable`. """
 
@@ -206,7 +207,7 @@ def asc_peaks(iterable):
 	yield cur
 
 def extrema(iterable, first={1, -1}, last={1, -1}, derivatives={1, -1}):
-	# type: (Iterable[T], Set[int], Set[int], Set[int]) -> Iterator[T]
+	# type: (Iterable[OrderableT], Set[int], Set[int], Set[int]) -> Iterator[OrderableT]
 
 	it = iter(iterable)
 	try:
@@ -236,14 +237,14 @@ def extrema(iterable, first={1, -1}, last={1, -1}, derivatives={1, -1}):
 		yield old
 
 def peaks(it):
-	# type: (Iterable[T], ) -> Iterator[T]
+	# type: (Iterable[OrderableT], ) -> Iterator[OrderableT]
 
 	""" Yields peaks of `it`. """
 
 	return extrema(it, {-1}, {1}, {1})
 
 def valleys(it):
-	# type: (Iterable[T], ) -> Iterator[T]
+	# type: (Iterable[OrderableT], ) -> Iterator[OrderableT]
 
 	""" Yields valleys of `it`. """
 
@@ -283,6 +284,7 @@ def last(it):
 		return deque(it, 1).pop()
 	except IndexError:
 		raise_from(EmptyIterable("Empty iterable"), None)
+		raise  # just to appease mypy
 
 def batch(it, n, func=None):
 	# type: (Iterable[Any], int, Optional[Callable]) -> Iterator[Any] # return type cannot be more specific because of filter()
@@ -658,7 +660,7 @@ def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter
 
 	if jitter_dist == "uniform":
 		def rand(waittime, jitter):
-			return waittime + random.uniform(-jitter, jitter)
+			return waittime + random.uniform(-jitter, jitter)  # nosec
 
 	elif jitter_dist == "normal":
 		def rand(waittime, jitter):

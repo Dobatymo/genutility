@@ -28,7 +28,7 @@ def now(aslocal=False):
 	return dt
 
 def datetime_from_utc_timestamp(epoch, aslocal=False):
-	# type: (int, bool) -> datetime
+	# type: (float, bool) -> datetime
 
 	""" Converts a UNIX epoch time in seconds to a timezone aware datetime.
 		Negative values are supported and return a datetime counted backwards

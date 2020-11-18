@@ -45,7 +45,7 @@ def rename(func_name):
 	return decorator
 
 def _not_available(func_name):
-	# type: (str) -> None
+	# type: (str) -> Callable
 
 	@rename(func_name)
 	def inner(*args, **kwargs):

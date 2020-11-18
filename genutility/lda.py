@@ -17,8 +17,10 @@ from .object import cast
 if TYPE_CHECKING:
 	from typing import Any, Dict, Iterable, Iterator, List, MutableMapping, Optional, Tuple, Union
 
+	from .typing import SizedIterable
+
 	RawDocument = List[int]
-	IterableDocuments = Iterable[Iterable[int]]
+	IterableDocuments = Iterable[SizedIterable[int]]
 	TopicsMapping = MutableMapping[Tuple[int, int], int]
 	Indices = Union[slice, np.ndarray]
 
@@ -45,7 +47,7 @@ def format_topics(topics, linesep="\n", tokensep="\t"):
 
 	return linesep.join(buffer)
 
-class LDADocument(object):
+class LDADocument(SizedIterable[int]):
 
 	def __init__(self, words):
 		# type: (RawDocument, ) -> None
@@ -68,6 +70,19 @@ class LDADocument(object):
 		return "LDADocument({})".format(repr(self.words))
 
 class LDABase(object):
+
+	K: int
+	nmk: np.ndarray
+	nkt: np.ndarray
+	nk: np.ndarray
+	nm: np.ndarray
+
+	α: float
+	β: float
+	αsum: float
+	βsum: float
+
+	docs: List[LDADocument]
 
 	def __init__(self, seed=None):
 		# type: (Optional[int], ) -> None
@@ -159,6 +174,13 @@ class LDABase(object):
 	def initialize(self):
 		# type: () -> None
 
+		""" Set base parameters """
+
+		raise NotImplementedError
+
+	def initialize_docs(self):
+		# type: () -> None
+
 		""" Set parameters based on input docs """
 
 		raise NotImplementedError
@@ -245,10 +267,10 @@ class LDABase(object):
 
 		return np.argmax(self.theta(), axis=-1) # [M]
 
-	def print_topics(self, num_words=10):
-		# type: (int, ) -> List[list[Tuple[str, float]]]
+	def print_topics(self, id2word, num_words=10):
+		# type: (Dict[int, str], int) -> None
 
-		topics = top_topics(self.id2word, self.phi(), num_words)
+		topics = top_topics(id2word, self.phi(), num_words)
 		print(format_topics(topics))
 
 	@staticmethod
@@ -322,8 +344,8 @@ class LDA(LDABase):
 		self.nmk = np.zeros((self.M, self.K), dtype=self.inttype) # [M, K] document-topic counts
 		self.nm = np.array(list(map(len, self.docs)), dtype=self.inttype) # [M] total document counts, not necessary for sampling, but useful for theta and phi calculation
 
-		# note: VariableRowMatrix() is slower than a dict here for some reason
-		self.topics = {} # `z`, sparse document-word topics matrix (because rows can have different lengths)
+		# note: VariableRowMatrix(0) is slower than a dict here for some reason
+		self.topics = {} # type: TopicsMapping # `z`, sparse document-word topics matrix (because rows can have different lengths)
 
 	def initialize_topics(self):
 		# type: () -> None
@@ -527,7 +549,7 @@ class LDATermWeight(LDABase):
 		#self.nmkt = np.zeros((self.M, self.K, self.V), dtype=self.inttype)
 		self.wmk = np.zeros((self.M, self.K), dtype=self.floattype) # [M, K] weights, same as np.sum(nmkt, axis=-1)
 
-		self.topics = VariableRowMatrix() # [M, Variable] `z`, sparse document-word topics matrix
+		self.topics = VariableRowMatrix(0) # type: VariableRowMatrix[int] # [M, Variable] `z`, sparse document-word topics matrix
 
 	def initialize_topics(self):
 		# type: () -> None

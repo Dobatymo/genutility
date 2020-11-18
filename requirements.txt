@@ -1,4 +1,5 @@
 future
+typing-extensions
 
 # av # no simple build
 aiohttp>=2.3; python_version>='3.5'

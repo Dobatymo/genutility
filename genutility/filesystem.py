@@ -460,7 +460,7 @@ def _char_subber(s, illegal_chars, replacement):
 	return re.sub(regex, replacement, s)
 
 def _char_splitter(s, chars):
-	# type: (str, Set[str]) -> List[str]
+	# type: (str, Iterable[str]) -> List[str]
 
 	regex = "[" + re.escape("".join(chars)) + "]"
 	return re.split(regex, s)
@@ -704,11 +704,13 @@ class Counts(object):
 		self.others = 0
 
 	def __iadd__(self, other):
-		# type: (Counts, ) -> None
+		# type: (Counts, ) -> Counts
 
 		self.dirs += other.dirs
 		self.files += other.files
 		self.others += other.others
+
+		return self
 
 	def null(self):
 		# type: () -> bool
@@ -731,6 +733,7 @@ def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, e
 							yield subentry, subcounts
 
 							if total:
+								assert subcounts
 								counts += subcounts
 
 				elif entry.is_file():

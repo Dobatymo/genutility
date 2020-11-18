@@ -16,6 +16,7 @@ from .iter import switched_enumerate
 if TYPE_CHECKING:
 	from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple, TypeVar, Union
 	T = TypeVar("T")
+	UnicodeOrdinalT = Union[int, str]
 
 english_consonants = "bcdfghjklmnpqrstvwxz" # y?
 english_vowels = "aeiouy" # y?
@@ -70,7 +71,7 @@ def tryint(obj):
 	"""
 
 	try:
-		return int(obj)
+		return int(obj)  # type: ignore
 	except (ValueError, TypeError):
 		return obj
 
@@ -281,13 +282,13 @@ def replace_pairs_bytes(s, items):
 	return s.translate(table, delete)
 
 def replace_pairs_chars(s, items):
-	# type: (str, Dict[str, Optional[str]]) -> str
+	# type: (str, Dict[UnicodeOrdinalT, Optional[UnicodeOrdinalT]]) -> str
 
 	if PY2:
 		# table = s.maketrans(items) # 'unicode' object has no attribute 'maketrans'
 		table = {ord(k):v for k, v in viewitems(items)}
 	else:
-		table = s.maketrans(items)
+		table = s.maketrans(items)  # type: ignore # mypy issue #4374
 
 	return s.translate(table)
 

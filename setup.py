@@ -138,6 +138,7 @@ setup(
 	install_requires=[
 		"future",
 		"ctypes-windows-sdk>=0.0.7; sys_platform=='win32'",
+		"typing-extensions"
 	],
 	extras_require=extras_require,
 	use_2to3=False

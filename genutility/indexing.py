@@ -5,12 +5,18 @@ from builtins import map, range
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Iterator, Tuple
+	from typing import Iterable, Iterator, Sequence, Tuple, TypeVar, Union
+
+	T = TypeVar("T")
 
 def obj2tuple(obj):
+	# type: (T, ) -> Tuple[T]
+
 	return (obj, )
 
 def row_indices(n, square_length):
+	# type: (int, int) -> Iterable[int]
+
 	""" Returns the one-dimensional indices of all the cells belonging to the
 		same row as index `n`.
 	"""
@@ -19,6 +25,8 @@ def row_indices(n, square_length):
 	return range(j * square_length, (j + 1) * square_length)
 
 def col_indices(n, square_length):
+	# type: (int, int) -> Iterable[int]
+
 	""" Returns the one-dimensional indices of all the cells belonging to the
 		same column as index `n`.
 	"""
@@ -27,7 +35,7 @@ def col_indices(n, square_length):
 	return range(j, square_length * (square_length - 1) + j + 1, square_length)
 
 def subblock_indices(n, outer_square_length, inner_square_length):
-	# type: (int, int, int) -> Iterator[Tuple[int, int]]
+	# type: (int, int, int) -> Iterator[int]
 
 	""" Returns the one-dimensional indices of all the cells belonging to the
 		same block as index `n`.
@@ -51,6 +59,7 @@ def subblock_indices(n, outer_square_length, inner_square_length):
 			yield (y * i * j) + (i * iy) + (x * j) + (ix)
 
 def triangular_indices(n):
+	# type: (int, ) -> Iterator[Tuple[int, int]]
 
 	""" Returns all combinations of indices for a sequence of length `n` with duplicates and self-combinations.
 		triangular_indices(4) -> (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
@@ -61,6 +70,8 @@ def triangular_indices(n):
 			yield i, j
 
 def to_2d_index(n, width):
+	# type: (int, int) -> Tuple[int, int]
+
 	return n // width, n % width
 
 def indices_2d(n, width):
@@ -89,6 +100,7 @@ def window_combinations_indices(size, window_size):
 			yield a, b
 
 def _combination_indices(start, sizes):
+	# type: (int, Sequence[int]) -> Iterator[Tuple[int, ...]]
 
 	""" earlier (left) dimensions can never be higher than later (right) dimensions. """
 
@@ -97,8 +109,8 @@ def _combination_indices(start, sizes):
 			for j in _combination_indices(i, sizes[1:]):
 				yield (i, ) + j
 	else:
-		for i in map(obj2tuple, range(start, sizes[0])):
-			yield i
+		for k in map(obj2tuple, range(start, sizes[0])): # type: ignore # mypy issue #1317
+			yield k # type: ignore # mypy issue #1317
 
 def combination_indices(*sizes):
 

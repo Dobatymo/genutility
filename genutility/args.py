@@ -66,7 +66,7 @@ def multiple_of(divisor):
 		error: argument --multiple: invalid int value: 'a'
 	"""
 	def int(s):
-		# type: (str, ) -> int
+		# type: (str, ) -> builtin_int
 
 		number = builtin_int(s)
 
@@ -84,7 +84,7 @@ def in_range(start, stop, step=1):
 	from builtins import int as builtin_int
 
 	def int(s):  # see: multiple_of()
-		# type: (str, ) -> int
+		# type: (str, ) -> builtin_int
 
 		number = builtin_int(s)
 
@@ -103,7 +103,7 @@ def between(start, stop):
 	from builtins import float as builtin_float
 
 	def float(s):
-		# type: (str, ) -> float
+		# type: (str, ) -> builtin_float
 
 		number = builtin_float(s)
 

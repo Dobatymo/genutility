@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 	from typing import IO, Any, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
 
 	PathType = Union[str, PathLike]
-	Data = TypeVar('D', str, bytes)
+	Data = TypeVar("Data", str, bytes)
 
 if __debug__:
 	import tarfile
@@ -263,8 +263,8 @@ class PathOrBinaryIO(object):
 		# type: (Union[PathType, BinaryIO], str, bool) -> None
 
 		if isinstance(fname, (RawIOBase, BufferedIOBase)):
-			self.doclose = close
-			self.fp = fname
+			self.doclose = close  # type: bool
+			self.fp = fname  # type: BinaryIO
 		else:
 			self.doclose = True
 			self.fp = copen(fname, mode)
@@ -284,8 +284,8 @@ class PathOrTextIO(object):
 		# type: (Union[PathType, TextIO], str, str, str, Optional[str], bool) -> None
 
 		if isinstance(fname, TextIOBase):
-			self.doclose = close
-			self.fp = fname
+			self.doclose = close  # type: bool
+			self.fp = fname  # type: TextIO
 		else:
 			self.doclose = True
 			self.fp = copen(fname, mode, encoding=encoding, errors=errors, newline=newline)
@@ -531,7 +531,7 @@ def copyfilelike(fin, fout, amount=None, buffer=FILE_IO_BUFFER_SIZE, report=None
 	return copied
 
 def simple_file_iter(fr, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (IO, int) -> Iterator
+	# type: (IO[Data], int) -> Iterator[Data]
 
 	""" Iterate file-like object `fr` and yield chunks of size `chunk_size`. """
 
@@ -546,7 +546,7 @@ def simple_file_iter(fr, chunk_size=FILE_IO_BUFFER_SIZE):
 			break
 
 def reversed_file_iter(fp, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (IO, int) -> Iterator
+	# type: (IO[Data], int) -> Iterator[Data]
 
 	""" Generate blocks of file's contents in reverse order. """
 
@@ -559,7 +559,7 @@ def reversed_file_iter(fp, chunk_size=FILE_IO_BUFFER_SIZE):
 		yield fp.read(delta)
 
 def limited_file_iter(fr, amount, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (IO, int, int) -> Iterator
+	# type: (IO[Data], int, int) -> Iterator[Data]
 
 	""" Iterate file-like object `fr` and yield chunks of size `chunk_size`.
 		Limit output to `amount` bytes.
@@ -573,7 +573,7 @@ def limited_file_iter(fr, amount, chunk_size=FILE_IO_BUFFER_SIZE):
 		amount -= len(data)
 
 def iterfilelike(fr, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (IO, int, Optional[int], int) -> Iterator
+	# type: (IO[Data], int, Optional[int], int) -> Iterable[Data]
 
 	""" Iterate file-like object `fr` and yield chunks of size `chunk_size`.
 		Starts reading at `start` and optionally limit output to `amount` bytes.
@@ -588,7 +588,7 @@ def iterfilelike(fr, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
 		return limited_file_iter(fr, amount, chunk_size)
 
 def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (PathType, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterator
+	# type: (PathType, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterator[Data]
 
 	""" Iterate over file at `path` and yield chunks of size `chunk_size`.
 		Optionally limit output to `amount` bytes.
@@ -633,17 +633,17 @@ def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
 	if chunk:
 		yield chunk
 
-def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, amount=None, buffer_size=FILE_IO_BUFFER_SIZE):
-	# type: (PathType, int, str, Optional[str], Optional[str], Optional[int], int) -> Iterator
+def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, start=0, amount=None, buffer_size=FILE_IO_BUFFER_SIZE):
+	# type: (PathType, int, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterable[Data]
 
 	""" Iterate over file at `path` reading chunks of size `buffer_size` at a time.
 		Yields data chunks of `chunk_size` and optionally limits output to `amount` bytes.
 	"""
 
-	return resizer(blockfileiter(path, mode, encoding, errors, amount, buffer_size), chunk_size)
+	return resizer(blockfileiter(path, mode, encoding, errors, start, amount, buffer_size), chunk_size)
 
 def byte_out(path, buffer_size=FILE_IO_BUFFER_SIZE):
-	# type: (PathType, int) -> Iterator[bytes]
+	# type: (PathType, int) -> Iterable[bytes]
 
 	""" Reads file at `path` byte by byte, using a read buffer of size `buffer_size`.
 	"""
@@ -689,7 +689,7 @@ def is_all_byte(fr, thebyte=b"\0", chunk_size=FILE_IO_BUFFER_SIZE):
 	return True
 
 def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password=None):
-	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str], Optional[bytes]) -> Iterator[IO]
 
 	"""
 		Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -709,7 +709,7 @@ def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password
 					yield wrap_text(bf, mode, encoding, errors, newline)
 
 def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
-	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+	# type: (Union[PathType, BinaryIO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
 
 	"""
 		Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -732,7 +732,9 @@ def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
 	with cls as tf:
 		for ti in tf:
 			if ti.isfile(): # fixme: what about links?
-				with tf.extractfile(ti) as bf: # no `mode` for `extractfile`
+				bf = tf.extractfile(ti)
+				assert bf, "member `ti` is file, but still `extractfile` returned `None`"
+				with bf: # no `mode` for `extractfile`
 					yield wrap_text(bf, mode, encoding, errors, newline)
 
 def iter_lines(path, encoding="utf-8", errors="strict", newline=None, verbose=False):

@@ -8,7 +8,9 @@ import logging
 from datetime import timedelta
 from functools import partial, wraps
 from itertools import islice
-from typing import TYPE_CHECKING
+from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Iterator, Optional, Sequence, Tuple, Type, Union
+
+from typing_extensions import TypedDict
 
 from .atomic import TransactionalCreateFile, sopen
 from .compat import FileNotFoundError
@@ -18,10 +20,9 @@ from .filesystem import mdatetime
 from .object import args_to_key
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Iterator, Optional, Sequence, TextIO, Tuple, Union
+	from pathlib import Path
 
-	from .compat.pathlib import Path
-	JsonDict = Dict[str, Any]
+JsonDict = Dict[str, Any]
 
 if __debug__:
 	import jsonschema
@@ -83,7 +84,7 @@ def read_json(path, schema=None, cls=None, object_hook=None):
 	return obj
 
 def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False):
-	# type: (Any, str, Optional[Union[str, JsonDict]], bool, Optional[Callable], Optional[str], bool, Optional[Callable], bool) -> None
+	# type: (Any, str, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[str], bool, Optional[Callable], bool) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
@@ -102,6 +103,14 @@ def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None
 	with sopen(path, "wt", encoding="utf-8", safe=safe) as fw:
 		json.dump(obj, fw, ensure_ascii=ensure_ascii, cls=cls, indent=indent, sort_keys=sort_keys, default=default)
 
+class JsonLoadKwargs(TypedDict):
+	cls: Optional[Type[json.JSONDecoder]]
+	object_hook: Optional[Callable]
+	parse_float: Optional[Callable]
+	parse_int: Optional[Callable]
+	parse_constant: Optional[Callable]
+	object_pairs_hook: Optional[Callable]
+
 class json_lines(object):
 
 	""" Read and write files in the JSON Lines format (http://jsonlines.org).
@@ -111,7 +120,7 @@ class json_lines(object):
 		stream, doclose, cls=None, object_hook=None, parse_float=None,
 		parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
 	):
-		# type: (TextIO, bool, Optional[json.JSONEncoder], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> None
+		# type: (IO, bool, Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> None
 
 		""" Don't use directly. Use `from_path` or `from_stream` classmethods instead. """
 
@@ -131,15 +140,22 @@ class json_lines(object):
 			"parse_int": parse_int,
 			"parse_constant": parse_constant,
 			"object_pairs_hook": object_pairs_hook,
-		}
-		self.json_kwargs.update(kw)
+		}  # type: JsonLoadKwargs
+		self.json_cls_kw = kw
 
 	@staticmethod
 	def from_path(
 		file, mode="rt", encoding="utf-8", errors="strict", newline=None,
 		cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
 	):
-		# type: (str, str, str, str, Optional[str], Optional[json.JSONEncoder], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
+		# type: (str, str, str, str, Optional[str], Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
+
+		""" Binary writing modes "wb", "ab", "r+b", "w+b" are not supported by the python json module.
+			Use text modes instead. Binary read-only is fine.
+		"""
+
+		if set(mode) not in (set("rt"), set("rb"), set("xt"), set("xb"), set("wt"), set("at"), set("r+t"), set("w+t")):
+			raise ValueError(f"mode cannot be `{mode}`")
 
 		stream = copen(file, mode, encoding=encoding, errors=errors, newline=newline)
 		return json_lines(stream, True, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw)
@@ -149,7 +165,7 @@ class json_lines(object):
 		stream,
 		cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
 	):
-		# type: (TextIO, Optional[json.JSONEncoder], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
+		# type: (IO, Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
 
 		return json_lines(stream, False, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw)
 
@@ -169,10 +185,10 @@ class json_lines(object):
 			for line in islice(self.f, start, stop):
 				line = line.rstrip().lstrip("\x00") # fixme: strip \0 is only a temp fix!
 				if line:
-					yield json.loads(line, **self.json_kwargs)
+					yield json.loads(line, **self.json_kwargs, **self.json_cls_kw)
 				linenum += 1
 
-		except ValueError as e: # json.JSONDecodeError in python 3.5+
+		except json.JSONDecodeError as e:
 			e.lineno = linenum
 			logger.error("JSON Lines parse error in line %s: '%r'", linenum, line)
 			raise
@@ -184,7 +200,7 @@ class json_lines(object):
 
 	def write(self, obj, skipkeys=False, ensure_ascii=False, check_circular=True, allow_nan=True,
 		cls=None, separators=None, default=None, sort_keys=False, **kw):
-		# type: (Any, bool, bool, bool, bool, Optional[Callable], Optional[Tuple[str, str]], Optional[Callable], bool, **Any) -> None
+		# type: (Any, bool, bool, bool, bool, Optional[Type[json.JSONEncoder]], Optional[Tuple[str, str]], Optional[Callable], bool, **Any) -> None
 
 		json.dump(obj, self.f, skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular,
 			allow_nan=allow_nan, cls=cls, indent=None, separators=separators, default=default, sort_keys=sort_keys,

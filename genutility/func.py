@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from .iter import retrier
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, TypeVar
+	from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
 	T = TypeVar("T")
 	U = TypeVar("U")
 
@@ -123,7 +123,7 @@ def print_return_type(func, file=stdout):
 	return inner
 
 def retry(func, waittime, exceptions=(Exception, ), attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter_dist="uniform", waitfunc=sleep):
-	# type: (Callable[[], T], float, Tuple[Exception], int, float, float, Optional[float], str, Callable[[float], Any]) -> T
+	# type: (Callable[[], T], float, Union[Type[Exception], Tuple[Type[Exception]]], int, float, float, Optional[float], str, Callable[[float], Any]) -> T
 
 	""" Retry function `func` multiple times in case of raised `exceptions`.
 		See `genutility.iter.retrier()` for the remaining arguments.

@@ -140,6 +140,7 @@ def _get_appdata_dir():
 
 	ret = cast(Path, c_wchar_p).value
 	CoTaskMemFree(Path)
+	assert ret
 	return ret
 
 def _disk_usage_windows(path):

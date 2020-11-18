@@ -4,15 +4,13 @@ from builtins import range
 from future.utils import viewitems
 
 from math import exp, sqrt
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Dict, Generic, Iterator, Optional, Tuple, TypeVar
 
 import numpy as np
 
 from .numba import opjit
 
-if TYPE_CHECKING:
-	from typing import Callable, Iterator, Tuple, TypeVar
-	T = TypeVar("T")
+T = TypeVar("T")
 
 RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
@@ -234,7 +232,7 @@ class Sampler(object):
 		self.psum = cdf[-1]
 
 	def __call__(self):
-		# type: (int, ) -> int
+		# type: () -> int
 
 		""" Sample one. """
 
@@ -250,6 +248,8 @@ class Sampler(object):
 		return np.searchsorted(self.cdf, rands, side="right")
 
 	def pdf(self, n, minlength=None):
+		# type: (int, Optional[int]) -> np.ndarray
+
 		out = np.bincount(self.sample(n), minlength=minlength)
 		return out / n
 
@@ -262,24 +262,24 @@ def sample_probabilities(pvals):
 
 	return Sampler(np.cumsum(pvals))
 
-class UnboundedSparseMatrix(object):
+class UnboundedSparseMatrix(Generic[T]):
 
 	def __init__(self, dtype=float):
 		# type: (type, ) -> None
 
 		self.dtype = dtype
 		self.zero = self.dtype(0)
-		self.m = dict()
+		self.m = dict()  # type: Dict[Tuple[int, int], T]
 		self.cols = 0
 		self.rows = 0
 
 	def __getitem__(self, slice):
-		# type: (tuple, ) -> T
+		# type: (Tuple[int, int], ) -> T
 
 		return self.m.get(slice, self.zero)
 
 	def __setitem__(self, slice, value):
-		# type: (tuple, T) -> None
+		# type: (Tuple[int, int], T) -> None
 
 		c, r = slice
 		self.cols = max(self.cols, c+1)

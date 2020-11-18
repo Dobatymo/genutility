@@ -3,17 +3,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from collections.abc import Iterable, Sized
 from typing import TYPE_CHECKING
 
-
-class SizedIterable(Iterable, Sized):
-	pass
-
 if TYPE_CHECKING:
 
-	from typing import Any, Optional, Sequence, Union
+	from typing import Any, Optional, Sequence, TypeVar, Union
 
 	from typing_extensions import Protocol
 
 	Number = Union[int, float]
+	T = TypeVar("T")
+
+	class SizedIterable(Iterable[T], Sized):
+		pass
 
 	class Comparable(Protocol):
 
