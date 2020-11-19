@@ -1,8 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import sys
+
+if sys.platform != "win32":
+	raise ImportError("win submodule is only available on Windows")
+
 import re
-from ctypes import Structure, WinError, byref, create_unicode_buffer, sizeof, wintypes
-from ctypes.wintypes import BYTE
+from ctypes import Structure, WinError, byref, create_unicode_buffer, sizeof
+from ctypes.wintypes import BYTE, DWORD
 from typing import TYPE_CHECKING
 
 from cwinsdk import struct2dict
@@ -181,7 +186,7 @@ def partition_type_string(partition_type):
 def MyDeviceIoControl(DeviceHandle, IoControlCode, InBuffer, OutBuffer, check_output=True):
 	# type: (Any, Any, Any, Any, bool) -> None
 
-	BytesReturned = wintypes.DWORD()
+	BytesReturned = DWORD()
 
 	assert_true("IoControlCode", IoControlCode)
 

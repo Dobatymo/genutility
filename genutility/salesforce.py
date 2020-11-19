@@ -43,6 +43,12 @@ def sosl_escape(s):
 
 	return _sosl_pat.sub(_sosl_repl, s)
 
+def one(result):
+	if len(result) == 1:
+		return result[0]
+	else:
+		raise ValueError("More than one result")
+
 class SalesforceError(Exception):
 	pass
 
@@ -261,6 +267,9 @@ class LiveAgentBase(Generic[ReturnTGet, ReturnTPost]):
 		self.button_id = button_id
 		self.scheme = scheme
 		self.timeout = timeout
+
+		if not (hostname and organization_id and deployment_id and button_id and scheme):
+			raise ValueError("All arguments must have a value")
 
 		self.key = None  # type: Optional[str]
 		self.affinity_token = None  # type: Optional[str]
