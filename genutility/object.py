@@ -6,7 +6,7 @@ from copy import copy
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any
+	from typing import Any, List
 
 def cast(object, class_, instanceof=object, *args, **kwargs):
 	""" Changes the class of `object` to `class_` if `object` is an instance of `instanceof`,
@@ -30,7 +30,7 @@ def args_to_key(args, kwargs, separator=STAR):
 	""" Create cache key from function arguments.
 	"""
 
-	key = []
+	key = []  # type: List[tuple]
 	if args:
 		key.extend(args)
 	if kwargs:

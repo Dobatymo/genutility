@@ -3,8 +3,21 @@ import csv
 import logging
 import re
 import time
-from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Coroutine,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import aiohttp
 import requests
@@ -16,8 +29,9 @@ from .atomic import sopen
 from .iter import progress
 from .json import read_json, write_json
 
-if TYPE_CHECKING:
-	from typing import Any, Awaitable, Dict, Iterable, Iterator, List, Optional, Tuple, Union
+JsonDict = Dict[str, Any]
+ReturnTGet = TypeVar("ReturnTGet")
+ReturnTPost = TypeVar("ReturnTPost")
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +117,7 @@ class MySalesforce(object):
 	# internal query/search
 
 	def _query(self, s, attributes=False):
-		# type: (str, bool) -> List[dict]
+		# type: (str, bool) -> List[JsonDict]
 
 		try:
 			results = self.session().query(s).get("records", [])
@@ -118,7 +132,7 @@ class MySalesforce(object):
 		return results
 
 	def _query_all(self, s, attributes=False):
-		# type: (str, bool) -> Iterator[dict]
+		# type: (str, bool) -> Iterator[JsonDict]
 
 		reconnect = True
 
@@ -169,7 +183,7 @@ class MySalesforce(object):
 	# actual methods
 
 	def query(self, query_str):
-		# type: (str, ) -> List[dict]
+		# type: (str, ) -> List[JsonDict]
 
 		return self._query(query_str)
 
@@ -177,14 +191,14 @@ class MySalesforce(object):
 		return [row[name] for row in results]
 
 	def get_all_objects(self):
-		# type: () -> List[dict]
+		# type: () -> List[JsonDict]
 
 		query_str = "SELECT QualifiedApiName, Label FROM EntityDefinition ORDER BY QualifiedApiName"
 
 		return self._query(query_str)
 
 	def get_all_fields(self, object_name):
-		# type: (str, ) -> List[dict]
+		# type: (str, ) -> List[JsonDict]
 
 		""" Retrieves all fields of `object_name`.
 			Warning: `object_name` is not escaped!
@@ -205,7 +219,7 @@ class MySalesforce(object):
 		return self._search("FIND {{{}}} RETURNING {}({})".format(s, object_name, ", ".join(object_fields)))
 
 	def dump_csv(self, query_str, path, verbose=False, safe=False):
-		# type: (str, str, False, bool) -> int
+		# type: (str, str, bool, bool) -> int
 
 		""" Run SOQL `query_str` and dump results to csv file `path`.
 			Returns the number of exported rows.
@@ -232,7 +246,7 @@ class MySalesforce(object):
 
 		return i
 
-class LiveAgentBase(object):
+class LiveAgentBase(Generic[ReturnTGet, ReturnTPost]):
 	# https://help.salesforce.com/articleView?id=000331168&type=1&mode=1
 	# https://help.salesforce.com/articleView?id=000340657&type=1&mode=1
 
@@ -248,33 +262,44 @@ class LiveAgentBase(object):
 		self.scheme = scheme
 		self.timeout = timeout
 
-		self.key = None
-		self.affinity_token = None
+		self.key = None  # type: Optional[str]
+		self.affinity_token = None  # type: Optional[str]
 		self._sequence = 0
 		self.last_offset = 0
-		self.client_poll_timeout = None
+		self.client_poll_timeout = None  # type: Optional[int]
+
+	# abstract
+
+	def get_request(self, endpoint, headers, params=None, timeout=None):
+		# type: (str, JsonDict, Optional[JsonDict], Optional[float]) -> ReturnTGet
+
+		raise NotImplementedError
+
+	def post_request(self, endpoint, headers, json=None, timeout=None):
+		# type: (str, JsonDict, Optional[JsonDict], Optional[float]) -> ReturnTPost
+
+		raise NotImplementedError
 
 	# helper
 
 	def urljoin(self, endpoint):
+		# type: (str, ) -> str
+
 		return self.scheme + "://" + self.hostname + endpoint
 
 	@property
 	def sequence(self):
+		# type: () -> str
+
 		self._sequence += 1
 		return str(self._sequence)
 
 	@staticmethod
-	def _make_prechat_details(prechat_details, slots):
+	def _make_prechat_details(slots):
+		# type: (Union[Dict[str, str], List[JsonDict]], ) -> List[JsonDict]
 
-		if prechat_details:
-			pass
-
-		elif not slots:
+		if isinstance(slots, dict):
 			prechat_details = []
-
-		elif isinstance(slots, dict):
-			prechat_details = []  # type: List[Dict[str, Any]]
 
 			for label, value in slots.items():
 				custom_detail = {
@@ -286,7 +311,7 @@ class LiveAgentBase(object):
 				}
 				prechat_details.append(custom_detail)
 
-		elif isinstance(slots, Sequence):
+		elif isinstance(slots, list):
 			try:
 				for custom_detail in slots:
 					custom_detail["label"]
@@ -300,12 +325,14 @@ class LiveAgentBase(object):
 			prechat_details = slots
 
 		else:
-			raise ValueError("either prechat_details must be given or slots must be dict or Sequence")
+			raise ValueError("either prechat_details must be given or slots must be dict or list")
 
 		return prechat_details
 
 	@staticmethod
 	def _availibility(res):
+		# type: (JsonDict, ) -> bool
+
 		for msg in res["messages"]:
 			if msg["type"] == "Availability":
 				return msg["message"]["results"][0].get("isAvailable", False)
@@ -315,6 +342,8 @@ class LiveAgentBase(object):
 		raise SalesforceError("No Availability message in live agent response")
 
 	def _reset(self, d):
+		# type: (JsonDict, ) -> None
+
 		msg = d["messages"][0]
 		assert msg["type"] == "ReconnectSession"
 
@@ -324,6 +353,8 @@ class LiveAgentBase(object):
 			self._sequence = 0
 
 	def _set_session_info(self, response):
+		# type: (JsonDict, ) -> None
+
 		self.key = response["key"]
 		self.affinity_token = response["affinityToken"]
 		self.client_poll_timeout = response["clientPollTimeout"]
@@ -331,26 +362,30 @@ class LiveAgentBase(object):
 	# high level
 
 	def send(self, text):
-		# type: (str, ) -> Union[bytes, Awaitable[bytes]]
+		# type: (str, ) -> ReturnTPost
 
 		""" Send text message to agent.
 		"""
 
+		assert self.key
+		assert self.affinity_token
 		return self.rest_chat_message(self.key, self.affinity_token, text)
 
 	def close(self):
-		# type: () -> Union[bytes, Awaitable[bytes]]
+		# type: () -> ReturnTPost
 
 		""" Close live chat.
 			Can raise a 403 HTTP error in case the agent already ended the chat.
 		"""
 
+		assert self.key
+		assert self.affinity_token
 		return self.rest_chat_end(self.key, self.affinity_token)
 
 	# low level
 
 	def rest_session_id(self):
-		# type: () -> Union[dict, Awaitable[dict]]
+		# type: () -> ReturnTGet
 
 		endpoint = "/chat/rest/System/SessionId"
 
@@ -363,7 +398,7 @@ class LiveAgentBase(object):
 	def rest_chasitor_init(self, key, affinity_token, session_id, visitor_name, user_agent="", language="en-US",
 		screen_resolution="1920x1080", prechat_details=None, prechat_entities=None,
 		receive_queue_updates=True, is_post=True):
-		# type: (str, str, str, str, str, str, str, Sequence[Dict[str, Any]], Sequence[Dict[str, Any]], bool, bool) -> Union[bytes, Awaitable[bytes]]
+		# type: (str, str, str, str, str, str, str, List[JsonDict], List[JsonDict], bool, bool) -> ReturnTPost
 
 		endpoint = "/chat/rest/Chasitor/ChasitorInit"
 
@@ -390,7 +425,7 @@ class LiveAgentBase(object):
 		return self.post_request(endpoint, headers, json=params)
 
 	def rest_reconnect_session(self, key, affinity_token, offset):
-		# type: (str, str, int) -> Union[dict, Awaitable[dict]]
+		# type: (str, str, int) -> ReturnTGet
 
 		endpoint = "/chat/rest/System/ReconnectSession"
 
@@ -406,7 +441,7 @@ class LiveAgentBase(object):
 		return self.get_request(endpoint, headers, params=params)
 
 	def rest_chasitor_resync_state(self, key, affinity_token):
-		# type: (str, str) -> Union[dict, Awaitable[dict]]
+		# type: (str, str) -> ReturnTPost
 
 		endpoint = "/chat/rest/Chasitor/ChasitorResyncState"
 
@@ -419,10 +454,10 @@ class LiveAgentBase(object):
 			"organizationId": self.organization_id
 		}
 
-		return self.get_request(endpoint, headers, json=params)
+		return self.post_request(endpoint, headers, json=params)
 
 	def rest_messages(self, key, affinity_token):
-		# type: (str, str) -> Union[dict, Awaitable[dict]]
+		# type: (str, str) -> ReturnTGet
 
 		endpoint = "/chat/rest/System/Messages"
 
@@ -434,7 +469,7 @@ class LiveAgentBase(object):
 		return self.get_request(endpoint, headers, timeout=self.client_poll_timeout)
 
 	def rest_chat_message(self, key, affinity_token, text):
-		# type: (str, str, str) -> Union[bytes, Awaitable[bytes]]
+		# type: (str, str, str) -> ReturnTPost
 
 		endpoint = "/chat/rest/Chasitor/ChatMessage"
 
@@ -450,7 +485,7 @@ class LiveAgentBase(object):
 		return self.post_request(endpoint, headers, json=params)
 
 	def rest_chasitor_sneak_peek(self, key, affinity_token, position, text):
-		# type: (str, str, int, str) -> Union[bytes, Awaitable[bytes]]
+		# type: (str, str, int, str) -> ReturnTPost
 
 		endpoint = "/chat/rest/Chasitor/ChasitorSneakPeek"
 
@@ -467,7 +502,7 @@ class LiveAgentBase(object):
 		return self.post_request(endpoint, headers, json=params)
 
 	def rest_chat_end(self, key, affinity_token):
-		# type: (str, str) -> Union[bytes, Awaitable[bytes]]
+		# type: (str, str) -> ReturnTPost
 
 		endpoint = "/chat/rest/Chasitor/ChatEnd"
 
@@ -484,11 +519,11 @@ class LiveAgentBase(object):
 		return self.post_request(endpoint, headers, json=params)
 
 	def rest_availability(self, estimated_wait_time=False):
-		# type: (bool, ) -> Union[dict, Awaitable[dict]]
+		# type: (bool, ) -> ReturnTGet
 
 		endpoint = "/chat/rest/Visitor/Availability"
 
-		headers = {}
+		headers = {}  # type: JsonDict
 
 		params = {
 			"org_id": self.organization_id,
@@ -504,10 +539,10 @@ class LiveAgentBase(object):
 
 		return self.get_request(endpoint, headers, params=params)
 
-class LiveAgent(LiveAgentBase):
+class LiveAgent(LiveAgentBase[JsonDict, bytes]):
 
 	def get_request(self, endpoint, headers, params=None, timeout=None):
-		# type: (str, dict, Optional[dict], Optional[float]) -> dict
+		# type: (str, JsonDict, Optional[JsonDict], Optional[float]) -> JsonDict
 
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
 		timeout = timeout or self.timeout
@@ -520,7 +555,7 @@ class LiveAgent(LiveAgentBase):
 			return r.json()
 
 	def post_request(self, endpoint, headers, json=None, timeout=None):
-		# type: (str, dict, Optional[dict], Optional[float]) -> bytes
+		# type: (str, JsonDict, Optional[JsonDict], Optional[float]) -> bytes
 
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
 		headers.setdefault("X-LIVEAGENT-SEQUENCE", self.sequence)
@@ -533,7 +568,7 @@ class LiveAgent(LiveAgentBase):
 	# high level
 
 	def connect(self, visitor_name, slots=None, prechat_details=None, prechat_entities=None):
-		# type: (str, Optional[Union[Dict[str, str], Sequence[Dict[str, Any]]]], Sequence[Dict[str, Any]], Sequence[Dict[str, Any]]) -> None
+		# type: (str, Optional[Union[Dict[str, str], List[JsonDict]]], List[JsonDict], List[JsonDict]) -> None
 
 		""" Connect using `visitor_name` as name.
 		"""
@@ -543,8 +578,11 @@ class LiveAgent(LiveAgentBase):
 
 		self._set_session_info(response)
 		session_id = response["id"]
-		prechat_details = self._make_prechat_details(prechat_details, slots)
+		if not prechat_details and slots:
+			prechat_details = self._make_prechat_details(slots)
 
+		assert self.key
+		assert self.affinity_token
 		self.rest_chasitor_init(self.key, self.affinity_token, session_id, visitor_name,
 			prechat_details=prechat_details, prechat_entities=prechat_entities)
 
@@ -553,8 +591,11 @@ class LiveAgent(LiveAgentBase):
 
 		""" Use `reconnect()` whenever a 503 error is encounted. """
 
+		assert self.key
+		assert self.last_offset
 		d = self.rest_reconnect_session(self.key, "null", self.last_offset)
 		self._reset(d)
+		assert self.affinity_token
 		self.rest_chasitor_resync_state(self.key, self.affinity_token)
 
 	def is_available(self):
@@ -580,11 +621,13 @@ class LiveAgent(LiveAgentBase):
 			time.sleep(wait)
 
 	def receive(self, wait_forever=False):
-		# type: (bool, ) -> List[dict]
+		# type: (bool, ) -> List[JsonDict]
 
 		""" Long poll messages.
 		"""
 
+		assert self.key
+		assert self.affinity_token
 		while True:
 			d = self.rest_messages(self.key, self.affinity_token)
 			if not d:
@@ -596,12 +639,12 @@ class LiveAgent(LiveAgentBase):
 			self.last_offset = d.get("offset", 0)
 			return d["messages"]
 
-class LiveAgentAsync(LiveAgentBase):
+class LiveAgentAsync(LiveAgentBase[Coroutine[Any, Any, JsonDict], Coroutine[Any, Any, bytes]]):
 
 	trust_env = True
 
 	async def get_request(self, endpoint, headers, params=None, timeout=None):
-		# type: (str, dict, Optional[dict], Optional[float]) -> dict
+		# type: (str, JsonDict, Optional[JsonDict], Optional[float]) -> JsonDict
 
 		headers = headers or {}
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
@@ -616,7 +659,7 @@ class LiveAgentAsync(LiveAgentBase):
 					return await r.json()
 
 	async def post_request(self, endpoint, headers, json=None, timeout=None):
-		# type: (str, dict, Optional[dict], Optional[float]) -> bytes
+		# type: (str, JsonDict, Optional[JsonDict], Optional[float]) -> bytes
 
 		headers = headers or {}
 		headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
@@ -631,7 +674,7 @@ class LiveAgentAsync(LiveAgentBase):
 	# high level
 
 	async def connect(self, visitor_name, slots=None, prechat_details=None, prechat_entities=None):
-		# type: (str, Optional[Union[Dict[str, str], Sequence[Dict[str, Any]]]], Sequence[Dict[str, Any]], Sequence[Dict[str, Any]]) -> None
+		# type: (str, Optional[Union[Dict[str, str], List[JsonDict]]], List[JsonDict], List[JsonDict]) -> None
 
 		""" Connect using `visitor_name` as name.
 		"""
@@ -641,8 +684,11 @@ class LiveAgentAsync(LiveAgentBase):
 
 		self._set_session_info(response)
 		session_id = response["id"]
-		prechat_details = self._make_prechat_details(prechat_details, slots)
+		if not prechat_details and slots:
+			prechat_details = self._make_prechat_details(slots)
 
+		assert self.key
+		assert self.affinity_token
 		await self.rest_chasitor_init(self.key, self.affinity_token, session_id, visitor_name,
 			prechat_details=prechat_details, prechat_entities=prechat_entities)
 
@@ -651,8 +697,11 @@ class LiveAgentAsync(LiveAgentBase):
 
 		""" Use `reconnect()` whenever a 503 error is encounted. """
 
+		assert self.key
+		assert self.last_offset
 		d = await self.rest_reconnect_session(self.key, "null", self.last_offset)
 		self._reset(d)
+		assert self.affinity_token
 		await self.rest_chasitor_resync_state(self.key, self.affinity_token)
 
 	async def is_available(self):
@@ -678,10 +727,12 @@ class LiveAgentAsync(LiveAgentBase):
 			await asyncio.sleep(wait)
 
 	async def receive(self, wait_forever=False):
-		# type: (bool, ) -> List[dict]
+		# type: (bool, ) -> List[JsonDict]
 
 		""" Long poll messages.
 		"""
+		assert self.key
+		assert self.affinity_token
 
 		while True:
 			d = await self.rest_messages(self.key, self.affinity_token)
