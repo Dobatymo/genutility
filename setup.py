@@ -107,7 +107,7 @@ extras_require = {
 	"pillow": ["pillow", "piexif"],
 	"powerpoint": ["python-pptx"],
 	"rasa": ["requests", "aiohttp>=2.3", "ruamel.yaml"],
-	"salesforce": ["simple_salesforce>=1.1.0", "simplejson", "aiohttp>=2.3", "requests"],
+	"salesforce": ["simple_salesforce>=1.1.0", "simplejson", "aiohttp>=2.3", "requests", "pandas"],
 	"scipy": ["numpy", "scipy"],
 	"toml": ["toml"],
 	"torch": ["torch"],
