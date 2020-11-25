@@ -3,6 +3,7 @@ import csv
 import logging
 import re
 import time
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -29,6 +30,9 @@ from .atomic import sopen
 from .iter import progress
 from .json import read_json, write_json
 
+if TYPE_CHECKING:
+	import pandas as pd
+
 JsonDict = Dict[str, Any]
 ReturnTGet = TypeVar("ReturnTGet")
 ReturnTPost = TypeVar("ReturnTPost")
@@ -51,6 +55,19 @@ def one(result):
 
 class SalesforceError(Exception):
 	pass
+
+def _flatten_row(row):
+	ret = {}
+	del row["attributes"]
+
+	for k, v in row.items():
+		if isinstance(v, dict):
+			for kk, vv in _flatten_row(v).items():
+				ret[f"{k}.{kk}"] = vv
+		else:
+			ret[k] = v
+
+	return ret
 
 class MySalesforce(object):
 
@@ -137,24 +154,26 @@ class MySalesforce(object):
 
 		return results
 
-	def _query_all(self, s, attributes=False):
+	def _query_all(self, s, flatten=True):
 		# type: (str, bool) -> Iterator[JsonDict]
 
 		reconnect = True
 
 		try:
 			for row in self.session().query_all_iter(s):
-				if not attributes:
-					del row["attributes"]
-				yield row
+				if flatten:
+					yield _flatten_row(row)
+				else:
+					yield row
 				reconnect = False
 		except SalesforceExpiredSession:
 			logger.debug("Salesforce session expired")
 			if reconnect:
 				for row in self.session(True).query_all_iter(s):
-					if not attributes:
-						del row["attributes"]
-					yield row
+					if flatten:
+						yield _flatten_row(row)
+					else:
+						yield row
 			else:
 				raise RuntimeError("Cannot reconnect Salesforce session after partial query")
 
@@ -224,8 +243,39 @@ class MySalesforce(object):
 		s = sosl_escape(s)
 		return self._search("FIND {{{}}} RETURNING {}({})".format(s, object_name, ", ".join(object_fields)))
 
-	def dump_csv(self, query_str, path, verbose=False, safe=False):
-		# type: (str, str, bool, bool) -> int
+	@staticmethod
+	def dictkeymapper(it, columns):
+		# type: (Iterable[dict], dict) -> Iterator[dict]
+
+		for row in it:
+			yield {v: row.get(k, "") for k, v in columns.items()}
+
+	def soql_to_pandas(self, query_str, verbose=False, columns=None):
+		# type: (str, bool, Optional[Union[Sequence[str], Mapping[str, str]]]) -> pd.DataFrame
+
+		import pandas as pd
+
+		if verbose:
+			it = progress(self._query_all(query_str, flatten=True))
+		else:
+			it = self._query_all(query_str, flatten=True)
+
+		if not columns:
+			fieldnames = None
+		elif isinstance(columns, Sequence):
+			fieldnames = columns
+		elif isinstance(columns, Mapping):
+			fieldnames = columns.keys()
+		else:
+			raise ValueError()
+
+		df = pd.DataFrame.from_records(it, columns=fieldnames)
+		if isinstance(columns, Mapping):
+			df.columns = columns.values()
+		return df
+
+	def dump_csv(self, query_str, path, verbose=False, safe=False, columns=None):
+		# type: (str, str, bool, bool, Optional[Union[Sequence[str], Mapping[str, str]]]) -> int
 
 		""" Run SOQL `query_str` and dump results to csv file `path`.
 			Returns the number of exported rows.
@@ -234,20 +284,32 @@ class MySalesforce(object):
 		i = 0
 
 		with sopen(path, "wt", encoding="utf-8", newline="", safe=safe) as csvfile:
-			csvwriter = csv.writer(csvfile)
-
 			if verbose:
-				it = progress(self._query_all(query_str))
+				it = progress(self._query_all(query_str, flatten=True))
 			else:
-				it = self._query_all(query_str)
+				it = self._query_all(query_str, flatten=True)
+
+			if isinstance(columns, Mapping):
+				it = self.dictkeymapper(it, columns)
 
 			row = next(it)
-			csvwriter.writerow(row.keys())
-			csvwriter.writerow(row.values())
+			if not columns:
+				fieldnames = row.keys()
+			elif isinstance(columns, Sequence):
+				fieldnames = columns
+			elif isinstance(columns, Mapping):
+				fieldnames = columns.values()
+			else:
+				raise ValueError()
+
+			csvwriter = csv.DictWriter(csvfile, fieldnames, extrasaction="ignore")
+
+			csvwriter.writeheader()
+			csvwriter.writerow(row)
 			i += 1
 
 			for row in it:
-				csvwriter.writerow(row.values())
+				csvwriter.writerow(row)
 				i += 1
 
 		return i
