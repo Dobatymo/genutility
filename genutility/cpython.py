@@ -1,6 +1,8 @@
 from __future__ import generator_stop
 
 import sys
+from types import FrameType
+from typing import Any, Optional
 
 """ All functions of this module use implemention details specific to CPython
 	and might not work on other implementations.
