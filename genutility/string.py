@@ -14,7 +14,7 @@ from .binary import decode_binary, encode_binary
 from .iter import switched_enumerate
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple, TypeVar, Union
+	from typing import Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, Union
 	T = TypeVar("T")
 	UnicodeOrdinalT = Union[int, str]
 
@@ -114,12 +114,15 @@ def decode_case(s, key):
 def locale_sorted(seq, case_insensitive=True, lower_before_upper=True):
 	if case_insensitive:
 		if lower_before_upper:
-			key = lambda s: (strxfrm(s.lower()), strxfrm(s.swapcase()))
+			def key(s):
+				return (strxfrm(s.lower()), strxfrm(s.swapcase()))
 		else:
-			key = lambda s: (strxfrm(s.lower()), strxfrm(s))
+			def key(s):
+				return (strxfrm(s.lower()), strxfrm(s))
 	else:
 		if lower_before_upper:
-			key = lambda s: (strxfrm(s.swapcase()), strxfrm(s))
+			def key(s):
+				return (strxfrm(s.swapcase()), strxfrm(s))
 		else:
 			key = strxfrm
 
@@ -189,7 +192,7 @@ _backslashquote_escape = build_multiple_replace(OrderedDict([
 def backslashquote_escape(s):
 	# type: (str, ) -> str
 
-	""" Converts \ to \\ and " to \"
+	""" Converts \\ to \\\\ and " to \\"
 	"""
 
 	return _backslashquote_escape(s)
@@ -255,15 +258,15 @@ def filter_join(s, it, func=None):
 	else:
 		return s.join(i for i in it if func(i))
 
-def surrounding_join(j, it, l="", r=""):
+def surrounding_join(j, it, left="", right=""):
 	# type: (str, Iterable[str], str, str) -> str
 
-	""" Example: surrounding_join(", ", ("a", "b", "c"), l="[", r="]") -> "[a], [b], [c]"
+	""" Example: surrounding_join(", ", ("a", "b", "c"), left="[", right="]") -> "[a], [b], [c]"
 	"""
 
-	s = (r + j + l).join(it)
+	s = (right + j + left).join(it)
 	if s != "":
-		return l + s + r
+		return left + s + right
 	return ""
 
 def replace_pairs_bytes(s, items):

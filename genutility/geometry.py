@@ -13,7 +13,9 @@ def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=No
 		principal point: center of the image (not the quadrilateral)
 	"""
 
-	sqr = lambda x: x**2
+	def sqr(x):
+		return x**2
+
 	#(m1x, m1y), (m2x, m2y), (m3x, m3y), (m4x, m4y) = corners
 	(m1x, m1y), (m3x, m3y), (m4x, m4y), (m2x, m2y) = corners
 	u0, v0 = principal_point

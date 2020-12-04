@@ -17,7 +17,7 @@ from .sqlite import quote_identifier
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Iterable, Iterator, Optional, Set
+	from typing import Any, Dict, FrozenSet, Iterable, Iterator, Optional, Tuple
 
 	from .filesystem import EntryType
 
@@ -131,7 +131,7 @@ class GenericFileDb(object):
 			return tuple(chain((self.normalize_path(path), filesize, mod_date), (derived.get(n) for n, t, v in self._derived)))
 
 	def iter(self, only=frozenset(), no=frozenset()):
-		# type: (Set[str], Set[str]) -> Iterator[tuple]
+		# type: (FrozenSet[str], FrozenSet[str]) -> Iterator[tuple]
 
 		if only and no:
 			raise ValueError("Only `only` or `no` can be specified")
@@ -145,7 +145,7 @@ class GenericFileDb(object):
 		return iterfetch(self.cursor)
 
 	def get_latest(self, path, filesize, mod_date, derived=None, ignore_null=True, only=frozenset(), no=frozenset()):
-		# type: (str, int, int, Optional[Dict[str, Any]], bool, Set[str], Set[str]) -> tuple
+		# type: (str, int, int, Optional[Dict[str, Any]], bool, FrozenSet[str], FrozenSet[str]) -> tuple
 
 		""" Retrieve latest row based on mandatory and derived information.
 
@@ -187,7 +187,7 @@ class GenericFileDb(object):
 		return fetchone(self.cursor)
 
 	def get(self, path, only=frozenset(), no=frozenset()):
-		# type: (EntryType, Set[str], Set[str]) -> tuple
+		# type: (EntryType, FrozenSet[str], FrozenSet[str]) -> tuple
 
 		""" Retrieves latest row based on mandatory information
 			which is solely based on the `path`.
@@ -220,7 +220,7 @@ class GenericFileDb(object):
 		"""
 
 		try:
-			result = self.get_latest(path, filesize, mod_date, derived, ignore_null=ignore_null)
+			self.get_latest(path, filesize, mod_date, derived, ignore_null=ignore_null)
 			return False
 
 		except NoResult:
@@ -243,7 +243,7 @@ class GenericFileDb(object):
 		return result
 
 	def add_files(self, batch):
-		# type: (Iterable[str, int, int, Optional[Dict[str, Any]]], ) -> Iterator[bool]
+		# type: (Iterable[Tuple[str, int, int, Optional[Dict[str, Any]]]], ) -> Iterator[bool]
 
 		for path, filesize, mod_date, derived in batch:
 			yield self._add_file_no_dup(path, filesize, mod_date, derived)

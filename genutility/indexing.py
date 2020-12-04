@@ -5,7 +5,7 @@ from builtins import map, range
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Iterable, Iterator, Sequence, Tuple, TypeVar, Union
+	from typing import Iterable, Iterator, Sequence, Tuple, TypeVar
 
 	T = TypeVar("T")
 

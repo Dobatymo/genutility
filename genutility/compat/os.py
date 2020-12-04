@@ -40,7 +40,7 @@ if PY2:
 		return bf
 
 else:
-	from os import fdopen
+	from os import fdopen  # noqa: F401
 
 try:
 	from os import makedirs
@@ -105,7 +105,7 @@ except ImportError:
 				raise WinError()
 
 	else:
-		from os import rename as replace  # on posix rename can already replace existing files atomically
+		from os import rename as replace  # noqa: F401 # on posix rename can already replace existing files atomically
 
 try:
 	from os import DirEntry

@@ -419,7 +419,7 @@ class IterTest(MyTestCase):
 	)
 	def test_decompress_error(self, selectors, data):
 		with self.assertRaises(IteratorExhausted):
-			result = tuple(decompress(selectors, data))
+			tuple(decompress(selectors, data))
 
 	@parametrize(
 		([], None),
@@ -614,8 +614,12 @@ class IterTest(MyTestCase):
 	)
 	def test_retrier(self, kwargs, truth):
 		results = []
+
 		result = tuple(retrier(waitfunc=results.append, **kwargs))
 		self.assertIterEqual(truth, results)
+
+		truth = tuple(range(len(truth) + 1))
+		self.assertEqual(truth, result)
 
 	@parametrize(
 		((), set(), ()),

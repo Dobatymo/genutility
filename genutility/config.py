@@ -12,10 +12,6 @@ from .os import get_appdata_dir
 if TYPE_CHECKING:
 	from typing import Any, Dict, Optional, Union
 
-if __debug__:
-	import jsonschema
-	import sortedcontainers
-
 def sort_config(inpath, outpath):
 	# type: (str, str) -> None
 
@@ -31,7 +27,7 @@ def _load(name):
 
 	from .toml import read_toml
 
-	configfilename = name+".toml"
+	configfilename = name + ".toml"
 
 	# try appdata directory
 	try:

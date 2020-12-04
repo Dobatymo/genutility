@@ -11,7 +11,7 @@ class SplitRecursive(object):
 		# type: (int, ) -> int
 
 		if n < 0:
-			raise ArithmeticError("Factorial: n has to be >= 0, but was " + n)
+			raise ArithmeticError("Factorial: n has to be >= 0, but was {}".format(n))
 
 		if n < 2:
 			return 1

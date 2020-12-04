@@ -49,7 +49,7 @@ def write_pickle(result, path, protocol=None, safe=False):
 def read_iter(path):
 	# type: (str, ) -> Iterator[Any]
 
-	""" Read pickled iterable from `path`. 
+	""" Read pickled iterable from `path`.
 		Warning: All usual security consideration regarding the pickle module still apply.
 	"""
 

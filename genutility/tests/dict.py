@@ -27,7 +27,7 @@ class DictTest(MyTestCase):
 	)
 	def test_subdict_error(self, d, it, truth):
 		with self.assertRaises(KeyError):
-			result = subdict(d, it)
+			subdict(d, it)
 
 	@parametrize(
 		({}, (), None, {}),

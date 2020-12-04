@@ -7,7 +7,6 @@ from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Awaitable,
     Coroutine,
     Dict,
     Generic,
@@ -23,24 +22,25 @@ from typing import (
 import aiohttp
 import requests
 from simple_salesforce import Salesforce
-from simple_salesforce.exceptions import SalesforceAuthenticationFailed, SalesforceExpiredSession
-from simplejson.errors import JSONDecodeError
+from simple_salesforce.exceptions import SalesforceExpiredSession
 
 from .atomic import sopen
 from .iter import progress
 from .json import read_json, write_json
 
 if TYPE_CHECKING:
-	import pandas as pd
+	import pandas as pd  # noqa: F401
 
 JsonDict = Dict[str, Any]
 ReturnTGet = TypeVar("ReturnTGet")
 ReturnTPost = TypeVar("ReturnTPost")
+T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
 _sosl_pat = re.compile("[" + re.escape("?&|!{}[]()^~*:\\\"'+-") + "]")
-_sosl_repl = lambda m: "\\" + m.group(0)
+def _sosl_repl(m):
+	return "\\" + m.group(0)
 
 def sosl_escape(s):
 	# type: (str, ) -> str
@@ -245,7 +245,7 @@ class MySalesforce(object):
 
 	@staticmethod
 	def dictkeymapper(it, columns):
-		# type: (Iterable[dict], dict) -> Iterator[dict]
+		# type: (Iterable[Mapping[str, str]], Mapping[str, T]) -> Iterator[Dict[T, str]]
 
 		for row in it:
 			yield {v: row.get(k, "") for k, v in columns.items()}
@@ -253,7 +253,7 @@ class MySalesforce(object):
 	def soql_to_pandas(self, query_str, verbose=False, columns=None):
 		# type: (str, bool, Optional[Union[Sequence[str], Mapping[str, str]]]) -> pd.DataFrame
 
-		import pandas as pd
+		import pandas as pd  # noqa: F811
 
 		if verbose:
 			it = progress(self._query_all(query_str, flatten=True))
@@ -261,7 +261,7 @@ class MySalesforce(object):
 			it = self._query_all(query_str, flatten=True)
 
 		if not columns:
-			fieldnames = None
+			fieldnames = None # type: Optional[Iterable[str]]
 		elif isinstance(columns, Sequence):
 			fieldnames = columns
 		elif isinstance(columns, Mapping):

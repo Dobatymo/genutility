@@ -54,6 +54,7 @@ class TwitchAPI(object):
 		if userid:
 			self.userid = userid
 		else:
+			assert username
 			self.userid = self.get_userid(username)
 
 	def req(self, url, params):

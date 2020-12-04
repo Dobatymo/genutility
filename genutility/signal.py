@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from types import FrameType
-	from typing import Any, Callable, Iterable, Optional, TypeVar, Union
+	from typing import Any, Callable, Iterable, Optional, TypeVar
 	if sys.version_info >= (3, 5):
 		from signal import Signals  # pylint: disable=no-name-in-module
 	else:
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class HandleKeyboardInterrupt(object):
 
 	""" Context manager to handle ctrl-c (keyboard interrupts)
-	
+
 		with HandleKeyboardInterrupt():
 			do_a()
 			do_b()

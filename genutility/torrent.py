@@ -10,7 +10,7 @@ from .file import blockfileiter, blockfilesiter, read_file
 from .filesystem import FileProperties
 
 if TYPE_CHECKING:
-	from typing import Optional
+	from typing import Any, Dict, Optional
 
 	from .compat.pathlib import Path
 
@@ -21,7 +21,7 @@ def read_torrent_info_dict(path):
 	return bdecode(read_file(path, "rb"))["info"]
 
 def iter_torrent(path):
-	""" Returns file informations from a torrent file. 
+	""" Returns file informations from a torrent file.
 		Hash (SHA-1) is obtained according to BEP0047 (if available).
 	"""
 
@@ -40,10 +40,10 @@ def pieces_field(pieces):
 	return b"".join(sha1(piece).digest() for piece in pieces)  # nosec
 
 def create_torrent_info_dict(path, piece_size, private=None):
-	# type: (Path, int, Optional[int]) -> dict
+	# type: (Path, int, Optional[int]) -> Dict[str, Any]
 
 	if private is not None:
-		assert_choice("private", private, (0, 1))
+		assert_choice("private", private, {0, 1})
 
 	if path.is_file():
 		ret = {
@@ -54,9 +54,9 @@ def create_torrent_info_dict(path, piece_size, private=None):
 		}
 
 	elif path.is_dir():
-		files = []
+		files = []  # fixme: not implemented yet
 
-		assert files
+		assert files, "not implemented yet"
 
 		ret = {
 			"name": path.name,
@@ -65,7 +65,7 @@ def create_torrent_info_dict(path, piece_size, private=None):
 				"path": path.parts,
 			} for length, path in files],
 			"piece length": piece_size,
-			"pieces": pieces_field(blockfilesiter((p for l, p in files), chunk_size=piece_size)),
+			"pieces": pieces_field(blockfilesiter((p for _, p in files), chunk_size=piece_size)),
 		}
 
 	else:

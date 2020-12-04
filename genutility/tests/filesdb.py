@@ -38,7 +38,7 @@ class SimpleDBTest(MyTestCase):
 		db = Simple(":memory:", "tests")
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd"})
-		assert result == True
+		assert result
 
 		assert list(db.iter(no={"entry_date"})) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd")]
 
@@ -46,13 +46,13 @@ class SimpleDBTest(MyTestCase):
 		assert row == ("path/pathB", 123, "2013-01-01 12:00:00", "asd")
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd"})
-		assert result == False
+		assert not result
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "qwe"})
-		assert result == True
+		assert result
 
 		result = db.add_file("path/pathB", 124, "2013-01-01 12:00:00", derived={"data": "qwe"})
-		assert result == True
+		assert result
 
 		assert list(db.iter(no={"entry_date"})) == [("path/pathB", 124, "2013-01-01 12:00:00", "qwe")]
 
@@ -70,7 +70,7 @@ class HistoryDBTest(MyTestCase):
 		no = {"file_id", "entry_date"}
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd"})
-		assert result == True
+		assert result
 
 		assert list(db.iter(no=no)) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd")]
 
@@ -78,15 +78,15 @@ class HistoryDBTest(MyTestCase):
 		assert row == ("path/pathB", 123, "2013-01-01 12:00:00", "asd")
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd"})
-		assert result == False
+		assert not result
 
 		sleep(2) # sleep so sqlite date is increased
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "qwe"})
-		assert result == True
+		assert result
 
 		result = db.add_file("path/pathB", 124, "2013-01-01 12:00:00", derived={"data": "qwe"})
-		assert result == True
+		assert result
 
 		assert list(db.iter(no=no)) == [
 			('path/pathB', 123, '2013-01-01 12:00:00', 'asd'),
@@ -106,7 +106,7 @@ class HistoryDBTest(MyTestCase):
 		no = {"file_id", "entry_date"}
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data1": "asd"})
-		assert result == True
+		assert result
 
 		assert list(db.iter(no=no)) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd", None)]
 
@@ -114,15 +114,15 @@ class HistoryDBTest(MyTestCase):
 		assert row == ("path/pathB", 123, "2013-01-01 12:00:00", "asd", None)
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data1": "asd"})
-		assert result == False
+		assert not result
 
 		sleep(2) # sleep so sqlite date is increased
 
 		result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data1": "qwe"})
-		assert result == True
+		assert result
 
 		result = db.add_file("path/pathB", 124, "2013-01-01 12:00:00", derived={"data1": "qwe"})
-		assert result == True
+		assert result
 
 		assert list(db.iter(no=no)) == [
 			('path/pathB', 123, '2013-01-01 12:00:00', 'asd', None),

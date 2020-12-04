@@ -1,3 +1,5 @@
+from __future__ import generator_stop
+
 from typing import Callable, List, Optional
 
 
@@ -33,69 +35,26 @@ class SegmentTree(object):
 			p >>= 1
 			self.t[p] = val
 
-	def query(self, l, r):
+	def query(self, left, right):
 		# type: (int, int) -> int
 
-		if l >= r or not 0 <= l <= self.n or not 0 <= r <= self.n:
-			raise ValueError("Interval [{}, {}) out of range".format(l, r))
+		if left >= right or not 0 <= left <= self.n or not 0 <= right <= self.n:
+			raise ValueError("Interval [{}, {}) out of range".format(left, right))
 
 		res = self.initializer
-		l += self.n
-		r += self.n
+		left += self.n
+		right += self.n
 
-		while l < r:
+		while left < right:
 
-			if l & 1:
-				res = self.func(res, self.t[l])
-				l += 1
-			if r & 1:
-				r -= 1
-				res = self.func(res, self.t[r])
+			if left & 1:
+				res = self.func(res, self.t[left])
+				left += 1
+			if right & 1:
+				right -= 1
+				res = self.func(res, self.t[right])
 
-			l >>= 1
-			r >>= 1
+			left >>= 1
+			right >>= 1
 
 		return res
-
-import random
-from operator import add
-from sys import maxsize
-from unittest import TestCase
-
-
-def range_generator(size, tests):
-	ls = random.sample(range(size), tests)
-	rs = random.sample(range(size), tests)
-
-	for l, r in zip(ls, rs):
-		if l == r:
-			continue
-
-		yield min(l, r), max(l, r)
-
-class SegmentTreeTest(TestCase):
-
-	def test_range(self):
-		size = 100
-		tests = 10
-
-		t = list(range(size))
-		random.shuffle(t)
-
-		for func, initializer, truthfunc in (
-			(min, maxsize, min),
-			(max, -maxsize, max),
-			(add, 0, sum)
-		):
-			st = SegmentTree(t, func, initializer)
-			st.build()
-
-			for l, r in range_generator(size, tests):
-
-				result = st.query(l, r)
-				truth = truthfunc(t[l:r])
-				self.assertEqual(truth, result)
-
-if __name__ == "__main__":
-	import unittest
-	unittest.main()

@@ -11,9 +11,7 @@ from operator import gt, lt, mul
 from random import sample
 from typing import TYPE_CHECKING
 
-from .compat.math import isqrt
-from .compat.math import nan as NaN
-from .compat.math import prod
+from .compat.math import isqrt, prod
 from .exceptions import EmptyIterable
 from .iter import range_count
 
@@ -21,7 +19,7 @@ if TYPE_CHECKING:
 	from typing import Callable, Iterable, List, Optional, Sequence, SupportsFloat, Tuple, TypeVar
 
 	from .typing import Computable, Orderable
-	O = TypeVar("O", bound=Orderable)
+	OrderableT = TypeVar("OrderableT", bound=Orderable)
 
 inf = float("inf")
 
@@ -70,34 +68,34 @@ def cosine_similarity(a, b):
 
 	return dot(a, b)/euclidean_norm(a)/euclidean_norm(b)
 
-def argmin(l, s=0, e=None):
-	# type: (Sequence[O], int, Optional[int]) -> O
+def argmin(seq, s=0, e=None):
+	# type: (Sequence[OrderableT], int, Optional[int]) -> OrderableT
 
-	if not l:
+	if not seq:
 		raise EmptyIterable()
 
 	arg = s
-	e = e or len(l)
+	e = e or len(seq)
 	for i in range(s+1, e):
-		if l[i] < l[arg]:
+		if seq[i] < seq[arg]:
 			arg = i
 	return arg
 
-def argmax(l, s=0, e=None):
-	# type: (Sequence[O], int, Optional[int]) -> O
+def argmax(seq, s=0, e=None):
+	# type: (Sequence[OrderableT], int, Optional[int]) -> OrderableT
 
-	if not l:
+	if not seq:
 		raise EmptyIterable()
 
 	arg = s
-	e = e or len(l)
+	e = e or len(seq)
 	for i in range(s+1, e):
-		if l[i] > l[arg]:
+		if seq[i] > seq[arg]:
 			arg = i
 	return arg
 
 def argmax_pair(iterable):
-	# type: (Iterable[O], ) -> Tuple[int, O]
+	# type: (Iterable[OrderableT], ) -> Tuple[int, OrderableT]
 
 	it = iter(iterable)
 	arg = 0
@@ -118,13 +116,13 @@ from operator import itemgetter
 
 
 def argmax_v2(iterable):
-	# type: (Iterable[O], ) -> Tuple[int, O]
+	# type: (Iterable[OrderableT], ) -> Tuple[int, OrderableT]
 
 	""" nicer, but almost 2 times slower than above"""
 	return max(zip(count(), iterable), key=itemgetter(1))[0]
 
 def minmax(a, b):
-	# type: (O, O) -> O
+	# type: (OrderableT, OrderableT) -> Tuple[OrderableT, OrderableT]
 
 	""" `default` argument cannot be used, because the C level function doesn't have a default value
 		but an overload.
@@ -136,7 +134,7 @@ def minmax(a, b):
 		return b, a
 
 def _argfind_cmp(it, target, op1, op2, pos=0):
-	# type: (Iterable[O], O, Callable[[O, O], bool], Callable[[O, O], bool], int) -> Tuple[int, O]
+	# type: (Iterable[OrderableT], OrderableT, Callable[[OrderableT, OrderableT], bool], Callable[[OrderableT, OrderableT], bool], int) -> Tuple[int, OrderableT]
 
 	""" Find the largest element in `it` less than or equal to `target` and return the index and value.
 		Return (-1, None) if no such element can be found.

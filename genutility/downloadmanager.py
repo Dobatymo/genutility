@@ -78,14 +78,14 @@ class DownloadManager(object):
 		self.queue.add(task)
 
 	def _start(self, task):
-		# type: (DownloadTask, ) -> asyncio.Future
+		# type: (DownloadTask, ) -> asyncio.Task
 
 		self.active.add(task)
 		atask = asyncio.ensure_future(self._download(task))
 		return atask
 
 	def _trystart(self):
-		# type: () -> Optional[asyncio.Future]
+		# type: () -> Optional[asyncio.Task]
 
 		if len(self.active) < self.concurrent_downloads:
 			try:
@@ -96,6 +96,8 @@ class DownloadManager(object):
 					logger.info("all done")
 					#self.loop.stop()
 					#task = asyncio.ensure_future(self._close())
+
+		return None
 
 	async def _download(self, task):
 		# type: (DownloadTask, ) -> None
@@ -111,7 +113,7 @@ class DownloadManager(object):
 			async with self.session.get(task.url, headers={}) as response:
 				stream = response.content
 				try:
-					size = int(response.headers.get('content-length')) # type: Optional[int]
+					size = int(response.headers.get("content-length", ""))  # type: Optional[int]
 				except (ValueError, TypeError):
 					size = None
 
@@ -120,8 +122,10 @@ class DownloadManager(object):
 				if response.status == 200: # range not supported
 					pass
 				elif response.status == 206: # range supported
-					assert accept_range == "bytes"
+					if accept_range != "bytes":
+						raise RuntimeError("Only bytes content ranges are supported")
 					bytes_range = response.headers.get('Content-Range') # 'bytes 0-10/46239'
+					raise RuntimeError("Range requests are not supported yet: {}".format(bytes_range))
 
 				with open(task.path, "wb", buffering=self.chunksize) as fw:
 					async for data in stream.iter_any():

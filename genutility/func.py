@@ -155,7 +155,7 @@ class CustomCache(object):
 		@cc.cache("func-cache.p")
 		# arg is ignored, so the cache will return the result of the argument which was supplied
 		# when the cache file was created.
-		def func(arg): 
+		def func(arg):
 			return arg
 		```
 		a = func(1) # cache created, a == 1

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from .exceptions import NoResult, assert_choice
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Iterator, Optional, Tuple, TypeVar, Union
+	from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Tuple, TypeVar, Union
 	T = TypeVar("T")
 	U = TypeVar("U")
 
@@ -147,7 +147,7 @@ class ThreadPool(object):
 		self.tasks.join()
 
 def gather_all_unsorted(threadpool, func, params, *args, **kwargs):
-	# type: (ThreadPool, Callable, Iterable, tuple, dict) -> Iterator[Tuple[Any, Any]]
+	# type: (ThreadPool, Callable, Sequence, tuple, dict) -> Iterator[Tuple[Any, Any]]
 
 	""" Runs multiple tasks concurrently and returns all results in the order
 		of execution finish as soon as possible.
@@ -172,7 +172,7 @@ def gather_any(threadpool, func, params, *args, **kwargs):
 	raise NoResult("No task returned a valid result")
 
 def NotThreadSafe(verify=False):
-	# type: (bool, ) -> Callable[type]
+	# type: (bool, ) -> Callable[[type], type]
 
 	""" Class decorator. Only works on new style classes (object)
 		`verify=True` prohibits write access to attributes.

@@ -250,7 +250,6 @@ if __name__ == "__main__":
 	from hashlib import sha1
 
 	from genutility.args import is_dir
-	from genutility.file import equal_files
 	from genutility.hash import format_file_hash
 	from genutility.iter import consume
 
@@ -287,7 +286,7 @@ if __name__ == "__main__":
 			logging.debug("Parse error in %s: %s", path, e)
 			invalid += 1
 
-		except EOFError as e:
+		except EOFError:
 			logging.debug("Truncated file %s", path)
 			invalid += 1
 

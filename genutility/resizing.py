@@ -1,13 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from itertools import islice
-from math import cos, pi, sin
+from math import pi
 
 import cv2
 import numpy as np
 from sklearn.cluster import MeanShift
 
-from .math import degree_to_rad, inf
+from .math import inf
 from .rand import rgb_colors
 
 ## UNFINISHED
@@ -68,7 +68,7 @@ def norm(v):
 def shape_dissimmilarity(R_u, R_v, i, j):
 	num1 = np.abs(R_u[i] - R_u[j])
 	denom1 = max(norm(R_u[i]), norm(R_u[j]))
-	
+
 	num2 = np.abs(R_v[i] - R_v[j])
 	denom2 = max(norm(R_v[i]), norm(R_v[j]))
 

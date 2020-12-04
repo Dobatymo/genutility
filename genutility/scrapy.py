@@ -6,19 +6,17 @@ from typing import TYPE_CHECKING
 from .dbm import dbm_items
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterator
+	from collections.abc import MutableMapping
+	from typing import Any, Callable, ContextManager, Iterator, Tuple
 
 def read_dbm_httpcache(path, open_func=dbm.open):
-	# type: (str, Callable) -> Iterator[dict]
+	# type: (str, Callable[[str], ContextManager[MutableMapping]]) -> Iterator[Tuple[bytes, float, Any]]
 
 	""" Loads scrapy dbm http cache files.
 		Uses pickle so only use on trusted file.
 	"""
 
 	with open_func(path, "r") as db:
-
-		time_pair = None
-		data_pair = None
 
 		for key, value in dbm_items(db):
 

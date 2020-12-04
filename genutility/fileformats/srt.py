@@ -126,14 +126,14 @@ def transform(infile, outfile, callback, encoding):
 
 def merge(srtlines, lim):
 	ret = []
-	for l in srtlines:
-		if l.startswith(lim):
-			ret.append(l[len(lim):])
+	for line in srtlines:
+		if line.startswith(lim):
+			ret.append(line[len(lim):])
 		else:
 			if not ret:
-				ret.append(l)
+				ret.append(line)
 			else:
-				ret[-1] = ret[-1] + " " + l
+				ret[-1] = ret[-1] + " " + line
 	return ret
 
 def srt2txt(srt_fp):
@@ -161,17 +161,17 @@ def compare_srt_and_txt(srt_file, txt_file):
 
 		while limit > 0:
 			try:
-				l = next(txt).rstrip()
-				if not l:
+				line = next(txt).rstrip()
+				if not line:
 					continue
-				if not l.startswith("- "):
-					print(l)
+				if not line.startswith("- "):
+					print(line)
 				else:
-					l = l[2:]
+					line = line[2:]
 					start = 0
-					while start <= len(l):
+					while start <= len(line):
 						srtpart = next(srtiter)
-						txtpart = l[start:start+len(srtpart)]
+						txtpart = line[start:start+len(srtpart)]
 						logging.debug("Compare '{}' '{}'".format(txtpart, srtpart))
 						if txtpart != srtpart:
 							#print("{} - {}".format(sub.start, sub.end))

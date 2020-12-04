@@ -15,7 +15,7 @@ from .exceptions import Break, ParseError
 from .file import read_or_raise
 
 if TYPE_CHECKING:
-	from typing import BytesIO, Iterator, Tuple
+	from typing import IO, Dict, Iterator, Tuple
 
 # http://mp4ra.org/#/atoms
 # https://wiki.multimedia.cx/index.php/QuickTime_container#QuickTime_Atom_Reference
@@ -25,12 +25,12 @@ if TYPE_CHECKING:
 """
 
 def _load_atoms():
-	# type: () -> dict
+	# type: () -> Dict[str, Dict[str, str]]
 
 	package_name = __package__ or "genutility"
 	atoms_path = pkg_resources.resource_filename(package_name, "data/mp4-atoms.tsv")
 
-	out = {"container": {}, "leaf": {}}
+	out = {"container": {}, "leaf": {}}  # type: Dict[str, Dict[str, str]]
 
 	for _, type, fourcc, description, _ in iter_csv(atoms_path, delimiter="\t"):
 		out[type][fourcc] = description
@@ -42,7 +42,7 @@ atoms = _load_atoms()
 atomcodep = re.compile(br"[0-9a-zA-Z]{4}") # what do the specs say here?
 
 def read_atom(fin):
-	# type: (BytesIO, ) -> Tuple[int, str, int]
+	# type: (IO[bytes], ) -> Tuple[int, str, int]
 
 	pos = fin.tell()
 
@@ -59,7 +59,7 @@ def read_atom(fin):
 	return pos, code, size
 
 def _enum_atoms(fin, total_size, depth):
-	# type: (BytesIO, int, int) -> Iterator[Tuple[int, int, str, int]]
+	# type: (IO[bytes], int, int) -> Iterator[Tuple[int, int, str, int]]
 
 	while fin.tell() < total_size:
 		pos, type, size = read_atom(fin)

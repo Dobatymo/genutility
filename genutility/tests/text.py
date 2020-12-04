@@ -1,6 +1,7 @@
 from __future__ import generator_stop
 
 from itertools import count
+from typing import Iterator
 
 from genutility.test import MyTestCase, parametrize
 from genutility.text import (
@@ -13,6 +14,12 @@ from genutility.text import (
     replace_typographical_punctuation,
 )
 
+
+def urls_iter():
+	# type: () -> Iterator[str]
+
+	for i in count(0):
+		yield "<URL_{}>".format(i)
 
 class TextTest(MyTestCase):
 
@@ -44,13 +51,11 @@ class TextTest(MyTestCase):
 		result = collapse_punctuation_symbols(value)
 		self.assertEqual(truth, result)
 
-	it = lambda: ("<URL_{}>".format(i) for i in count(0))
-
 	@parametrize(
-		(it(), "irc://0.0.0.0", "<URL_0>"),
-		(it(), "asd asd", "asd asd"),
-		(it(), "asd http://localhost asd", "asd <URL_0> asd"),
-		(it(), "asd http://localhost qwe ftp://google.com/ncr zxc", "asd <URL_0> qwe <URL_1> zxc"),
+		(urls_iter(), "irc://0.0.0.0", "<URL_0>"),
+		(urls_iter(), "asd asd", "asd asd"),
+		(urls_iter(), "asd http://localhost asd", "asd <URL_0> asd"),
+		(urls_iter(), "asd http://localhost qwe ftp://google.com/ncr zxc", "asd <URL_0> qwe <URL_1> zxc"),
 		("<URL>", "asd https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B qwe", "asd <URL> qwe"),
 		("<URL>", "asd www.google.com qwe", "asd <URL> qwe")
 	)

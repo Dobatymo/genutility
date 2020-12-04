@@ -6,12 +6,12 @@ import os
 import platform
 from typing import TYPE_CHECKING
 
-from .os_shared import is_os_64bit
+from .os_shared import is_os_64bit  # noqa: F401
 
 if TYPE_CHECKING:
-	from builtins import str
-
-	from typing import Callable
+	from pathlib import Path
+	from typing import Callable, Union
+	PathStr = Union[Path, str]
 
 system = platform.system()
 
@@ -20,10 +20,14 @@ class CurrentWorkingDirectory(object):
 	__slots__ = ("oldcwd", )
 
 	def __init__(self, path):
+		# type: (PathStr, ) -> None
+
 		self.oldcwd = os.getcwd()
 		os.chdir(path)
 
 	def close(self):
+		# type: () -> None
+
 		os.chdir(self.oldcwd)
 
 	def __enter__(self):

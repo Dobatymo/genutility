@@ -3,11 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from typing import TYPE_CHECKING
 
 try:
-	from contextlib import ExitStack
-except ImportError:
-	from contextlib2 import ExitStack
-
-try:
 	from contextlib import nullcontext  # pylint: disable=no-name-in-module
 
 except ImportError:

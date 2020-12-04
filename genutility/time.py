@@ -2,13 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import defaultdict
 from datetime import timedelta
-from time import sleep
+from time import monotonic, sleep
 from typing import TYPE_CHECKING
-
-try:
-	from time import monotonic  # Python 3.5+
-except ImportError:
-	from time import clock as monotonic
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Hashable, Iterator, Optional, Tuple, TypeVar, Union
@@ -26,6 +21,8 @@ def iter_timer(it):
 		pass
 
 class TakeAtleast(object):
+
+	__slots__ = ("delta", "wait_on_error", "now")
 
 	def __init__(self, delta, wait_on_error=False):
 		# type: (Union[float, timedelta], bool) -> None
@@ -114,9 +111,12 @@ class MeasureTime(object):
 
 	def __init__(self):
 		# type: () -> None
+
 		self.delta = None
 
 	def __enter__(self):
+		# type: () -> MeasureTime
+
 		self.start = monotonic()
 		return self
 
@@ -125,6 +125,7 @@ class MeasureTime(object):
 
 	def get(self):
 		# type: () -> float
+
 		if self.delta:
 			return self.delta
 		else:
@@ -133,11 +134,13 @@ class MeasureTime(object):
 class TimeIt(object):
 
 	def __init__(self):
+		# type: () -> None
+
 		self.results = defaultdict(list)
 		self.starts = dict()
 
 	def __call__(self, key, func, *args, **kwargs):
-		# type: (Hashable, Callable, *Any, **Any) -> Any
+		# type: (Hashable, Callable[..., T], *Any, **Any) -> T
 
 		with MeasureTime() as t:
 			ret = func(*args, **kwargs)
@@ -146,16 +149,20 @@ class TimeIt(object):
 
 	def start(self, key):
 		# type: (Hashable, ) -> None
+
 		self.starts[key] = DeltaTime()
 
 	def stop(self, key):
 		# type: (Hashable, ) -> None
+
 		self.results[key].append(self.starts[key].get())
 
 	def min(self, key):
 		# type: (Hashable, ) -> float
+
 		return min(self.results[key])
 
 	def length(self, key):
 		# type: (Hashable, ) -> int
+
 		return len(self.results[key])

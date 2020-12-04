@@ -17,7 +17,7 @@ def read_toml(path):
 		return toml.load(fr)
 
 def write_toml(obj, path):
-	# type: (str, Any) -> None
+	# type: (Any, str) -> None
 
 	with open(path, "w", encoding="utf-8") as fw:
 		toml.dump(obj, fw)

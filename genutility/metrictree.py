@@ -11,9 +11,6 @@ if TYPE_CHECKING:
 
 	from graphviz import Digraph
 
-if __debug__:
-	import graphviz
-
 class BKNode(object):
 
 	__slots__ = ["value", "leaves"]

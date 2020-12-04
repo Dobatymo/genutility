@@ -53,7 +53,7 @@ def batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True):
 
 		# need to cache batch data, because if the iterable is exhausted,
 		# executemany raises `sqlite3.ProgrammingError`
-		data = list(queries_batch) 
+		data = list(queries_batch)
 		if data:
 			cursor.execute("BEGIN TRANSACTION")
 			cursor.executemany(query_str, data)

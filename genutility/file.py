@@ -17,12 +17,6 @@ if TYPE_CHECKING:
 	PathType = Union[str, PathLike]
 	Data = TypeVar("Data", str, bytes)
 
-if __debug__:
-	import tarfile
-	import zipfile
-
-	from .compat import bz2, gzip
-
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
 def _check_arguments(mode, encoding=None):
@@ -52,7 +46,7 @@ def read_file(path, mode="b", encoding=None, errors=None):
 
 	encoding = _check_arguments(mode, encoding)
 
-	if not "r" in mode:
+	if "r" not in mode:
 		mode = "r" + mode
 
 	with open(path, mode, encoding=encoding, errors=errors) as fr:
@@ -364,7 +358,7 @@ class Tell(object):
 		# type: (IO, ) -> None
 
 		try:
-			assert fp.seekable() == False
+			assert not fp.seekable()
 		except AttributeError:
 			pass
 

@@ -9,7 +9,7 @@ from .func import identity
 from .indexing import triangular_indices
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Iterator, MutableSequence, Optional, Sequence, Tuple, TypeVar
+	from typing import Callable, Dict, Iterator, MutableSequence, Optional, Sequence, Tuple, TypeVar
 
 	from .typing import Comparable
 	T = TypeVar("T")
@@ -110,7 +110,10 @@ def delete_duplicates_from_sorted_sequence(seq, key=None):
 		else:
 			i += 1
 
-remove_duplicate_rows_from_sorted_table = lambda seq, key: delete_duplicates_from_sorted_sequence(seq, itemgetter(key))
+def remove_duplicate_rows_from_sorted_table(seq, key):
+	# type: (MutableSequence[Dict[str, T]], str) -> None
+
+	return delete_duplicates_from_sorted_sequence(seq, itemgetter(key))
 
 def cycle_sort(seq):
 	# type: (MutableSequence[T], ) -> Iterator[Tuple[int, int]]

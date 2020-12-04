@@ -10,7 +10,7 @@ if PY2:
 
 	from . import os
 
-	""" This function is copied from `Python36\Lib\gzip.py`.
+	""" This function is copied from `Python36/Lib/gzip.py`.
 	"""
 
 	def open(filename, mode="rb", compresslevel=9,
@@ -58,4 +58,4 @@ if PY2:
 			return binary_file
 
 else:
-	from gzip import open
+	from gzip import open  # noqa: F401

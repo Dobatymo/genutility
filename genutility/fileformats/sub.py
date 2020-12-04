@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging
 from io import open
 
 from ..exceptions import MalformedFile
@@ -35,7 +34,7 @@ class Sub(object):
 		start, end, text = line.split("}", 2)
 		try:
 			start, end = int(start[1:]), int(end[1:])
-		except:
+		except Exception:
 			MalformedFile("Error in line {}: sub malformed: {}".format(self.current_line, line))
 
 		return Subtitle(start, end, text.split(self.sep))

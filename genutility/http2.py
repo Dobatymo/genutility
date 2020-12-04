@@ -33,7 +33,7 @@ class WrappedHTTP20Connection(object):
 			sleep(i)
 			try:
 				return self._dl_url(path, headers, timeout)
-			except (ConnectionResetError, SocketTimeout, StreamResetError) as e:
+			except (ConnectionResetError, SocketTimeout, StreamResetError):
 				self.connect()
 				continue
 

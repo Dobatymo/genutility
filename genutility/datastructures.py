@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from collections.abc import MutableMapping
-from typing import TYPE_CHECKING, AbstractSet, Iterator, List, Tuple, TypeVar, cast
+from typing import AbstractSet, Iterator, List, Tuple, TypeVar, cast
 
 T = TypeVar("T")
 

@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Sequence, Set, Tuple, TypeVar, Union
+	from typing import Any, Dict, Set, Tuple, TypeVar, Union
 	T = TypeVar("T")
 	U = TypeVar("U")
 

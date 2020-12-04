@@ -8,7 +8,7 @@ import logging
 from datetime import timedelta
 from functools import partial, wraps
 from itertools import islice
-from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Iterator, Optional, Sequence, Tuple, Type, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Dict, FrozenSet, Iterator, Optional, Sequence, Tuple, Type, Union
 
 from typing_extensions import TypedDict
 
@@ -22,17 +22,16 @@ from .object import args_to_key
 if TYPE_CHECKING:
 	from pathlib import Path
 
-JsonDict = Dict[str, Any]
+	PathStr = Union[Path, str]
 
-if __debug__:
-	import jsonschema
+JsonDict = Dict[str, Any]
 
 logger = logging.getLogger(__name__)
 
 class BuiltinEncoder(json.JSONEncoder):
 
 	def default(self, obj):
-	
+
 		# collections.OrderedDict is supported by default
 
 		from base64 import b85encode
@@ -55,13 +54,13 @@ class BuiltinEncoder(json.JSONEncoder):
 		return json.JSONEncoder.default(self, obj)
 
 def read_json_schema(path):
-	# type: (str, ) -> JsonDict
+	# type: (PathStr, ) -> JsonDict
 
 	with open(path, "r", encoding="utf-8") as fr:
 		return json.load(fr)
 
 def read_json(path, schema=None, cls=None, object_hook=None):
-	# type: (str, Optional[Union[str, JsonDict]], Any, Any) -> Any
+	# type: (PathStr, Optional[Union[str, JsonDict]], Any, Any) -> Any
 
 	""" Read the json file at `path` and optionally validates the input according to `schema`.
 		The validation requires `jsonschema`.
@@ -84,7 +83,7 @@ def read_json(path, schema=None, cls=None, object_hook=None):
 	return obj
 
 def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False):
-	# type: (Any, str, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[str], bool, Optional[Callable], bool) -> None
+	# type: (Any, PathStr, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[str], bool, Optional[Callable], bool) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
@@ -148,7 +147,7 @@ class json_lines(object):
 		file, mode="rt", encoding="utf-8", errors="strict", newline=None,
 		cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw
 	):
-		# type: (str, str, str, str, Optional[str], Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
+		# type: (PathStr, str, str, str, Optional[str], Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
 
 		""" Binary writing modes "wb", "ab", "r+b", "w+b" are not supported by the python json module.
 			Use text modes instead. Binary read-only is fine.
@@ -214,6 +213,7 @@ class json_lines(object):
 			self.f.close()
 
 def read_json_lines(file, object_hook=None):
+	# type: (PathStr, Optional[Callable]) -> Iterator[Any]
 
 	""" Iterate over a JSON Lines `file` object by object.
 		`object_hook` is passed through to `json.load`.
@@ -224,7 +224,7 @@ def read_json_lines(file, object_hook=None):
 			yield obj
 
 def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt"):
-	# type: (str, str, Callable[[JsonDict], Sequence[str]], str) -> None
+	# type: (PathStr, str, Callable[[JsonDict], Sequence[str]], str) -> None
 
 	with json_lines.from_path(jlpath, "rt") as fr:
 		with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
@@ -233,6 +233,8 @@ def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt"):
 				fw.writerow(keyfunc(obj))
 
 def key_to_hash(key, default=None):
+	# type: (Any, Optional[Callable]) -> str
+
 	from hashlib import md5
 	binary = json.dumps(key, default=default).encode("utf-8")
 	return md5(binary).hexdigest()  # nosec
@@ -330,6 +332,8 @@ class JsonLinesFormatter(logging.Formatter):
 	}
 
 	def __init__(self, include=frozenset(), builtins=frozenset(), default=None):
+		# type: (FrozenSet[str], FrozenSet[str], Optional[Callable]) -> None
+
 		logging.Formatter.__init__(self)
 		self.include_b = include & viewkeys(self.myfields)
 		self.builtins = builtins

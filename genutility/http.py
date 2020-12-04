@@ -24,10 +24,8 @@ from .url import get_filename_from_url
 if TYPE_CHECKING:
 	from http.client import HTTPMessage
 	from http.cookiejar import CookieJar
-	from typing import Callable, Mapping, Optional, Tuple
-
-if __debug__:
-	import requests
+	from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
+	JsonObject = Union[List[Any], Dict[str, Any]]
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +54,8 @@ try:
 	from email.utils import parsedate_to_datetime  # new in 3.3
 
 	def parsedate_to_timestamp(datestr): # correct timezone
+		# type: (str, ) -> float
+
 		return parsedate_to_datetime(datestr).timestamp()
 
 except ImportError:
@@ -81,7 +81,7 @@ try:
 
 except ImportError:
 	def get_filename(headers):
-		# type: (Mapping, ) -> str
+		# type: (Mapping, ) -> Optional[str]
 
 		try:
 			content_disposition = headers["Content-Disposition"]
@@ -219,7 +219,7 @@ class URLRequest(object):
 				raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
 
 	def _json(self):
-		# type: () -> dict
+		# type: () -> JsonObject
 
 		with FileLike(self) as fp:
 			try:
@@ -251,7 +251,7 @@ class URLRequest(object):
 		filenames = [filenames[p] for p in fn_prio]
 		logger.info("Filenames: {}".format(", ".join(map(str, filenames))))
 
-		filename = first_not_none(filenames)
+		filename = first_not_none(filenames)  # Optional[str]
 
 		if not filename:
 			raise ValueError("Please provide a filename")
@@ -284,7 +284,7 @@ class URLRequest(object):
 			logger.warning("Connection was reset during download: %s", str(e))
 			raise DownloadInterrupted("Connection was reset during download")
 
-		except Exception as e:
+		except Exception:
 			logger.exception("Downloading failed mid file. Handle.")
 			raise
 
@@ -309,7 +309,7 @@ class URLRequest(object):
 			self.response.close()
 
 	def json(self):
-		# type: () -> bytes
+		# type: () -> JsonObject
 
 		try:
 			return self._json()

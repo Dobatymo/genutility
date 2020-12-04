@@ -19,23 +19,23 @@ ys = np.random.randint(0, width, num)
 
 def index_lol():
 	for x, y in zip(xs, ys):
-		a = lol[x][y]
+		lol[x][y]
 
 def index_sm():
 	for x, y in zip(xs, ys):
-		a = sm[x, y]
+		sm[x, y]
 
 def index_sm_2():
 	for ind in zip(xs, ys):
-		a = sm[ind]
+		sm[ind]
 
 def index_d():
 	for x, y in zip(xs, ys):
-		a = d[x, y]
+		d[x, y]
 
 def index_d_2():
 	for ind in zip(xs, ys):
-		a = d[ind]
+		d[ind]
 
 benchmarks = {
 	"VariableRowMatrix": {

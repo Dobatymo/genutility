@@ -1,5 +1,7 @@
 from __future__ import generator_stop
 
+from random import shuffle
+
 from genutility.sort import bubble_sort, selection_sort_max, selection_sort_min
 from genutility.test import MyTestCase
 
@@ -7,11 +9,9 @@ from genutility.test import MyTestCase
 class SortTest(MyTestCase):
 
 	def _get_random_list(self):
-		from random import shuffle
-
-		l = list(range(20))
-		shuffle(l)
-		return l
+		lst = list(range(20))
+		shuffle(lst)
+		return lst
 
 	def test_bubble_sort(self):
 		result = self._get_random_list()

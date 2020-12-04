@@ -4,7 +4,7 @@ from unittest import SkipTest
 
 from genutility.math import number_metric
 from genutility.metrictree import BKTree
-from genutility.test import MyTestCase, parametrize
+from genutility.test import MyTestCase
 
 
 class BKTreeTest(MyTestCase):

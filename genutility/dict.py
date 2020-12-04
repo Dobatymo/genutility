@@ -6,11 +6,10 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, Mapping, Optional, Tuple, TypeVar
+	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, Mapping, Tuple, TypeVar, Union
 
 	T = TypeVar("T")
 	U = TypeVar("U")
-	H = TypeVar("H", bound=Hashable)
 	V = TypeVar("V")
 
 def flatten(d):
@@ -84,7 +83,7 @@ def subdict(d, it):
 	return {key: d[key] for key in it}
 
 def subdictdefault(d, it, default=None):
-	# type: (Mapping[T, U], Iterable[T], Optional[T]) -> Dict[T, U]
+	# type: (Mapping[T, U], Iterable[T], Union[U, V]) -> Dict[T, Union[U, V]]
 
 	""" Uses the elements of `it` as keys to extract a new sub-dictionary. """
 

@@ -11,7 +11,7 @@ from ..exceptions import ParseError
 from ..file import read_or_raise
 
 if TYPE_CHECKING:
-	from typing import BytesIO, Callable, Iterator, Tuple, Union
+	from typing import IO, Callable, Iterator, Tuple
 
 	from _hashlib import HASH as Hashobj
 
@@ -62,7 +62,7 @@ def binary2png(binary, width, height):
 	return png_sig + IHDR(width, height) + IDAT(binary) + IEND()
 
 def iter_png_fp(stream, translate=True, verify_crc=True):
-	# type: (BytesIO, bool, bool) -> Iterator[tuple]
+	# type: (IO[bytes], bool, bool) -> Iterator[tuple]
 
 	""" Parses PNG / APNG files.
 	"""
@@ -126,7 +126,7 @@ def iter_png(path, translate=True, verify_crc=True):
 
 
 def copy_png_fp(fin, fout, filter_chunks=None, verify_crc=False):
-	# type: (BytesIO, BytesIO, Callable[[bytes], bool], bool) -> None
+	# type: (IO[bytes], IO[bytes], Callable[[bytes], bool], bool) -> None
 
 	""" Same as `copy_png()` except that it accepts file-like objects.
 	"""
@@ -160,7 +160,10 @@ def hash_raw_png(path, hashobj):
 	""" Create a hash of the JPEG at `path` skipping over meta data sections.
 	"""
 
-	filter_chunks = lambda ct: ct in image_chunks
+	def filter_chunks(ct):
+		# type: (bytes, ) -> bool
+
+		return ct in image_chunks
 
 	for length, chunk_type, chunk, crc in iter_png(path, translate=False, verify_crc=False):
 		if filter_chunks(chunk_type):

@@ -254,14 +254,22 @@ def copy_file_generator(source, dest, buffer_size=FILE_IO_BUFFER_SIZE, overwrite
 def st_mode_to_str(st_mode):
 	# type: (int, ) -> str
 
-	if stat.S_ISDIR(st_mode): return "directory"
-	elif stat.S_ISREG(st_mode): return "regular file"
-	elif stat.S_ISCHR(st_mode): return "character special device file"
-	elif stat.S_ISBLK(st_mode): return "block special device file"
-	elif stat.S_ISFIFO(st_mode): return "named pipe"
-	elif stat.S_ISLNK(st_mode): return "symbolic link"
-	elif stat.S_ISSOCK(st_mode): return "socket"
-	else: return "unknown"
+	if stat.S_ISDIR(st_mode):
+		return "directory"
+	elif stat.S_ISREG(st_mode):
+		return "regular file"
+	elif stat.S_ISCHR(st_mode):
+		return "character special device file"
+	elif stat.S_ISBLK(st_mode):
+		return "block special device file"
+	elif stat.S_ISFIFO(st_mode):
+		return "named pipe"
+	elif stat.S_ISLNK(st_mode):
+		return "symbolic link"
+	elif stat.S_ISSOCK(st_mode):
+		return "socket"
+	else:
+		return "unknown"
 
 def append_to_filename(path, s):
 	# type: (PathType, str) -> str
@@ -655,7 +663,7 @@ def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
 				logger.info("Remove: %s", file_to_delete)
 				try:
 					os.remove(file_to_delete)
-				except OSError as e:
+				except OSError:
 					logger.exception("Could not delete: %s", file_to_delete)
 					break
 
@@ -667,7 +675,7 @@ def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
 			try:
 				logger.info("Rename: %s -> %s", filepath, target)
 				os.rename(filepath, target)
-			except OSError as e:
+			except OSError:
 				logger.exception("Should not have happened")
 				break
 
@@ -685,7 +693,7 @@ def iter_links(path):
 def normalize_seps(path):
 	# type: (str, ) -> str
 
-	""" Converts \ to /
+	""" Converts \\ to /
 	"""
 
 	return path.replace("\\", "/")

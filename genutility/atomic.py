@@ -4,7 +4,6 @@ from builtins import bytes, str
 from future.utils import PY2
 
 import os.path
-from io import open
 from os import remove
 from sys import getfilesystemencoding
 from tempfile import mkstemp

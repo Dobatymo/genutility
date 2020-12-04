@@ -23,23 +23,23 @@ def bubble_sort(seq):
 			break
 		n = newn
 
-def selection_sort_min(l):
+def selection_sort_min(seq):
 	#inplace, unstable
 
-	n = len(l)
+	n = len(seq)
 	for i in range(n-1):
-		m = argmin(l, i, n)
+		m = argmin(seq, i, n)
 		if m != i:
-			l[i], l[m] = l[m], l[i]
+			seq[i], seq[m] = seq[m], seq[i]
 
-def selection_sort_max(l):
+def selection_sort_max(seq):
 	#inplace, unstable
 
-	for n in range(len(l)-1, 0, -1):
-		m = argmax(l[:n+1])
+	for n in range(len(seq)-1, 0, -1):
+		m = argmax(seq[:n+1])
 		if m != n:
-			l[m], l[n] = l[n], l[m]
+			seq[m], seq[n] = seq[n], seq[m]
 
-def selection_sort_ll(l):
+def selection_sort_ll(seq):
 	# inplace, stable, on linked lists
 	raise NotImplementedError

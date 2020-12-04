@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 	    Union,
 	)
 
-	from .typing import Number, Orderable, SizedIterable
+	from .typing import Orderable, SizedIterable
 	T = TypeVar("T")
 	U = TypeVar("U")
 	V = TypeVar("V")

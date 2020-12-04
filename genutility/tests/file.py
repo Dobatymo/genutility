@@ -48,12 +48,12 @@ class FileTest(MyTestCase):
 	def test_OpenFileAndDeleteOnError(self):
 		path = os.path.join(tempfile.gettempdir(), "excepttest.tmp") # not super safe
 
-		with OpenFileAndDeleteOnError(path, "wb") as fw:
+		with OpenFileAndDeleteOnError(path, "wb"):
 			pass
 		self.assertEqual(os.path.isfile(path), True)
 
 		with self.assertRaises(RuntimeError):
-			with OpenFileAndDeleteOnError(path, "wb") as fw:
+			with OpenFileAndDeleteOnError(path, "wb"):
 				raise RuntimeError()
 		self.assertEqual(os.path.isfile(path), False)
 

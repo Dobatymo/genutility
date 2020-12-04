@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import csv
-import fnmatch
 from io import open
 from itertools import islice
 
@@ -45,7 +44,7 @@ class Browscap(object):
 
 if __name__ == "__main__":
 	from argparse import ArgumentParser
-	
+
 	parser = ArgumentParser()
 	parser.add_argument("path", help="browscap.csv file")
 	args = parser.parse_args()

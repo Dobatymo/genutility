@@ -2,7 +2,7 @@ from __future__ import generator_stop
 
 import os.path
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Any, Coroutine, Dict, Generic, List, Optional, TypeVar, Union
+from typing import Any, Coroutine, Dict, Generic, List, Optional, TypeVar, Union
 
 import aiohttp
 import requests

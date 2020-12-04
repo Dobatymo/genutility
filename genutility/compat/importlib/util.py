@@ -1,15 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from typing import Any, Dict
+
 try:
 	from importlib.util import find_spec
 
 except ImportError:
 	def find_spec(name):
-		# type: (str, ) -> dict
+		# type: (str, ) -> Dict[str, Any]
 
 		""" Find the spec for a module. `name` must be importable. """
 
-		from importlib import import_module 
+		from importlib import import_module
 		module = import_module(name)
 
 		ret = {

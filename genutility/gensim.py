@@ -10,10 +10,15 @@ from gensim.models.keyedvectors import Vocab
 from .file import PathOrTextIO
 
 if TYPE_CHECKING:
-	from typing import Callable, Collection, Iterator, Optional, TextIO, Tuple, Union
+	from typing import Any, Callable, Collection, Iterable, Iterator, Optional, TextIO, Tuple, Union
 
 class DuplicateEntry(ValueError):
 	pass
+
+def false(x):
+	# type: (Any, ) -> bool
+
+	return False
 
 class KeyedVectors(KeyedVectorsOriginal):
 
@@ -23,10 +28,9 @@ class KeyedVectors(KeyedVectorsOriginal):
 
 	@classmethod
 	def load_a_format(cls, fin, vocab_size, vector_size, datatype=np.float32, discard=None):
-		# type: (TextIO, int, int, Optional[Callable[[str], bool]]) -> KeyedVectorsOriginal
+		# type: (Iterable[str], int, int, Any, Optional[Callable[[str], bool]]) -> KeyedVectorsOriginal
 
-		if discard is None:
-			discard = lambda x: False
+		discard = discard or false
 
 		result = cls(vector_size)
 		result.vector_size = vector_size
@@ -60,7 +64,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 		return result
 
 	def add(self, wwc):
-		# type: (Collection[Tuple[str, np.ndarray, int]], ) -> None
+		# type: (Collection[Tuple[str, np.ndarray, int]], ) -> Iterator[Vocab]
 
 		""" `wwc` is a collection of (word, weights, count) tuples """
 
@@ -116,12 +120,14 @@ class KeyedVectors(KeyedVectorsOriginal):
 				raise ValueError("duplicate word '{}' in {}".format(e, fname))
 
 	def get_keras_embedding(self, train_embeddings=False, mask_zero=True):
+		# type: (bool, bool) -> "Embedding"
+
 		try:
 			from keras.layers import Embedding
 		except ImportError:
 			raise ImportError("Please install Keras to use this function")
 
-		if mask_zero == True:
+		if mask_zero:
 			self.index2word = [None]+ self.index2word
 			zero_vec = np.zeros((1, self.vector_size))
 			self.vectors = np.concatenate([zero_vec, self.vectors], axis=0)

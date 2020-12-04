@@ -128,12 +128,12 @@ def _get_appdata_dir():
 	KF_FLAG_CREATE = 0x00008000
 
 	rfid = byref(FOLDERID_RoamingAppData)
-	Flags = 0
+	Flags = KF_FLAG_CREATE
 	Token = None
 	Path = PWSTR()
 
 	try:
-		result = SHGetKnownFolderPath(rfid, KF_FLAG_CREATE, None, byref(Path))
+		result = SHGetKnownFolderPath(rfid, Flags, Token, byref(Path))
 	except OSError:
 		logging.error("SHGetKnownFolderPath result: {:X}".format(result & 0xffffffff))
 		raise

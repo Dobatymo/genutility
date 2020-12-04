@@ -149,8 +149,8 @@ class StringTest(MyTestCase):
 		("", ("a", "b", "c"), "", "", "abc"),
 		(", ", ("a", "b", "c"), "(", ")", "(a), (b), (c)"),
 	)
-	def test_surrounding_join(self, s, items, l, r, truth):
-		result = surrounding_join(s, items, l, r)
+	def test_surrounding_join(self, s, items, left, right, truth):
+		result = surrounding_join(s, items, left, right)
 		self.assertEqual(truth, result)
 
 	@parametrize(

@@ -9,7 +9,7 @@ import numpy as np
 if TYPE_CHECKING:
 	from typing import Iterator, Union
 
-	import wx
+	import wx  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

@@ -22,6 +22,7 @@ from .signal import HandleKeyboardInterrupt  # problem here
 if TYPE_CHECKING:
 	from typing import Any, Callable, Collection, DefaultDict, Hashable, Iterable, Mapping, Optional, Tuple, TypeVar
 	T = TypeVar("T")
+	U = TypeVar("U")
 
 class nullcontext(object): # see: .compat.contextlib
 
@@ -77,7 +78,7 @@ class MyTestRunner(TextTestRunner):
 	def run(self, test):
 		"""Stores the total count of test cases, then calls super impl"""
 
-		total_test_cases = test.countTestCases()
+		self.total_test_cases = test.countTestCases()
 		return TextTestRunner.run(self, test)
 
 	def _makeResult(self):
@@ -235,7 +236,7 @@ class MyTestCase(TestCase):
 		raise AssertionError("Result does not match one of the provided truths") # from None
 
 	def assertUnorderedMappingEqual(self, first, second, msg=None):
-		# type: (Mapping[T], Mapping[T], Optional[str]) -> None
+		# type: (Mapping[T, U], Mapping[T, U], Optional[str]) -> None
 
 		self.assertEqual(len(first), len(second), msg)
 

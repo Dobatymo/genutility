@@ -4,11 +4,11 @@ from builtins import range
 from future.utils import viewitems
 
 from math import exp, sqrt
-from typing import TYPE_CHECKING, Callable, Dict, Generic, Iterator, Optional, Tuple, TypeVar
+from typing import Callable, Dict, Generic, Iterator, Optional, Tuple, TypeVar
 
 import numpy as np
 
-from .numba import opjit
+#from .numba import opjit
 
 T = TypeVar("T")
 
@@ -40,7 +40,7 @@ def is_rgb(img):
 
 	return len(img.shape) >= 1 and img.shape[-1] == 3
 
-#@opjit() np.errstate doesn't work in numba...
+#@opjit() # np.errstate doesn't work in numba...
 def rgb_to_hsi(image):
 	# type: (np.ndarray, ) -> np.ndarray
 
@@ -72,7 +72,7 @@ def rgb_to_hsi(image):
 
 	return out
 
-#@opjit() np.dot with more than 2 dimensions is not supported...
+#@opjit() # np.dot with more than 2 dimensions is not supported...
 def rgb_to_ycbcr(image):
 	# type: (np.ndarray, ) -> np.ndarray
 
@@ -198,7 +198,7 @@ def batchtopk(probs, k=None, axis=-1, reverse=False):
 
 	return indices, probs
 
-#@opjit()
+#@opjit() # np.diagonal not supported by numba as of version 0.52.0
 def logtrace(m):
 	""" Calcuates the sum of the logs of the diagonal elements (batchwise if necessary)
 		m: [..., x, x]

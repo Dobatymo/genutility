@@ -1,15 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from typing import TYPE_CHECKING
+from typing import Callable, Dict, Generic, Hashable, Iterable, Iterator, List, TypeVar, Union
 
 import numpy as np
 from nltk.tokenize import word_tokenize
 
 from .func import identity
 
-if TYPE_CHECKING:
-	from typing import Any, Dict, Hashable, Iterable, Iterator, List, TypeVar
-	T = TypeVar("T")
+T = TypeVar("T")
 
 class GenericLabelEncoder(object):
 
@@ -65,7 +63,7 @@ class GenericLabelEncoder(object):
 		assert len(self.object2idx) == len(self.idx2object)
 		return len(self.idx2object)
 
-class BatchLabelEncoder(object):
+class BatchLabelEncoder(Generic[T]):
 
 	""" Similar to `sklearn.preprocessing.LabelEncoder` but accepts a list of sentences as inputs
 		and returns a list of lists of integer labels.
@@ -79,7 +77,7 @@ class BatchLabelEncoder(object):
 		self.tokenizer = {
 			"none": identity,
 			"nltk": word_tokenize,
-		}[tokenizer]
+		}[tokenizer]  # type: Callable[[str], Iterator[T]]
 		self.reset()
 
 	def reset(self):
@@ -87,9 +85,10 @@ class BatchLabelEncoder(object):
 
 		""" Initializes all mappings with empty containers. """
 
-		self.token2idx = {} # type: Dict[Any, int]
-		self.idx2count = []
-		self.idx2token = []
+		self.token2idx = {}  # type: Dict[T, int]
+
+		self.idx2count = []  # type: Union[List[int], np.ndarray]
+		self.idx2token = []  # type: Union[List[T], np.ndarray]
 
 	def finalize(self, vocab_size):
 		# type: (int, ) -> None
@@ -149,14 +148,14 @@ class BatchLabelEncoder(object):
 		self.partial_fit_batch(sentences)
 
 	def transform_single(self, token):
-		# type: (Iterable[str], ) -> Iterator[List[int]]
+		# type: (T, ) -> int
 
 		""" Unknown labels are skipped. """
 
 		return self.token2idx[token]
 
 	def transform(self, sentence, ignore=True):
-		# type: (str, ) -> Iterator[int]
+		# type: (str, bool) -> Iterator[int]
 
 		for token in self.tokenizer(sentence):
 			try:
@@ -168,7 +167,7 @@ class BatchLabelEncoder(object):
 					raise
 
 	def transform_batch(self, sentences, ignore=True):
-		# type: (Iterable[str], ) -> Iterator[List[int]]
+		# type: (Iterable[str], bool) -> Iterator[List[int]]
 
 		""" Unknown labels are skipped. """
 
@@ -193,18 +192,18 @@ class BatchLabelEncoder(object):
 		return self.transform_batch(sentences)
 
 	def inverse_transform_single(self, idx):
-		# type: (int, ) -> str
+		# type: (int, ) -> T
 
 		return self.idx2token[idx]
 
 	def inverse_transform(self, indices):
-		# type: (Iterable[int], ) -> Iterator[str]
+		# type: (Iterable[int], ) -> Iterator[T]
 
 		for idx in indices:
 			yield self.inverse_transform_single(idx)
 
 	def inverse_transform_batch(self, list_of_indices):
-		# type: (Iterable[Iterable[int]], ) -> Iterator[List[str]]
+		# type: (Iterable[Iterable[int]], ) -> Iterator[List[T]]
 
 		for indices in list_of_indices:
 			yield list(self.inverse_transform(indices))

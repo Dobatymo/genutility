@@ -6,16 +6,16 @@ import logging
 import os
 import subprocess  # nosec
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ..compat.os import scandir
-from ..compat.pathlib import Path
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
 from ..twothree.filesystem import fromfs, tofs
 
 if TYPE_CHECKING:
-	from typing import Callable
+	from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -55,26 +55,30 @@ class Rar(object):
 			raise ValueError("Invalid executable")
 
 		self.archive = archive
-		self.filelist = []
+		self.filelist = [] # type: List[str]
 		self.cmd = ""
-		self.flags = {}
-		self.flags["lock"] = [False, "k"]
-		self.flags["delete"] = [False, "df"]
-		self.flags["test"] = [False, "t"]
-		self.flags["filetime"] = [False, "tl"]
-		self.flags["append_archive_name"] = [False, "ad"]
-		self.options = {}
-		self.options["split"] = [False, "v%s"]
-		self.options["compression"] = [False, "m%u"]
-		self.options["password"] = [False, "p%s"]
-		self.options["password_header"] = [False, "hp%s"]
-		self.options["recovery"] = [False, "rr%up"]
-		self.options["recovery_volumes"] = [False, "rr%u%%"]
+		self.flags = {} # type: Dict[str, Tuple[bool, str]]
+		self.flags["lock"] = (False, "k")
+		self.flags["delete"] = (False, "df")
+		self.flags["test"] = (False, "t")
+		self.flags["filetime"] = (False, "tl")
+		self.flags["append_archive_name"] = (False, "ad")
+		self.options = {} # type: Dict[str, Tuple[bool, str]]
+		self.options["split"] = (False, "v%s")
+		self.options["compression"] = (False, "m%u")
+		self.options["password"] = (False, "p%s")
+		self.options["password_header"] = (False, "hp%s")
+		self.options["recovery"] = (False, "rr%up")
+		self.options["recovery_volumes"] = (False, "rr%u%%")
 
 	def add_file(self, pathname):
+		# type: (str, ) -> None
+
 		self.filelist.append(pathname)
 
 	def add_files(self, filelist):
+		# type: (Iterable[str], ) -> None
+
 		self.filelist.extend(filelist)
 
 	def set_compression(self, level):
@@ -131,10 +135,12 @@ class Rar(object):
 		logger.debug("CMD: " + cmd)
 		try:
 			ret = subprocess.check_output(tofs(cmd), stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
-		except UnicodeEncodeError as e:
+		except UnicodeEncodeError:
 			raise RarError("UnicodeError, Win32Console fault")
 		except subprocess.CalledProcessError as e:
 			raise RarError("Error", e.returncode, fromfs(e.cmd), e.output.decode(sys.stdout.encoding)) #should use only stderr
+
+		return ret
 
 	def test(self, password="-"):  # nosec
 		self._execute('t -p{} "{}"'.format(password, self.archive))
@@ -163,13 +169,13 @@ class Rar(object):
 	def close(self):
 		pass
 
-def create_rar_from_folder(path, dest_path=".", profile_setter_func=None, filter_func=lambda x:True, name_transform=lambda x:x):
-	# type: (Path, Path, Callable, Callable, Callable) -> None
+def create_rar_from_folder(path, dest_path=None, profile_setter_func=None, filter_func=lambda x:True, name_transform=lambda x:x):
+	# type: (Path, Optional[Path], Callable, Callable, Callable) -> bool
 
 	if not path.is_dir():
 		return False
 
-	if dest_path == ".":
+	if dest_path is None:
 		dest_path = path.parent
 
 	with CurrentWorkingDirectory(path):
@@ -189,7 +195,7 @@ def create_rar_from_folder(path, dest_path=".", profile_setter_func=None, filter
 	return True
 
 def create_rar_from_file(path, dest_path=".", profile_setter_func=None, name_transform = lambda x:x):
-	# type: (Path, Path, Callable, Callable) -> None
+	# type: (Path, Path, Callable[[Rar], Any], Callable) -> bool
 
 	if dest_path == ".":
 		dest_path = path.parent

@@ -11,7 +11,7 @@ class CpythonTests(MyTestCase):
 		truth = "asd"
 
 		def func_a():
-			var_a = truth
+			var_a = truth  # noqa: F841
 			return func_b()
 
 		def func_b():
@@ -25,7 +25,7 @@ class CpythonTests(MyTestCase):
 		truth = "asd"
 
 		def func_a():
-			var_b = truth
+			var_b = truth  # noqa: F841
 			return func_b()
 
 		def func_b():

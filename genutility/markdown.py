@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import re
 
 _markdown_newline_pat = re.compile(r"[^\n]\n[^\n]")
-_markdown_newline_func = lambda x: x.group(0).replace("\n", "  \n")
+def _markdown_newline_func(x):
+	return x.group(0).replace("\n", "  \n")
 
 def markdown_newline(s):
 	# type: (str, ) -> str

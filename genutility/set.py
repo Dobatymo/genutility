@@ -11,3 +11,5 @@ def get(s):
 
 	for i in s:
 		return i
+
+	raise KeyError("set empty")

@@ -48,7 +48,7 @@ def proc(hist, lambda_=200):
 	delta = 0.5
 	DS = np.sqrt(2.)/2.*np.sum(np.abs(hist - hist.T), axis=(-2,-1))
 	B = DS > lambda_
-	BC = np.mean(unpack(B, 2, 2), axis=-1) > delta # noqa: F821
+	BC = np.mean(unpack(B, 2, 2), axis=-1) > delta  # noqa
 
 	raise RuntimeError("Unfinished")
 
@@ -67,8 +67,6 @@ def test_scene_change_detection_block_histogram():
 		print(diffs.tolist())
 
 if __name__ == "__main__":
-	from PIL import Image
-
 	#test_image_histogram_gray()
-	#test_scene_change_detection_histogram_correlation()
+	test_scene_change_detection_histogram_correlation()
 	test_scene_change_detection_block_histogram()

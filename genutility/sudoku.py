@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import range
 
 from copy import deepcopy
-from random import choice
 from typing import TYPE_CHECKING
 
 from .compat.math import isqrt
@@ -182,7 +181,7 @@ class SudokuBruteforce(Sudoku):
 				"inc": self.get_next_higher_possible_num,
 				"dec": self.get_next_lower_possible_num,
 			}[strategy]
-			
+
 			selection_func = {
 				"inc": min,
 				"dec": max,

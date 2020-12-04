@@ -1,13 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
-from io import open
+from contextlib import ExitStack
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from PyPDF2 import PdfFileMerger, PdfFileReader
-
-from .compat import FileNotFoundError
-from .compat.contextlib import ExitStack
-from .compat.pathlib import Path
 
 if TYPE_CHECKING:
 	from typing import Iterator, Union

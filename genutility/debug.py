@@ -115,7 +115,7 @@ def log_wrap_call(func):
 
 		try:
 			ret = func(*args, **kwargs)
-		except BaseException as e:
+		except BaseException:
 			logging.exception("RAISED %s(%s)", func.__name__, args_str(args, kwargs))
 			raise
 

@@ -21,7 +21,7 @@ except ImportError: # python 3.5 and lower
 		""" Return a random URL-safe text string, containing `nbytes` random bytes.
 			The text is Base64 encoded, so on average each byte results in approximately 1.3 characters.
 			If `nbytes` is None or not supplied, a reasonable default is used.
-			>>> token_urlsafe(16)  
+			>>> token_urlsafe(16)
 			'99B8rh_My-u5zCJSMhking'
 		"""
 
