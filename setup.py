@@ -132,7 +132,7 @@ setup(
 		"Operating System :: OS Independent",
 		"Topic :: Utilities",
 	],
-	packages=["genutility", "genutility/compat", "genutility/fileformats", "genutility/hardware", "genutility/twothree"],
+	packages=["genutility", "genutility.compat", "genutility.fileformats", "genutility.hardware", "genutility.twothree", "genutility.win", "genutility.compat.importlib", "genutility.compat.unittest"],
 	package_data={"genutility": ["py.typed", "data/*.tsv"]},
 	python_requires=">=3.5",
 	install_requires=[
