@@ -97,7 +97,7 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 			where `ppv` is assigned the  pickle protocol version.
 	"""
 
-	duration = duration or timedelta.max
+	_duration = duration or timedelta.max
 
 	if not verbose:
 		context = nullcontext
@@ -120,7 +120,7 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 				fullpath = fspath(path).format(ppv=protocol)
 
 			try:
-				invalid = now() - mdatetime(fullpath) > duration
+				invalid = now() - mdatetime(fullpath) > _duration
 			except FileNotFoundError:
 				invalid = True
 

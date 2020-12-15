@@ -28,9 +28,9 @@ def png_chunk(chunk_type_ascii, chunk):
 	chunk_type = chunk_type_ascii.encode("ascii")
 
 	length = pack("!I", len(chunk))
-	crc = zlib.crc32(chunk_type)
-	crc = zlib.crc32(chunk, crc)
-	crc = pack("!i", crc)
+	_crc = zlib.crc32(chunk_type)
+	_crc = zlib.crc32(chunk, _crc)
+	crc = pack("!i", _crc)
 	return length + chunk_type + chunk + crc
 
 def IHDR(width, height):
@@ -174,7 +174,7 @@ def hash_raw_png(path, hashobj):
 def parse_tEXt(chunk):
 	# type: (bytes, ) -> Tuple[str, str]
 
-	keyword, text = chunk.split("\0")
+	keyword, text = chunk.split(b"\0")
 	return keyword.decode("latin1"), text.decode("latin1")
 
 def parse_tIME(chunk):

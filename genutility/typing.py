@@ -45,8 +45,8 @@ if TYPE_CHECKING:
 
 	class Computable(Protocol):
 
-		def __neg__(self, other):
-			# type: (Any, ) -> Any
+		def __neg__(self):
+			# type: () -> Any
 			...
 
 		def __add__(self, other):
@@ -69,14 +69,14 @@ if TYPE_CHECKING:
 			# type: (Any, ) -> Any
 			...
 
-		def __abs__(self, other):
-			# type: (Any, ) -> Any
+		def __abs__(self):
+			# type: () -> Any
 			...
 
 	class MutableComputable(Protocol):
 
-		def __neg__(self, other):
-			# type: (Any, ) -> Any
+		def __neg__(self):
+			# type: () -> Any
 			...
 
 		def __add__(self, other):

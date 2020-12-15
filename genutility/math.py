@@ -16,7 +16,7 @@ from .exceptions import EmptyIterable
 from .iter import range_count
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, List, Optional, Sequence, SupportsFloat, Tuple, TypeVar
+	from typing import Callable, DefaultDict, Iterable, Iterator, List, Optional, Sequence, SupportsFloat, Tuple, TypeVar
 
 	from .typing import Computable, Orderable
 	OrderableT = TypeVar("OrderableT", bound=Orderable)
@@ -119,7 +119,7 @@ def argmax_v2(iterable):
 	# type: (Iterable[OrderableT], ) -> Tuple[int, OrderableT]
 
 	""" nicer, but almost 2 times slower than above"""
-	return max(zip(count(), iterable), key=itemgetter(1))[0]
+	return max(zip(count(), iterable), key=itemgetter(1))
 
 def minmax(a, b):
 	# type: (OrderableT, OrderableT) -> Tuple[OrderableT, OrderableT]
@@ -134,14 +134,14 @@ def minmax(a, b):
 		return b, a
 
 def _argfind_cmp(it, target, op1, op2, pos=0):
-	# type: (Iterable[OrderableT], OrderableT, Callable[[OrderableT, OrderableT], bool], Callable[[OrderableT, OrderableT], bool], int) -> Tuple[int, OrderableT]
+	# type: (Iterable[OrderableT], OrderableT, Callable[[OrderableT, OrderableT], bool], Callable[[OrderableT, OrderableT], bool], int) -> Tuple[int, Optional[OrderableT]]
 
 	""" Find the largest element in `it` less than or equal to `target` and return the index and value.
 		Return (-1, None) if no such element can be found.
 	"""
 
 	idx = -1
-	val = None
+	val = None # type: Optional[OrderableT]
 
 	it = islice(it, pos, None)
 	try:
@@ -232,19 +232,20 @@ def num_unique_permutations(word):
 	return multinomial_coefficient(len(word), viewvalues(Counter(word)))
 
 def discrete_distribution(it):
-	# type: (Iterable, ) -> Tuple[defaultdict, int]
+	# type: (Iterable, ) -> Tuple[DefaultDict[int, int], int]
 
 	""" Creates a discrete distribution of the elements of `it`. """
 
-	d = defaultdict(int)
+	d = defaultdict(int) # type: DefaultDict[int, int]
 	s = 0
 	for i in it:
 		s += 1
 		d[i] += 1
-	return (d, s)
+	return d, s
 
 def fibonaccigen(f0=0, f1=1):
-	# type: (int, int) -> int
+	# type: (int, int) -> Iterator[int]
+
 	""" A000045 [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, ...]
 		arguments are the first two element of the Fibonacci series
 
@@ -257,6 +258,8 @@ def fibonaccigen(f0=0, f1=1):
 		f1, f0 = f1+f0, f1
 
 def floordiv2(n):
+	# type: (int, ) -> Iterator[int]
+
 	while n > 0:
 		yield n
 		n = n // 2
@@ -340,7 +343,9 @@ def byte2size(byte, exp=0, base=1024):
 		if (byte >= base):
 			byte /= base
 		else:
-			return byte, unit
+			break
+
+	return byte, unit
 
 def byte2size_str(byte, roundval=3):
 	# type: (SupportsFloat, int) -> str
@@ -360,7 +365,7 @@ def primes(stop=None):
 		For better algorithms see here: https://stackoverflow.com/questions/2211990/how-to-implement-an-efficient-infinite-generator-of-prime-numbers-in-python/10733621#10733621
 	"""
 
-	found_primes = []
+	found_primes = [] # type: List[int]
 	first_prime = 2
 
 	for i in range_count(first_prime, stop):
@@ -426,7 +431,7 @@ def euclidean_distance(a, b):
 	return abs(b-a)
 
 def closest(numbers, number, distance_func=euclidean_distance):
-	# type: (Iterable, Computable, Callable[[Computable, Computable], Computable]) -> Computable
+	# type: (Iterable[Computable], Computable, Callable[[Computable, Computable], Computable]) -> Computable
 
 	""" For a list of `numbers`, return the closest number to `number`. """
 

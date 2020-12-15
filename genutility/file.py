@@ -2,10 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os.path
 from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper, open
+from os import PathLike, fdopen, fspath
 from sys import stdout, version_info
 from typing import TYPE_CHECKING, overload
 
-from .compat.os import PathLike, fdopen, fspath
 from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
 from .ops import logical_implication, logical_xor
@@ -66,13 +66,13 @@ def write_file(data, path, mode="wb", encoding=None, errors=None):
 def read_or_raise(fin, size):
 	# type: (IO[Data], int) -> Data
 
-	pass
+	...
 
 @overload
 def read_or_raise(fin, size):
 	# type: (mmap, int) -> bytes
 
-	pass
+	...
 
 def read_or_raise(fin, size):
 
@@ -135,11 +135,11 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 		ext = ext and ext.lower()
 
 	if ext == ".gz":
-		from .compat import gzip
+		import gzip
 		return gzip.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
 	elif ext == ".bz2":
-		from .compat import bz2
+		import bz2
 		return bz2.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
 	elif ext == ".zip":
@@ -174,7 +174,7 @@ class OpenFileAndDeleteOnError(object):
 	"""
 
 	def __init__(self, file, mode="rt", encoding=None, errors=None, newline=None, compresslevel=9):
-	# type: (PathType, str, Optional[str], Optional[str], Optional[str], int) -> None
+		# type: (PathType, str, Optional[str], Optional[str], Optional[str], int) -> None
 
 		encoding = _check_arguments(mode, encoding)
 
@@ -498,7 +498,7 @@ class BufferedTell(response.addinfourl): # fixme: untested!!!
 			raise ValueError("Unknown whence")
 
 def copyfilelike(fin, fout, amount=None, buffer=FILE_IO_BUFFER_SIZE, report=None):
-	# type: (IO, IO, Optional[int], Optional[int], Optional[Callable]) -> int
+	# type: (IO, IO, Optional[int], int, Optional[Callable]) -> int
 
 	""" Read data from `fin` in chunks of size `buffer` and write them to `fout`.
 		Optionally limit the amount of data to `amount`. `report` can be a callable which receives
@@ -508,19 +508,19 @@ def copyfilelike(fin, fout, amount=None, buffer=FILE_IO_BUFFER_SIZE, report=None
 
 	# todo: have different input and output buffers
 
-	amount = amount or PosInfInt
+	_amount = amount or PosInfInt
 
 	copied = 0
-	while amount > 0:
+	while _amount > 0:
 		if report:
-			report(copied, amount+copied)
+			report(copied, _amount + copied)
 
-		data = fin.read(min(buffer, amount))
+		data = fin.read(min(buffer, _amount))
 
 		if not data:
 			break
 		fout.write(data)
-		amount -= len(data)
+		_amount -= len(data)
 		copied += len(data)
 	return copied
 
@@ -582,7 +582,7 @@ def iterfilelike(fr, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
 		return limited_file_iter(fr, amount, chunk_size)
 
 def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
-	# type: (PathType, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterator[Data]
+	# type: (PathType, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterator[Union[str, bytes]]
 
 	""" Iterate over file at `path` and yield chunks of size `chunk_size`.
 		Optionally limit output to `amount` bytes.
@@ -628,7 +628,7 @@ def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
 		yield chunk
 
 def bufferedfileiter(path, chunk_size, mode="rb", encoding=None, errors=None, start=0, amount=None, buffer_size=FILE_IO_BUFFER_SIZE):
-	# type: (PathType, int, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterable[Data]
+	# type: (PathType, int, str, Optional[str], Optional[str], int, Optional[int], int) -> Iterable[Union[str, bytes]]
 
 	""" Iterate over file at `path` reading chunks of size `buffer_size` at a time.
 		Yields data chunks of `chunk_size` and optionally limits output to `amount` bytes.

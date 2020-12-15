@@ -6,7 +6,7 @@ from time import monotonic, sleep
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Hashable, Iterator, Optional, Tuple, TypeVar, Union
+	from typing import Any, Callable, DefaultDict, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
 	T = TypeVar("T")
 
 def iter_timer(it):
@@ -136,8 +136,8 @@ class TimeIt(object):
 	def __init__(self):
 		# type: () -> None
 
-		self.results = defaultdict(list)
-		self.starts = dict()
+		self.results = defaultdict(list) # type: DefaultDict[Hashable, List[float]]
+		self.starts = dict() # type: Dict[Hashable, DeltaTime]
 
 	def __call__(self, key, func, *args, **kwargs):
 		# type: (Hashable, Callable[..., T], *Any, **Any) -> T

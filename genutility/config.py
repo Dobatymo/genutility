@@ -43,10 +43,11 @@ def _load(name):
 			raise ImportError("No module named '{}'".format(name)) # or FileNotFoundError?
 
 		if spec.has_location:
+			assert spec.origin # for mypy
 			modpath = os.path.dirname(spec.origin)
 		else:
 			try:
-				modpath = spec.submodule_search_locations[0]
+				modpath = spec.submodule_search_locations[0] # type: ignore
 			except (TypeError, IndexError):
 				raise FileNotFoundError
 

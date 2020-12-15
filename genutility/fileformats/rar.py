@@ -194,7 +194,7 @@ def create_rar_from_folder(path, dest_path=None, profile_setter_func=None, filte
 
 	return True
 
-def create_rar_from_file(path, dest_path=".", profile_setter_func=None, name_transform = lambda x:x):
+def create_rar_from_file(path, dest_path=Path("."), profile_setter_func=None, name_transform = lambda x:x):
 	# type: (Path, Path, Callable[[Rar], Any], Callable) -> bool
 
 	if dest_path == ".":

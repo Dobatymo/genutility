@@ -133,7 +133,7 @@ class BatchLabelEncoder(Generic[T]):
 			self.partial_fit(sentence)
 
 	def fit_single(self, token):
-		# type: (str, ) -> None
+		# type: (T, ) -> None
 
 		self.partial_fit_single(token)
 
@@ -175,7 +175,7 @@ class BatchLabelEncoder(Generic[T]):
 			yield list(self.transform(sentence, ignore))
 
 	def fit_transform_single(self, token):
-		# type: (Iterable[str], ) -> Iterator[List[int]]
+		# type: (T, ) -> int
 
 		return self.partial_fit_single(token)
 

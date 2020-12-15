@@ -317,7 +317,7 @@ class LDA(LDABase):
 		self.alpha = alpha
 		self.beta = beta
 
-		self.word_encoder = BatchLabelEncoder(tokenizer="nltk")
+		self.word_encoder = BatchLabelEncoder(tokenizer="nltk") # type: BatchLabelEncoder[str]
 		self.docs = [] # type: List[LDADocument]
 
 		self.inttype = np.int32
@@ -421,7 +421,7 @@ class LDATermWeight(LDABase):
 		self.alpha = alpha
 		self.beta = beta
 
-		self.word_encoder = BatchLabelEncoder(tokenizer="nltk")
+		self.word_encoder = BatchLabelEncoder(tokenizer="nltk") # type: BatchLabelEncoder[str]
 		self.docs = [] # type: List[LDADocument]
 
 		self.create_term_weights = {
