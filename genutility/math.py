@@ -82,7 +82,7 @@ def argmin(seq, s=0, e=None):
 	return arg
 
 def argmax(seq, s=0, e=None):
-	# type: (Sequence[OrderableT], int, Optional[int]) -> OrderableT
+	# type: (Sequence[OrderableT], int, Optional[int]) -> int
 
 	if not seq:
 		raise EmptyIterable()
@@ -116,10 +116,10 @@ from operator import itemgetter
 
 
 def argmax_v2(iterable):
-	# type: (Iterable[OrderableT], ) -> Tuple[int, OrderableT]
+	# type: (Iterable[OrderableT], ) -> int
 
 	""" nicer, but almost 2 times slower than above"""
-	return max(zip(count(), iterable), key=itemgetter(1))
+	return max(zip(count(), iterable), key=itemgetter(1))[0]
 
 def minmax(a, b):
 	# type: (OrderableT, OrderableT) -> Tuple[OrderableT, OrderableT]

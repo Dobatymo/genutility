@@ -10,12 +10,17 @@ import requests
 from .exceptions import assert_choice
 from .yaml import read_yaml
 
+""" Properly type checking this file would require higher-kinded type-vars,
+	ie. https://github.com/python/typing/issues/548 to be fixed.
+"""
+
 JsonDict = Dict[str, Any]
 JsonValue = Union[JsonDict, List[JsonDict]]
-ReturnT = TypeVar("ReturnT")
+ReturnT = TypeVar("ReturnT")  # fixme: should be higher kinded type var
+ResponseT = Union[bytes, JsonValue]
 
-SyncReturnT = JsonValue
-AsyncReturnT = Coroutine[Any, Any, JsonValue]
+SyncReturnT = ResponseT
+AsyncReturnT = Coroutine[Any, Any, ResponseT]
 
 class RasaABC(Generic[ReturnT], metaclass=ABCMeta):
 
@@ -27,23 +32,23 @@ class RasaABC(Generic[ReturnT], metaclass=ABCMeta):
 		raise NotImplementedError
 
 	@abstractmethod
-	def get_request(self, url, params=None):
-		# type: (str, Optional[JsonDict]) -> ReturnT
+	def get_request(self, url, params=None, raw=False):
+		# type: (str, Optional[JsonDict], bool) -> ReturnT
 		raise NotImplementedError
 
 	@abstractmethod
-	def post_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> ReturnT
+	def post_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ReturnT
 		raise NotImplementedError
 
 	@abstractmethod
-	def put_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> ReturnT
+	def put_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ReturnT
 		raise NotImplementedError
 
 	@abstractmethod
-	def delete_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> ReturnT
+	def delete_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ReturnT
 		raise NotImplementedError
 
 
@@ -65,8 +70,8 @@ class Rasa(object):
 
 class RasaRest(Rasa):
 
-	def get_request(self, url, params=None):
-		# type: (str, Optional[JsonDict]) -> JsonValue
+	def get_request(self, url, params=None, raw=False):
+		# type: (str, Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -75,10 +80,13 @@ class RasaRest(Rasa):
 
 		r = requests.get(url, timeout=self.timeout, params=params)
 		r.raise_for_status()
-		return r.json()
+		if raw:
+			return r.content
+		else:
+			return r.json()
 
-	def post_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
+	def post_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -87,10 +95,13 @@ class RasaRest(Rasa):
 
 		r = requests.post(url, timeout=self.timeout, params=params, json=json)
 		r.raise_for_status()
-		return r.json()
+		if raw:
+			return r.content
+		else:
+			return r.json()
 
-	def put_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
+	def put_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -99,13 +110,17 @@ class RasaRest(Rasa):
 
 		r = requests.put(url, timeout=self.timeout, params=params, json=json)
 		r.raise_for_status()
-		if r.status_code == 204:
-			return {}
-		else:
-			return r.json()
 
-	def delete_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
+		if raw:
+			return r.content
+		else:
+			if r.status_code == 204:
+				return b""
+			else:
+				return r.json()
+
+	def delete_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -115,15 +130,18 @@ class RasaRest(Rasa):
 		r = requests.delete(url, timeout=self.timeout, params=params, json=json)
 		r.raise_for_status()
 
-		if r.status_code == 204:
-			return {}
+		if raw:
+			return r.content
 		else:
-			return r.json()
+			if r.status_code == 204:
+				return b""
+			else:
+				return r.json()
 
 class RasaRestAsync(Rasa):
 
-	async def get_request(self, url, params=None):
-		# type: (str, Optional[JsonDict]) -> JsonValue
+	async def get_request(self, url, params=None, raw=False):
+		# type: (str, Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -133,10 +151,13 @@ class RasaRestAsync(Rasa):
 		async with aiohttp.ClientSession() as session:
 			async with session.get(url, timeout=self.timeout, params=params) as r:
 				r.raise_for_status()
-				return await r.json()
+				if raw:
+					return await r.read()
+				else:
+					return await r.json()
 
-	async def post_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
+	async def post_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -146,10 +167,13 @@ class RasaRestAsync(Rasa):
 		async with aiohttp.ClientSession() as session:
 			async with session.post(url, timeout=self.timeout, params=params, json=json) as r:
 				r.raise_for_status()
-				return await r.json()
+				if raw:
+					return await r.read()
+				else:
+					return await r.json()
 
-	async def put_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
+	async def put_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -159,13 +183,16 @@ class RasaRestAsync(Rasa):
 		async with aiohttp.ClientSession() as session:
 			async with session.put(url, timeout=self.timeout, params=params, json=json) as r:
 				r.raise_for_status()
-				if r.status == 204:
-					return {}
+				if raw:
+					return await r.read()
 				else:
-					return await r.json()
+					if r.status == 204:
+						return {}
+					else:
+						return await r.json()
 
-	async def delete_request(self, url, params=None, json=None):
-		# type: (str, Optional[JsonDict], Optional[JsonDict]) -> JsonValue
+	async def delete_request(self, url, params=None, json=None, raw=False):
+		# type: (str, Optional[JsonDict], Optional[JsonDict], bool) -> ResponseT
 
 		params = params or {}
 
@@ -175,10 +202,13 @@ class RasaRestAsync(Rasa):
 		async with aiohttp.ClientSession() as session:
 			async with session.delete(url, timeout=self.timeout, params=params, json=json) as r:
 				r.raise_for_status()
-				if r.status == 204:
-					return {}
+				if raw:
+					return await r.read()
 				else:
-					return await r.json()
+					if r.status == 204:
+						return {}
+					else:
+						return await r.json()
 
 INCLUDE_EVENTS_ENUM = {"AFTER_RESTART", "ALL", "APPLIED", "NONE"}
 OUTPUT_CHANNEL_ENUM = {"latest", "slack", "callback", "facebook", "rocketchat", "telegram", "twilio", "webexteams", "socketio"}
@@ -237,7 +267,7 @@ class _RasaRestConversations(RasaABC[ReturnT]):
 		return self.get_request(url, params={
 			"until": until,
 			"all_sessions": all_sessions,
-		})
+		}, raw=True)
 
 	def execute_action(self, name, policy=None, confidence=None, include_events=None, output_channel=None):
 		# type: (str, Optional[str], Optional[float], Optional[str], Optional[str]) -> ReturnT
@@ -314,7 +344,7 @@ class _RasaRestModel(RasaABC[ReturnT]):
 		}, json=json)
 
 	def replace_model(self, model_file=None, model_server=None, remote_storage=None):
-		# type: (str, Optional[JsonDict], Optional[str]) -> ReturnT
+		# type: (Optional[str], Optional[JsonDict], Optional[str]) -> ReturnT
 
 		""" Replace the currently loaded model.
 
