@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import asyncio
 import sys
@@ -6,9 +6,6 @@ from time import time
 from typing import TYPE_CHECKING
 
 from .iter import _lstr, progressdata
-
-# needs python 3.4
-
 
 if TYPE_CHECKING:
 	from numbers import Number

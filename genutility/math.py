@@ -1,7 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import map, range
-from future.utils import raise_from, viewvalues
+from __future__ import generator_stop
 
 from collections import Counter, defaultdict
 from functools import partial
@@ -102,7 +99,7 @@ def argmax_pair(iterable):
 	try:
 		max = next(it)
 	except StopIteration:
-		raise_from(EmptyIterable("empty iterable"), None)
+		raise EmptyIterable("empty iterable") from None
 
 	for i, elm in enumerate(it, 1):
 		if elm > max:
@@ -229,7 +226,7 @@ def num_unique_permutations(word):
 
 	""" Number of unique permutations of `word`. """
 
-	return multinomial_coefficient(len(word), viewvalues(Counter(word)))
+	return multinomial_coefficient(len(word), Counter(word).values())
 
 def discrete_distribution(it):
 	# type: (Iterable, ) -> Tuple[DefaultDict[int, int], int]

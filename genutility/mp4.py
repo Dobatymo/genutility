@@ -1,15 +1,14 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import os
 import re
 import struct
 import warnings
-from io import open
+from os import fspath
 from typing import TYPE_CHECKING
 
 import pkg_resources
 
-from .compat.os import fspath
 from .csv import iter_csv
 from .exceptions import Break, ParseError
 from .file import read_or_raise

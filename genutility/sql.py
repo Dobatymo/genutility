@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewkeys, viewvalues
+from __future__ import generator_stop
 
 from itertools import chain, repeat
 from typing import TYPE_CHECKING
@@ -74,18 +72,18 @@ def upsert(cursor, primary, values, table):
 	if not primary:
 		raise ValueError("Empty primary mapping would result in an empty WHERE condition which would affect all rows")
 
-	set_str = ",".join("{}=?".format(k) for k in viewkeys(values))
-	where_str = " AND ".join("{}=?".format(k) for k in viewkeys(primary))
+	set_str = ",".join("{}=?".format(k) for k in values.keys())
+	where_str = " AND ".join("{}=?".format(k) for k in primary.keys())
 
 	cursor.execute("UPDATE {} SET {} WHERE {}".format(table, set_str, where_str),  # nosec
-		chain(viewvalues(values), viewvalues(primary))
+		chain(values.values(), primary.values())
 	)
 
 	if cursor.rowcount == 0:
-		into_str = ",".join(chain(viewkeys(primary), viewkeys(values)))
+		into_str = ",".join(chain(primary.keys(), values.keys()))
 		values_str = ",".join(repeat("?", len(primary) + len(values)))
 		cursor.execute("INSERT INTO {} ({}) VALUES ({})".format(table, into_str, values_str),  # nosec
-			chain(viewvalues(primary), viewvalues(values))
+			chain(primary.values(), values.values())
 		)
 		return True
 

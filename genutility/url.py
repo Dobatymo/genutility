@@ -1,11 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.moves.urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
+from __future__ import generator_stop
 
 import os.path
 import re
 from string import ascii_letters, digits
 from typing import TYPE_CHECKING
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 if TYPE_CHECKING:
 	from future.moves.urllib.parse import SplitResult

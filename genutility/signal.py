@@ -1,17 +1,13 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import logging
 import signal
-import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+	from signal import Signals
 	from types import FrameType
 	from typing import Any, Callable, Iterable, Optional, TypeVar
-	if sys.version_info >= (3, 5):
-		from signal import Signals  # pylint: disable=no-name-in-module
-	else:
-		Signals = int
 
 	T = TypeVar("T")
 
@@ -52,7 +48,7 @@ class HandleKeyboardInterrupt(object):
 		self.raise_after = self.init_raise_after # pylint: disable=attribute-defined-outside-init
 		self.delay = self.init_delay # pylint: disable=attribute-defined-outside-init
 		self.signal_received = None # type: Optional[tuple]
-		self.old_handler = signal.signal(signal.SIGINT, self.handler) # type: ignore # cast to Callable[[Signals, FrameType], None]
+		self.old_handler = signal.signal(signal.SIGINT, self.handler)
 
 	def handler(self, sig, frame):
 		# type: (Signals, FrameType) -> None

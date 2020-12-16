@@ -1,3 +1,5 @@
+from __future__ import generator_stop
+
 from twisted.internet import protocol
 
 

@@ -1,7 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import input, str
-from future.utils import PY3
+from __future__ import generator_stop
 
 import logging
 import sys
@@ -11,11 +8,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from typing import IO, Any, Optional
 
-try:
-	from shutil import get_terminal_size
-	_terminal_width = get_terminal_size((80, 30)).columns
-except ImportError: # < Python 3.3
-	_terminal_width = 80
+from shutil import get_terminal_size
+
+_terminal_width = get_terminal_size((80, 30)).columns
 
 def print_line(char="-", length=_terminal_width, file=None, flush=False):
 	# type: (str, int, IO, bool) -> None
@@ -73,20 +68,12 @@ def info_print(msg=None, args=tuple(), exception=None):
 		if msg:
 			print(msg % args)
 
-if PY3:
-	def input_ex(s, file_out=sys.stdout, file_in=sys.stdin):
-		# type: (str, IO, IO) -> str
+def input_ex(s, file_out=sys.stdout, file_in=sys.stdin):
+	# type: (str, IO, IO) -> str
 
-		print(s, file=file_out, end="")
-		file_out.flush()
-		return sys.stdin.readline().rstrip("\n")
-
-else:
-	def input_ex(s, file_out=sys.stdout, file_in=sys.stdin):
-		# type: (str, IO, IO) -> str
-
-		print(s.encode(file_out.encoding, errors="replace"), file=file_out, end=b"")
-		return sys.stdin.readline().decode(file_in.encoding).rstrip("\n")
+	print(s, file=file_out, end="")
+	file_out.flush()
+	return sys.stdin.readline().rstrip("\n")
 
 # was: raw_input_ex
 def input_type(s, type=None, predicate=None, errormsg=None, exception=Exception, file=sys.stdout):

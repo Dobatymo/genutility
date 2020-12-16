@@ -1,7 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import chr, zip
-from future.moves.itertools import zip_longest
+from __future__ import generator_stop
 
 import errno
 import logging
@@ -13,12 +10,12 @@ import shutil
 import stat
 from fnmatch import fnmatch
 from functools import partial
+from itertools import zip_longest
 from operator import attrgetter
+from os import DirEntry, PathLike, fspath
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .compat import FileExistsError
-from .compat.os import DirEntry, PathLike, fspath
-from .compat.pathlib import Path
 from .datetime import datetime_from_utc_timestamp
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
 from .iter import is_empty

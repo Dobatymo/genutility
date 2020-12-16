@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewkeys
+from __future__ import generator_stop
 
 import json
 from typing import TYPE_CHECKING
@@ -16,14 +14,14 @@ class StreamWatcher(object):
 	def __init__(self, api):
 		self.api = api
 		self.followed_names = api.get_followed()
-		self.followed_online = {userid: False for userid in viewkeys(self.followed_names)}
+		self.followed_online = {userid: False for userid in self.followed_names.keys()}
 
 	def watch(self, notify_started, notify_stopped):
 		# type: (Callable[[str, str, Optional[str]], None], Callable[[str, str], None]) -> None
 
-		user_ids = viewkeys(self.followed_names)
+		user_ids = self.followed_names.keys()
 		streams = self.api.get_streams(user_ids)
-		online = viewkeys(streams)
+		online = streams.keys()
 		offline = user_ids - online
 
 		for user_id in online:

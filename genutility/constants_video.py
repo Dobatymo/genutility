@@ -1,4 +1,6 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
+
+from typing import Tuple
 
 DAR_WS = 16 / 9
 DAR_FS = 4 / 3
@@ -15,6 +17,8 @@ RES_FULL_HD = (1920, 1080)
 PAR_HD = 1
 
 def SAR(RES):
+	# type: (Tuple[int, int], ) -> float
+
 	x, y = RES
 	return x / y
 

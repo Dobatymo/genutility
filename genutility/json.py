@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewkeys
+from __future__ import generator_stop
 
 import csv
 import json
@@ -13,7 +11,6 @@ from typing import IO, TYPE_CHECKING, Any, Callable, Dict, FrozenSet, Iterator, 
 from typing_extensions import TypedDict
 
 from .atomic import TransactionalCreateFile, sopen
-from .compat import FileNotFoundError
 from .datetime import now
 from .file import copen
 from .filesystem import mdatetime
@@ -335,7 +332,7 @@ class JsonLinesFormatter(logging.Formatter):
 		# type: (FrozenSet[str], FrozenSet[str], Optional[Callable]) -> None
 
 		logging.Formatter.__init__(self)
-		self.include_b = include & viewkeys(self.myfields)
+		self.include_b = include & self.myfields.keys()
 		self.builtins = builtins
 		self.dumps = partial(json.dumps, ensure_ascii=False, indent=None, sort_keys=True, default=default)
 

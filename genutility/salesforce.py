@@ -1,3 +1,5 @@
+from __future__ import generator_stop
+
 import asyncio
 import csv
 import logging

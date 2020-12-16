@@ -1,9 +1,8 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.moves.urllib.parse import quote, unquote
+from __future__ import generator_stop
 
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from typing import TYPE_CHECKING
+from urllib.parse import quote, unquote
 
 from flask import Response, request
 from werkzeug.routing import BaseConverter

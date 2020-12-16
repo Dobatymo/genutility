@@ -1,13 +1,8 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import range
-from future.moves.itertools import zip_longest
-from future.utils import PY2, viewitems
+from __future__ import generator_stop
 
 from collections import defaultdict
 from functools import wraps
-from io import TextIOWrapper
-from itertools import product
+from itertools import product, zip_longest
 from os import remove
 from tempfile import NamedTemporaryFile
 from time import sleep
@@ -112,7 +107,7 @@ def make_comparable(d):
 	elif isinstance(d, tuple):
 		return tuple(make_comparable(i) for i in d)
 	elif isinstance(d, dict):
-		return make_comparable(list(viewitems(d)))
+		return make_comparable(list(d.items()))
 	else:
 		raise ValueError("must be list, tuple or dict, not {}".format(type(d)))
 
@@ -303,19 +298,7 @@ class closeable_tempfile(object):
 	def __init__(self, mode="w+b", encoding=None):
 
 		encoding = _check_arguments(mode, encoding)
-
-		if PY2:
-			ntf = NamedTemporaryFile(mode=mode, delete=False)
-			if encoding:
-				ntf.readable = lambda: True
-				ntf.writable = lambda: True
-				ntf.seekable = lambda: True
-
-				self.f = TextIOWrapper(ntf, encoding)
-			else:
-				self.f = ntf
-		else:
-			self.f = NamedTemporaryFile(mode=mode, encoding=encoding, delete=False)
+		self.f = NamedTemporaryFile(mode=mode, encoding=encoding, delete=False)
 
 	def __enter__(self):
 		return self.f, self.f.name

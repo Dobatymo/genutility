@@ -7,12 +7,11 @@ from typing import TYPE_CHECKING
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 if TYPE_CHECKING:
+	from os import PathLike
 	from typing import Iterator, Union
 
-	from .compat.os import PathLike
-
 def join_pdfs_in_folder(path_in, file_out, overwrite=False):
-	# type: (Path, Union[PathLike, str]) -> None
+	# type: (Path, Union[PathLike, str], bool) -> None
 
 	""" Join all PDFs in `path_in` and write to `file_out`. """
 

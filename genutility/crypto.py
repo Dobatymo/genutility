@@ -1,12 +1,8 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import bytes, zip
+from __future__ import generator_stop
 
 from itertools import cycle
-from typing import TYPE_CHECKING
+from typing import Iterable, Iterator
 
-if TYPE_CHECKING:
-	from typing import Iterable, Iterator
 
 def xor_stream(it, key, cyclekey=True):
 	# type: (Iterable[bytes], Iterable[bytes], bool) -> Iterator[bytes]

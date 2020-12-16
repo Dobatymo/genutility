@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import map
+from __future__ import generator_stop
 
 from typing import TYPE_CHECKING
 
@@ -11,10 +9,10 @@ from .iter import pairwise
 from .numpy import histogram_correlation
 
 if TYPE_CHECKING:
-	pass
+	from typing import Iterable, Iterator
 
 def scene_change_detection_histogram_correlation(images):
-
+	# type: (Iterable[np.ndarray], ) -> Iterator[np.ndarray]
 	""" Based on: 'Histogram Correlation for Video Scene Change Detection'. Algorithm described
 		in paper is incomplete. It only mentions 'almost constant', 'not constant' and 'change is sharp'
 		behaviour of the correlation. A real implementation would need to define a sliding window

@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewitems
+from __future__ import generator_stop
 
 from copy import copy
 from typing import TYPE_CHECKING
@@ -57,6 +55,6 @@ def compress(value):
 	elif isinstance(value, bytearray):
 		return bytes(value) # bytearray can only be bytes or List[int] right?
 	elif isinstance(value, dict):
-		return {k: compress(v) for k, v in viewitems(value)}
+		return {k: compress(v) for k, v in value.items()}
 	else:
 		return value

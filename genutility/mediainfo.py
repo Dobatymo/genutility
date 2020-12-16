@@ -1,10 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
+from os import PathLike, fspath
 from typing import TYPE_CHECKING
 
 from pymediainfo import MediaInfo
-
-from .compat.os import PathLike, fspath
 
 if TYPE_CHECKING:
 	from typing import Union

@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import str
+from __future__ import generator_stop
 
 import re
 from string import whitespace
@@ -116,4 +114,4 @@ class ReplaceURLs(object):
 	def __call__(self, s, count=0):
 		# type: (str, int) -> str
 
-		return self.pattern.sub(self.repl, s, count) # type: ignore # mypy error, `sub()` supports functions as `repl`
+		return self.pattern.sub(self.repl, s, count)

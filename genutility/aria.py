@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewvalues
+from __future__ import generator_stop
 
 import sys
 from collections.abc import Sequence
@@ -140,9 +138,9 @@ class AriaDownloader(object):
 			entries = self._entries(self.query("tell_active"))  # active
 			if entries:
 				if progress_file:
-					completed = sum(int(entry["completedLength"]) for entry in viewvalues(entries))
-					total = sum(int(entry["totalLength"]) for entry in viewvalues(entries))
-					speed = sum(int(entry["downloadSpeed"]) for entry in viewvalues(entries))
+					completed = sum(int(entry["completedLength"]) for entry in entries.values())
+					total = sum(int(entry["totalLength"]) for entry in entries.values())
+					speed = sum(int(entry["downloadSpeed"]) for entry in entries.values())
 					print("{} downloads: {}/{} bytes {} bytes/sec".format(len(entries), completed, total, speed), file=progress_file, end="\r")
 
 				sleep(self.poll)

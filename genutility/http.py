@@ -1,8 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import map, str
-from future.moves.urllib import request
-from future.moves.urllib.error import URLError
+from __future__ import generator_stop
 
 import errno
 import gzip
@@ -11,10 +7,10 @@ import logging
 import os
 import os.path
 import socket
-from io import open
 from typing import TYPE_CHECKING
+from urllib import request
+from urllib.error import URLError
 
-from .compat import FileExistsError
 from .exceptions import DownloadFailed
 from .file import Tell, copyfilelike
 from .filesystem import safe_filename

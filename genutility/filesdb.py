@@ -1,14 +1,14 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import logging
 import os.path
 import sqlite3
 from itertools import chain
+from os import fspath
 from typing import TYPE_CHECKING
 
 from tls_property import tls_property
 
-from .compat.os import fspath
 from .exceptions import NoResult
 from .filesystem import normalize_seps
 from .sql import fetchone, iterfetch

@@ -1,9 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import os.path
-from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper, open
+from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from os import PathLike, fdopen, fspath
-from sys import stdout, version_info
+from sys import stdout
 from typing import TYPE_CHECKING, overload
 
 from .iter import consume, iter_equal, resizer
@@ -12,7 +12,7 @@ from .ops import logical_implication, logical_xor
 
 if TYPE_CHECKING:
 	from mmap import mmap
-	from typing import IO, Any, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
+	from typing import IO, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
 
 	PathType = Union[str, PathLike[str]]
 	Data = TypeVar("Data", str, bytes)
@@ -151,10 +151,7 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 		newmode = _stripmode(mode)
 
 		with ZipFile(file, newmode) as zf: # note: even if the outer zip file is closed, the inner file can still be read apparently
-			if version_info >= (3, 6):
-				bf = zf.open(archive_file, newmode, force_zip64=True)
-			else:
-				bf = zf.open(archive_file, newmode)
+			bf = zf.open(archive_file, newmode, force_zip64=True)
 
 		return wrap_text(bf, mode, encoding, errors, newline)
 
@@ -651,20 +648,12 @@ def consume_file(filename, buffer_size=FILE_IO_BUFFER_SIZE):
 	consume(blockfileiter(filename, mode="rb", chunk_size=buffer_size))
 
 # was: same_files, textfile_equal: equal_files(*paths, mode="rt")
-def equal_files(*paths, **kwargs):
-	# type: (*PathType, **Any) -> bool
+def equal_files(*paths, mode="rb", encoding=None, errors=None, amount=None, chunk_size=FILE_IO_BUFFER_SIZE):
+	# type: (*PathType, str, Optional[str], Optional[str], Optional[int], int) -> bool
 
 	""" Check if files at `*paths` are equal. Chunks of size `chunk_size` are read at a time.
 		Data can be optionally limited to `amount`.
 	"""
-
-	# python2 fix for `equal_files(*paths, mode="rb", encoding=None, errors=None, amount=None, chunk_size=FILE_IO_BUFFER_SIZE)`
-	mode = kwargs.pop("mode", "rb")  # type: str
-	encoding = kwargs.pop("encoding", None)  # type: Optional[str]
-	errors = kwargs.pop("errors", None)  # type: Optional[str]
-	amount = kwargs.pop("amount", None)  # type: Optional[int]
-	chunk_size = kwargs.pop("chunk_size", FILE_IO_BUFFER_SIZE)  # type: int
-	assert not kwargs, "Invalid keyword arguments"
 
 	its = tuple(blockfileiter(path, mode=mode, encoding=encoding, errors=errors, amount=amount, chunk_size=chunk_size) for path in paths)
 	return iter_equal(*its)

@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewitems
+from __future__ import generator_stop
 
 import logging
 from collections import defaultdict
@@ -21,6 +19,8 @@ def _to_union(types):
 		return types[0]
 	elif len(types) > 1:
 		return "Union[" + ", ".join(types) + "]"
+
+	assert False
 
 def _type_str(obj):
 	# type: (Any, ) -> str
@@ -71,7 +71,7 @@ def args_str(args, kwargs, maxlen=20, app="...", repr_args=True):
 	"""
 
 	args = ", ".join(_arg_str(arg, maxlen, app, repr_args) for arg in args)
-	kwargs = ", ".join(_kwarg_str(k, v, maxlen, app, repr_args) for k, v in viewitems(kwargs))
+	kwargs = ", ".join(_kwarg_str(k, v, maxlen, app, repr_args) for k, v in kwargs.items())
 
 	if args:
 		if kwargs:

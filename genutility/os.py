@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import PY2
+from __future__ import generator_stop
 
 import os
 import platform
@@ -38,9 +36,6 @@ class CurrentWorkingDirectory(object):
 
 def rename(func_name):
 	# type: (str, ) -> Callable
-
-	if PY2:
-		func_name = func_name.encode("ascii")
 
 	def decorator(func):
 		func.__name__ = func_name

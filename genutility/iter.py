@@ -1,15 +1,11 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import map, range, reversed, zip
-from future.moves.itertools import zip_longest
-from future.utils import raise_from
+from __future__ import generator_stop
 
 import logging
 import random
 import sys
 from collections import deque
 from functools import partial
-from itertools import chain, combinations, count, groupby, islice, product, repeat, starmap, tee
+from itertools import chain, combinations, count, groupby, islice, product, repeat, starmap, tee, zip_longest
 from operator import add, itemgetter
 from random import randrange
 from time import sleep, time
@@ -283,8 +279,7 @@ def last(it):
 	try:
 		return deque(it, 1).pop()
 	except IndexError:
-		raise_from(EmptyIterable("Empty iterable"), None)
-		raise  # just to appease mypy
+		raise EmptyIterable("Empty iterable") from None
 
 def batch(it, n, func=None):
 	# type: (Iterable[Any], int, Optional[Callable]) -> Iterator[Any] # return type cannot be more specific because of filter()

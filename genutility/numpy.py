@@ -1,7 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import range
-from future.utils import viewitems
+from __future__ import generator_stop
 
 from math import exp, sqrt
 from typing import Callable, Dict, Generic, Iterator, Optional, Tuple, TypeVar
@@ -291,7 +288,7 @@ class UnboundedSparseMatrix(Generic[T]):
 
 		ret = np.zeros((self.cols, self.rows), dtype=self.dtype)
 
-		for slice, value in viewitems(self.m):
+		for slice, value in self.m.items():
 			ret[slice] = value
 
 		return ret

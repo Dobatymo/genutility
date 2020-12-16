@@ -1,12 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import os.path
 from configparser import ConfigParser
-from io import open
+from importlib.util import find_spec
 from typing import TYPE_CHECKING
 
-from .compat import FileNotFoundError
-from .compat.importlib.util import find_spec
 from .os import get_appdata_dir
 
 if TYPE_CHECKING:

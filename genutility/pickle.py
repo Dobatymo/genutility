@@ -1,16 +1,15 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import logging
 import pickle  # nosec
 from datetime import timedelta
 from functools import wraps
+from os import fspath
 from pickle import HIGHEST_PROTOCOL  # nosec
 from typing import TYPE_CHECKING
 
 from .atomic import sopen
-from .compat import FileNotFoundError
 from .compat.contextlib import nullcontext
-from .compat.os import fspath
 from .datetime import now
 from .file import copen
 from .filesystem import mdatetime
@@ -18,9 +17,8 @@ from .object import args_to_key
 from .time import PrintStatementTime
 
 if TYPE_CHECKING:
+	from pathlib import Path
 	from typing import Any, Callable, Iterable, Iterator, Optional
-
-	from .compat.pathlib import Path
 
 logger = logging.getLogger(__name__)
 

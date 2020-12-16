@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewitems
+from __future__ import generator_stop
 
 import logging
 
@@ -56,7 +54,7 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 		self.SetItemData(pos, self.insertcount)
 		self.itemDataMap[self.insertcount] = items
 
-		"""for id, pos in viewitems(self.idtopos):
+		"""for id, pos in self.idtopos.items():
 			if pos >= event.Index:
 				self.idtopos[id] = pos + 1"""
 
@@ -70,7 +68,7 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
 	def Edit(self, pos, items):
 		"""items is dict with col as key and string als value"""
-		for col, val in viewitems(items):
+		for col, val in items.items():
 			self.SetItem(pos, col, val)
 
 	def GetSelections(self):

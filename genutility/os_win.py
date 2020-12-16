@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import logging
 import os
@@ -6,6 +6,7 @@ import signal
 from ctypes import WinError, byref, c_wchar_p, cast, create_unicode_buffer, memset, sizeof
 from ctypes.wintypes import DWORD, LPCWSTR, ULARGE_INTEGER
 from msvcrt import get_osfhandle
+from os import fspath
 from typing import TYPE_CHECKING
 
 from cwinsdk.shared.ehstorioctl import MAX_PATH
@@ -27,7 +28,6 @@ from cwinsdk.um.ShlObj_core import SHGetKnownFolderPath
 from cwinsdk.um.WinBase import STD_OUTPUT_HANDLE
 from cwinsdk.um.winnt import FILE_ATTRIBUTE_REPARSE_POINT
 
-from .compat.os import fspath
 from .os_shared import _usagetuple, _volumeinfotuple
 
 if TYPE_CHECKING:

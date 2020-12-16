@@ -1,12 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewitems, viewvalues
+from __future__ import generator_stop
 
 from operator import itemgetter
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar
 	T = TypeVar("T")
 
 	from graphviz import Digraph
@@ -93,7 +90,7 @@ class BKTree(object):
 
 			# instead of looking for candidates by searching,
 			# one could also directly access the necessary keys in the dict
-			for d, bknode in viewitems(candidate.leaves):
+			for d, bknode in candidate.leaves.items():
 				lower = distance - max_distance
 				upper = distance + max_distance
 				if lower <= d <= upper:
@@ -105,7 +102,7 @@ class BKTree(object):
 	def _find_by_distance(node, distance):
 		# type: (BKNode, int) -> Iterator[Set[Any]]
 
-		for d, bknode in viewitems(node.leaves):
+		for d, bknode in node.leaves.items():
 			if d == distance:
 				nodeset = set(BKTree._values(bknode))
 				nodeset.add(node.value)
@@ -128,7 +125,7 @@ class BKTree(object):
 	def _dot(dot, node):
 		# type: (Digraph, BKNode) -> None
 
-		for distance, childnode in viewitems(node.leaves):
+		for distance, childnode in node.leaves.items():
 			dot.node(str(childnode.value))
 			dot.edge(str(node.value), str(childnode.value), label=str(distance))
 			BKTree._dot(dot, childnode)
@@ -149,7 +146,7 @@ class BKTree(object):
 		# type: (BKNode, ) -> Iterator[Any]
 
 		yield node.value
-		for leaf in viewvalues(node.leaves):
+		for leaf in node.leaves.values():
 			for value in BKTree._values(leaf):
 				yield value
 

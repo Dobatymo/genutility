@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewitems
+from __future__ import generator_stop
 
 from typing import TYPE_CHECKING
 
@@ -11,7 +9,7 @@ if TYPE_CHECKING:
 def extract_indexes(d):
 	# type: (dict, ) -> Callable[[Sequence], dict]
 
-	return lambda seq: {name: seq[index] for index, name in viewitems(d)}
+	return lambda seq: {name: seq[index] for index, name in d.items()}
 
 def bit_or(x, y):
 	# type: (Any, Any) -> Any

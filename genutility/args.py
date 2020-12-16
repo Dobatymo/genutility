@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import input, range
+from __future__ import generator_stop
 
 import os
 import os.path
@@ -8,10 +6,10 @@ import shlex
 import sys
 from argparse import ArgumentTypeError
 from functools import wraps
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .compat.os import makedirs
-from .compat.pathlib import Path
 from .iter import is_empty
 from .stdio import confirm
 

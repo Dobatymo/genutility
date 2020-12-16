@@ -1,7 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import sum
-from future.utils import viewitems, viewkeys
+from __future__ import generator_stop
 
 from itertools import islice
 from typing import TYPE_CHECKING
@@ -44,9 +41,9 @@ def load_freqs(fname, normalize=False, limit=None):
 			freqs[word] = int(count)
 
 	if normalize:
-		total = sum(viewkeys(freqs))
+		total = sum(freqs.keys())
 
-		for word, count in viewitems(freqs):
+		for word, count in freqs.items():
 			freqs[word] = count / total
 
 	return freqs

@@ -1,7 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import map, zip
-from future.utils import PY2, viewitems, viewkeys
+from __future__ import generator_stop
 
 import re
 from collections import OrderedDict
@@ -140,9 +137,9 @@ def build_multiple_replace(d, escape=True):
 	"""
 
 	if escape:
-		it = map(re.escape, viewkeys(d))
+		it = map(re.escape, d.keys())
 	else:
-		it = viewkeys(d)
+		it = d.keys()
 
 	cp = re.compile("(" + "|".join(it) + ")")
 	return partial(cp.sub, lambda m: d[m.group(0)])
@@ -272,26 +269,18 @@ def surrounding_join(j, it, left="", right=""):
 def replace_pairs_bytes(s, items):
 	# type: (bytes, Dict[bytes, Optional[bytes]]) -> bytes
 
-	frm = b"".join(k for k, v in viewitems(items) if v)
-	to = b"".join(v for k, v in viewitems(items) if v)
-	delete = b"".join(k for k, v in viewitems(items) if v is None)
+	frm = b"".join(k for k, v in items.items() if v)
+	to = b"".join(v for k, v in items.items() if v)
+	delete = b"".join(k for k, v in items.items() if v is None)
 
-	if PY2:
-		import string
-		table = string.maketrans(frm, to)
-	else:
-		table = s.maketrans(frm, to)
+	table = s.maketrans(frm, to)
 
 	return s.translate(table, delete)
 
 def replace_pairs_chars(s, items):
 	# type: (str, Dict[UnicodeOrdinalT, Optional[UnicodeOrdinalT]]) -> str
 
-	if PY2:
-		# table = s.maketrans(items) # 'unicode' object has no attribute 'maketrans'
-		table = {ord(k):v for k, v in viewitems(items)}
-	else:
-		table = s.maketrans(items)  # type: ignore # mypy issue #4374
+	table = s.maketrans(items)  # type: ignore # mypy issue #4374
 
 	return s.translate(table)
 

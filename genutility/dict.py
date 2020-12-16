@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from future.utils import viewitems
+from __future__ import generator_stop
 
 from collections import defaultdict
 from typing import TYPE_CHECKING
@@ -21,7 +19,7 @@ def flatten(d):
 		for v in d:
 			yield v
 	elif isinstance(d, dict):
-		for k, val in viewitems(d):
+		for k, val in d.items():
 			for v in flatten(val):
 				yield v
 	else:
@@ -53,12 +51,12 @@ def get_available(d, keys):
 def hasvalues(d):
 	# type: (dict, ) -> dict
 
-	return {k:v for k, v in viewitems(d) if v}
+	return {k:v for k, v in d.items() if v}
 
 def valuemap(func, d):
 	# type: (Callable[[U], V], Dict[T, U]) -> Dict[T, V]
 
-	return {k: func(v) for k, v in viewitems(d)}
+	return {k: func(v) for k, v in d.items()}
 
 # was: mapdict, mapget
 def mapmap(d, it):
@@ -94,7 +92,7 @@ def update(d1, d2):
 
 	""" Same as `dict.update` except that `None` values are skipped. """
 
-	for k, v in viewitems(d2):
+	for k, v in d2.items():
 		if v is not None:
 			d1[k] = v
 

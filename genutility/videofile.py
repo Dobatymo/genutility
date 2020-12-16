@@ -1,21 +1,19 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import logging
 from datetime import timedelta
 from fractions import Fraction
+from os import PathLike, fspath
 from typing import TYPE_CHECKING
 
-from .compat import FileExistsError
-from .compat.os import PathLike, fspath
-
 if TYPE_CHECKING:
+	from pathlib import Path
 	from typing import Any, Iterator, Sequence, Tuple, Union
 
 	import numpy as np
 
 	from av import VideoFrame
 
-	from .compat.pathlib import Path
 	WsgiApp = Any
 
 #if __debug__:
