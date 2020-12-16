@@ -74,7 +74,7 @@ def repeatfunc(func, times=None, *args):
 def _lstr(it, length=None):
 	if length is None:
 		try:
-			length = len(it) # type: ignore # TypeError caught below
+			length = len(it)
 		except TypeError:
 			pass
 
@@ -112,7 +112,7 @@ def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout):
 			print("Finished {} in {} seconds.".format(total, int(duration)), end=end, file=file)
 
 def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None):
-	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Callable) -> Iterator
+	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable]) -> Iterator
 
 	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
 
@@ -259,7 +259,7 @@ def empty():
 	"""
 
 	return
-	yield # pylint: disable=unreachable
+	yield # type: ignore # pylint: disable=unreachable
 
 def lastdefault(it, default=None):
 	# type: (Iterable[T], Optional[T]) -> Optional[T]

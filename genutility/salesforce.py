@@ -469,7 +469,7 @@ class LiveAgentBase(Generic[ReturnTGet, ReturnTPost]):
 	def rest_chasitor_init(self, key, affinity_token, session_id, visitor_name, user_agent="", language="en-US",
 		screen_resolution="1920x1080", prechat_details=None, prechat_entities=None,
 		receive_queue_updates=True, is_post=True):
-		# type: (str, str, str, str, str, str, str, List[JsonDict], List[JsonDict], bool, bool) -> ReturnTPost
+		# type: (str, str, str, str, str, str, str, Optional[List[JsonDict]], Optional[List[JsonDict]], bool, bool) -> ReturnTPost
 
 		endpoint = "/chat/rest/Chasitor/ChasitorInit"
 
@@ -639,7 +639,7 @@ class LiveAgent(LiveAgentBase[JsonDict, bytes]):
 	# high level
 
 	def connect(self, visitor_name, slots=None, prechat_details=None, prechat_entities=None):
-		# type: (str, Optional[Union[Dict[str, str], List[JsonDict]]], List[JsonDict], List[JsonDict]) -> None
+		# type: (str, Optional[Union[Dict[str, str], List[JsonDict]]], Optional[List[JsonDict]], Optional[List[JsonDict]]) -> None
 
 		""" Connect using `visitor_name` as name.
 		"""
@@ -745,7 +745,7 @@ class LiveAgentAsync(LiveAgentBase[Coroutine[Any, Any, JsonDict], Coroutine[Any,
 	# high level
 
 	async def connect(self, visitor_name, slots=None, prechat_details=None, prechat_entities=None):
-		# type: (str, Optional[Union[Dict[str, str], List[JsonDict]]], List[JsonDict], List[JsonDict]) -> None
+		# type: (str, Optional[Union[Dict[str, str], List[JsonDict]]], Optional[List[JsonDict]], Optional[List[JsonDict]]) -> None
 
 		""" Connect using `visitor_name` as name.
 		"""

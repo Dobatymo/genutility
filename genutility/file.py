@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 	from mmap import mmap
 	from typing import IO, Any, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
 
-	PathType = Union[str, PathLike]
+	PathType = Union[str, PathLike[str]]
 	Data = TypeVar("Data", str, bytes)
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024

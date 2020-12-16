@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Set, Tuple, TypeVar, Union
+	from typing import Any, Dict, Optional, Set, Tuple, TypeVar, Union
 	T = TypeVar("T")
 	U = TypeVar("U")
 
@@ -96,7 +96,7 @@ class MalformedFile(ValueError):
 	"""
 
 def assert_choice(name, value, choices, optional=False):
-	# type: (str, T, Set[T], bool) -> None
+	# type: (str, Optional[T], Set[T], bool) -> None
 
 	if optional and value is None:
 		return

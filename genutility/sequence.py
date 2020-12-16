@@ -11,7 +11,7 @@ from .indexing import triangular_indices
 if TYPE_CHECKING:
 	from typing import Callable, Dict, Iterator, MutableSequence, Optional, Sequence, Tuple, TypeVar
 
-	from .typing import Comparable
+	from .typing import Comparable, Orderable
 	T = TypeVar("T")
 
 class LazyStringList(object):
@@ -116,7 +116,7 @@ def remove_duplicate_rows_from_sorted_table(seq, key):
 	return delete_duplicates_from_sorted_sequence(seq, itemgetter(key))
 
 def cycle_sort(seq):
-	# type: (MutableSequence[T], ) -> Iterator[Tuple[int, int]]
+	# type: (MutableSequence[Orderable], ) -> Iterator[Tuple[int, int]]
 
 	""" Sort a sequence in place and yield swaps.
 		based on: https://rosettacode.org/wiki/Sorting_algorithms/Cycle_sort#Python

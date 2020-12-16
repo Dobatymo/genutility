@@ -43,14 +43,14 @@ def partial_decorator(*args, **kwargs):
 	return decorator
 
 def compose_two(f, g):
-	# type: (Callable, Callable) -> Callable
+	# type: (Callable[[Any], Any], Callable[[Any], Any]) -> Callable[[Any], Any]
 
 	""" compose_two(f, g) -> lambda x: f(g(x)) """
 
 	return lambda x: f(g(x))
 
 def compose(*functions):
-	# type: (Iterable[Callable[[Any], Any]], ) -> Callable[[Any], Any]
+	# type: (*Callable[[Any], Any]) -> Callable[[Any], Any]
 
 	""" compose(f, g, h) -> lambda x: f(g(h(x))).
 		see: Function composition
