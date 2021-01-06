@@ -11,6 +11,7 @@ build/
 dist/
 .hypothesis/
 .mypy_cache/
+.coverage
 
 # C extensions
 *.so
