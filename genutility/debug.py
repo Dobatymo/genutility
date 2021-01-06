@@ -8,6 +8,39 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from typing import Any, Callable, Collection, Optional
 
+def printr(*objs, end="\n", depth=0):
+	# type: (*Any, str, int) -> None
+
+	for i, obj in enumerate(objs, 1):
+
+		if isinstance(obj, str):
+			print(obj, end="")
+		elif isinstance(obj, dict):
+			print("{", end="")
+			for j, (k, v) in enumerate(obj.items(), 1):
+				printr(k, end=end, depth=depth+1)
+				print(": ", end="")
+				printr(v, end=end, depth=depth+1)
+				if j != len(obj):
+					print(", ", end="")
+			print("}", end="")
+		else:
+			try:
+				print("(", end="")
+				for j, item in enumerate(obj, 1):
+					printr(item, end=end, depth=depth+1)
+					if j != len(obj):
+						print(", ", end="")
+				print(")", end="")
+			except TypeError:
+				print(obj, end="")
+
+		if i != len(objs):
+			print(" ", end="")
+
+	if depth == 0:
+		print(end=end)
+
 def _to_union(types):
 	# type: (Collection[str], ) -> str
 
