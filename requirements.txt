@@ -13,7 +13,7 @@ msgpack>=0.6.0
 netifaces
 networkx
 nltk
-numba
+# numba
 numpy
 opencv-python # cv2
 orderedset
@@ -33,7 +33,7 @@ scipy<1.6.0
 simple_salesforce>=1.1.0
 simplejson
 sortedcontainers
-tensorflow
+# tensorflow
 tls-property>=1.0.1
 toml
 twisted
@@ -41,5 +41,5 @@ typing-extensions
 unidecode
 werkzeug>=0.11.11
 wmi; sys_platform=='win32'
-wxasync
-wxPython>=4
+# wxasync
+# wxPython>=4 # no linux wheels
