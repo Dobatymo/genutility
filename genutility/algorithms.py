@@ -1,11 +1,10 @@
 from __future__ import generator_stop
 
-from past.builtins import cmp
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Callable, MutableSequence
+	from typing import Callable, MutableSequence, TypeVar
+	T = TypeVar("T")
 
 def _insertion(seq, cmp_, left, right, gap):
 	# type: (MutableSequence, Callable, int, int, int) -> None
@@ -21,6 +20,14 @@ def _insertion(seq, cmp_, left, right, gap):
 		loc += gap
 
 GROUP_SIZE = 5
+
+def cmp(x, y):
+	# type: (T, T) -> int
+
+	"""
+	Return negative if x<y, zero if x==y, positive if x>y.
+	"""
+	return (x > y) - (x < y)
 
 def median_of_medians(seq, cmp_=None, left=0, right=None, depth=0):
 	# type: (MutableSequence, Callable, int, int, int) -> int

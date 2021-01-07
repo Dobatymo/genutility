@@ -2,13 +2,12 @@ from __future__ import generator_stop
 
 import logging
 from datetime import datetime
+from math import nan
 from typing import TYPE_CHECKING
 
 import win32evtlog
 import winerror
 import wmi
-
-from .math import NaN
 
 if TYPE_CHECKING:
 	from typing import Iterator
@@ -49,10 +48,10 @@ class cpu_usage(Resource):
 		Resource.__init__(self, wmii)
 		self.proc_name = proc_name
 
-		self.real0 = NaN
-		self.user0 = NaN
-		self.sys0 = NaN
-		self.ts0 = NaN
+		self.real0 = nan
+		self.user0 = nan
+		self.sys0 = nan
+		self.ts0 = nan
 
 	@staticmethod
 	def get_proc_names(wmii):
@@ -72,9 +71,9 @@ class cpu_usage(Resource):
 			user_ratio = (user - self.user0) / delta_time
 			sys_ratio = (sys - self.sys0) / delta_time
 		except ZeroDivisionError:
-			real_ratio = NaN
-			user_ratio = NaN
-			sys_ratio = NaN
+			real_ratio = nan
+			user_ratio = nan
+			sys_ratio = nan
 
 		self.real0 = real
 		self.user0 = user
@@ -150,8 +149,6 @@ def event_logs(server="localhost", source="System"):
 		win32evtlog.CloseEventLog(handle)
 
 if __name__ == "__main__":
-	from builtins import zip
-
 	from argparse import ArgumentParser
 	from time import sleep
 

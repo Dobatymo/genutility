@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import sys
 
@@ -75,8 +75,8 @@ class Volume(WindowsHandle):
 	def __init__(self, path):
 		# type: (str, ) -> None
 
-		WindowsHandle.__init__(self)
-		self.handle = open_logical_volume(path)
+		handle = open_logical_volume(path)
+		WindowsHandle.__init__(self, handle)
 
 	def lock(self):
 		MyDeviceIoControl(self.handle, FSCTL_LOCK_VOLUME, EMPTY_BUFFER(), EMPTY_BUFFER())
@@ -94,7 +94,7 @@ class Drive(WindowsHandle):
 		# type: (int, ) -> None
 
 		handle = open_physical_drive(DriveIndex)
-		WindowsHandle.__init__(self, handle, doclose=True)
+		WindowsHandle.__init__(self, handle)
 
 	def get_alignment(self):
 		# type: () -> dict

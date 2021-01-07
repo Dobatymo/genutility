@@ -6,11 +6,10 @@ from typing import TYPE_CHECKING
 from pymediainfo import MediaInfo
 
 if TYPE_CHECKING:
+	from pathlib import Path
 	from typing import Union
 
 	from pymediainfo import Track
-
-	from .compat.pathlib import Path
 
 class MediaInfoHelper(object):
 

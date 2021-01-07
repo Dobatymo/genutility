@@ -1,42 +1,45 @@
-future
-typing-extensions
-
+aiohttp>=2.3
 # av # no simple build
-aiohttp>=2.3; python_version>='3.5'
+aria2p
+beautifulsoup4
 bencode.py>=2.0.0 # bencode
 cryptography>=1.5.3
 ctypes-windows-sdk>=0.0.7; sys_platform=='win32'
 flask>=0.12.3
+hyper
 jsonschema
+lxml
 msgpack>=0.6.0
 netifaces
-nltk; python_version>='3'
-nltk<3.5; python_version<'3'
+networkx
+nltk
+numba
 numpy
-opencv-python; python_version>='3' # cv2
-opencv-python<=4.2.0.32; python_version<'3' # cv2
+opencv-python # cv2
 orderedset
+pandas
+piexif
 pillow
-PyPDF2
+pymediainfo
+pymongo
 pyOpenSSL>=17.5.0 # OpenSSL
+PyPDF2
+python-pptx
 pywin32; sys_platform=='win32' # win32evtlog, winerror
 requests
 rhash; sys_platform=='win32'
 ruamel.yaml
+scipy<1.6.0
 simple_salesforce>=1.1.0
 simplejson
 sortedcontainers
+tensorflow
 tls-property>=1.0.1
 toml
+twisted
+typing-extensions
 unidecode
 werkzeug>=0.11.11
 wmi; sys_platform=='win32'
-
-#wxasync
-#wxPython # wx
-
-contextlib2; python_version < '3'
-mock; python_version < '3'
-pathlib2; python_version < '3'
-scandir; python_version < '3'
-typing; python_version < '3'
+wxasync
+wxPython>=4

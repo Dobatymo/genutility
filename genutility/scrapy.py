@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 	from typing import Any, Callable, ContextManager, Iterator, Tuple
 
 def read_dbm_httpcache(path, open_func=dbm.open):
-	# type: (str, Callable[[str], ContextManager[MutableMapping]]) -> Iterator[Tuple[bytes, float, Any]]
+	# type: (str, Callable[[str, str], ContextManager[MutableMapping]]) -> Iterator[Tuple[bytes, float, Any]]
 
 	""" Loads scrapy dbm http cache files.
 		Uses pickle so only use on trusted file.

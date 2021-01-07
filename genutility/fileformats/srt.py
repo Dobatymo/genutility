@@ -1,7 +1,6 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import logging
-from io import open
 
 from ..exceptions import MalformedFile
 

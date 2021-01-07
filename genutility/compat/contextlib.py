@@ -1,9 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 from typing import TYPE_CHECKING
 
 try:
-	from contextlib import nullcontext  # pylint: disable=no-name-in-module
+	from contextlib import nullcontext  # pylint: disable=no-name-in-module # New in version 3.7
 
 except ImportError:
 

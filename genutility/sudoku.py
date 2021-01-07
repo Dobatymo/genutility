@@ -1,7 +1,7 @@
 from __future__ import generator_stop
 
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import Collection, Generic, Iterable, Optional, Set, Tuple, TypeVar
 
 from .compat.math import isqrt
 from .exceptions import assert_type
@@ -9,18 +9,16 @@ from .indexing import col_indices, row_indices, subblock_indices
 from .iter import batch
 from .set import get as setget
 
-if TYPE_CHECKING:
-	from typing import Iterable, Set, Tuple, TypeVar
-	T = TypeVar("T")
+T = TypeVar("T")
 
 class Unsolvable(Exception):
 	pass
 
 
-class Sudoku(object):
+class Sudoku(Generic[T]):
 
 	def __init__(self, board, sym_set, sym_free):
-		# type: (Iterable[T], Set[T], T) -> None
+		# type: (Collection[T], Set[T], T) -> None
 
 		assert_type("sym_set", sym_set, set)
 
@@ -43,21 +41,33 @@ class Sudoku(object):
 		self.solved = False
 
 	def init_board(self, board):
+		# type: (Collection[T], ) -> Collection[T]
+
 		raise NotImplementedError
 
 	def get_board(self):
+		# type: () -> Collection[T]
+
 		raise NotImplementedError
 
 	def print_square(self):
+		# type: () -> None
+
 		for i, num in enumerate(self.get_board(), 1):
 			print(num, end=" ")
 			if i % self.outer_square_size == 0:
 				print()
 
 	def solve(self, strategy=None):
+		# type: (Optional[str], ) -> Collection[T]
+
 		self.square = self.init_board(self.square)
 		return self._solve(strategy)
 
+	def _solve(self, strategy=None):
+		# type: (Optional[str], ) -> Collection[T]
+
+		raise NotImplementedError
 
 class SudokuRulebased(Sudoku):
 

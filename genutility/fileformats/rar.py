@@ -1,18 +1,13 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import filter, range
+from __future__ import generator_stop
 
 import logging
 import os
 import subprocess  # nosec
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..compat.os import scandir
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
-from ..twothree.filesystem import fromfs, tofs
 
 if TYPE_CHECKING:
 	from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
@@ -134,11 +129,12 @@ class Rar(object):
 		cmd = "{} {}".format(self.exe, args)
 		logger.debug("CMD: " + cmd)
 		try:
-			ret = subprocess.check_output(tofs(cmd), stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
+			ret = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
 		except UnicodeEncodeError:
 			raise RarError("UnicodeError, Win32Console fault")
 		except subprocess.CalledProcessError as e:
-			raise RarError("Error", e.returncode, fromfs(e.cmd), e.output.decode(sys.stdout.encoding)) #should use only stderr
+			assert isinstance(e.output, str)
+			raise RarError("Error", e.returncode, e.cmd, e.output) #should use only stderr
 
 		return ret
 
@@ -184,7 +180,7 @@ def create_rar_from_folder(path, dest_path=None, profile_setter_func=None, filte
 			r = Rar(dest_path / "{}.rar".format(name_transform(path.name)))
 			if profile_setter_func:
 				profile_setter_func(r)
-			with scandir(".") as it:
+			with os.scandir(".") as it:
 				for entry in filter(filter_func, it): #was: scandir_rec
 					r.add_file(entry.path)
 			r.create()

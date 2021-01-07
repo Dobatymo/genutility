@@ -30,7 +30,7 @@ def multiline_textsize(text, ttf, spacing=4):
 def exifinfo(image):
 	# type: (Image, ) -> Dict[str, Any]
 
-	ret = dict()
+	ret = dict() # type: Dict[str, Any]
 
 	exifd = image._getexif()
 

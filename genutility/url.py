@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 if TYPE_CHECKING:
-	from future.moves.urllib.parse import SplitResult
-
 	from typing import Dict, Iterable, Optional
+	from urllib.parse import SplitResult
 
 # URI RFC
 gen_delims = ":/?#[]@"
@@ -59,11 +58,11 @@ def url_replace_query(split_url, query, drop_fragment=True):
 
 	scheme, netloc, path, _, fragment = split_url
 
-	query = urlencode(query)
+	_query = urlencode(query)
 	if drop_fragment:
 		fragment = ""
 
-	return urlunsplit((scheme, netloc, path, query, fragment))
+	return urlunsplit((scheme, netloc, path, _query, fragment))
 
 def path_ext(path):
 	return os.path.splitext(path)[1][1:].lower()

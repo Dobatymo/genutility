@@ -69,7 +69,7 @@ class HandleKeyboardInterrupt(object):
 			self.old_handler(*self.signal_received)
 
 def safe_for_loop(it, body_func, else_func=None):
-	# type: (Iterable[T], Callable[[T], bool], Callable[[], Any]) -> None
+	# type: (Iterable[T], Callable[[T], bool], Optional[Callable[[], Any]]) -> None
 
 	""" This function makes sure that `body_func(element)` is called each time an element is retrieved from the
 		iterable `it`, even if a `KeyboardInterrupt` is signaled in-between.

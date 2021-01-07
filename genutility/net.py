@@ -31,7 +31,7 @@ def is_email(s):
 		"asd@.asd.com" and reject some valid ones like "asd@localhost"
 	"""
 
-	return re.fullmatch(simple_email_regex, s)
+	return re.fullmatch(simple_email_regex, s) is not None
 
 def get_standard_gateway(default=None):
 	# type: (Optional[str], ) -> Optional[str]

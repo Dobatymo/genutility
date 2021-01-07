@@ -32,11 +32,11 @@ def choldate(L, x, sign):
 		raise ValueError("Invalid dimensions")
 
 	try:
-		sign = {"+": +1., "-": -1.}[sign]
+		_sign = {"+": +1., "-": -1.}[sign]
 	except KeyError:
 		raise ValueError("Invalid sign")
 
-	return _choldate(L, x, sign)
+	return _choldate(L, x, _sign)
 
 if __name__ == "__main__":
 	import timeit

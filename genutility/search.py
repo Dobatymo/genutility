@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from .func import identity
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Optional, Sequence, TypeVar
+	from typing import Callable, Optional, Sequence, TypeVar
 	T = TypeVar("T")
 	U = TypeVar("U")
 
@@ -28,12 +28,14 @@ def make_binary_search(target):
 	return binary_search_func
 
 def make_binary_search_sequence(seq, target, key=None):
-	# type: (Sequence, Any, Optional[Callable]) -> Callable[[int], BisectRetVal]
+	# type: (Sequence[T], U, Optional[Callable[[T], U]]) -> Callable[[int], BisectRetVal]
 
-	key = key or identity
+	_key = key or identity
 
 	def binary_search_func(x):
-		result = key(seq[x])
+		# type: (int, ) -> BisectRetVal
+
+		result = _key(seq[x])
 		if result < target:
 			return BisectRetVal.Higher
 		elif result > target:
@@ -89,12 +91,12 @@ def bisect_right_sequence(seq, target, key=None):
 	return bisect_right_generic(0, len(seq), func)
 
 def search_sorted(seq, newitem, key=None):
-	# type: (Sequence[T], U, Callable[[T], U]) -> int
+	# type: (Sequence[T], U, Optional[Callable[[T], U]]) -> int
 
-	key = key or identity
+	_key = key or identity
 
 	for i, item in enumerate(seq):
-		if newitem < key(item):
+		if newitem < _key(item):
 			return i
 
 	return len(seq)

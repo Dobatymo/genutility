@@ -6,10 +6,10 @@ import shlex
 import sys
 from argparse import ArgumentTypeError
 from functools import wraps
+from os import makedirs
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .compat.os import makedirs
 from .iter import is_empty
 from .stdio import confirm
 

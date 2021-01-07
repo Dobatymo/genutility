@@ -1,7 +1,7 @@
-hypothesis
+aiohttp<3.7.0
+aioresponses<0.7
 bandit
 flake8
+hypothesis
 pre-commit
 requests-mock
-aioresponses<0.7
-aiohttp<3.7.0

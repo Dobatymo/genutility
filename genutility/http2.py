@@ -36,4 +36,3 @@ class WrappedHTTP20Connection(object):
 			except (ConnectionResetError, SocketTimeout, StreamResetError):
 				self.connect()
 				continue
-

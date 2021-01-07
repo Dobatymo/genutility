@@ -282,6 +282,8 @@ class PathOrTextIO(object):
 			self.fp = copen(fname, mode, encoding=encoding, errors=errors, newline=newline)
 
 	def __enter__(self):
+		# type: () -> IO
+
 		return self.fp
 
 	def __exit__(self, exc_type, exc_value, traceback):
@@ -439,9 +441,8 @@ class Tell(object):
 	def writable(self):
 		return self._fp.writable()
 
-from future.moves.urllib import response
-
 from collections import deque
+from urllib import response
 
 
 class BufferedTell(response.addinfourl): # fixme: untested!!!

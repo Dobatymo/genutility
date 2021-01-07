@@ -56,7 +56,7 @@ extras_require = {
 	"string": [],
 	"test": [],
 	"time": [],
-	"typing": [],
+	"typing": ["typing-extensions"],
 	"text": [],
 	"twitch": [],
 	"url": [],
@@ -121,7 +121,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.66",
+	version="0.0.67",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,
@@ -132,11 +132,10 @@ setup(
 		"Operating System :: OS Independent",
 		"Topic :: Utilities",
 	],
-	packages=["genutility", "genutility.compat", "genutility.fileformats", "genutility.hardware", "genutility.twothree", "genutility.win", "genutility.compat.importlib", "genutility.compat.unittest"],
+	packages=["genutility", "genutility.compat", "genutility.fileformats", "genutility.hardware", "genutility.win"],
 	package_data={"genutility": ["py.typed", "data/*.tsv"]},
-	python_requires=">=3.5",
+	python_requires=">=3.6",
 	install_requires=[
-		"future",
 		"ctypes-windows-sdk>=0.0.7; sys_platform=='win32'",
 		"typing-extensions"
 	],

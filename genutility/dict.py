@@ -4,14 +4,14 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, Mapping, Tuple, TypeVar, Union
+	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List, Mapping, Tuple, TypeVar, Union
 
 	T = TypeVar("T")
 	U = TypeVar("U")
 	V = TypeVar("V")
 
 def flatten(d):
-	# type: (Dict[T, U], ) -> Iterator[U]
+	# type: (Union[Dict[T, U], List[U], Tuple[U, ...]], ) -> Iterator[U]
 
 	""" Flattens dicts of (dicts of...) lists to lists. """
 

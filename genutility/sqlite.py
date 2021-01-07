@@ -3,13 +3,11 @@ from __future__ import generator_stop
 import codecs
 import logging
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import Iterable
 
 from .iter import batch, progress
 from .signal import safe_for_loop
 
-if TYPE_CHECKING:
-	from sqlite3 import Cursor, Iterable
 
 def quote_identifier(s, errors="strict"):
 	# type: (str, str) -> str
@@ -38,7 +36,7 @@ def vacuum(db_path):
 		conn.execute("VACUUM")
 
 def batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True):
-	# type: (Cursor, str, Iterable[tuple], int, bool) -> int
+	# type: (sqlite3.Cursor, str, Iterable[tuple], int, bool) -> int
 
 	""" Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
 		If `exclusive` is True the database will be locked in exclusive mode.
@@ -63,7 +61,7 @@ def batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True):
 	return entries
 
 def safe_batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True):
-	# type: (Cursor, str, Iterable[tuple], int, bool) -> None
+	# type: (sqlite3.Cursor, str, Iterable[tuple], int, bool) -> None
 
 	""" Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
 		If `exclusive` is True the database will be locked in exclusive mode.

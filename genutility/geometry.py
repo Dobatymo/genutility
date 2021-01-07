@@ -92,4 +92,3 @@ def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=No
 	# until then:
 	return whRatio
 	whRatio = 1/whRatio
-

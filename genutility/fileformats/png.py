@@ -1,9 +1,8 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 import logging
 import re
 import zlib
-from io import open
 from struct import pack, unpack
 from typing import TYPE_CHECKING
 
@@ -11,7 +10,7 @@ from ..exceptions import ParseError
 from ..file import read_or_raise
 
 if TYPE_CHECKING:
-	from typing import IO, Callable, Iterator, Tuple
+	from typing import IO, Callable, Iterator, Optional, Tuple
 
 	from _hashlib import HASH as Hashobj
 
@@ -126,7 +125,7 @@ def iter_png(path, translate=True, verify_crc=True):
 
 
 def copy_png_fp(fin, fout, filter_chunks=None, verify_crc=False):
-	# type: (IO[bytes], IO[bytes], Callable[[bytes], bool], bool) -> None
+	# type: (IO[bytes], IO[bytes], Optional[Callable[[bytes], bool]], bool) -> None
 
 	""" Same as `copy_png()` except that it accepts file-like objects.
 	"""

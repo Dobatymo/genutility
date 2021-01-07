@@ -10,9 +10,8 @@ from .file import blockfileiter, blockfilesiter, read_file
 from .filesystem import FileProperties
 
 if TYPE_CHECKING:
+	from pathlib import Path
 	from typing import Any, Dict, Optional
-
-	from .compat.pathlib import Path
 
 def read_torrent(path):
 	return bdecode(read_file(path, "rb"))

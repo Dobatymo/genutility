@@ -220,7 +220,7 @@ class IterWorker(threading.Thread):
 		threading.Thread.__init__(self)
 		self.queue = taskqueue
 		self.onstatechange = onstatechange
-		self.control = Queue()
+		self.control = Queue() # type: Queue[int]
 		self.state = self.STATE_WAITING
 
 	@property
@@ -471,8 +471,8 @@ def parallel_map(func, it, ordered=True, parallel=True, processes=None, bufsize=
 				q.done()  # the semaphore in the bounded queue might block otherwise
 				raise
 	else:
-		for item in it:
-			yield func(item)
+		for _item in it:
+			yield func(_item)
 
 class ThreadsafeList(list):  # untested!!!
 

@@ -1,45 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 from datetime import datetime as _datetime
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-	from typing import Optional
+from datetime import timezone
 
 try:
-	from datetime import timezone
-
-except ImportError:
-
-	from datetime import timedelta, tzinfo
-
-	class timezone(tzinfo):
-
-		def __init__(self, offset, name=None):
-			# type: (int, Optional[str]) -> None
-
-			self.offset = offset
-			self.name = name
-
-		def __reduce__(self):
-			return (timezone, (self.offset, self.name))
-
-		def utcoffset(self, dt):
-			return self.offset
-
-		def dst(self, dt):
-			return timedelta(0)
-
-		def tzname(self, dt):
-			if self.name:
-				return self.name
-			else:
-				raise NotImplementedError
-
-	timezone.utc = timezone(timedelta(0))
-
-try:
-	_datetime.fromisoformat
+	_datetime.fromisoformat # New in version 3.7
 	datetime = _datetime
 
 except AttributeError:

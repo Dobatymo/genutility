@@ -112,7 +112,7 @@ class MeasureTime(object):
 	def __init__(self):
 		# type: () -> None
 
-		self.delta = None
+		self.delta = None # type: Optional[float]
 
 	def __enter__(self):
 		# type: () -> MeasureTime

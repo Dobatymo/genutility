@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import generator_stop
 
 from ctypes import WinError
 from msvcrt import get_osfhandle, open_osfhandle
@@ -12,7 +12,7 @@ _mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "w+": GENERIC_READ
 
 class WindowsHandle(object):
 
-	def __init__(self, handle, doclose):
+	def __init__(self, handle, doclose=True):
 		# type: (int, bool) -> None
 
 		if not isinstance(handle, int):
@@ -42,7 +42,7 @@ class WindowsHandle(object):
 			raise WinError()
 
 	def __enter__(self):
-		# type: () -> None
+		# type: () -> WindowsHandle
 
 		return self
 

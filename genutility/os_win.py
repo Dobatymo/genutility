@@ -32,9 +32,8 @@ from .os_shared import _usagetuple, _volumeinfotuple
 
 if TYPE_CHECKING:
 	from ctypes.wintypes import HANDLE
+	from os import PathLike
 	from typing import IO, Union
-
-	from .compat.os import PathLike
 
 	PathType = Union[str, PathLike]
 

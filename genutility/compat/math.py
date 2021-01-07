@@ -1,6 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from builtins import zip
+from __future__ import generator_stop
 
 from functools import reduce
 from operator import mul
@@ -12,13 +10,9 @@ if TYPE_CHECKING:
 	from ..typing import Computable
 	T = TypeVar("T")
 
-try:
-	from math import nan
-except ImportError:
-	nan = float("NaN")
 
 try:
-	from math import prod
+	from math import prod  # New in version 3.8
 
 except ImportError:
 
@@ -39,7 +33,7 @@ except ImportError:
 		return start
 
 try:
-	from math import dist
+	from math import dist  # New in version 3.8
 except ImportError:
 
 	from math import sqrt
@@ -48,7 +42,7 @@ except ImportError:
 		return sqrt(sum((px - qx) ** 2. for px, qx in zip(p, q)))
 
 try:
-	from math import isqrt
+	from math import isqrt  # New in version 3.8
 
 except ImportError:
 

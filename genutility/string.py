@@ -137,7 +137,7 @@ def build_multiple_replace(d, escape=True):
 	"""
 
 	if escape:
-		it = map(re.escape, d.keys())
+		it = map(re.escape, d.keys()) # type: Iterable[str]
 	else:
 		it = d.keys()
 

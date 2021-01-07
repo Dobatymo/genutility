@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING
 from .file import copen
 
 if TYPE_CHECKING:
+	from os import PathLike
 	from typing import IO, ContextManager, Optional, Union
 
-	from .compat.os import PathLike
 	PathType = Union[str, PathLike]
 
 # http://stupidpythonideas.blogspot.tw/2014/07/getting-atomic-writes-right.html

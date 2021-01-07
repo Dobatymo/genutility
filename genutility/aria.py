@@ -13,7 +13,7 @@ from .dict import update
 from .exceptions import DownloadFailed, ExternalProcedureUnavailable, InconsistentState, WouldBlockForever, assert_type
 
 if TYPE_CHECKING:
-	from typing import Any, List, Optional, TextIO, Tuple
+	from typing import Any, List, Optional, Set, TextIO, Tuple
 
 def aria_bool(value):
 	# type: (Optional[bool], ) -> Optional[str]
@@ -66,7 +66,7 @@ class AriaDownloader(object):
 		else:
 			self.aria2.change_global_option(self.default_global_options)
 
-		self.gids = set()
+		self.gids = set() # type: Set[str]
 
 	def query(self, method, *args, **kwargs):
 
@@ -165,7 +165,7 @@ class AriaDownloader(object):
 	def block_all(self):
 		# type: () -> List[Tuple[Any, Any]]
 
-		ret = []  # type: Tuple[Any, Any]
+		ret = []  # type: List[Tuple[Any, Any]]
 
 		while True:
 			try:
