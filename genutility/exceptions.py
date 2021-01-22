@@ -7,6 +7,11 @@ if TYPE_CHECKING:
 	T = TypeVar("T")
 	U = TypeVar("U")
 
+class NotFound(LookupError):
+	""" Raised when a search doesn't turn up any results.
+		Similar to KeyError or IndexError.
+	"""
+
 class ParseError(Exception):
 	""" Raised when the content to be parsed is malformed.
 		Not a value error because usually the error is in some external resource

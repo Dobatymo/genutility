@@ -80,7 +80,7 @@ def read_json(path, schema=None, cls=None, object_hook=None):
 	return obj
 
 def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False):
-	# type: (Any, PathStr, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[str], bool, Optional[Callable], bool) -> None
+	# type: (Any, PathStr, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[Union[str, int]], bool, Optional[Callable], bool) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
@@ -237,7 +237,7 @@ def key_to_hash(key, default=None):
 	return md5(binary).hexdigest()  # nosec
 
 def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False, default=None, object_hook=None):
-	# type: (Path, Optional[timedelta], bool, Optional[str], bool, Optional[Callable], Optional[Callable]) -> Callable
+	# type: (Path, Optional[timedelta], bool, Optional[Union[str, int]], bool, Optional[Callable], Optional[Callable]) -> Callable
 
 	""" Decorator to cache results of function to json files at `path` for `duration`.
 		The remaining parameters are passed through to `json.dump`.

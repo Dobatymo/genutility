@@ -1,9 +1,9 @@
 from __future__ import generator_stop
 
 from hashlib import sha1
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Union
 
-from bencode import bdecode, bencode
+import bencode
 
 from .exceptions import assert_choice
 from .file import blockfileiter, blockfilesiter, read_file
@@ -11,15 +11,26 @@ from .filesystem import FileProperties
 
 if TYPE_CHECKING:
 	from pathlib import Path
-	from typing import Any, Dict, Optional
+	PathType = Union[str, Path]
 
 def read_torrent(path):
-	return bdecode(read_file(path, "rb"))
+	# type: (str, ) -> dict
+
+	return bencode.bread(path)
+
+def write_torrent(data, path):
+	# type: (dict, PathType) -> None
+
+	bencode.bwrite(data, path)
 
 def read_torrent_info_dict(path):
-	return bdecode(read_file(path, "rb"))["info"]
+	# type: (PathType, ) -> dict
+
+	return bencode.bread(path)["info"]
 
 def iter_torrent(path):
+	# type: (PathType, ) -> Iterator[FileProperties]
+
 	""" Returns file informations from a torrent file.
 		Hash (SHA-1) is obtained according to BEP0047 (if available).
 	"""
@@ -76,7 +87,7 @@ def create_torrent_info_dict(path, piece_size, private=None):
 	return ret
 
 def torrent_info_hash(d):
-	return sha1(bencode(d)).hexdigest()  # nosec
+	return sha1(bencode.bencode(d)).hexdigest()  # nosec
 
 def get_torrent_hash(path):
 	return torrent_info_hash(read_torrent_info_dict(path))
@@ -90,4 +101,4 @@ def create_torrent(path, piece_size, announce=""):
 		"announce": announce
 	}
 
-	return bencode(torrent)
+	return bencode.bencode(torrent)
