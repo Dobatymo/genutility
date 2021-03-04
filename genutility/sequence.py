@@ -81,8 +81,8 @@ def batch(seq, size):
 	# type: (Sequence[T], int) -> Iterator[Sequence[T]]
 
 	""" Similar to `iter.batch()` except that it returns slices of a sequence.
-		sliding_window([1, 2, 3], 2) -> [1, 2], [2, 3]
-		sliding_window([1, 2, 3, 4, 5], 2, 3) -> [1, 2], [4, 5]
+		batch([1, 2, 3], 2) -> [1, 2], [3]
+		batch([1, 2, 3, 4, 5], 3) -> [1, 2, 3], [4, 5]
 	"""
 
 	if size < 1:

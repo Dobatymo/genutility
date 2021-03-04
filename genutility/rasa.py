@@ -54,6 +54,8 @@ class RasaABC(Generic[ReturnT], metaclass=ABCMeta):
 
 class Rasa(object):
 
+	sender: str
+
 	def __init__(self, sender, scheme="http", netloc="localhost:5005", token=None, timeout=60):
 		# type: (str, str, str, Optional[str], int) -> None
 

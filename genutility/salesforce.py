@@ -402,9 +402,10 @@ class LiveAgentBase(Generic[ReturnTGet, ReturnTPost]):
 
 		return prechat_details
 
-	@staticmethod
-	def _availibility(res):
+	def _availibility(self, res):
 		# type: (JsonDict, ) -> bool
+
+		# this is not a staticmethod as to include potentially useful stack-info in logs
 
 		for msg in res["messages"]:
 			if msg["type"] == "Availability":

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Union
 import bencode
 
 from .exceptions import assert_choice
-from .file import blockfileiter, blockfilesiter, read_file
+from .file import blockfileiter, blockfilesiter
 from .filesystem import FileProperties
 
 if TYPE_CHECKING:
