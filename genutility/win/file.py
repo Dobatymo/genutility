@@ -6,17 +6,8 @@ from errno import EACCES
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
 from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
 from cwinsdk.windows import ERROR_SHARING_VIOLATION  # structs; enums
-from cwinsdk.windows import (
-    FILE_ID_DESCRIPTOR,
-    FILE_ID_INFO,
-    FILE_ID_TYPE,
-    FILE_INFO_BY_HANDLE_CLASS,
-    GENERIC_READ,
-    OPEN_EXISTING,
-    CreateFileW,
-    GetFileInformationByHandleEx,
-    OpenFileById,
-)
+from cwinsdk.windows import (FILE_ID_DESCRIPTOR, FILE_ID_INFO, FILE_ID_TYPE, FILE_INFO_BY_HANDLE_CLASS, GENERIC_READ,
+                             OPEN_EXISTING, CreateFileW, GetFileInformationByHandleEx, OpenFileById)
 
 from .handle import WindowsHandle, _mode2access
 

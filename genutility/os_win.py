@@ -13,14 +13,8 @@ from cwinsdk.shared.ehstorioctl import MAX_PATH
 from cwinsdk.shared.ntdef import PWSTR
 from cwinsdk.um.combaseapi import CoTaskMemFree
 from cwinsdk.um.consoleapi import ENABLE_VIRTUAL_TERMINAL_PROCESSING, GetConsoleMode, SetConsoleMode
-from cwinsdk.um.fileapi import (
-    INVALID_FILE_ATTRIBUTES,
-    GetDiskFreeSpaceExW,
-    GetFileAttributesW,
-    GetVolumeInformationW,
-    LockFileEx,
-    UnlockFileEx,
-)
+from cwinsdk.um.fileapi import (INVALID_FILE_ATTRIBUTES, GetDiskFreeSpaceExW, GetFileAttributesW, GetVolumeInformationW,
+                                LockFileEx, UnlockFileEx)
 from cwinsdk.um.KnownFolders import FOLDERID_RoamingAppData
 from cwinsdk.um.minwinbase import LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY, OVERLAPPED
 from cwinsdk.um.processenv import GetStdHandle

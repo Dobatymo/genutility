@@ -4,14 +4,8 @@ from operator import itemgetter
 
 from genutility.benchmarks.sequence import pop_many_2
 from genutility.func import identity
-from genutility.sequence import (
-    batch,
-    cycle_sort,
-    delete_duplicates_from_sorted_sequence,
-    pop_many,
-    sliding_window,
-    triangular,
-)
+from genutility.sequence import (batch, cycle_sort, delete_duplicates_from_sorted_sequence, pop_many, sliding_window,
+                                 triangular)
 from genutility.test import MyTestCase, parametrize
 
 

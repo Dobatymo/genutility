@@ -2,26 +2,9 @@ from __future__ import generator_stop
 
 from itertools import islice
 
-from genutility.math import (
-    PosInfInt,
-    additaet,
-    argfind_gte,
-    argfind_lte,
-    argmax,
-    argmax_v2,
-    argmin,
-    byte2size,
-    byte2size_str,
-    closest,
-    digitsum,
-    digitsum_base,
-    digitsum_small,
-    fibonacci,
-    fibonaccigen,
-    limit,
-    multinomial_coefficient,
-    primes,
-)
+from genutility.math import (PosInfInt, additaet, argfind_gte, argfind_lte, argmax, argmax_v2, argmin, byte2size,
+                             byte2size_str, closest, digitsum, digitsum_base, digitsum_small, fibonacci, fibonaccigen,
+                             limit, multinomial_coefficient, primes)
 from genutility.test import MyTestCase, parametrize
 
 

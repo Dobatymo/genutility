@@ -1,15 +1,7 @@
 from __future__ import generator_stop
 
-from genutility.ops import (
-    bit_or,
-    converse_implication,
-    converse_nonimplication,
-    logical_implication,
-    logical_nonimplication,
-    logical_xnor,
-    logical_xor,
-    operator_in,
-)
+from genutility.ops import (bit_or, converse_implication, converse_nonimplication, logical_implication,
+                            logical_nonimplication, logical_xnor, logical_xor, operator_in)
 from genutility.test import MyTestCase, parametrize
 
 

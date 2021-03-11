@@ -4,14 +4,8 @@ from typing import TYPE_CHECKING
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
-from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    NoEncryption,
-    PrivateFormat,
-    PublicFormat,
-    load_der_private_key,
-    load_pem_private_key,
-)
+from cryptography.hazmat.primitives.serialization import (Encoding, NoEncryption, PrivateFormat, PublicFormat,
+                                                          load_der_private_key, load_pem_private_key)
 from OpenSSL import crypto  # pyOpenSSL
 
 from .exceptions import assert_choice

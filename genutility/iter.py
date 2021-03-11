@@ -17,24 +17,8 @@ from .ops import operator_in
 
 if TYPE_CHECKING:
 	from logging import Logger
-	from typing import (
-	    Any,
-	    Callable,
-	    Collection,
-	    Container,
-	    Dict,
-	    Iterable,
-	    Iterator,
-	    List,
-	    Optional,
-	    Sequence,
-	    Set,
-	    TextIO,
-	    Tuple,
-	    Type,
-	    TypeVar,
-	    Union,
-	)
+	from typing import (Any, Callable, Collection, Container, Dict, Iterable, Iterator, List, Optional, Sequence, Set,
+	                    TextIO, Tuple, Type, TypeVar, Union)
 
 	from .typing import Orderable, SizedIterable
 	T = TypeVar("T")
@@ -122,21 +106,25 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 	last = start = time()
 	i = 0
 
-	for i, elm in enumerate(it, 1):
-		yield elm
-		current = time()
-		if current - last > refresh:
-			last = current
-			duration = current-start
-			if extra_info_callback:
-				extra = " [{}]".format(extra_info_callback(i, length))
-			print("{}{}, running for {} seconds ({:0.2e}/s){}.".format(i, lstr, int(duration), i/duration, extra), end="\r", file=file)
-
-	duration = last-start
-	if duration > 0:
-		print("Finished {} in {} seconds ({:0.2e}/s).".format(i, int(duration), i/duration), end=end, file=file)
+	try:
+		for i, elm in enumerate(it, 1):
+			yield elm
+			current = time()
+			if current - last > refresh:
+				last = current
+				duration = current-start
+				if extra_info_callback:
+					extra = " [{}]".format(extra_info_callback(i, length))
+				print("{}{}, running for {} seconds ({:0.2e}/s){}.".format(i, lstr, int(duration), i/duration, extra), end="\r", file=file)
+	except KeyboardInterrupt:
+		print("Unsafely aborted after reading {}{} in {} seconds ({:0.2e}/s).".format(i, lstr, int(last-start), i/(last-start)), end=end, file=file)
+		raise
 	else:
-		print("Finished {} in {} seconds.".format(i, int(duration)), end=end, file=file)
+		duration = last-start
+		if duration > 0:
+			print("Finished {} in {} seconds ({:0.2e}/s).".format(i, int(duration), i/duration), end=end, file=file)
+		else:
+			print("Finished {} in {} seconds.".format(i, int(duration)), end=end, file=file)
 
 class Progress(object):
 

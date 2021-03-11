@@ -6,20 +6,8 @@ import logging
 import re
 import time
 from collections.abc import Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Coroutine,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import (TYPE_CHECKING, Any, Coroutine, Dict, Generic, Iterable, Iterator, List, Optional, Tuple, TypeVar,
+                    Union)
 
 import aiohttp
 import requests

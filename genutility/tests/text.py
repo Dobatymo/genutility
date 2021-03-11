@@ -4,15 +4,8 @@ from itertools import count
 from typing import Iterator
 
 from genutility.test import MyTestCase, parametrize
-from genutility.text import (
-    ReplaceURLs,
-    collapse_punctuation_symbols,
-    collapse_space,
-    collapse_whitespace,
-    extract_urls,
-    newlines_to_spaces,
-    replace_typographical_punctuation,
-)
+from genutility.text import (ReplaceURLs, collapse_punctuation_symbols, collapse_space, collapse_whitespace,
+                             extract_urls, newlines_to_spaces, replace_typographical_punctuation)
 
 
 def urls_iter():
