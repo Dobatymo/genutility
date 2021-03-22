@@ -19,7 +19,7 @@ opencv-python # cv2
 orderedset
 pandas
 piexif
-pillow
+Pillow>=8.1.1
 pymediainfo
 pymongo
 pyOpenSSL>=17.5.0 # OpenSSL

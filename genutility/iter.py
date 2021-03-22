@@ -30,6 +30,22 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+def one(it):
+	# type: (Iterator[T], ) -> T
+
+	try:
+		ret = next(it)
+	except StopIteration:
+		raise EmptyIterable()
+	try:
+		next(it)
+	except StopIteration:
+		pass
+	else:
+		raise ValueError("Iterator yielded more than one value")
+
+	return ret
+
 def iterrandrange(a, b):
 	# type: (int, int) -> Iterator[int]
 
