@@ -81,8 +81,11 @@ def _lstr(it, length=None):
 
 	return length, lstr
 
-def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout):
-	# type: (Union[Iterable, Sequence], Optional[int], float, str, Optional[TextIO]) -> Iterable
+def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout, disable=False):
+	# type: (Union[Iterable, Sequence], Optional[int], float, str, Optional[TextIO], bool) -> Iterable
+
+	if disable:
+		return it
 
 	length, lstr = _lstr(it, length)
 	last = start = time()
@@ -107,8 +110,8 @@ def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout):
 		else:
 			print("Finished {} in {} seconds.".format(total, int(duration)), end=end, file=file)
 
-def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None):
-	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable]) -> Iterator
+def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=False):
+	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable], bool) -> Iterator
 
 	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
 
@@ -116,6 +119,9 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 		Use `length_hint(it)` for a guess which might be better than nothing.
 		Can return 0.
 	"""
+
+	if disable:
+		return it
 
 	length, lstr = _lstr(it, length)
 	extra = ""
