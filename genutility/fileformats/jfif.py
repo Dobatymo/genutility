@@ -249,7 +249,7 @@ if __name__ == "__main__":
 	from hashlib import sha1
 
 	from genutility.args import is_dir
-	from genutility.hash import format_file_hash
+	from genutility.hash import hashsum_file_format
 	from genutility.iter import consume
 
 	parser = ArgumentParser()
@@ -277,7 +277,7 @@ if __name__ == "__main__":
 			if args.hash:
 				hashobj = sha1()  # nosec
 				hash_raw_jpeg(path, hashobj)
-				print(format_file_hash(hashobj, path))
+				print(hashsum_file_format(hashobj, path))
 			else:
 				consume(iter_jpeg(path))
 

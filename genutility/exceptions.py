@@ -3,7 +3,7 @@ from __future__ import generator_stop
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Any, Dict, Optional, Set, Tuple, TypeVar, Union
+	from typing import Any, Dict, Optional, Sequence, Set, Tuple, TypeVar, Union
 	T = TypeVar("T")
 	U = TypeVar("U")
 
@@ -108,6 +108,15 @@ def assert_choice(name, value, choices, optional=False):
 
 	if value not in choices:
 		raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices))))
+
+def assert_choices(name, values, choices, optional=False):
+	# type: (str, Optional[Sequence[T]], Set[T], bool) -> None
+
+	if optional and values is None:
+		return
+
+	if set(values) - choices:
+		raise ValueError("{} must be a subset of {}".format(name, ", ".join(map(str, choices))))
 
 def assert_choice_map(name, value, choices):
 	# type: (str, T, Dict[T, U]) -> U

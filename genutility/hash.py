@@ -3,32 +3,33 @@ from __future__ import generator_stop
 import hashlib
 import zlib
 from functools import partial
-from os import fspath
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .file import blockfileiter, read_file
-from .filesystem import scandir_rec
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Iterator, Optional, Union
+	from typing import Callable, Iterable, Optional, Union
 
 	from _hashlib import HASH as Hashobj
 
-	from .filesystem import PathType
+	HashCls = Union[Callable[[], Hashobj], str]
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
 def hash_file(path, hashcls, chunksize=FILE_IO_BUFFER_SIZE, mode="rb", encoding=None):
-	# type: (str, Callable[[], Hashobj], int, str, Optional[str]) -> Hashobj
+	# type: (str, HashCls, int, str, Optional[str]) -> Hashobj
 
-	m = hashcls()
+	if isinstance(hashcls, str):
+		m = hashlib.new(hashcls)
+	else:
+		m = hashcls()
 	for d in blockfileiter(path, mode, encoding, chunk_size=chunksize):
 		m.update(d)
 	return m
 
 def hash_data(data, hashcls):
-	# type: (bytes, Union[Callable[[], Hashobj], str]) -> Hashobj
+	# type: (bytes, HashCls) -> Hashobj
 
 	""" Hashes `data` with `hashcls`.
 		`hashcls` can either be a string like "md5" or a hash object like `hashlib.md5`.
@@ -68,24 +69,10 @@ def crc32_hash_file(path, chunksize=FILE_IO_BUFFER_SIZE, mode="rb", encoding=Non
 md5_hash_file = partial(hash_file, hashcls=hashlib.md5)
 sha1_hash_file = partial(hash_file, hashcls=hashlib.sha1)
 
-def format_file_hash(hashobj, path):
+def hashsum_file_format(hashobj, path):
 	# type: (Hashobj, str) -> str
 
 	return "{} *{}".format(hashobj.hexdigest(), path)
-
-def hash_dir_str(path, hashcls=hashlib.sha1, include_names=False):
-	# type: (PathType, Callable[[], Hashobj], bool) -> Iterator[str]
-
-	""" sorts names naively, e.g. all uppercase chars come before lowercase """
-
-	m = hashcls()
-	for entry in sorted(scandir_rec(path), key=lambda x: x.path):
-		filehash = hash_file(entry.path, hashcls)
-		yield format_file_hash(filehash, fspath(entry))
-		if include_names:
-			m.update(entry.name.encode("utf-8"))
-		m.update(filehash.digest())
-	yield format_file_hash(m, fspath(path))
 
 ed2k_chunksize = 9728000
 

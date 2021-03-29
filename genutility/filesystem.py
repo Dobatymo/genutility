@@ -105,7 +105,12 @@ class FileProperties(object):
 	def __iter__(self):
 		# type: () -> tuple
 
-		return self.values()
+		return iter(self.values())
+
+	def __eq__(self, other):
+		# type: (Any, ) -> bool
+
+		return self.values() == other.values()
 
 	def __repr__(self):
 		# type: () -> str

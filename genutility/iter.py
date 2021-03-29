@@ -10,22 +10,21 @@ from operator import add, itemgetter
 from random import randrange
 from time import sleep, time
 from types import GeneratorType
-from typing import TYPE_CHECKING
+from typing import (TYPE_CHECKING, Any, Callable, Collection, Container, Dict, Generic, Iterable, Iterator, List,
+                    Optional, Sequence, Set, TextIO, Tuple, Type, TypeVar, Union)
 
 from .exceptions import EmptyIterable, IteratorExhausted
 from .ops import operator_in
 
 if TYPE_CHECKING:
-	from logging import Logger
-	from typing import (Any, Callable, Collection, Container, Dict, Iterable, Iterator, List, Optional, Sequence, Set,
-	                    TextIO, Tuple, Type, TypeVar, Union)
-
 	from .typing import Orderable, SizedIterable
-	T = TypeVar("T")
-	U = TypeVar("U")
-	V = TypeVar("V")
+
 	OrderableT = TypeVar("OrderableT", bound=Orderable)
 	ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
+
+T = TypeVar("T")
+U = TypeVar("U")
+V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -526,7 +525,7 @@ def list_except(it, catch=Exception):
 	return exc, ret
 
 def iter_except_ignore(iterator, exceptions, logger=logger):
-	# type: (Iterator[T], ExceptionsType, Logger) -> Iterator[T]
+	# type: (Iterator[T], ExceptionsType, logging.Logger) -> Iterator[T]
 
 	""" Ignores `exceptions` raised in `iterator`. Does not work for Generators.
 	"""
@@ -811,3 +810,28 @@ def remove_consecutive_dupes(it):
 	"""
 
 	return map(itemgetter(0), groupby(it))
+
+class CachedIterable(Generic[T]):
+	# https://stackoverflow.com/a/19504173
+
+	def __init__(self, iterable):
+		# type: (Iterable[T], ) -> None
+
+		self.iterable = iterable
+		self.done = False
+		self.vals = []  # type: List[T]
+
+	def __iter__(self):
+		# type: () -> Iterator[T]
+
+		if self.done:
+			return iter(self.vals)
+		return chain(self.vals, self._gen_iter())
+
+	def _gen_iter(self):
+		# type: () -> Iterator[T]
+
+		for val in self.iterable:
+			self.vals.append(val)
+			yield val
+		self.done = True
