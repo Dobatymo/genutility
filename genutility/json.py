@@ -243,7 +243,10 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
 		The remaining parameters are passed through to `json.dump`.
 	"""
 
-	duration = duration or timedelta.max
+	if duration is None:
+		_duration = timedelta.max
+	else:
+		_duration = duration
 
 	def decorator(func):
 		# type: (Callable, ) -> Callable
@@ -255,7 +258,7 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
 			fullpath = path / hash
 
 			try:
-				invalid = now() - mdatetime(fullpath) > duration
+				invalid = now() - mdatetime(fullpath) > _duration
 			except FileNotFoundError:
 				invalid = True
 

@@ -95,7 +95,10 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 			where `ppv` is assigned the  pickle protocol version.
 	"""
 
-	_duration = duration or timedelta.max
+	if duration is None:
+		_duration = timedelta.max
+	else:
+		_duration = duration
 
 	if not verbose:
 		context = nullcontext
