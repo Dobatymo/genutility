@@ -80,7 +80,7 @@ def _islink(path):
 	return FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT == FILE_ATTRIBUTE_REPARSE_POINT
 
 def _uncabspath(path):
-	# type: (PathType, )-> str
+	# type: (str, )-> str
 
 	if path.startswith(unc_prefix):
 		return os.path.abspath(path)

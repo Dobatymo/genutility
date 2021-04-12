@@ -9,11 +9,11 @@ from .dict import itemgetter
 from .func import compose, identity, zipmap
 
 
-def iter_csv(path, delimiter=",", encoding="utf-8"):
-	# type: (str, str, str) -> Iterator[List[str]]
+def iter_csv(path, delimiter=",", encoding="utf-8", skip=0):
+	# type: (str, str, str, bool) -> Iterator[List[str]]
 
 	with open(path, "rt", encoding="utf-8", newline="") as fr:
-		for data in csv.reader(fr, delimiter=delimiter):
+		for data in islice(csv.reader(fr, delimiter=delimiter), skip, None):
 			yield data
 
 def read_csv(path, delimiter=",", skip=0, usecols=None, dtype=None, encoding="utf-8"):

@@ -355,7 +355,7 @@ class ProgressThreadPool(object):
 			w.daemon = True  # program will end even if threads are still running
 			w.start()
 
-	def start(self, callable, *args, **kwargs):
+	def start(self, callable, *args, **kwargs):  # todo: add optional task id here.
 		self.waiting_queue.put((callable, args, kwargs))
 
 	def finalize(self, result):

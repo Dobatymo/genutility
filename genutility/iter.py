@@ -67,6 +67,8 @@ def repeatfunc(func, times=None, *args):
 	return starmap(func, repeat(args, times))
 
 def _lstr(it, length=None):
+	# type: (Iterable, Optional[int]) -> Tuple[Optional[int], str]
+
 	if length is None:
 		try:
 			length = len(it)
@@ -74,50 +76,29 @@ def _lstr(it, length=None):
 			pass
 
 	if length is not None:
-		lstr = "/{}".format(length)
+		lstr = f"/{length}"
 	else:
 		lstr = ""
 
 	return length, lstr
 
-def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout, disable=False):
-	# type: (Union[Iterable, Sequence], Optional[int], float, str, Optional[TextIO], bool) -> Iterable
+def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=False, delta=1):
+	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], bool, Optional[int]) -> Iterator
 
-	if disable:
-		return it
-
-	length, lstr = _lstr(it, length)
-	last = start = time()
-	total = 0
-
-	try:
-		for elm in it:
-			yield elm
-			total += len(elm)
-			current = time()
-			if current - last > refresh:
-				last = current
-				duration = current-start
-				print("Read {}{}, running for {} seconds ({:0.2e}/s).".format(total, lstr, int(duration), total/duration), end="\r", file=file)
-	except KeyboardInterrupt:
-		print("Unsafely aborted after reading {}{} in {} seconds ({:0.2e}/s).".format(total, lstr, int(last-start), total/(last-start)), end=end, file=file)
-		raise
-	else:
-		duration = last-start
-		if duration > 0:
-			print("Finished {} in {} seconds ({:0.2e}/s).".format(total, int(duration), total/duration), end=end, file=file)
-		else:
-			print("Finished {} in {} seconds.".format(total, int(duration)), end=end, file=file)
-
-def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=False):
-	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable], bool) -> Iterator
-
-	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds. """
+	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds.
+		`lengths` is the total size of `it`. `len(it)` is used to get the size if set to `None`.
+		`refresh` updates the printed output every `refresh` seconds.
+		`delta` specifies the value which is added to the counter every iteration.
+			`None` uses `len(elm)` to determine the value. Defaults to 1.
+	"""
 
 	""" todo: `from operator import length_hint`
 		Use `length_hint(it)` for a guess which might be better than nothing.
 		Can return 0.
 	"""
+
+	if delta is not None and delta < 1:
+		raise ValueError(f"`delta` must be a integer larger than 1 or `None`, not '{delta}'")
 
 	if disable:
 		return it
@@ -125,27 +106,41 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 	length, lstr = _lstr(it, length)
 	extra = ""
 	last = start = time()
-	i = 0
+	total = 0
 
 	try:
-		for i, elm in enumerate(it, 1):
+		for elm in it:
 			yield elm
+			if delta is None:
+				total += len(elm)
+			else:
+				total += delta
 			current = time()
 			if current - last > refresh:
 				last = current
-				duration = current-start
+				duration = current - start
 				if extra_info_callback:
-					extra = " [{}]".format(extra_info_callback(i, length))
-				print("{}{}, running for {} seconds ({:0.2e}/s){}.".format(i, lstr, int(duration), i/duration, extra), end="\r", file=file)
+					extra = extra_info_callback(total, length)
+					extra = " [{extra}]"
+				print(f"{total}{lstr}, running for {int(duration)} seconds ({total/duration:0.2e}/s){extra}.", end="\r", file=file)
 	except KeyboardInterrupt:
-		print("Unsafely aborted after reading {}{} in {} seconds ({:0.2e}/s).".format(i, lstr, int(last-start), i/(last-start)), end=end, file=file)
+		duration = last - start
+		if duration > 0:
+			print(f"Unsafely aborted after reading {total}{lstr} in {int(duration)} seconds ({total/duration:0.2e}/s).", end=end, file=file)
+		else:
+			print(f"Unsafely aborted after reading {total}{lstr} in {int(duration)} seconds.", end=end, file=file)
 		raise
 	else:
-		duration = last-start
+		duration = last - start
 		if duration > 0:
-			print("Finished {} in {} seconds ({:0.2e}/s).".format(i, int(duration), i/duration), end=end, file=file)
+			print(f"Finished {total} in {int(duration)} seconds ({total/duration:0.2e}/s).", end=end, file=file)
 		else:
-			print("Finished {} in {} seconds.".format(i, int(duration)), end=end, file=file)
+			print(f"Finished {total} in {int(duration)} seconds.", end=end, file=file)
+
+def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=False):
+	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], bool) -> Iterable
+
+	return progress(it, length, refresh, end, file, extra_info_callback, disable, None)
 
 class Progress(object):
 
@@ -153,11 +148,16 @@ class Progress(object):
 		because attributes cannot be set on generator objects.
 	"""
 
-	def __init__(self, obj):
+	def __init__(self, obj, refresh=1):
+		# type: (Collection, float) -> None
+
 		self.obj = obj
+		self.refresh = refresh
 
 	def __iter__(self):
-		return progress(self.obj)
+		# type: () -> Iterator
+
+		return progress(self.obj, len(self.obj), self.refresh)
 
 	def __len__(self):
 		# type: () -> int

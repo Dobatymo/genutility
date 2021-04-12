@@ -27,6 +27,12 @@ logger = logging.getLogger(__name__)
 
 class BuiltinEncoder(json.JSONEncoder):
 
+	def __init__(self, *args, sort_sets=False, **kwargs):
+		# type: (*Any, bool, **Any) -> None
+
+		json.JSONEncoder.__init__(self, *args, **kwargs)
+		self.sort_sets = sort_sets
+
 	def default(self, obj):
 
 		# collections.OrderedDict is supported by default
@@ -36,7 +42,10 @@ class BuiltinEncoder(json.JSONEncoder):
 		from uuid import UUID
 
 		if isinstance(obj, (set, frozenset)):
-			return tuple(obj)
+			if self.sort_sets:
+				return sorted(obj)
+			else:
+				return tuple(obj)
 		elif isinstance(obj, complex):
 			return [obj.real, obj.imag]
 		elif isinstance(obj, date):
@@ -79,8 +88,8 @@ def read_json(path, schema=None, cls=None, object_hook=None):
 	validate(obj, schema)
 	return obj
 
-def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False):
-	# type: (Any, PathStr, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[Union[str, int]], bool, Optional[Callable], bool) -> None
+def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False, **kw):
+	# type: (Any, PathStr, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[Union[str, int]], bool, Optional[Callable], bool, **Any) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
@@ -97,7 +106,7 @@ def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None
 		validate(obj, schema)
 
 	with sopen(path, "wt", encoding="utf-8", safe=safe) as fw:
-		json.dump(obj, fw, ensure_ascii=ensure_ascii, cls=cls, indent=indent, sort_keys=sort_keys, default=default)
+		json.dump(obj, fw, ensure_ascii=ensure_ascii, cls=cls, indent=indent, sort_keys=sort_keys, default=default, **kw)
 
 class JsonLoadKwargs(TypedDict):
 	cls: Optional[Type[json.JSONDecoder]]

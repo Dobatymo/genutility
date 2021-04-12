@@ -321,7 +321,7 @@ def _scandir_rec(rootentry, files=True, dirs=False, others=False, rec=True, foll
 				if files and entry.is_file(follow_symlinks=follow_symlinks):
 					yield entry
 				elif entry.is_dir(follow_symlinks=follow_symlinks):
-					if not follow_symlinks and islink(entry): # must be a windows junction
+					if not follow_symlinks and islink(entry): # must be a windows junction. entry.is_symlink() doesn't support junctions
 						continue
 					if dirs:
 						yield entry
@@ -367,6 +367,26 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 				return entry
 
 		return map(modpathrelative, it)
+
+def scandir_ext(path, extensions, rec=True, follow_symlinks=False, relative=False, errorfunc=scandir_error_log):
+	# type: (PathType, Set[str], bool, bool) -> Iterator[DirEntry]
+
+	for entry in scandir_rec(path, files=True, dirs=False, rec=rec, follow_symlinks=follow_symlinks, relative=relative, errorfunc=errorfunc):
+		if entrysuffix(entry).lower() in extensions:
+			yield entry
+
+# fixme: benchmark and delete
+def scandir_ext_2(path, extensions, rec=True):
+	# type: (str, Set[str], bool, bool) -> Iterator[Path]
+
+	if rec:
+		paths = Path(uncabspath(path)).rglob("*")
+	else:
+		paths = Path(uncabspath(path)).glob("*")
+
+	for p in paths:
+		if p.suffix.lower() in extensions:
+			yield p
 
 def _scandir_depth(rootentry, depth, errorfunc):
 
@@ -762,7 +782,7 @@ def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, e
 		errorfunc(rootentry, e)
 
 def scandir_counts(path, files=True, others=True, rec=True, total=False, onerror=scandir_error_log):
-	# type: (PathType, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
+	# type: (str, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
 
 	""" A recursive variant of scandir() which also returns the number of files/directories
 		within directories.
