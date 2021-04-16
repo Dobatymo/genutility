@@ -81,6 +81,7 @@ extras_require = {
 	"nlp": ["nltk"],
 	"regression": ["numpy"],
 	"resizing": ["numpy", "opencv-python", "scikit-learn"],
+	"rich": ["rich"],
 	"scene_change_detection": ["numpy"],
 	"sudoku": ["setuptools"],
 	"tls": ["cryptography", "pyOpenSSL>=17.5.0"],
@@ -121,7 +122,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.71",
+	version="0.0.72",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,

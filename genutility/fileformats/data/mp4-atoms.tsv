@@ -1,34 +1,13 @@
 fourcc	container or leaf	box or fullbox	description	spec
-esds	cont	fullbox	Elementary Stream Descriptor Atom	QuickTime # int32 version
-chan	cont	fullbox	Audio Channel Layout Atom	QuickTime
-alis	leaf	fullbox	Alias box	QuickTime
-rsrc	leaf	fullbox	resource type	QuickTime
-rmra	cont	?	?	QuickTime
-rmda	cont	?	?	QuickTime
 Cr8r	cont	?	?	?
 FIEL	cont	?	?	?
 FXTC	cont	?	?	?
 ID32	leaf	fullbox	ID3 version 2 container	id3v2
 NCDT	cont	?	?	Nikon
-NCTG	leaf	?	?	Nikon
 NCHD	leaf	?	?	Nikon
+NCTG	leaf	?	?	Nikon
 NCTH	leaf	?	?	Nikon
 NCVW	leaf	?	?	Nikon
-trpy	leaf	box	hint Bytes Sent incl RTP	ISO
-nump	leaf	box	hint Packets Sent	ISO
-tpyl	leaf	box	hint Bytes Sent excl RTP	ISO
-totl	leaf	box	hint Bytes Sent incl RTP	ISO
-npck	leaf	box	hint Packets Sent	ISO
-tpay	leaf	box	hint Bytes Sent excl RTP	ISO
-maxr	leaf	box	hint maxrate	ISO
-dmed	leaf	box	hint media Bytes Sent	ISO
-dimm	leaf	box	hint immediate Bytes Sent	ISO
-drep	leaf	box	hint repeated Bytes Sent	ISO
-tmin	leaf	box	hint min relative time	ISO
-tmax	leaf	box	hint max relative time	ISO
-pmax	leaf	box	hint largest packet	ISO
-dmax	leaf	box	hint longest packet	ISO
-payt	leaf	box	hint payload ID	ISO
 SDLN	cont	?	User-data XXX	Samsung
 UITS	cont	?	Unique Identifier Technology Solution	Universal Music Group
 Xtra	leaf	?	?	?
@@ -36,6 +15,7 @@ aeLK	cont	?	?	?
 ainf	cont	?	Asset information to identify, license and play	DECE
 albc	leaf	?	?	?
 albm	leaf	fullbox	Album	3GPP
+alis	leaf	fullbox	Alias box	QuickTime
 alou	cont	?	Album loudness	ISO
 altr	leaf	?	?	?
 angl	cont	?	Angle	Apple
@@ -54,6 +34,7 @@ cclv	leaf	?	Content colour volume	HEIF
 cdef	cont	?	type and ordering of the components within the codestream	JPEG2000
 cdep	leaf	?	?	?
 cdsc	leaf	?	?	?
+chan	cont	fullbox	Audio Channel Layout Atom	QuickTime
 chap	leaf	?	Chapter list	QT
 chnl	cont	fullbox	Channel Layout	ISO
 chpl	leaf	fullbox	chapter list box	adobe
@@ -86,10 +67,14 @@ date	leaf	?	Date and time	Apple
 dawp	cont	box	AMRWP Specific Box	3GPP
 dcfD	cont	?	Marlin DCF Duration	OMArlin
 dimg	leaf	box	?	?
+dimm	leaf	box	hint immediate Bytes Sent	ISO
 dinf	cont	?	Data information	ISO
+dmax	leaf	box	hint longest packet	ISO
+dmed	leaf	box	hint media Bytes Sent	ISO
 dmix	cont	fullbox	Down Mix Instructions	?
 dpnd	leaf	?	MPEG4 reference track	Unknown
 dref	cont	fullbox	Data reference	ISO
+drep	leaf	box	hint repeated Bytes Sent	ISO
 dscp	leaf	fullbox	Description	3GPP
 dsgd	cont	?	DVB Sample Group Description Box	DVB
 dstg	cont	?	DVB Sample to Group Box	DVB
@@ -101,6 +86,7 @@ enca	cont	box	Encrypted Audio Sample Entry	3GPP
 enct	cont	box	Encrypted Text Sample Entry	3GPP
 encv	cont	box	Encrypted Video Sample Entry	3GPP
 enof	leaf	?	Track Encoded Pixels Dimensions	QT
+esds	cont	fullbox	Elementary Stream Descriptor Atom	QuickTime # int32 version
 evti	cont	?	Event information	ATSC 3.0
 fdel	cont	?	File delivery information (item info extension)	ISO
 fdsa	cont	box	FD sample	?
@@ -162,6 +148,7 @@ ludt	cont	?	Loudness	ISO
 m7hd	cont	?	Reserved for MPEG7Stream header	MP4v1
 manu	cont	?	Manufacturer	Apple
 matt	cont	?	Reserved / Visual track matte	ISO / QT
+maxr	leaf	box	hint maxrate	ISO
 mdat	leaf	?	Media data container	ISO
 mdcv	leaf	?	Mastering display colour volume	HEIF
 mdhd	leaf	fullbox	Media header, overall information about the media	ISO
@@ -171,7 +158,7 @@ meco	cont	?	Metadata container	ISO
 mehd	cont	?	Movie extends header	ISO
 mere	cont	?	Metabox relation	ISO
 meta	cont	fullbox	Metadata container	ISO
-mfhd	cont	?	Movie fragment header	ISO
+mfhd	leaf	fullbox	Movie fragment header	ISO
 mfra	cont	box	Movie fragment random access	ISO
 mfro	cont	fullbox	Movie fragment random access offset	ISO
 minf	cont	box	Media information container	ISO
@@ -190,6 +177,8 @@ mvra	cont	?	Multiview relation attribute	NALu Video
 name	leaf	?	?	?
 ndrm	cont	?	?	?
 nmhd	leaf	fullbox	Null media header	ISO
+npck	leaf	box	hint Packets Sent	ISO
+nump	leaf	box	hint Packets Sent	ISO
 ochd	cont	?	Reserved for ObjectContentInfoStream header	MP4v1
 odaf	cont	?	OMA DRM Access Unit Format	OMA DRM 2.0
 odda	cont	?	OMA DRM Content Object	OMA DRM 2.0
@@ -203,11 +192,13 @@ orie	cont	?	Orientation	3GPP
 padb	cont	fullbox	Padding bits	ISO
 paen	cont	box	Partition entry	ISO
 pasp	leaf	box	Pixel Aspect Ratio	HEIF
+payt	leaf	box	hint payload ID	ISO
 pclr	cont	?	palette which maps a single component in index space to a multiple- component image	JPEG2000
 pdin	leaf	fullbox	Progressive download information	ISO
 perf	leaf	fullbox	Performer	3GPP
 pitm	leaf	fullbox	Primary item reference	ISO
 pixi	leaf	?	Pixel Information	HEIF
+pmax	leaf	box	hint largest packet	ISO
 pnot	cont	?	Reserved / Preview container	ISO / QT
 prft	cont	fullbox	Producer reference time box	ISO
 prof	leaf	fullbox	Track Production Aperture Dimensions	QuickTime
@@ -219,7 +210,10 @@ resc	cont	?	Resolution captured	JPEG2000
 resd	cont	?	Resolution displayed	JPEG2000
 rinf	cont	?	Restricted information	ISO
 rloc	leaf	?	Relative Location	HEIF
+rmda	cont	?	?	QuickTime
+rmra	cont	?	?	QuickTime
 rrtp	leaf	?	Required reference types	HEIF
+rsrc	leaf	fullbox	resource type	QuickTime
 rtng	leaf	fullbox	Rating	3GPP
 s263	cont	box	H263 Sample Entry	3GPP
 saio	cont	fullbox	Sample auxiliary information offsets	ISO
@@ -287,7 +281,12 @@ tiri	cont	?	Tier Information	NALu Video
 titl	leaf	fullbox	Title	3GPP
 tkhd	leaf	fullbox	Track header	ISO
 tlou	cont	?	Track loudness	ISO
+tmax	leaf	box	hint max relative time	ISO
 tmcd	leaf	?	Time code	QT
+tmin	leaf	box	hint min relative time	ISO
+totl	leaf	box	hint Bytes Sent incl RTP	ISO
+tpay	leaf	box	hint Bytes Sent excl RTP	ISO
+tpyl	leaf	box	hint Bytes Sent excl RTP	ISO
 traf	cont	box	Track fragment	ISO
 trak	cont	box	Track	ISO
 tref	cont	box	Track reference	ISO
@@ -295,6 +294,7 @@ trep	cont	fullbox	Track Extension Properties Box	ISO
 trex	leaf	?	Track extends defaults	ISO
 trgr	leaf	fullbox	Track grouping information	ISO
 trik	cont	?	Facilitates random access and trick play modes	DECE
+trpy	leaf	box	hint Bytes Sent incl RTP	ISO
 trun	cont	fullbox	Track fragment run	ISO
 tsel	leaf	fullbox	Track selection	ISO/3GPP
 tsyn	leaf	?	?	?

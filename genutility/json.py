@@ -159,6 +159,18 @@ class json_lines(object):
 			Use text modes instead. Binary read-only is fine.
 		"""
 
+		if isinstance(file, str):
+			if file.startswith("s3://"):
+				message = f"""Reading data from S3 is not supported natively. Use `smart-open` package:
+```python
+from smart_open import open
+with open("{file}", "r") as fr:
+	with json_lines.from_stream(fr) as jl:
+		for doc in jl:
+			pass
+```"""
+				raise ValueError(message)
+
 		if set(mode) not in (set("rt"), set("rb"), set("xt"), set("xb"), set("wt"), set("at"), set("r+t"), set("w+t")):
 			raise ValueError(f"mode cannot be `{mode}`")
 

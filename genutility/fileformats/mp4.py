@@ -1,14 +1,13 @@
 from __future__ import generator_stop
 
+import logging
 import os
 import re
 import struct
 import warnings
-from os import fspath
-from typing import TYPE_CHECKING
-import logging
+from base64 import b64decode
 from collections import namedtuple
-from typing import IO, Dict, Iterator, Tuple, Iterable, List
+from typing import IO, Dict, Iterable, Iterator, List, Optional, Tuple
 
 import pkg_resources
 
@@ -51,10 +50,16 @@ class BoxParser:
 	def c_string(self, encoding=None):
 		s = self.read_c_string(self.fin, self.size - self.delta)
 		self.delta += len(s)
+		s = s.rstrip(b"\0")
 		if encoding is None:
-			return s.rstrip(b"\0")
+			return s
 		else:
-			return s.rstrip(b"\0").decode(encoding)
+			try:
+				return s.decode(encoding)
+			except UnicodeDecodeError:
+				ret = s.decode("latin-1") # should never fail
+				logging.warning("'%s' is not a valid %s string", ret, encoding)
+				return ret
 
 def named_batch(entries: Iterable, length: int, named_tuple_cls: object) -> List[namedtuple]:
 	return list(batch(entries, length, named_tuple_cls._make))
@@ -64,10 +69,13 @@ def named_batch(entries: Iterable, length: int, named_tuple_cls: object) -> List
 SampleToChunkEntry = namedtuple("SampleToChunkEntry", ["first_chunk", "samples_per_chunk", "sample_description_index"])
 CompositionOffsetEntry = namedtuple("CompositionOffsetEntry", ["sample_count", "sample_offset"])
 TimeToSampleEntry = namedtuple("TimeToSampleEntry", ["sample_count", "sample_delta"])
+FilePartitionEntry = namedtuple("FilePartitionEntry", ["block_count", "block_size"])
 
 # atoms
 
 def stco(fin, size, version, flags):
+	""" ChunkOffsetBox """
+
 	assert version == 0
 	p = BoxParser(fin, size)
 
@@ -75,6 +83,49 @@ def stco(fin, size, version, flags):
 	chunk_offsets = p.unpack(f">{entry_count}L", entry_count*4)
 
 	return {"chunk_offsets": chunk_offsets}, p.delta
+
+def fpar(fin, size, version, flags):
+	""" FilePartitionBox """
+
+	assert version in (0, 1)
+	p = BoxParser(fin, size)
+
+	if version == 0:
+		item_ID, = p.unpack(">H", 2)
+	elif version == 1:
+		item_ID, = p.unpack(">L", 4)
+
+	packet_payload_size, reserved, FEC_encoding_ID, FEC_instance_ID, max_source_block_length, encoding_symbol_length, max_number_of_encoding_symbols = p.unpack(">H2B4H", 12)
+	assert reserved == 0
+
+	scheme_specific_info = b64decode(p.c_string("ascii"))
+	if version == 0:
+		entry_count, = p.unpack(">H", 2)
+	elif version == 1:
+		entry_count, = p.unpack(">L", 4)
+
+	entries = p.unpack(f">{'HL'*entry_count}", entry_count*6)
+	return {
+		"item_ID": item_ID,
+		"packet_payload_size": packet_payload_size,
+		"FEC_encoding_ID": FEC_encoding_ID,
+		"FEC_instance_ID": FEC_instance_ID,
+		"max_source_block_length": max_source_block_length,
+		"encoding_symbol_length": encoding_symbol_length,
+		"max_number_of_encoding_symbols": max_number_of_encoding_symbols,
+		"scheme_specific_info": scheme_specific_info,
+		"file_partition_entries": named_batch(entries, 2, FilePartitionEntry)
+	}, p.delta
+
+def mfhd(fin, size, version, flags):
+	""" MovieFragmentHeaderBox """
+
+	assert version == 0
+	p = BoxParser(fin, size)
+
+	sequence_number, = p.unpack(">L", 4)
+
+	return {"sequence_number": sequence_number}, p.delta
 
 def co64(fin, size, version, flags):
 	assert version == 0
@@ -304,6 +355,8 @@ parsers = {
 	"ctts": ctts,
 	"stsc": stsc,
 	"stts": stts,
+	"mfhd": mfhd,
+	"fpar": fpar,
 }
 
 versions = {
@@ -312,7 +365,6 @@ versions = {
 	"elng": (0, ),
 	"stdp": (0, ),
 	"fecr": (0, 1),
-	"fpar": (0, 1),
 }
 
 def _load_atoms():
@@ -449,11 +501,11 @@ if __name__ == "__main__":
 	from os import fspath
 	from sys import stderr
 
-	from genutility.args import is_dir
-	from genutility.iter import list_except, progress
-	from genutility.filesystem import scandir_ext
-
 	import pandas as pd
+
+	from genutility.args import is_dir
+	from genutility.filesystem import scandir_ext
+	from genutility.iter import list_except, progress
 	atoms_path = pkg_resources.resource_filename(__package__, "data/mp4-atoms.tsv")
 	df = pd.read_csv(atoms_path, sep="\t")
 	df.sort_values("fourcc").to_csv(atoms_path + ".new", sep="\t", index=False)
