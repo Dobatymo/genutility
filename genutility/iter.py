@@ -121,7 +121,7 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 				duration = current - start
 				if extra_info_callback:
 					extra = extra_info_callback(total, length)
-					extra = " [{extra}]"
+					extra = f" [{extra}]"
 				print(f"{total}{lstr}, running for {int(duration)} seconds ({total/duration:0.2e}/s){extra}.", end="\r", file=file)
 	except KeyboardInterrupt:
 		duration = last - start

@@ -19,6 +19,9 @@ if TYPE_CHECKING:
 
 FILE_IO_BUFFER_SIZE = 8*1024*1024
 
+class Empty(OSError):
+	pass
+
 def _check_arguments(mode, encoding=None):
 	# type: (str, Optional[str]) -> Optional[str]
 
@@ -81,7 +84,9 @@ def read_or_raise(fin, size):
 	"""
 
 	data = fin.read(size)
-	if len(data) != size:
+	if len(data) == 0: # fixme: add `and size != 0`?
+		raise Empty
+	elif len(data) != size:
 		raise EOFError
 
 	return data
