@@ -4,7 +4,7 @@ import os.path
 from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from os import PathLike, fdopen, fspath
 from sys import stdout
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, Optional, BinaryIO, Union, Iterator, Tuple, IO
 
 from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
@@ -12,7 +12,7 @@ from .ops import logical_implication, logical_xor
 
 if TYPE_CHECKING:
 	from mmap import mmap
-	from typing import IO, BinaryIO, Callable, Iterable, Iterator, Optional, TextIO, TypeVar, Union
+	from typing import Callable, Iterable, TextIO, TypeVar
 
 	PathType = Union[str, PathLike[str]]
 	Data = TypeVar("Data", str, bytes)
@@ -678,7 +678,7 @@ def is_all_byte(fr, thebyte=b"\0", chunk_size=FILE_IO_BUFFER_SIZE):
 	return True
 
 def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password=None):
-	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str], Optional[bytes]) -> Iterator[IO]
+	# type: (Union[PathType, IO], str, Optional[str], Optional[str], Optional[str], Optional[bytes]) -> Iterator[Tuple[str, IO]]
 
 	"""
 		Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -695,10 +695,21 @@ def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password
 		for zi in zf.infolist():
 			if not zi.is_dir():  # fixme: Py3.5 AttributeError: 'ZipInfo' object has no attribute 'is_dir'
 				with zf.open(zi, newmode, password) as bf:
-					yield wrap_text(bf, mode, encoding, errors, newline)
+					yield zi.filename, wrap_text(bf, mode, encoding, errors, newline)
+
+def iter_7zip(file: Union[BinaryIO, str, PathLike], mode: str="rb", encoding: Optional[str]=None, errors: Optional[str]=None, newline: Optional[str]=None, password: Optional[str]=None) -> Iterator[Tuple[str, IO]]:
+
+	from py7zr import SevenZipFile
+
+	encoding = _check_arguments(mode, encoding)
+	newmode = _stripmode(mode)
+
+	with SevenZipFile(file, mode=newmode) as zf:
+		for fname, bf in zf.readall().items():
+			yield fname, wrap_text(bf, mode, encoding, errors, newline)
 
 def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
-	# type: (Union[PathType, BinaryIO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[IO]
+	# type: (Union[PathType, BinaryIO], str, Optional[str], Optional[str], Optional[str]) -> Iterator[Tuple[str, IO]]
 
 	"""
 		Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -724,7 +735,7 @@ def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
 				bf = tf.extractfile(ti)
 				assert bf, "member `ti` is file, but still `extractfile` returned `None`"
 				with bf: # no `mode` for `extractfile`
-					yield wrap_text(bf, mode, encoding, errors, newline)
+					yield ti.name, wrap_text(bf, mode, encoding, errors, newline)
 
 def iter_lines(path, encoding="utf-8", errors="strict", newline=None, verbose=False):
 	# type: (str, str, str, Optional[str], bool) -> Iterator[str]
