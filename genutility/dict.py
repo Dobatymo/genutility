@@ -1,19 +1,15 @@
 from __future__ import generator_stop
 
 from collections import defaultdict
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List, Mapping, Tuple, TypeVar, Union
 
-if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List, Mapping, Tuple, TypeVar, Union
+T = TypeVar("T")
+U = TypeVar("U")
+V = TypeVar("V")
 
-	T = TypeVar("T")
-	U = TypeVar("U")
-	V = TypeVar("V")
+def flatten(d: Union[Dict[T, U], List[U], Tuple[U, ...]]) -> Iterator[U]:
 
-def flatten(d):
-	# type: (Union[Dict[T, U], List[U], Tuple[U, ...]], ) -> Iterator[U]
-
-	""" Flattens dicts of (dicts of...) lists to lists. """
+	""" Flattens dicts/lists of (dicts/lists of ...) lists to lists. """
 
 	if isinstance(d, (list, tuple)):
 		for v in d:
@@ -25,8 +21,7 @@ def flatten(d):
 	else:
 		raise TypeError("Unsupported type: {}".format(type(d)))
 
-def get_one_of(d, keys):
-	# type: (Dict[T, U], Iterable[T]) -> Tuple[T, U]
+def get_one_of(d: Dict[T, U], keys: Iterable[T]) -> Tuple[T, U]:
 
 	""" Returns the (key, value) pair of the first key of `keys` found in `d`.
 	"""
@@ -39,8 +34,12 @@ def get_one_of(d, keys):
 
 	raise KeyError("None of the {} keys could be found".format(len(keys)))
 
-def get_available(d, keys):
-	# type: (Dict[T, U], Iterable[T]) -> Iterator[Tuple[T, U]]
+# similar: subdict
+def get_available(d: Dict[T, U], keys: Iterable[T]) -> Iterator[Tuple[T, U]]:
+
+	""" Returns all the key-value pairs in `d` for the keys in `it`.
+		Missing keys are ignored.
+	"""
 
 	for key in keys:
 		try:
@@ -48,37 +47,43 @@ def get_available(d, keys):
 		except KeyError:
 			pass
 
-def hasvalues(d):
-	# type: (dict, ) -> dict
+def subdict(d: Mapping[T, U], it: Iterable[T]) -> Dict[T, U]:
 
-	return {k:v for k, v in d.items() if v}
+	""" Uses the elements of `it` as keys to extract a new sub-dictionary.
+		Raises if not all keys in `it` are available.
+	"""
 
-def valuemap(func, d):
-	# type: (Callable[[U], V], Dict[T, U]) -> Dict[T, V]
-
-	return {k: func(v) for k, v in d.items()}
+	return {key: d[key] for key in it}
 
 # was: mapdict, mapget
-def mapmap(d, it):
-	# type: (Mapping[T, U], Iterable[T]) -> Iterator[U]
+def mapmap(d: Mapping[T, U], it: Iterable[T]) -> Iterator[U]:
+	""" Returns all the values of `d` for the keys in `it`.
+		Raises for missing keys.
+	"""
 
 	return (d[i] for i in it)
 
-def itemgetter(it):
-	# type: (Iterable[T], ) -> Callable[[Mapping[T, U]], Iterator[U]]
+def hasvalues(d: dict) -> dict:
+
+	""" Returns a sub-dictionary which leaves out all pairs where the value evaluates to False.
+	"""
+
+	return {k: v for k, v in d.items() if v}
+
+def valuemap(func: Callable[[U], V], d: Dict[T, U]) -> Dict[T, V]:
+
+	""" Returns a new dictionary with `func` applied to all values of `d`.
+	"""
+
+	return {k: func(v) for k, v in d.items()}
+
+def itemgetter(it: Iterable[T]) -> Callable[[Mapping[T, U]], Iterator[U]]:
 
 	""" Similar to `operator.itemgetter` except that it always expects and returns iterables.
 		Compare `mapmap`
 	"""
 
 	return lambda d: (d[i] for i in it)
-
-def subdict(d, it):
-	# type: (Mapping[T, U], Iterable[T]) -> Dict[T, U]
-
-	""" Uses the elements of `it` as keys to extract a new sub-dictionary. """
-
-	return {key: d[key] for key in it}
 
 def subdictdefault(d, it, default=None):
 	# type: (Mapping[T, U], Iterable[T], Union[U, V]) -> Dict[T, Union[U, V]]
@@ -87,8 +92,7 @@ def subdictdefault(d, it, default=None):
 
 	return {key: d.get(key, default) for key in it}
 
-def update(d1, d2):
-	# type: (dict, dict) -> None
+def update(d1: dict, d2: dict) -> None:
 
 	""" Same as `dict.update` except that `None` values are skipped. """
 

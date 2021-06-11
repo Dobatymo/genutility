@@ -4,7 +4,7 @@ import os.path
 from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from os import PathLike, fdopen, fspath
 from sys import stdout
-from typing import TYPE_CHECKING, overload, Optional, BinaryIO, Union, Iterator, Tuple, IO
+from typing import IO, TYPE_CHECKING, BinaryIO, Iterator, Optional, Tuple, Union, overload
 
 from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
