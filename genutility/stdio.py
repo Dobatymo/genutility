@@ -2,11 +2,9 @@ from __future__ import generator_stop
 
 import logging
 import sys
+import os
 from time import sleep
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-	from typing import IO, Any, Optional
+from typing import IO, Any, Optional
 
 from shutil import get_terminal_size
 
@@ -54,8 +52,7 @@ def safe_input(s, block=10):
 		sleep(block) # can be interrupted by KeyboardInterrupt
 		raise
 
-def info_print(msg=None, args=tuple(), exception=None):
-	# type: (Optional[str], tuple, Exception) -> None
+def info_print(msg: Optional[str]=None, args: tuple=tuple(), exception: Optional[Exception]=None) -> None:
 
 	# not (msg or exception) this doesn't do anything
 
@@ -101,15 +98,21 @@ def confirm(msg, yesno=True):
 	else:
 		return input_type(msg+" (anything, nothing): ", type=bool) # bool cannot throw if given string I think...
 
-def waitquit(msg=None, args=tuple(), exception=None): # fixme: ferutility.printing breaks this
+def waitquit(msg=None, args=tuple(), exception: Optional[Exception]=None): # fixme: ferutility.printing breaks this
 	info_print(msg, args, exception)
 	input("Press enter to exit...")
 	sys.exit(msg or exception)
 
-def waitcontinue(msg=None, args=tuple(), exception=None):
+def waitcontinue(msg=None, args=tuple(), exception: Optional[Exception]=None):
 	info_print(msg, args, exception)
 	input("Press enter to continue...")
 
-def errorquit(msg=None, args=tuple(), exception=None):
+def errorquit(msg=None, args=tuple(), exception: Optional[Exception]=None):
 	info_print(msg, args, exception)
 	sys.exit(msg or exception)
+
+def print_terminal_progress_line(out: str, file=None) -> None:
+	columns, lines = os.get_terminal_size()
+	if len(out) >= columns:
+		out = out[: columns - 4] + "..."
+	print(out, end="\r", file=file)

@@ -5,12 +5,12 @@ import os.path
 from functools import partial, reduce, wraps
 from sys import stdout
 from time import sleep
-from typing import TYPE_CHECKING
+from datetime import timedelta, datetime
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
 
 from .iter import retrier
 
 if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
 	T = TypeVar("T")
 	U = TypeVar("U")
 
@@ -189,3 +189,15 @@ class CustomCache(object):
 
 			return inner
 		return dec
+
+class RunScheduled:
+	def __init__(self, delta: timedelta, func: Callable):
+		self.delta = delta
+		self.func = func
+		self.lastrun: Optional[datetime] = None
+
+	def __call__(self, *args, **kwargs):
+		now = datetime.now()
+		if self.lastrun is None or now - self.lastrun > self.delta:
+			self.func(*args, **kwargs)
+			self.lastrun = now
