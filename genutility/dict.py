@@ -1,6 +1,6 @@
 from __future__ import generator_stop
 
-from collections import defaultdict
+from collections import UserDict, defaultdict
 from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List, Mapping, Tuple, TypeVar, Union
 
 T = TypeVar("T")
@@ -112,3 +112,21 @@ class keydefaultdict(defaultdict):
 		else:
 			value = self[key] = self.default_factory(key)
 			return value
+
+
+class KeyExistsError(KeyError):
+	pass
+
+
+class NoOverwriteDict(UserDict):
+
+	""" Dictionary which does not allow overwriting existing items.
+	"""
+
+	def __setitem__(self, key, value):
+		if key in self.data:
+			raise KeyExistsError(repr(key))
+		self.data[key] = value
+
+	def overwrite(self, key, value):
+		self.data[key] = value

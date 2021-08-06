@@ -14,7 +14,7 @@ utcmax = datetime.max.replace(tzinfo=timezone.utc)
 def is_aware(dt: datetime) -> bool:
 	""" Test if a datetime object is aware or naive. """
 
-	return d.tzinfo is not None and d.tzinfo.utcoffset(d) is not None
+	return dt.tzinfo is not None and dt.tzinfo.utcoffset(dt) is not None
 
 def now(aslocal=False):
 	# type: (bool, ) -> datetime

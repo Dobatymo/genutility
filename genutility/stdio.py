@@ -1,12 +1,11 @@
 from __future__ import generator_stop
 
 import logging
-import sys
 import os
+import sys
+from shutil import get_terminal_size
 from time import sleep
 from typing import IO, Any, Optional
-
-from shutil import get_terminal_size
 
 _terminal_width = get_terminal_size((80, 30)).columns
 

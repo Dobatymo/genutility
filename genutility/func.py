@@ -2,11 +2,12 @@ from __future__ import generator_stop
 
 import logging
 import os.path
+from datetime import datetime, timedelta
 from functools import partial, reduce, wraps
 from sys import stdout
 from time import sleep
-from datetime import timedelta, datetime
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
+from typing import (TYPE_CHECKING, Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar,
+                    Union)
 
 from .iter import retrier
 

@@ -1,6 +1,6 @@
 from __future__ import generator_stop
 
-from genutility.dict import keydefaultdict, mapmap, subdict, subdictdefault
+from genutility.dict import KeyExistsError, NoOverwriteDict, keydefaultdict, mapmap, subdict, subdictdefault
 from genutility.test import MyTestCase, parametrize
 
 
@@ -51,6 +51,19 @@ class DictTest(MyTestCase):
 		d = keydefaultdict()
 		with self.assertRaises(KeyError):
 			d["test"]
+
+	def test_NoOverwriteDict(self):
+		d = NoOverwriteDict()
+
+		d[1] = 1
+		with self.assertRaises(KeyExistsError):
+			d[1] = 2
+
+		d.update({2: 2})
+		with self.assertRaises(KeyExistsError):
+			d.update({2: 3})
+
+		self.assertEqual(d, {1: 1, 2: 2})
 
 if __name__ == "__main__":
 	import unittest

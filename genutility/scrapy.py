@@ -2,12 +2,11 @@ from __future__ import generator_stop
 
 import dbm
 import gzip
-import pickle  # nosec
 import logging
-from typing import Any, Callable, ContextManager, Iterator, Tuple, Optional
-from typing import TYPE_CHECKING
-from datetime import datetime, timedelta
+import pickle  # nosec
 import warnings
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING, Any, Callable, ContextManager, Iterator, Optional, Tuple
 
 import scrapy
 
@@ -69,7 +68,7 @@ def print_progress(spider: scrapy.Spider) -> None:
 	)
 	print_terminal_progress_line(out)
 
-def get_url_logger(urllogfile: Optional[str], name: str="urllog") -> logging.Logger:
+def get_url_logger(urllogfile: Optional[str], name: str="urllog", funcname: bool=False) -> logging.Logger:
 	if urllogfile:
 		handler = logging.FileHandler(urllogfile, encoding="utf-8", delay=True)
 	else:
@@ -80,7 +79,11 @@ def get_url_logger(urllogfile: Optional[str], name: str="urllog") -> logging.Log
 	urllog.setLevel(logging.INFO)
 
 	handler.setLevel(logging.INFO)
-	formatter = logging.Formatter("%(asctime)s\t%(message)s")
+	if funcname:
+		fmtstring = "%(asctime)s\t%(funcName)10s\t%(message)s"
+	else:
+		fmtstring = "%(asctime)s\t%(message)s"
+	formatter = logging.Formatter(fmtstring)
 	handler.setFormatter(formatter)
 	urllog.addHandler(handler)
 	return urllog
