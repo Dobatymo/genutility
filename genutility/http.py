@@ -7,7 +7,7 @@ import logging
 import os
 import os.path
 import socket
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
 from urllib import request
 from urllib.error import URLError
 
@@ -20,7 +20,6 @@ from .url import get_filename_from_url
 if TYPE_CHECKING:
 	from http.client import HTTPMessage
 	from http.cookiejar import CookieJar
-	from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
 	JsonObject = Union[List[Any], Dict[str, Any]]
 
 logger = logging.getLogger(__name__)
@@ -237,17 +236,17 @@ class URLRequest(object):
 		if fn_prio is None:
 			fn_prio = (0, 1, 2, 3)
 
-		filenames = {
+		filenames_ = {
 			0: filename,
 			1: get_filename(self.headers),
 			2: get_filename_from_url(self.response.geturl()), # url after redirect
 			3: get_filename_from_url(self.url),
 		}
 
-		filenames = [filenames[p] for p in fn_prio]
+		filenames = [filenames_[p] for p in fn_prio]
 		logger.info("Filenames: {}".format(", ".join(map(str, filenames))))
 
-		filename = first_not_none(filenames)  # Optional[str]
+		filename = first_not_none(filenames)
 
 		if not filename:
 			raise ValueError("Please provide a filename")

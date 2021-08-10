@@ -14,7 +14,7 @@ except AttributeError:
 
 	from ..string import tryint
 
-	isoformatre = re.compile(r"^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})\.(\d{6})(\+|-)(\d{2}):(\d{2})$")
+	isoformatre = re.compile(r"^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{6}))?(\+|-)(\d{2}):(\d{2})$")
 	isoformatre2 = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 
 	class datetime(_datetime):
@@ -29,10 +29,12 @@ except AttributeError:
 				eg. '2019-01-03T22:30:03.789000-07:00'
 			"""
 
-			try:
-				groups = isoformatre.match(date_string).groups()
+			m = isoformatre.match(date_string)
+
+			if m:
+				groups = m.groups()
 				year, month, day, hour, minute, second, milliseconds, tzsign, tzhours, tzminutes = map(tryint, groups)
-			except AttributeError:
+			else:
 				groups = isoformatre2.match(date_string).groups()
 				year, month, day = map(tryint, groups)
 				hour, minute, second, milliseconds, tzsign, tzhours, tzminutes = (0, 0, 0, 0, "+", 0, 0)
@@ -41,5 +43,8 @@ except AttributeError:
 
 			if tzsign == "-":
 				offset = -offset
+
+			if milliseconds is None:
+				milliseconds = 0
 
 			return cls(year, month, day, hour, minute, second, milliseconds, tzinfo=timezone(offset))

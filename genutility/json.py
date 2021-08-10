@@ -1,26 +1,24 @@
 from __future__ import generator_stop
 
 import csv
+import datetime
 import json
 import logging
-from datetime import timedelta
 from functools import partial, wraps
 from itertools import islice
-from typing import IO, TYPE_CHECKING, Any, Callable, Dict, FrozenSet, Iterator, Optional, Sequence, Tuple, Type, Union
+from pathlib import Path
+from typing import IO, Any, Callable, Dict, FrozenSet, Iterator, Optional, Sequence, Tuple, Type, Union
 
 from typing_extensions import TypedDict
 
 from .atomic import TransactionalCreateFile, sopen
-from .datetime import now
+from .compat.datetime import datetime as compat_datetime
+from .datetime import datetime_from_utc_timestamp_ms, now
 from .file import copen
 from .filesystem import mdatetime
 from .object import args_to_key
 
-if TYPE_CHECKING:
-	from pathlib import Path
-
-	PathStr = Union[Path, str]
-
+PathStr = Union[Path, str]
 JsonDict = Dict[str, Any]
 
 logger = logging.getLogger(__name__)
@@ -38,7 +36,6 @@ class BuiltinEncoder(json.JSONEncoder):
 		# collections.OrderedDict is supported by default
 
 		from base64 import b85encode
-		from datetime import date, timedelta
 		from uuid import UUID
 
 		if isinstance(obj, (set, frozenset)):
@@ -48,9 +45,9 @@ class BuiltinEncoder(json.JSONEncoder):
 				return tuple(obj)
 		elif isinstance(obj, complex):
 			return [obj.real, obj.imag]
-		elif isinstance(obj, date):
+		elif isinstance(obj, datetime.date, datetime.time, datetime.datetime):
 			return obj.isoformat()
-		elif isinstance(obj, timedelta):
+		elif isinstance(obj, datetime.timedelta):
 			return obj.total_seconds()
 		elif isinstance(obj, UUID):
 			return str(obj)
@@ -58,6 +55,32 @@ class BuiltinEncoder(json.JSONEncoder):
 			return b85encode(obj).decode("ascii") # b85encode doesn't use ", ' or \
 
 		return json.JSONEncoder.default(self, obj)
+
+class BuiltinRoundtripEncoder(json.JSONEncoder):
+
+	def default(self, obj):
+		if isinstance(obj, datetime.timedelta):
+			return {"$timedelta": (obj.days, obj.seconds, obj.microseconds)}
+		elif isinstance(obj, datetime.datetime):
+			return {"$datetime": obj.isoformat()}
+
+		return json.JSONEncoder.default(self, obj)
+
+class BuiltinRoundtripDecoder(json.JSONDecoder):
+	def __init__(self, *args, **kwargs):
+		json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+
+	def object_hook(self, obj):
+		if len(obj) == 1:
+			key, value = next(iter(obj.items()))
+			if key == "$timedelta":
+				return datetime.timedelta(*value)
+			elif key == "$datetime":
+				return compat_datetime.fromisoformat(value)
+			elif key == "$date":  # for compatibility with bson.json_util
+				return datetime_from_utc_timestamp_ms(value)
+
+		return obj
 
 def read_json_schema(path):
 	# type: (PathStr, ) -> JsonDict
@@ -194,10 +217,9 @@ with open("{file}", "r") as fr:
 	def __exit__(self, exc_type, exc_value, traceback):
 		self.close()
 
-	def iterrange(self, start=0, stop=None):
-		# type: (int, Optional[int]) -> Iterator
+	def iterrange(self, start: int=0, stop: Optional[int]=None) -> Iterator:
 
-		linenum = start+1
+		linenum = start + 1
 		try:
 			for line in islice(self.f, start, stop):
 				line = line.rstrip().lstrip("\x00") # fixme: strip \0 is only a temp fix!
@@ -210,8 +232,7 @@ with open("{file}", "r") as fr:
 			logger.error("JSON Lines parse error in line %s: '%r'", linenum, line)
 			raise
 
-	def __iter__(self):
-		# type: () -> Iterator
+	def __iter__(self) -> Iterator:
 
 		return self.iterrange()
 
@@ -241,8 +262,7 @@ def read_json_lines(file, object_hook=None):
 		for obj in fr:
 			yield obj
 
-def jl_to_csv(jlpath, csvpath, keyfunc, mode="xt"):
-	# type: (PathStr, str, Callable[[JsonDict], Sequence[str]], str) -> None
+def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Sequence[str]], mode: str="xt") -> None:
 
 	with json_lines.from_path(jlpath, "rt") as fr:
 		with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
@@ -258,14 +278,14 @@ def key_to_hash(key, default=None):
 	return md5(binary).hexdigest()  # nosec
 
 def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False, default=None, object_hook=None):
-	# type: (Path, Optional[timedelta], bool, Optional[Union[str, int]], bool, Optional[Callable], Optional[Callable]) -> Callable
+	# type: (Path, Optional[datetime.timedelta], bool, Optional[Union[str, int]], bool, Optional[Callable], Optional[Callable]) -> Callable
 
 	""" Decorator to cache results of function to json files at `path` for `duration`.
 		The remaining parameters are passed through to `json.dump`.
 	"""
 
 	if duration is None:
-		_duration = timedelta.max
+		_duration = datetime.timedelta.max
 	else:
 		_duration = duration
 
@@ -295,13 +315,13 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
 	return decorator
 
 def jsonlines_cache(path, duration=None, ensure_ascii=False, sort_keys=False, default=None, object_hook=None):
-	# type: (Path, Optional[timedelta], bool, bool, Optional[Callable], Optional[Callable]) -> Callable
+	# type: (Path, Optional[datetime.timedelta], bool, bool, Optional[Callable], Optional[Callable]) -> Callable
 
 	""" Decorator to cache results of function to jsonlines files at `path` for `duration`.
 		The remaining parameters are passed through to `json_lines.from_path`.
 	"""
 
-	duration = duration or timedelta.max
+	duration = duration or datetime.timedelta.max
 
 	def decorator(func):
 		# type: (Callable, ) -> Callable

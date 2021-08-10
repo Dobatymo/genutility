@@ -1,10 +1,12 @@
 from __future__ import generator_stop
 
+import datetime
 import json
 import logging
 from io import StringIO
 
-from genutility.json import JsonLinesFormatter, json_lines, read_json_lines
+from genutility.json import (BuiltinRoundtripDecoder, BuiltinRoundtripEncoder, JsonLinesFormatter, json_lines,
+                             read_json_lines)
 from genutility.test import MyTestCase, closeable_tempfile, parametrize
 
 
@@ -51,6 +53,20 @@ class JsonTest(MyTestCase):
 		self.assertEqual(d["key"], "test")
 		self.assertIn("datetime-str", d)
 		self.assertIn("thread", d)
+
+	def test_BuiltinRoundtripDecoder(self):
+		dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
+		raw = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
+
+		truth = {"dt": dt}
+		result = json.loads(raw, cls=BuiltinRoundtripDecoder)
+		self.assertEqual(truth, result)
+
+	def test_BuiltinRoundtripEncoder(self):
+		dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
+		truth = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
+		result = json.dumps({"dt": dt}, cls=BuiltinRoundtripEncoder)
+		self.assertEqual(truth, result)
 
 if __name__ == "__main__":
 	import unittest

@@ -2,11 +2,10 @@ from __future__ import generator_stop
 
 import time
 from datetime import datetime, timedelta, timezone, tzinfo
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, Optional, overload
 
 if TYPE_CHECKING:
 	from datetime import time as dtime
-	from typing import Optional
 
 utcmin = datetime.min.replace(tzinfo=timezone.utc)
 utcmax = datetime.max.replace(tzinfo=timezone.utc)
@@ -16,8 +15,7 @@ def is_aware(dt: datetime) -> bool:
 
 	return dt.tzinfo is not None and dt.tzinfo.utcoffset(dt) is not None
 
-def now(aslocal=False):
-	# type: (bool, ) -> datetime
+def now(aslocal: bool=False) -> datetime:
 
 	""" Returns the current datetime as timezone aware object in
 		UTC timezone if `aslocal=False` (the default)
@@ -29,8 +27,7 @@ def now(aslocal=False):
 		dt = dt.astimezone(None)
 	return dt
 
-def datetime_from_utc_timestamp(epoch, aslocal=False):
-	# type: (float, bool) -> datetime
+def datetime_from_utc_timestamp(epoch: float, aslocal: bool=False) -> datetime:
 
 	""" Converts a UNIX epoch time in seconds to a timezone aware datetime.
 		Negative values are supported and return a datetime counted backwards
@@ -45,8 +42,24 @@ def datetime_from_utc_timestamp(epoch, aslocal=False):
 		dt = dt.astimezone(None)
 	return dt
 
-def datetime_from_utc_timestamp_ns(epoch, aslocal=False):
-	# type: (int, bool) -> datetime
+def datetime_from_utc_timestamp_ms(epoch: int, aslocal: bool=False) -> datetime:
+
+	""" Converts a UNIX epoch time in milliseconds to a timezone aware datetime.
+		Negative values are supported and return a datetime counted backwards
+		from 1970-01-01 UTC.
+		`aslocal=True` doesn't work for negative values on Windows.
+	"""
+
+	seconds, ms = divmod(epoch, 1000)
+
+	dt = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=seconds, milliseconds=ms)
+
+	if aslocal:
+		dt = dt.astimezone(None)
+
+	return dt
+
+def datetime_from_utc_timestamp_ns(epoch: int, aslocal: bool=False) -> datetime:
 
 	""" Converts a UNIX epoch time in nano seconds to a timezone aware datetime.
 		Negative values are supported and return a datetime counted backwards

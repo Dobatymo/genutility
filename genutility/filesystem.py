@@ -14,7 +14,7 @@ from itertools import zip_longest
 from operator import attrgetter
 from os import DirEntry, PathLike, fspath
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
 from .datetime import datetime_from_utc_timestamp
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
@@ -24,9 +24,9 @@ from .os import _not_available, islink, uncabspath
 
 if TYPE_CHECKING:
 	from datetime import datetime
-	from typing import Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
-	PathType = Union[str, PathLike]
-	EntryType = Union[Path, DirEntry]
+
+PathType = Union[str, PathLike]
+EntryType = Union[Path, DirEntry]
 
 logger = logging.getLogger(__name__)
 
@@ -368,16 +368,16 @@ def scandir_rec(path, files=True, dirs=False, others=False, rec=True, follow_sym
 
 		return map(modpathrelative, it)
 
-def scandir_ext(path, extensions, rec=True, follow_symlinks=False, relative=False, errorfunc=scandir_error_log):
-	# type: (PathType, Set[str], bool, bool) -> Iterator[DirEntry]
+def scandir_ext(
+	path: PathType, extensions: Set[str], rec: bool=True, follow_symlinks: bool=False, relative: bool=False, errorfunc: Callable=scandir_error_log
+) -> Iterator[DirEntry]:
 
 	for entry in scandir_rec(path, files=True, dirs=False, rec=rec, follow_symlinks=follow_symlinks, relative=relative, errorfunc=errorfunc):
 		if entrysuffix(entry).lower() in extensions:
 			yield entry
 
 # fixme: benchmark and delete
-def scandir_ext_2(path, extensions, rec=True):
-	# type: (str, Set[str], bool, bool) -> Iterator[Path]
+def scandir_ext_2(path: str, extensions: Set[str], rec: bool=True) -> Iterator[Path]:
 
 	if rec:
 		paths = Path(uncabspath(path)).rglob("*")

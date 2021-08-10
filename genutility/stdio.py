@@ -5,12 +5,12 @@ import os
 import sys
 from shutil import get_terminal_size
 from time import sleep
-from typing import IO, Any, Optional
+from typing import IO, Any, Callable, Optional, Type, TypeVar, Union
 
+T = TypeVar("T")
 _terminal_width = get_terminal_size((80, 30)).columns
 
-def print_line(char="-", length=_terminal_width, file=None, flush=False):
-	# type: (str, int, IO, bool) -> None
+def print_line(char: str="-", length: int=_terminal_width, file: Optional[IO]=None, flush: bool=False) -> None:
 	""" file=None, defaults to sys.stdout in print(). print() handles sys.stdout==None fine. """
 
 	print(char*length, end="", file=file, flush=flush)
@@ -38,8 +38,7 @@ class PrintOnError(object):
 		if exc_type:
 			print(*self.args, **self.kwargs)
 
-def safe_input(s, block=10):
-	# type: (str, int) -> str
+def safe_input(s: str, block: int=10) -> str:
 
 	""" Makes sure ctrl-c on input() only raises KeyboardInterrupt and not EOFError+KeyboardInterrupt.
 		Waits at most `block` seconds to be sure.
@@ -64,15 +63,16 @@ def info_print(msg: Optional[str]=None, args: tuple=tuple(), exception: Optional
 		if msg:
 			print(msg % args)
 
-def input_ex(s, file_out=sys.stdout, file_in=sys.stdin):
-	# type: (str, IO, IO) -> str
+def input_ex(s: str, file_out: IO=sys.stdout, file_in: IO=sys.stdin) -> str:
 
 	print(s, file=file_out, end="")
 	file_out.flush()
 	return sys.stdin.readline().rstrip("\n")
 
 # was: raw_input_ex
-def input_type(s, type=None, predicate=None, errormsg=None, exception=Exception, file=sys.stdout):
+def input_type(
+	s: str, type: Optional[Callable[[str], T]]=None, predicate: Optional[Callable[[str], bool]]=None, errormsg: Optional[str]=None, exception: Type[Exception]=Exception, file: IO=sys.stdout
+) -> Union[str, T]:
 	while True:
 		ret = input_ex(s, file_out=file)
 		if predicate and not predicate(ret):
@@ -88,8 +88,7 @@ def input_type(s, type=None, predicate=None, errormsg=None, exception=Exception,
 				continue
 		return ret
 
-def confirm(msg, yesno=True):
-	# type: (str, bool) -> bool
+def confirm(msg: str, yesno: bool=True) -> bool:
 
 	if yesno:
 		s = input_type(msg+" (yes, no): ", predicate=lambda x: x.strip().lower() in {"yes", "y", "n", "no"})
