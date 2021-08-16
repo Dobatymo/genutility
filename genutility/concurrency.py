@@ -5,14 +5,15 @@ import signal
 import threading
 from multiprocessing import Pool
 from queue import Empty, Full, Queue
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Tuple, TypeVar, Union, Generic
+import concurrent.futures
+from collections import deque
+from concurrent.futures._base import FINISHED
 
 from .exceptions import NoResult, assert_choice
 
-if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Tuple, TypeVar, Union
-	T = TypeVar("T")
-	U = TypeVar("U")
+T = TypeVar("T")
+U = TypeVar("U")
 
 logger = logging.getLogger(__name__)
 
@@ -392,7 +393,7 @@ class ProgressThreadPool(object):
 	def get_running(self):  # no locks, inconsistent data
 		return list(task for task in (w.get() for w in self.workers) if task)
 
-class BoundedQueue(object):
+class BoundedQueue:
 
 	# similar: pip install bounded-iterator
 
@@ -432,6 +433,74 @@ class BoundedQueue(object):
 
 		self.semaphore.release()
 
+class BufferedIterable(Generic[T]):
+
+	def __init__(self, it: Iterable[T], bufsize: int):
+		self.iterable = it
+		self.iterator = None
+		self.buffer = deque([])
+		self.bufsize = bufsize
+
+	def __iter__(self) -> Iterator[T]:
+
+		self.iterator = iter(self.iterable)
+		return self
+
+	def __next__(self) -> T:
+
+		if self.iterator is None:
+			raise TypeError
+
+		try:
+			while len(self.buffer) < self.bufsize:
+				item = next(self.iterator)
+				self.buffer.append(item)
+		except StopIteration:
+			pass
+
+		try:
+			return self.buffer.popleft()
+		except IndexError:
+			raise StopIteration
+
+class CompletedFutures:
+
+	def __init__(self, it: Iterable[concurrent.futures.Future], bufsize: int, timeout=None):
+		self.iterable = it
+		self.iterator: Optional[Iterator[concurrent.futures.Future]] = None
+		self.futures: Set[concurrent.futures.Future] = set()
+		self.bufsize = bufsize
+		self.timeout = timeout
+
+	def __iter__(self) -> Iterator[concurrent.futures.Future]:
+
+		self.iterator = iter(self.iterable)
+		return self
+
+	def __next__(self) -> concurrent.futures.Future:
+
+		if self.iterator is None:
+			raise TypeError
+
+		try:
+			while len(self.futures) < self.bufsize:
+				item = next(self.iterator)
+				self.futures.add(item)
+		except StopIteration:
+			pass
+
+		done, not_done = concurrent.futures.wait(self.futures, timeout=self.timeout, return_when=concurrent.futures.FIRST_COMPLETED)
+		if done:
+			ret = done.pop()
+			self.futures = done | not_done
+			return ret
+
+		raise StopIteration
+
+	def cancel_pending(self):
+		for future in self.futures:
+			future.cancel()
+
 def _ignore_sigint():
 	# type: () -> None
 
@@ -440,7 +509,7 @@ def _ignore_sigint():
 
 	signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-def parallel_map(func, it, ordered=True, parallel=True, processes=None, bufsize=1, chunksize=1):
+def parallel_map(func, it, ordered=True, parallel=True, workers=None, bufsize=1, chunksize=1):
 	# type: (Callable[[T], U], Iterable[T], bool, bool, Optional[int], int, int) -> Iterator[U]
 
 	""" Parallel map which uses multiprocessing to distribute tasks.
@@ -455,7 +524,7 @@ def parallel_map(func, it, ordered=True, parallel=True, processes=None, bufsize=
 
 		q = BoundedQueue(bufsize, it)
 
-		with Pool(processes, _ignore_sigint) as p:
+		with Pool(workers, _ignore_sigint) as p:
 
 			if ordered:
 				process = p.imap
@@ -471,8 +540,37 @@ def parallel_map(func, it, ordered=True, parallel=True, processes=None, bufsize=
 				q.done()  # the semaphore in the bounded queue might block otherwise
 				raise
 	else:
-		for _item in it:
-			yield func(_item)
+		yield from map(func, it)
+
+def FutureWithResult(result):
+	future = concurrent.futures.Future()
+	future._result = result
+	future._state = FINISHED
+	return future
+
+def executor_map(func, it, executercls=None, ordered=True, parallel=True, workers=None, bufsize=1) -> Iterator[concurrent.futures.Future]:
+
+	""" Starts processing when the iterator is started to be consumed. """
+
+	if parallel:
+
+		if executercls is None:
+			executercls = concurrent.futures.ThreadPoolExecutor
+
+		def futures() -> Iterator[concurrent.futures.Future]:
+			for item in it:
+				yield executor.submit(func, item)
+
+		with executercls(workers) as executor:
+			if ordered:
+				bufit = BufferedIterable(futures(), bufsize + executor._max_workers)
+			else:
+				bufit = CompletedFutures(futures(), bufsize + executor._max_workers)
+
+			yield from bufit
+
+	else:
+		yield from map(FutureWithResult, map(func, it))
 
 class ThreadsafeList(list):  # untested!!!
 
@@ -495,3 +593,19 @@ class ThreadsafeList(list):  # untested!!!
 
 	def __exit__(self, exc_type, exc_value, traceback):
 		self.lock.release()
+
+def idsleeprandom(i):
+	import time
+	import random
+	time.sleep(random.random())
+	return i
+
+if __name__ == "__main__":
+	from genutility.time import PrintStatementTime
+	from genutility.func import identity
+	from genutility.iter import consume
+
+	with PrintStatementTime():
+		consume(executor_map(identity, range(100000), ordered=True, parallel=True))
+	with PrintStatementTime():
+		consume(executor_map(identity, range(100000), ordered=False, parallel=True))
