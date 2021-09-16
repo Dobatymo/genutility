@@ -10,6 +10,8 @@ NTSC_VIDEO_FPS = 30000./1001
 PAL_PROG_FPS = 25.
 PAL_VIDEO_FPS = 30.
 
+DEFAULT_ENCODING = "utf-8-sig"
+
 def ntsc_to_pal(num):
 	return num * NTSC_PROG_FPS/PAL_PROG_FPS
 
@@ -51,7 +53,7 @@ class SRTFile(object):
 	nl = "\n"
 	sep = " --> "
 
-	def __init__(self, filename, mode="r", encoding="utf-8-sig", overwrite_index=False):
+	def __init__(self, filename, mode="r", encoding=DEFAULT_ENCODING, overwrite_index=False):
 		self.state = 0
 		self.linenum = 0
 		self.sub_num = 0
@@ -117,7 +119,7 @@ class SRTFile(object):
 	def __next__(self):
 		return self.read_subtitle()
 
-def transform(infile, outfile, callback, encoding):
+def transform(infile, outfile, callback, encoding=DEFAULT_ENCODING):
 	with SRTFile(infile, "r", encoding) as fi, SRTFile(outfile, "w", encoding) as fo:
 		for subtitle in fi:
 			subtitle = callback(subtitle)

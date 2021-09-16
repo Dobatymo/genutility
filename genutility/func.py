@@ -9,7 +9,7 @@ from time import sleep
 from typing import (TYPE_CHECKING, Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar,
                     Union)
 
-from .iter import retrier
+from .iter import nonstriter, retrier
 
 if TYPE_CHECKING:
 	T = TypeVar("T")
@@ -90,6 +90,55 @@ def multimap(funcs, it):
 
 	for i in it:
 		yield multiapply(funcs, i)
+
+def deepmap(func, *iterables):
+	# type: (Callable, *Iterable) -> Iterator
+
+	""" Simlar to `map`, but it maps recursively over sequences of sequnces.
+		Returns a generator of generators.
+		To output plain objects use `recmap` instead.
+
+		Example:
+		deepmap(lambda x: x*2, [1, [2, 3]]) -> (2, (4, 6))
+	"""
+
+	if not iterables:
+		raise ValueError("iterables must have a least one element")
+
+	for args in zip(*iterables):
+		try:
+			its = tuple(map(nonstriter, args))
+		except TypeError:
+			yield func(*args)
+		else:
+			yield deepmap(func, *its)
+
+def outermap(func, iterable):
+	# type: (Callable[[T], U], Iterable) -> U
+
+	""" Examples:
+		outermap(list, (1, (2, 3))) -> [1, [2, 3]]
+		outermap(sum, (1, (2, 3)) -> 6
+	"""
+
+	try:
+		it = nonstriter(iterable)
+	except TypeError:
+		return iterable
+	else:
+		return func(outermap(func, i) for i in it)
+
+def recmap(func, iterable):
+	# type: (Callable, Iterable) -> list
+
+	""" Simlar to `map`, but it maps recursively over sequences of sequnces and puts the result into a list of lists.
+		To return a generator of generators use `deepmap` instead.
+
+		Example:
+		recmap(lambda x: x*2, [1, [2, 3]]) -> [2, [4, 6]]
+	"""
+
+	return outermap(list, deepmap(func, iterable))
 
 def call_repeated(num):
 	# type: (int, ) -> Callable[[Callable], Callable]

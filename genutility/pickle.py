@@ -78,8 +78,8 @@ def key_to_hash(key, protocol=None):
 	binary = pickle.dumps(key, protocol=protocol)
 	return md5(binary).hexdigest()  # nosec
 
-def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignoreargs=False, verbose=False, keyfunc=None, consume=False):
-	# type: (Path, Optional[timedelta], bool, int, bool, bool, Optional[Callable[[tuple, dict], str]], bool) -> Callable[[Callable], Callable]
+def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignoreargs=False, verbose=False, keyfunc=None, consume=False, return_cached=False):
+	# type: (Path, Optional[timedelta], bool, int, bool, bool, Optional[Callable[[tuple, dict], str]], bool, bool) -> Callable[[Callable], Callable]
 
 	""" Decorator to cache function calls. Doesn't take function arguments into regard.
 		It's using `pickle` to deserialize the data. So don't use it with untrusted inputs.
@@ -132,13 +132,14 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 				invalid = True
 
 			if invalid:
+				cached = False
 				if not ignoreargs:
 					path.mkdir(parents=True, exist_ok=True)
 
 				if generator and not consume:
 					it = func(*args, **kwargs)
 					logger.info("Writing iterable to cache: %s", fullpath)
-					return write_iter(it, fullpath, protocol=protocol, safe=True)
+					result = write_iter(it, fullpath, protocol=protocol, safe=True)
 				else:
 					with context("Result calculated in {delta} seconds"):
 						if generator and consume:
@@ -146,14 +147,20 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 						else:
 							result = func(*args, **kwargs)
 					write_pickle(result, fullpath, protocol=protocol, safe=True)
-					return result
 			else:
+				cached = True
 				if generator and not consume:
 					logger.info("Loading iterable from cache: %s", fullpath)
-					return read_iter(fullpath)
+					result = read_iter(fullpath)
 				else:
 					with context("Result loaded from cache in {delta} seconds"):
-						return read_pickle(fullpath)
+						result = read_pickle(fullpath)
+
+			if return_cached:
+				return cached, result
+			else:
+				return result
+
 		return inner
 
 	return decorator

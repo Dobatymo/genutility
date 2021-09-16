@@ -1,6 +1,6 @@
 from __future__ import generator_stop
 
-from genutility.func import call_repeated, compose, identity, retry, zipmap
+from genutility.func import call_repeated, compose, identity, outermap, recmap, retry, zipmap
 from genutility.test import MyTestCase, parametrize
 
 
@@ -31,6 +31,23 @@ class FuncTest(MyTestCase):
 	def test_zipmap(self, funcs, vals, truth):
 		result = zipmap(funcs, vals)
 		self.assertIterEqual(truth, result)
+
+	@parametrize(
+		(list, [], []),
+		(list, (1, (2, 3)), [1, [2, 3]]),
+		(sum, (1, (2, 3)), 6),
+	)
+	def test_outermap(self, func, sequence, truth):
+		result = outermap(func, sequence)
+		self.assertEqual(truth, result)
+
+	@parametrize(
+		(lambda x: x*2, [], []),
+		(lambda x: x*2, (1, (2, 3)), [2, [4, 6]]),
+	)
+	def test_recmap(self, func, sequence, truth):
+		result = recmap(func, sequence)
+		self.assertEqual(truth, result)
 
 	def test_call_repeated(self):
 		self.a = 0

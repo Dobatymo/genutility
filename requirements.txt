@@ -30,7 +30,7 @@ requests
 rhash; sys_platform=='win32'
 ruamel.yaml
 scipy<1.6.0
-simple_salesforce>=1.1.0
+simple-salesforce>=1.1.0
 simplejson
 sortedcontainers
 # tensorflow
@@ -38,7 +38,6 @@ tls-property>=1.0.1
 toml
 twisted
 typing-extensions
-unidecode
 werkzeug>=0.11.11
 wmi; sys_platform=='win32'
 # wxasync

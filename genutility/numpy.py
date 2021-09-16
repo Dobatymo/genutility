@@ -424,6 +424,40 @@ def unblock(arr, n1, n2, axis1=-1, axis2=-2, blocksize=False):
 
 	return np.reshape(arr, s)
 
+def unblock2d(arr: np.ndarray, n1: int, n2: int, blocksize: bool=False) -> np.ndarray:
+	"""
+		arr: (width, height)
+
+		returns: (block_num, block_size)
+	"""
+
+	s = np.array(arr.shape)
+	if blocksize:
+		bs1 = n1
+		bs2 = n2
+		bn1 = s[0] // n1
+		bn2 = s[1] // n2
+	else:
+		bn1 = n1
+		bn2 = n2
+		bs1 = s[0] // n1
+		bs2 = s[1] // n2
+
+	return arr.reshape(bn1,bs1,bn2,bs2).swapaxes(1,2).reshape(bn1*bn2,bs1*bs2)
+
+def block2d(arr: np.ndarray, bn1: int, bn2: int, bs1: int, bs2: int) -> np.ndarray:
+	"""
+		arr: (block_num, block_size)
+
+		returns: (width, height)
+	"""
+
+	s = np.array(arr.shape)
+	assert s[0] == bn1*bn2
+	assert s[1] == bs1*bs2
+
+	return arr.reshape(bn1,bn2,bs1,bs2).swapaxes(1,2).reshape(bn1*bs1,bn2*bs2)
+
 def remove_color(img, ratio, neutral_color=RGB_WHITE):
 	# type: (np.ndarray, float, Tuple[int, int, int]) -> np.ndarray
 

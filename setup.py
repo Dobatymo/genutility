@@ -108,7 +108,7 @@ extras_require = {
 	"pillow": ["pillow", "piexif"],
 	"powerpoint": ["python-pptx"],
 	"rasa": ["requests", "aiohttp>=2.3", "ruamel.yaml"],
-	"salesforce": ["simple_salesforce>=1.1.0", "simplejson", "aiohttp>=2.3", "requests", "pandas"],
+	"salesforce": ["simple-salesforce>=1.1.0", "simplejson", "aiohttp>=2.3", "requests", "pandas"],
 	"scipy": ["numpy", "scipy"],
 	"toml": ["toml"],
 	"torch": ["torch"],
@@ -122,7 +122,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
 	author="Dobatymo",
 	name="genutility",
-	version="0.0.74",
+	version="0.0.75",
 	url="https://github.com/Dobatymo/genutility",
 	description="A collection of various Python utilities",
 	long_description=long_description,
@@ -141,5 +141,6 @@ setup(
 		"typing-extensions"
 	],
 	extras_require=extras_require,
-	use_2to3=False
+	use_2to3=False,
+	license_files=["LICENSE"]
 )

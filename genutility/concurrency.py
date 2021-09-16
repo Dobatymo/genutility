@@ -1,14 +1,14 @@
 from __future__ import generator_stop
 
+import concurrent.futures
 import logging
 import signal
 import threading
-from multiprocessing import Pool
-from queue import Empty, Full, Queue
-from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Tuple, TypeVar, Union, Generic
-import concurrent.futures
 from collections import deque
 from concurrent.futures._base import FINISHED
+from multiprocessing import Pool
+from queue import Empty, Full, Queue
+from typing import Any, Callable, Generic, Iterable, Iterator, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 from .exceptions import NoResult, assert_choice
 
@@ -507,10 +507,12 @@ def _ignore_sigint():
 	""" This need to be pickle'able to work with `multiprocessing.Pool`.
 	"""
 
-	signal.signal(signal.SIGINT, signal.SIG_IGN)
+	try:
+		signal.signal(signal.SIGINT, signal.SIG_IGN)
+	except ValueError: # ignore for threadpools as 'signal only works in main thread'
+		pass
 
-def parallel_map(func, it, ordered=True, parallel=True, workers=None, bufsize=1, chunksize=1):
-	# type: (Callable[[T], U], Iterable[T], bool, bool, Optional[int], int, int) -> Iterator[U]
+def parallel_map(func: Callable[[T], U], it: Iterable[T], poolcls: Callable=None, ordered: bool=True, parallel: bool=True, workers: Optional[int]=None, bufsize: int=1, chunksize: int=1) -> Iterator[U]:
 
 	""" Parallel map which uses multiprocessing to distribute tasks.
 		`bufsize` should be used to limit memory usage when the iterable `it`
@@ -522,9 +524,12 @@ def parallel_map(func, it, ordered=True, parallel=True, workers=None, bufsize=1,
 
 	if parallel:
 
+		if poolcls is None:
+			poolcls = Pool
+
 		q = BoundedQueue(bufsize, it)
 
-		with Pool(workers, _ignore_sigint) as p:
+		with poolcls(workers, _ignore_sigint) as p:
 
 			if ordered:
 				process = p.imap
@@ -548,7 +553,7 @@ def FutureWithResult(result):
 	future._state = FINISHED
 	return future
 
-def executor_map(func, it, executercls=None, ordered=True, parallel=True, workers=None, bufsize=1) -> Iterator[concurrent.futures.Future]:
+def executor_map(func: Callable[[T], U], it: Iterable[T], executercls: Callable=None, ordered: bool=True, parallel: bool=True, workers: Optional[int]=None, bufsize: int=1) -> Iterator[concurrent.futures.Future]:
 
 	""" Starts processing when the iterator is started to be consumed. """
 
@@ -595,17 +600,45 @@ class ThreadsafeList(list):  # untested!!!
 		self.lock.release()
 
 def idsleeprandom(i):
-	import time
 	import random
-	time.sleep(random.random())
+	import time
+	time.sleep(random.random()) # nosec
 	return i
 
-if __name__ == "__main__":
-	from genutility.time import PrintStatementTime
+def benchmark():
+	""" According to these benchmark results, executor_map is faster for threads,
+		whereas parallel_map is faster for processes.
+	"""
+
+	from multiprocessing.pool import ThreadPool
+
 	from genutility.func import identity
 	from genutility.iter import consume
+	from genutility.time import PrintStatementTime
 
-	with PrintStatementTime():
-		consume(executor_map(identity, range(100000), ordered=True, parallel=True))
-	with PrintStatementTime():
-		consume(executor_map(identity, range(100000), ordered=False, parallel=True))
+	executercls = concurrent.futures.ThreadPoolExecutor
+	with PrintStatementTime("executor_map(ThreadPool) ordered=True took {delta}s"):
+		consume(executor_map(identity, range(100000), executercls=executercls, ordered=True, parallel=True))
+	with PrintStatementTime("executor_map(ThreadPool) ordered=False took {delta}s"):
+		consume(executor_map(identity, range(100000), executercls=executercls, ordered=False, parallel=True))
+
+	executercls = concurrent.futures.ProcessPoolExecutor
+	with PrintStatementTime("executor_map(ProcessPool) ordered=True took {delta}s"):
+		consume(executor_map(identity, range(10000), executercls=executercls, ordered=True, parallel=True))
+	with PrintStatementTime("executor_map(ProcessPool) ordered=False took {delta}s"):
+		consume(executor_map(identity, range(10000), executercls=executercls, ordered=False, parallel=True))
+
+	poolcls = ThreadPool
+	with PrintStatementTime("parallel_map(ThreadPool) ordered=True took {delta}s"):
+		consume(parallel_map(identity, range(100000), poolcls=poolcls, ordered=True, parallel=True))
+	with PrintStatementTime("parallel_map(ThreadPool) ordered=False took {delta}s"):
+		consume(parallel_map(identity, range(100000), poolcls=poolcls, ordered=False, parallel=True))
+
+	poolcls = Pool
+	with PrintStatementTime("parallel_map(ProcessPool) ordered=True took {delta}s"):
+		consume(parallel_map(identity, range(10000), poolcls=poolcls, ordered=True, parallel=True))
+	with PrintStatementTime("parallel_map(ProcessPool) ordered=False took {delta}s"):
+		consume(parallel_map(identity, range(10000), poolcls=poolcls, ordered=False, parallel=True))
+
+if __name__ == "__main__":
+	benchmark()

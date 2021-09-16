@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from typing import Iterator, Tuple
 
-def randstr(length, charset):
-	# type: (int, str) -> str
+def randstr(length: int, charset: str) -> str:
 
 	""" Returns a (noncryptographic) random string consisting of characters from `charset`
 		of length `length`.
@@ -15,8 +14,7 @@ def randstr(length, charset):
 
 	return "".join(choice(charset) for i in range(length))  # nosec
 
-def randbytes(size):
-	# type: (int, ) -> bytes
+def randbytes(size: int) -> bytes:
 
 	""" Returns (noncryptographic) random bytes of length `length`.
 	"""

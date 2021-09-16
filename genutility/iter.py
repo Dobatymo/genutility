@@ -811,6 +811,14 @@ def remove_consecutive_dupes(it):
 
 	return map(itemgetter(0), groupby(it))
 
+def nonstriter(iterable):
+	# type: (Iterable, ) -> Iterator
+
+	if isinstance(iterable, (str, bytes)):
+		raise TypeError("str or bytes")
+	else:
+		return iter(iterable)
+
 class CachedIterable(Generic[T]):
 	# https://stackoverflow.com/a/19504173
 
