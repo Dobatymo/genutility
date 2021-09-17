@@ -1,6 +1,6 @@
 import numpy as np
 
-from genutility.datastructures import VariableRowMatrix
+from genutility.datastructures.sparse_matrix import VariableRowMatrix
 
 num = 9999999
 height = 1000

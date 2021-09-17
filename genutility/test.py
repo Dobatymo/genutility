@@ -260,7 +260,7 @@ def parametrize(*args_list):
 		@wraps(func)
 		def inner(self):
 			for args in args_list:
-				with self.subTest(str(args)):
+				with self.subTest(str(args)[:1000]):
 					if func(self, *args) is not None:
 						raise AssertionError
 		return inner

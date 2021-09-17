@@ -7,6 +7,7 @@ from functools import wraps
 from os import fspath
 from pickle import HIGHEST_PROTOCOL  # nosec
 from typing import TYPE_CHECKING
+import importlib
 
 from .atomic import sopen
 from .compat.contextlib import nullcontext
@@ -18,7 +19,7 @@ from .time import PrintStatementTime
 
 if TYPE_CHECKING:
 	from pathlib import Path
-	from typing import Any, Callable, Iterable, Iterator, Optional
+	from typing import Any, Callable, Iterable, Iterator, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -164,3 +165,56 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 		return inner
 
 	return decorator
+
+def unpickle(path, requirements=()):
+	# type: (str, Iterable[Tuple[str, Optional[str]]]) -> Any
+
+	""" Can be used to unpickle objects when normal unpickling fails to import some dependencies correctly.
+		path: Path to the pickled file.
+		requirements: Iterable of (module, package) tuples to be imported.
+
+		Consider this scenario:
+		```python
+		import pickle
+		class asd:
+			def qwe():
+				pass
+		a = asd()
+		with open("asd.p", "wb") as fw:
+			pickle.dump(a, fw)
+
+		with open("asd.p", "rb") as fr:
+			a = pickle.load(fr)  # everything ok here
+		```
+
+		Now the class definition is moved out of this file into another file `qwe.py`. Then
+		```python
+		import pickle
+		with open("asd.p", "rb") as fr:
+			a = pickle.load(fr)  # AttributeError: Can't get attribute 'asd' on <module '__main__' (built-in)>
+		```
+
+		Now unpickle can be used to fix this problem:
+		```python
+		from genutility.pickle import unpickle
+		a = unpickle("asd.p", [("qwe", "asd")])
+		```
+
+		Warning: Only use on safe inputs.
+	"""
+
+	import __main__
+
+	for module, package in requirements:
+		mod = importlib.import_module(module, package)
+		if package:
+			name = package
+			type = getattr(mod, package)
+		else:
+			name = module
+			type = mod
+
+		setattr(__main__, name, type)
+
+	with copen(path, "rb") as fr:
+		return pickle.load(fr)  # nosec

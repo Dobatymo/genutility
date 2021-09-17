@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .datastructures import VariableRowMatrix
+from .datastructures.sparse_matrix import VariableRowMatrix
 from .encoder import BatchLabelEncoder
 from .iter import progress
 from .numpy import batchtopk, categorical
