@@ -2,13 +2,14 @@ from __future__ import generator_stop
 
 import os.path
 from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
-from os import PathLike, fdopen, fspath
+from os import PathLike, fdopen, fspath, scandir
 from sys import stdout
 from typing import IO, TYPE_CHECKING, BinaryIO, Iterator, Optional, Tuple, Union, overload
 
 from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
 from .ops import logical_implication, logical_xor
+from ._files import entrysuffix
 
 if TYPE_CHECKING:
 	from mmap import mmap
@@ -168,7 +169,6 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 
 	return open(file, mode, encoding=encoding, errors=errors, newline=newline)
 
-# was: OpenAndDeleteOnError, OpenFileRemoveOnException
 class OpenFileAndDeleteOnError(object):
 
 	""" Context manager which opens a file using the same arguments as `open`,
@@ -736,6 +736,43 @@ def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
 				assert bf, "member `ti` is file, but still `extractfile` returned `None`"
 				with bf: # no `mode` for `extractfile`
 					yield ti.name, wrap_text(bf, mode, encoding, errors, newline)
+
+def iter_dir(path: str, mode: str="rb", encoding: Optional[str]=None, errors: Optional[str]=None, newline: Optional[str]=None, follow_symlinks: bool=True, archives: bool=False, joiner: str="/") -> Iterator[Tuple[str, IO]]:
+
+	"""
+		Iterate file-pointers to files in directory `path`.
+		They are valid for one iteration step each.
+		If `archives` is True, archives like zip files will be traversed as well.
+	"""
+
+	encoding = _check_arguments(mode, encoding)
+
+	archive_funcs = {
+		".zip": iter_zip,
+		".tar": iter_tar,
+		".tgz": iter_tar, # what about tar.gz
+		".tbz": iter_tar, # what about tar.bz2
+		".7z": iter_7zip,
+	}
+
+	if archives:
+		open = copen
+
+	with scandir(path) as scan:
+		for entry in scan:
+			if entry.is_file(follow_symlinks=follow_symlinks):
+
+				ext = entrysuffix(entry).lower()
+				iter_archive = archive_funcs.get(ext, None)
+				if archives and iter_archive:
+					for name, fr in iter_archive(entry.path, mode, encoding, errors, newline):
+						yield entry.path + joiner + name, fr
+				else:
+					with open(entry.path, mode, encoding=encoding, errors=errors, newline=newline) as fr:
+						yield entry.path, fr
+
+			elif entry.is_dir(follow_symlinks=follow_symlinks):
+				yield from iter_dir(entry.path, mode, encoding, errors, newline, follow_symlinks, archives)
 
 def iter_lines(path, encoding="utf-8", errors="strict", newline=None, verbose=False):
 	# type: (str, str, str, Optional[str], bool) -> Iterator[str]

@@ -21,6 +21,7 @@ from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
 from .iter import is_empty
 from .ops import logical_implication
 from .os import _not_available, islink, uncabspath
+from ._files import entrysuffix
 
 if TYPE_CHECKING:
 	from datetime import datetime
@@ -719,11 +720,6 @@ def normalize_seps(path):
 	"""
 
 	return path.replace("\\", "/")
-
-def entrysuffix(entry):
-	# type: (MyDirEntryT, ) -> str
-
-	return os.path.splitext(entry.name)[1]
 
 class Counts(object):
 	__slots__ = ("dirs", "files", "others")
