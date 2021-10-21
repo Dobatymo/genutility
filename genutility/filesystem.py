@@ -16,12 +16,12 @@ from os import DirEntry, PathLike, fspath
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
+from ._files import BaseDirEntry, MyDirEntryT, entrysuffix
 from .datetime import datetime_from_utc_timestamp
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
 from .iter import is_empty
 from .ops import logical_implication
 from .os import _not_available, islink, uncabspath
-from ._files import entrysuffix
 
 if TYPE_CHECKING:
 	from datetime import datetime
@@ -126,44 +126,6 @@ class DirEntryStub(object):
 		self.name = name
 		self.path = path
 
-class BaseDirEntry(object):
-	__slots__ = ("entry", )
-
-	def __init__(self, entry):
-		self.entry = entry
-
-	@property
-	def name(self):
-		return self.entry.name
-
-	@property
-	def path(self):
-		return self.entry.path
-
-	def inode(self):
-		return self.entry.inode()
-
-	def is_dir(self):
-		return self.entry.is_dir()
-
-	def is_file(self):
-		return self.entry.is_file()
-
-	def is_symlink(self):
-		return self.entry.is_symlink()
-
-	def stat(self):
-		return self.entry.stat()
-
-	def __str__(self):
-		return str(self.entry)
-
-	def __repr__(self):
-		return repr(self.entry)
-
-	def __fspath__(self):
-		return self.entry.path
-
 class MyDirEntry(BaseDirEntry):
 	__slots__ = ("basepath", "_relpath", "follow")
 
@@ -192,9 +154,6 @@ class MyDirEntry(BaseDirEntry):
 		# type: (str, ) -> None
 
 		self._relpath = path
-
-if TYPE_CHECKING:
-	MyDirEntryT = Union[DirEntry, MyDirEntry]
 
 def mdatetime(path, aslocal=False):
 	# type: (PathType, bool) -> datetime

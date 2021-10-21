@@ -9,7 +9,7 @@ class HllTest(MyTestCase):
     @parametrize(
         (set(), 0),
         (set(["asd", "qwe"]), 0),
-        (set(map(str, range(1000000))), 10000),
+        (set(map(str, range(1000000))), 20000),
     )
     def test_HyperLogLog(self, values, delta):
 

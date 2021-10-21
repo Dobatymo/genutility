@@ -6,10 +6,10 @@ from os import PathLike, fdopen, fspath, scandir
 from sys import stdout
 from typing import IO, TYPE_CHECKING, BinaryIO, Iterator, Optional, Tuple, Union, overload
 
+from ._files import entrysuffix
 from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
 from .ops import logical_implication, logical_xor
-from ._files import entrysuffix
 
 if TYPE_CHECKING:
 	from mmap import mmap

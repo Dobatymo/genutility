@@ -82,8 +82,8 @@ def _lstr(it, length=None):
 
 	return length, lstr
 
-def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=False, delta=1):
-	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], bool, Optional[int]) -> Iterator
+def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=None, delta=1):
+	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], Optional[bool], Optional[int]) -> Iterator
 
 	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds.
 		`lengths` is the total size of `it`. `len(it)` is used to get the size if set to `None`.
@@ -100,8 +100,12 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 	if delta is not None and delta < 1:
 		raise ValueError(f"`delta` must be a integer larger than 1 or `None`, not '{delta}'")
 
+	if disable is None and hasattr(file, "isatty") and not file.isatty():
+		disable = True
+
 	if disable:
-		return it
+		yield from it
+		return
 
 	length, lstr = _lstr(it, length)
 	extra = ""
@@ -137,8 +141,8 @@ def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_c
 		else:
 			print(f"Finished {total} in {int(duration)} seconds.", end=end, file=file)
 
-def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=False):
-	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], bool) -> Iterable
+def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=None):
+	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], Optional[bool]) -> Iterable
 
 	return progress(it, length, refresh, end, file, extra_info_callback, disable, None)
 

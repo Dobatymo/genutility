@@ -219,12 +219,18 @@ with open("{file}", "r") as fr:
 
 	def iterrange(self, start: int=0, stop: Optional[int]=None) -> Iterator:
 
+		try:
+			import simplejson as sjson
+			_json = sjson
+		except ImportError:
+			_json = json
+
 		linenum = start + 1
 		try:
 			for line in islice(self.f, start, stop):
 				line = line.rstrip().lstrip("\x00") # fixme: strip \0 is only a temp fix!
 				if line:
-					yield json.loads(line, **self.json_kwargs, **self.json_cls_kw)
+					yield _json.loads(line, **self.json_kwargs, **self.json_cls_kw)
 				linenum += 1
 
 		except json.JSONDecodeError as e:

@@ -3,11 +3,17 @@ from __future__ import generator_stop
 import codecs
 import logging
 import sqlite3
-from typing import Iterable
+from typing import Iterable, List
 
 from .iter import batch, progress
 from .signal import safe_for_loop
 
+
+def compile_options() -> List[str]:
+    with sqlite3.connect(":memory:") as conn:
+        cur = conn.execute("PRAGMA compile_options;")
+        ret = cur.fetchall()
+    return [i[0] for i in ret]
 
 def quote_identifier(s, errors="strict"):
 	# type: (str, str) -> str

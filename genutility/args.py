@@ -8,18 +8,15 @@ from argparse import ArgumentTypeError
 from functools import wraps
 from os import makedirs
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Union
 
-from .iter import is_empty
-from .stdio import confirm
-
-if TYPE_CHECKING:
-	from typing import Callable
 
 def get_args(argparser):
 	""" get commandline arguments from std input instead """
 
 	from pprint import pprint
+
+	from .stdio import confirm
 
 	if len(sys.argv) > 1:
 		return argparser.parse_args()
@@ -225,12 +222,24 @@ def empty_dir(dirname):
 
 	""" tests if directory is empty """
 
+	from .iter import is_empty
+
 	with os.scandir(dirname) as it:
 		if not is_empty(it):
 			msg = "directory {0} is not empty".format(dirname)
 			raise ArgumentTypeError(msg)
 
 	return dirname
+
+def json_file(path: Union[str, Path]) -> Any:
+	from json import JSONDecodeError
+
+	from .json import read_json
+
+	try:
+		return read_json(path)
+	except JSONDecodeError as e:
+		raise ArgumentTypeError(f"JSONDecodeError: {e}")
 
 if __name__ == "__main__":
 

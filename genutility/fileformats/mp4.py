@@ -477,8 +477,7 @@ def _enum_atoms(fin, total_size, depth, parse_atoms=True, unparsed_data=False, v
 	if fin.tell() != total_size:
 		raise ParseError(f"Invalid file structure. Possibly truncated. {fin.tell()}/{total_size}")
 
-def enumerate_atoms(path, parse_atoms=False, unparsed_data=False):
-	# type: (str, bool) -> Iterator[Tuple[int, int, str, int, Optional[bytes]]]
+def enumerate_atoms(path: str, parse_atoms: bool=False, unparsed_data: bool=False) -> Iterator[Tuple[int, int, str, int, Optional[bytes]]]:
 
 	""" Takes an ISO/IEC base media file format / mp4 file `path`
 		and yields (depth, position, code, size, parsed_data, unparsed_data) tuples.

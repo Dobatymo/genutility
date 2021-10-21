@@ -1,5 +1,6 @@
 from __future__ import generator_stop
 
+import importlib
 import logging
 import pickle  # nosec
 from datetime import timedelta
@@ -7,7 +8,6 @@ from functools import wraps
 from os import fspath
 from pickle import HIGHEST_PROTOCOL  # nosec
 from typing import TYPE_CHECKING
-import importlib
 
 from .atomic import sopen
 from .compat.contextlib import nullcontext
@@ -79,7 +79,7 @@ def key_to_hash(key, protocol=None):
 	binary = pickle.dumps(key, protocol=protocol)
 	return md5(binary).hexdigest()  # nosec
 
-def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignoreargs=False, verbose=False, keyfunc=None, consume=False, return_cached=False):
+def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignoreargs=False, ignore_first_arg=False, verbose=False, keyfunc=None, consume=False, return_cached=False):
 	# type: (Path, Optional[timedelta], bool, int, bool, bool, Optional[Callable[[tuple, dict], str]], bool, bool) -> Callable[[Callable], Callable]
 
 	""" Decorator to cache function calls. Doesn't take function arguments into regard.
@@ -117,11 +117,14 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 			# type: (*Any, **Any) -> Any
 
 			if not ignoreargs:
+				if ignore_first_arg:
+					args = args[1:]
+
 				if keyfunc is None:
-					hash = key_to_hash(args_to_key(args, kwargs), protocol=protocol)
+					hashstr = key_to_hash(args_to_key(args, kwargs), protocol=protocol)
 				else:
-					hash = keyfunc(args, kwargs)
-				fullpath = path / hash
+					hashstr = keyfunc(args, kwargs)
+				fullpath = path / hashstr
 			else:
 				if args or kwargs:
 					logger.warning("cache file decorator for %s called with arguments", func.__name__)
@@ -147,6 +150,7 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 							result = list(func(*args, **kwargs))
 						else:
 							result = func(*args, **kwargs)
+					logger.info("Writing result to cache: %s", fullpath)
 					write_pickle(result, fullpath, protocol=protocol, safe=True)
 			else:
 				cached = True
@@ -154,7 +158,7 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 					logger.info("Loading iterable from cache: %s", fullpath)
 					result = read_iter(fullpath)
 				else:
-					with context("Result loaded from cache in {delta} seconds"):
+					with context(f"Result loaded from {fullpath} in {{delta}} seconds"):
 						result = read_pickle(fullpath)
 
 			if return_cached:
