@@ -1,11 +1,9 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, TypeVar, Union
 
-if TYPE_CHECKING:
-	from typing import Any, Dict, Optional, Sequence, Set, Tuple, TypeVar, Union
-	T = TypeVar("T")
-	U = TypeVar("U")
+T = TypeVar("T")
+U = TypeVar("U")
 
 class NotFound(LookupError):
 	""" Raised when a search doesn't turn up any results.
@@ -100,8 +98,7 @@ class MalformedFile(ValueError):
 		In contrast to `ParseError` this is usually a file we have control over.
 	"""
 
-def assert_choice(name, value, choices, optional=False):
-	# type: (str, Optional[T], Set[T], bool) -> None
+def assert_choice(name: str, value: Optional[T], choices: Set[T], optional: bool=False) -> None:
 
 	if optional and value is None:
 		return
@@ -126,8 +123,7 @@ def assert_choice_map(name, value, choices):
 	except KeyError:
 		raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices.keys()))))
 
-def assert_type(name, value, types):
-	# type: (str, Any, Tuple[Union[type, Tuple[Any, ...]], ...]) -> None
+def assert_type(name: str, value: Any, types: Union[Type[Any], Tuple[Type[Any], ...]]) -> None:
 
 	if not isinstance(value, types):
 		raise TypeError("{} must be one of these types: {}".format(name, ", ".join(map(str, types))))

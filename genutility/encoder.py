@@ -71,13 +71,12 @@ class BatchLabelEncoder(Generic[T]):
 		cf. `keras_preprocessing.text.Tokenizer`
 	"""
 
-	def __init__(self, tokenizer):
-		# type: (str, ) -> None
+	def __init__(self, tokenizer: str) -> None:
 
-		self.tokenizer = {
+		self.tokenizer: Callable[[str], Iterator[T]] = {
 			"none": identity,
 			"nltk": word_tokenize,
-		}[tokenizer]  # type: Callable[[str], Iterator[T]]
+		}[tokenizer]
 		self.reset()
 
 	def reset(self):

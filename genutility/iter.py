@@ -27,10 +27,8 @@ U = TypeVar("U")
 V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
 
-def one(it):
-	# type: (Iterator[T], ) -> T
+def one(it: Iterator[T]) -> T:
 
 	try:
 		ret = next(it)
@@ -45,8 +43,7 @@ def one(it):
 
 	return ret
 
-def iterrandrange(a, b):
-	# type: (int, int) -> Iterator[int]
+def iterrandrange(a: int, b: int) -> Iterator[int]:
 
 	""" Yields a stream of non-cryptographic random numbers between `a` (inclusive) and `b` (exclusive).
 	"""
@@ -66,12 +63,11 @@ def repeatfunc(func, times=None, *args):
 		return starmap(func, repeat(args))
 	return starmap(func, repeat(args, times))
 
-def _lstr(it, length=None):
-	# type: (Iterable, Optional[int]) -> Tuple[Optional[int], str]
+def _lstr(it: Iterable, length: Optional[int]=None) -> Tuple[Optional[int], str]:
 
 	if length is None:
 		try:
-			length = len(it)
+			length = len(it)  # type: ignore[arg-type]
 		except TypeError:
 			pass
 
@@ -83,7 +79,7 @@ def _lstr(it, length=None):
 	return length, lstr
 
 def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=None, delta=1):
-	# type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], Optional[bool], Optional[int]) -> Iterator
+	# type: (Union[Iterable, Collection], Optional[int], float, str, TextIO, Optional[Callable[[int, Optional[int]], str]], Optional[bool], Optional[int]) -> Iterator
 
 	""" Wraps an iterable `it` to periodically print the progress every `refresh` seconds.
 		`lengths` is the total size of `it`. `len(it)` is used to get the size if set to `None`.

@@ -1,11 +1,8 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Any, Callable
 
 from .func import identity
-
-if TYPE_CHECKING:
-	from typing import Any, Callable
 
 try:
 	from numba import prange as oprange

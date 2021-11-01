@@ -78,13 +78,11 @@ class ThreadPool(object):
 		self.my_worker = [Worker(self.tasks, self.returns) for _ in range(num_threads)]
 		self.state = 0  # this is used to be able to cancel (or ignore the results of ongoing) tasks
 
-	def add_task(self, id, func, *args, **kargs):
-		# type: (int, Callable[..., Any], *Any, **Any) -> None
+	def add_task(self, id: int, func: Callable[..., Any], *args: Any, **kargs: Any) -> None:
 
 		self.tasks.put((self.state, id, func, args, kargs))
 
-	def get(self):
-		# type: () -> Tuple[int, Optional[Any]]
+	def get(self) -> Tuple[int, Optional[Any]]:
 
 		while True:  # so invalid states can be ignored
 			state, type, result = self.returns.get(True)  # type: Tuple[int, int, Tuple[int, Union[Any, Exception]]]
@@ -97,8 +95,7 @@ class ThreadPool(object):
 			#  else: old result, ignore
 
 	@staticmethod
-	def clear(queue):
-		# type: (Queue[Any], ) -> None
+	def clear(queue: Queue[Any]) -> None:
 
 		""" Only undocumented methods. """
 
@@ -108,8 +105,7 @@ class ThreadPool(object):
 			queue.unfinished_tasks = 0
 
 	@staticmethod
-	def _clear(queue):
-		# type: (Queue[Any], ) -> None
+	def _clear(queue: Queue[Any]) -> None:
 
 		""" Only uses documented methods, but is slower. """
 
@@ -117,8 +113,7 @@ class ThreadPool(object):
 			queue.get()
 			queue.task_done()
 
-	def close(self, finishall=False):
-		# type: (bool, ) -> None
+	def close(self, finishall: bool=False) -> None:
 
 		""" if `finishall` is True, it will finish all tasks currently in the queue,
 			if `finishall` is False, only currently active tasks will be finished
@@ -131,8 +126,7 @@ class ThreadPool(object):
 			for w in self.my_worker:
 				w.cancel()
 
-	def cancel(self):
-		# type: () -> None
+	def cancel(self) -> None:
 
 		""" Does not cancel already running tasks. Just clears queue and ignores
 			results of currently running tasks.
@@ -142,13 +136,11 @@ class ThreadPool(object):
 		self.clear(self.returns)
 		self.state += 1
 
-	def wait(self):
-		# type: () -> None
+	def wait(self) -> None:
 
 		self.tasks.join()
 
-def gather_all_unsorted(threadpool, func, params, *args, **kwargs):
-	# type: (ThreadPool, Callable, Sequence, tuple, dict) -> Iterator[Tuple[Any, Any]]
+def gather_all_unsorted(threadpool: ThreadPool, func: Callable, params: Sequence, *args: Any, **kwargs: Any) -> Iterator[Tuple[Any, Any]]:
 
 	""" Runs multiple tasks concurrently and returns all results in the order
 		of execution finish as soon as possible.
@@ -160,8 +152,7 @@ def gather_all_unsorted(threadpool, func, params, *args, **kwargs):
 	for i in range(len(params)):
 		yield threadpool.get()
 
-def gather_any(threadpool, func, params, *args, **kwargs):
-	# type: (ThreadPool, Callable, Iterable, tuple, dict) -> Tuple[Any, Any]
+def gather_any(threadpool: ThreadPool, func: Callable, params: Iterable, *args: Any, **kwargs: Any) -> Tuple[Any, Any]:
 
 	""" Runs multiple tasks concurrently and just returns the result of the first
 		task which finishes.
@@ -512,7 +503,7 @@ def _ignore_sigint():
 	except ValueError: # ignore for threadpools as 'signal only works in main thread'
 		pass
 
-def parallel_map(func: Callable[[T], U], it: Iterable[T], poolcls: Callable=None, ordered: bool=True, parallel: bool=True, workers: Optional[int]=None, bufsize: int=1, chunksize: int=1) -> Iterator[U]:
+def parallel_map(func: Callable[[T], U], it: Iterable[T], poolcls: Optional[Callable]=None, ordered: bool=True, parallel: bool=True, workers: Optional[int]=None, bufsize: int=1, chunksize: int=1) -> Iterator[U]:
 
 	""" Parallel map which uses multiprocessing to distribute tasks.
 		`bufsize` should be used to limit memory usage when the iterable `it`
@@ -553,7 +544,7 @@ def FutureWithResult(result):
 	future._state = FINISHED
 	return future
 
-def executor_map(func: Callable[[T], U], it: Iterable[T], executercls: Callable=None, ordered: bool=True, parallel: bool=True, workers: Optional[int]=None, bufsize: int=1) -> Iterator[concurrent.futures.Future]:
+def executor_map(func: Callable[[T], U], it: Iterable[T], executercls: Optional[Callable]=None, ordered: bool=True, parallel: bool=True, workers: Optional[int]=None, bufsize: int=1) -> Iterator[concurrent.futures.Future]:
 
 	""" Starts processing when the iterator is started to be consumed. """
 
@@ -568,7 +559,7 @@ def executor_map(func: Callable[[T], U], it: Iterable[T], executercls: Callable=
 
 		with executercls(workers) as executor:
 			if ordered:
-				bufit = BufferedIterable(futures(), bufsize + executor._max_workers)
+				bufit: Iterable = BufferedIterable(futures(), bufsize + executor._max_workers)
 			else:
 				bufit = CompletedFutures(futures(), bufsize + executor._max_workers)
 

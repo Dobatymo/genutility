@@ -1,13 +1,11 @@
 from __future__ import generator_stop
 
 from math import log
-from typing import TYPE_CHECKING
+from typing import Callable, Hashable, Iterable, List, Optional, Union
 
 from genutility.ops import logical_xnor
 from genutility.sys import bitness
 
-if TYPE_CHECKING:
-	from typing import Callable, Hashable, Iterable, Optional, Union
 
 class HyperLogLog(object):
 
@@ -15,8 +13,9 @@ class HyperLogLog(object):
 		of a set and supports unions with other HLLs. It uses a constant amount of memory.
 	"""
 
-	def __init__(self, b=14, hashfunc=None, hashbits=None):
-		# type: (int, Optional[Callable], Optional[int]) -> None
+	registers: List[int]
+
+	def __init__(self, b: int=14, hashfunc: Optional[Callable]=None, hashbits: Optional[int]=None) -> None:
 
 		assert b >= 4 and logical_xnor(hashfunc, hashbits)
 
@@ -54,12 +53,12 @@ class HyperLogLog(object):
 		return 1.04/(self.m ** 0.5)
 
 	def _merge_registers(self, other):
-		# type: (HyperLogLog, ) -> HyperLogLog
+		# type: (HyperLogLog, ) -> List[int]
 
 		if self.b != other.b or self.hash != other.hash or self.width != other.width:
 			raise ValueError("HyperLogLog object need to have the same number of registers and same hashes")
 
-		return list(map(max, self.registers, other.registers))
+		return list(map(max, self.registers, other.registers))  # type: ignore[arg-type]
 
 	def add(self, value):
 		# type: (Hashable, ) -> None
@@ -116,12 +115,11 @@ class HyperLogLog(object):
 		hll.registers = registers
 		return hll
 
-	def __or__(self, other):
-		# type: (HyperLogLog, ) -> HyperLogLog
+	def __or__(self, other: "HyperLogLog") -> "HyperLogLog":
 
 		return self.union(other)
 
-	def __ror__(self, other):
-		# type: (HyperLogLog, ) -> HyperLogLog
+	def __ror__(self, other: "HyperLogLog") -> "HyperLogLog":
 
 		self.registers = self._merge_registers(other)
+		return self

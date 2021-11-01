@@ -1,7 +1,7 @@
 from __future__ import generator_stop
 
 from itertools import islice
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Collection, Iterable, Iterator, Optional, TextIO, Tuple, Union
 
 import numpy as np
 from gensim.models.keyedvectors import KeyedVectors as KeyedVectorsOriginal
@@ -9,14 +9,11 @@ from gensim.models.keyedvectors import Vocab
 
 from .file import PathOrTextIO
 
-if TYPE_CHECKING:
-	from typing import Any, Callable, Collection, Iterable, Iterator, Optional, TextIO, Tuple, Union
 
 class DuplicateEntry(ValueError):
 	pass
 
-def false(x):
-	# type: (Any, ) -> bool
+def false(x: Any) -> bool:
 
 	return False
 
@@ -27,8 +24,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 	"""
 
 	@classmethod
-	def load_a_format(cls, fin, vocab_size, vector_size, datatype=np.float32, discard=None):
-		# type: (Iterable[str], int, int, Any, Optional[Callable[[str], bool]]) -> KeyedVectorsOriginal
+	def load_a_format(cls, fin: Iterable[str], vocab_size: int, vector_size: int, datatype: Any=np.float32, discard: Optional[Callable[[str], bool]]=None) -> KeyedVectorsOriginal:
 
 		discard = discard or false
 
@@ -63,8 +59,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 
 		return result
 
-	def add(self, wwc):
-		# type: (Collection[Tuple[str, np.ndarray, int]], ) -> Iterator[Vocab]
+	def add(self, wwc: Collection[Tuple[str, np.ndarray, int]]) -> Iterator[Vocab]:
 
 		""" `wwc` is a collection of (word, weights, count) tuples """
 
@@ -78,16 +73,15 @@ class KeyedVectors(KeyedVectorsOriginal):
 			self.index2word.append(word)
 			yield voc
 
-	def add_word(self, word, weights=None, count=1):
-		if not weights:
+	def add_word(self, word: str, weights: Optional[np.ndarray]=None, count: int=1):
+		if weights is None:
 			vocab_size, vector_size = self.vectors.shape
 			weights = np.random.randn(1, vector_size)
 
 		return list(self.add([(word, weights, count)]))[0]
 
 	@classmethod
-	def load_muse_format(cls, fname, limit=None, discard=None):
-		# type: (Union[str, TextIO], int, Optional[Callable[[str], bool]]) -> KeyedVectorsOriginal
+	def load_muse_format(cls, fname: Union[str, TextIO], limit: Optional[int]=None, discard: Optional[Callable[[str], bool]]=None) -> KeyedVectorsOriginal:
 
 		""" reads at most `limit` vectors from muse file, if `discard` is not None it might be less.
 			discard is a callable which should return False if word should not be loaded from file.
@@ -95,10 +89,10 @@ class KeyedVectors(KeyedVectorsOriginal):
 
 		with PathOrTextIO(fname, "rt", encoding="utf-8", newline="\n") as fin:
 			vocab_size_, vector_size = map(int, next(fin).split(" "))
-			if limit:
-				vs = min(vocab_size_, limit)
-			else:
+			if limit is None:
 				vs = vocab_size_
+			else:
+				vs = min(vocab_size_, limit)
 
 			try:
 				return cls.load_a_format(islice(fin, limit), vs, vector_size, discard=discard)
@@ -106,8 +100,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 				raise ValueError("duplicate word '{}' in {}".format(e, fname))
 
 	@classmethod
-	def load_glove_format(cls, fname, limit, vector_size, discard=None):
-		# type: (Union[str, TextIO], int, int, Optional[Callable[[str], bool]]) -> KeyedVectorsOriginal
+	def load_glove_format(cls, fname: Union[str, TextIO], limit: int, vector_size: int, discard: Optional[Callable[[str], bool]]=None) -> KeyedVectorsOriginal:
 
 		""" Reads at most `limit` vectors from glove file, if `discard` is not None it might be less.
 			`discard` is a callable which should return False if word should not be loaded from file.
@@ -119,8 +112,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 			except DuplicateEntry as e:
 				raise ValueError("duplicate word '{}' in {}".format(e, fname))
 
-	def get_keras_embedding(self, train_embeddings=False, mask_zero=True):
-		# type: (bool, bool) -> "Embedding"
+	def get_keras_embedding(self, train_embeddings: bool=False, mask_zero: bool=True) -> "Embedding":  # noqa: F821
 
 		try:
 			from keras.layers import Embedding
@@ -142,13 +134,11 @@ class KeyedVectors(KeyedVectorsOriginal):
 		)
 		return layer
 
-	def transform_words_to_indices(self, words):
-		# type: (Collection[str], ) -> Iterator[int]
+	def transform_words_to_indices(self, words: Collection[str]) -> Iterator[int]:
 
 		return (self.vocab[word].index for word in words)
 
-	def transform_words_to_indices_tuple(self, words):
-		# type: (Collection[str], ) -> Tuple[int, ...]
+	def transform_words_to_indices_tuple(self, words: Collection[str]) -> Tuple[int, ...]:
 
 		return tuple(self.transform_words_to_indices(words))
 

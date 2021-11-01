@@ -7,6 +7,8 @@ class SegmentTree(object):
 
 	# ported from https://codeforces.com/blog/entry/18051
 
+	t: List[Optional[int]]
+
 	def __init__(self, arr, func, initializer):
 		# type: (List[int], Callable[[int, int], int], int) -> None
 
@@ -14,7 +16,7 @@ class SegmentTree(object):
 		self.func = func
 		self.initializer = initializer
 
-		self.t = [None]*self.n + arr # type: List[Optional[int]]
+		self.t = [None]*self.n + arr # type
 
 	def build(self):
 		# type: () -> None

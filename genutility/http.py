@@ -7,7 +7,8 @@ import logging
 import os
 import os.path
 import socket
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
+import ssl
+from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib import request
 from urllib.error import URLError
 
@@ -18,11 +19,27 @@ from .iter import first_not_none
 from .url import get_filename_from_url
 
 if TYPE_CHECKING:
+	from email.message import Message
 	from http.client import HTTPMessage
 	from http.cookiejar import CookieJar
+
 	JsonObject = Union[List[Any], Dict[str, Any]]
 
 logger = logging.getLogger(__name__)
+DEFAULT_TIMEOUT = 120.
+
+def install_ceritfi_opener():
+	import certifi
+
+	logger.warning("Using certifi store: %s", certifi.where())
+
+	context = ssl.SSLContext()
+	context.verify_mode = ssl.CERT_REQUIRED
+	context.load_verify_locations(certifi.where())
+	context.check_hostname = True
+	https_handler = request.HTTPSHandler(context=context)
+	opener = request.build_opener(https_handler)
+	request.install_opener(opener)
 
 class HTTPError(Exception):
 
@@ -66,30 +83,14 @@ except ImportError:
 			#time data 'Thu, 02 Aug 2007 06:54:23 GMT' does not match format u'%a, %d %b %Y %H:%M:%S +0000' # fixed with str()
 			return time.mktime(time.strptime(datestr, str("%a, %d %b %Y %H:%M:%S +0000")))
 
-try:
-	from email.message import EmailMessage  # new in 3.6
-
-	def get_filename(headers):
-		# type: (EmailMessage, ) -> str
-
-		return headers.get_filename()
-
-except ImportError:
-	def get_filename(headers):
-		# type: (Mapping, ) -> Optional[str]
-
-		try:
-			content_disposition = headers["Content-Disposition"]
-			return content_disposition.split("=")[1].replace("\"", "").strip()
-		except (KeyError, IndexError):
-			return None
+def get_filename(headers: "Message") -> Optional[str]:
+	return headers.get_filename()
 
 class URLRequestBuilder(object):
 
-	def __init__(self, cookiejar=None, basicauth=None):
-		# type: (Optional[CookieJar], Optional[Tuple[str, str, str]]) -> None
+	def __init__(self, cookiejar: Optional["CookieJar"]=None, basicauth: Optional[Tuple[str, str, str]]=None) -> None:
 
-		handlers = []
+		handlers: List[request.BaseHandler] = []
 
 		if cookiejar:
 			handlers.append(request.HTTPCookieProcessor(cookiejar))
@@ -100,16 +101,16 @@ class URLRequestBuilder(object):
 			handlers.append(request.HTTPBasicAuthHandler(password_mgr))
 
 		if handlers:
-			opener = request.build_opener(handlers)
-			self.openfunc = opener.open
+			opener = request.build_opener(*handlers)
+			self.openfunc: Callable = opener.open
 		else:
 			self.openfunc = request.urlopen
 
 	def getfunc(self):
 		return self.openfunc
 
-	def request(self, url, headers=None, timeout=None):
-		return URLRequest(url, headers, timeout, openfunc=self.openfunc)
+	def request(self, url: str, headers: Optional[dict]=None, timeout: float=DEFAULT_TIMEOUT, context: Optional[ssl.SSLContext]=None) -> "URLRequest":
+		return URLRequest(url, headers, timeout, context, openfunc=self.openfunc)
 
 class FileLike(object):
 
@@ -126,17 +127,17 @@ class FileLike(object):
 		else:
 			self.fp = self.response
 
-	def close(self):
+	def close(self) -> None:
 		self.fp.close()
 
 		transferred = self.response.tell() # is this correct?
 		if self.content_length is not None and self.content_length != transferred:
 			raise ContentInvalidLength(None, self.content_length, transferred)
 
-	def __enter__(self):
+	def __enter__(self) -> IO[bytes]:
 		return self.fp
 
-	def __exit__(self, exc_type, exc_value, traceback):
+	def __exit__(self, exc_type, exc_value, traceback) -> None:
 		self.close()
 
 def get_redirect_url(url, headers=None):
@@ -157,33 +158,32 @@ def get_redirect_url(url, headers=None):
 
 class URLRequest(object):
 
-	def __init__(self, url, headers=None, timeout=120, cookiejar=None, basicauth=None, openfunc=None):
-		# type: (str, Optional[dict], Optional[float], Optional[CookieJar], Optional[Tuple[str, str, str]], Optional[Callable]) -> None
+	headers: "HTTPMessage"
+
+	def __init__(self, url: str, headers: Optional[dict]=None, timeout: float=DEFAULT_TIMEOUT, context: Optional[ssl.SSLContext]=None, cookiejar: Optional["CookieJar"]=None, basicauth: Optional[Tuple[str, str, str]]=None, openfunc: Optional[Callable]=None) -> None:
 
 		self.url = url
 		self.timeout = timeout
 		headers = headers or {}
 
 		if not openfunc:
-			openfunc = URLRequestBuilder(cookiejar=None, basicauth=None).getfunc()
+			openfunc = URLRequestBuilder(cookiejar, basicauth).getfunc()
 
 		req = request.Request(url, data=None, headers=headers)
-		self.response = openfunc(req, timeout=timeout)
-		self.headers = self.response.info() # type: HTTPMessage
+		self.response = openfunc(req, timeout=timeout, context=context)
+		self.headers = self.response.info()
 
 	def _close(self): # unused
 		self.response.close()
 
-	def __enter__(self):
-		# type: () -> URLRequest
+	def __enter__(self) -> "URLRequest":
 
 		return self
 
-	def __exit__(self, exc_type, exc_value, traceback):
+	def __exit__(self, exc_type, exc_value, traceback) -> None:
 		self.response.close()
 
-	def _content_length(self):
-		# type: () -> Optional[int]
+	def _content_length(self) -> Optional[int]:
 
 		try:
 			content_length = self.headers["Content-Length"]
@@ -191,8 +191,7 @@ class URLRequest(object):
 		except (KeyError, ValueError, TypeError):
 			return None
 
-	def _last_modified(self):
-		# type: () -> Optional[float]
+	def _last_modified(self) -> Optional[float]:
 
 		try:
 			last_modified = self.headers["Last-Modified"]
@@ -200,12 +199,11 @@ class URLRequest(object):
 		except (KeyError, TypeError, ValueError):
 			return None
 
-	def get_redirect_url(self):
+	def get_redirect_url(self) -> str:
 		self.response.close()
 		return self.response.geturl()
 
-	def _load(self):
-		# type: () -> bytes
+	def _load(self) -> bytes:
 
 		with FileLike(self) as fp:
 			try:
@@ -213,8 +211,7 @@ class URLRequest(object):
 			except URLError:
 				raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
 
-	def _json(self):
-		# type: () -> JsonObject
+	def _json(self) -> "JsonObject":
 
 		with FileLike(self) as fp:
 			try:
@@ -222,8 +219,7 @@ class URLRequest(object):
 			except URLError:
 				raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
 
-	def _download(self, basepath, filename=None, fn_prio=None, overwrite=False, suffix=".partial", report=None):
-		# type: (str, Optional[str], Optional[Tuple[int, int, int, int]], bool, str, Optional[Callable[[int, int], None]]) -> Tuple[Optional[int], str]
+	def _download(self, basepath: str, filename: Optional[str]=None, fn_prio: Optional[Tuple[int, int, int, int]]=None, overwrite: bool=False, suffix: str=".partial", report: Optional[Callable[[int, int], None]]=None) -> Tuple[Optional[int], str]:
 
 		"""PermissionError: [WinError 32] Der Prozess kann nicht auf die Datei zugreifen,
 			da sie von einem anderen Prozess verwendet wird:
@@ -295,24 +291,21 @@ class URLRequest(object):
 
 		return (content_length, filename)
 
-	def load(self):
-		# type: () -> bytes
+	def load(self) -> bytes:
 
 		try:
 			return self._load()
 		finally:
 			self.response.close()
 
-	def json(self):
-		# type: () -> JsonObject
+	def json(self) -> "JsonObject":
 
 		try:
 			return self._json()
 		finally:
 			self.response.close()
 
-	def download(self, basepath, filename=None, fn_prio=None, overwrite=False, suffix=".partial", report=None):
-		# type: (str, Optional[str], Optional[Tuple[int, int, int, int]], bool, str, Optional[Callable[[int, int], None]]) -> Tuple[Optional[int], str]
+	def download(self, basepath: str, filename: Optional[str]=None, fn_prio: Optional[Tuple[int, int, int, int]]=None, overwrite: bool=False, suffix: str=".partial", report: Optional[Callable[[int, int], None]]=None) -> Tuple[Optional[int], str]:
 
 		try:
 			return self._download(basepath, filename, fn_prio, overwrite, suffix, report)

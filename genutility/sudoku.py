@@ -1,7 +1,7 @@
 from __future__ import generator_stop
 
 from copy import deepcopy
-from typing import Collection, Generic, Iterable, Optional, Set, Tuple, TypeVar
+from typing import Collection, Generic, Optional, Set, Tuple, TypeVar
 
 from .compat.math import isqrt
 from .exceptions import assert_type
@@ -233,7 +233,7 @@ class SudokuBruteforce(Sudoku):
 
 
 def is_valid_solution(board, sym_set):
-	# type: (Iterable[T], Set[T]) -> bool
+	# type: (Collection[T], Set[T]) -> bool
 
 	""" Checks if `board` is a valid solved Sudoku configuration
 	"""

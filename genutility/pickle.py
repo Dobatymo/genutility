@@ -2,12 +2,14 @@ from __future__ import generator_stop
 
 import importlib
 import logging
+import os.path
 import pickle  # nosec
 from datetime import timedelta
 from functools import wraps
 from os import fspath
+from pathlib import Path
 from pickle import HIGHEST_PROTOCOL  # nosec
-from typing import TYPE_CHECKING
+from typing import Any, Callable, ContextManager, Iterable, Iterator, Optional, Tuple
 
 from .atomic import sopen
 from .compat.contextlib import nullcontext
@@ -17,14 +19,9 @@ from .filesystem import mdatetime
 from .object import args_to_key
 from .time import PrintStatementTime
 
-if TYPE_CHECKING:
-	from pathlib import Path
-	from typing import Any, Callable, Iterable, Iterator, Optional, Tuple
-
 logger = logging.getLogger(__name__)
 
-def read_pickle(path):
-	# type: (str, ) -> Any
+def read_pickle(path: str) -> Any:
 
 	""" Read pickle file from `path`.
 		Warning: All usual security consideration regarding the pickle module still apply.
@@ -33,8 +30,7 @@ def read_pickle(path):
 	with copen(path, "rb") as fr:
 		return pickle.load(fr)  # nosec
 
-def write_pickle(result, path, protocol=None, safe=False):
-	# type: (Any, str, Optional[int], bool) -> None
+def write_pickle(result: Any, path: str, protocol: Optional[int]=None, safe: bool=False) -> None:
 
 	""" Write `result` to `path` using pickle serialization.
 
@@ -74,26 +70,25 @@ def write_iter(it, path, protocol=None, safe=False):
 			pickler.dump(result)
 			yield result
 
-def key_to_hash(key, protocol=None):
+def key_to_hash(key: Any, protocol: Optional[int]=None):
 	from hashlib import md5
 	binary = pickle.dumps(key, protocol=protocol)
 	return md5(binary).hexdigest()  # nosec
 
-def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignoreargs=False, ignore_first_arg=False, verbose=False, keyfunc=None, consume=False, return_cached=False):
-	# type: (Path, Optional[timedelta], bool, int, bool, bool, Optional[Callable[[tuple, dict], str]], bool, bool) -> Callable[[Callable], Callable]
+def cache(path: Path, duration: Optional[timedelta]=None, generator: bool=False, protocol: int=HIGHEST_PROTOCOL, ignoreargs: bool=False, ignore_first_arg: bool=False, verbose: bool=False, keyfunc: Optional[Callable[[tuple, dict], str]]=None, consume: bool=False, return_cached: bool=False, file_ext: Optional[str]=None) -> Callable[[Callable], Callable]:
 
 	""" Decorator to cache function calls. Doesn't take function arguments into regard.
 		It's using `pickle` to deserialize the data. So don't use it with untrusted inputs.
 
-		`path`: path to cache file
+		`path`: path to cache file or directory.
+			This can be a template string where `ppv` is assigned the pickle protocol version.
 		`duration`: maximum age of cache
 		`generator`: set to True to store the results of generator objects
 		`protocol`: pickle protocol version
 		`verbose`: print loading times if `generator` is False
 
 		If `ignoreargs` is True, the cache won't take function arguments into regard.
-			The path will be interpreted as template string to a file instead of a directory
-			where `ppv` is assigned the  pickle protocol version.
+			The path will be interpreted as template string to a file instead of a directory.
 	"""
 
 	if not generator and consume:
@@ -105,9 +100,11 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 		_duration = duration
 
 	if not verbose:
-		context = nullcontext
+		context: Callable[[str], ContextManager] = nullcontext
 	else:
 		context = PrintStatementTime
+
+	file_ext = file_ext or ".p"
 
 	def decorator(func):
 		# type: (Callable, ) -> Callable
@@ -115,6 +112,8 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 		@wraps(func)
 		def inner(*args, **kwargs):
 			# type: (*Any, **Any) -> Any
+
+			strpath = fspath(path).format(ppv=protocol)
 
 			if not ignoreargs:
 				if ignore_first_arg:
@@ -124,11 +123,13 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 					hashstr = key_to_hash(args_to_key(args, kwargs), protocol=protocol)
 				else:
 					hashstr = keyfunc(args, kwargs)
-				fullpath = path / hashstr
+				fullpath = os.path.join(strpath, hashstr + file_ext)
 			else:
+				if keyfunc or file_ext:
+					raise ValueError("`keyfunc` or `file_ext` can only be specified if ignoreargs is False")
 				if args or kwargs:
 					logger.warning("cache file decorator for %s called with arguments", func.__name__)
-				fullpath = fspath(path).format(ppv=protocol)
+				fullpath = strpath
 
 			try:
 				invalid = now() - mdatetime(fullpath) > _duration
@@ -143,7 +144,7 @@ def cache(path, duration=None, generator=False, protocol=HIGHEST_PROTOCOL, ignor
 				if generator and not consume:
 					it = func(*args, **kwargs)
 					logger.info("Writing iterable to cache: %s", fullpath)
-					result = write_iter(it, fullpath, protocol=protocol, safe=True)
+					result: Any = write_iter(it, fullpath, protocol=protocol, safe=True)
 				else:
 					with context("Result calculated in {delta} seconds"):
 						if generator and consume:

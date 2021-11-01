@@ -1,14 +1,29 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Iterable, List, Optional, Tuple, TypeVar
 
 from pandas import DataFrame, Series
 
 from .func import identity
 
-if TYPE_CHECKING:
-	from typing import Any, Callable, Iterable, List, Optional, Tuple, TypeVar
-	T = TypeVar("T")
+T = TypeVar("T")
+
+def intersect_columns(*dfs: DataFrame, sort=False) -> Tuple[DataFrame, ...]:
+
+	""" Takes multiple dataframes and removes the columns which are not present in the other dataframes.
+		The order of columns will be equalized.
+	"""
+
+	cols = tuple(set(df.columns) for df in dfs)
+	goodset = set.intersection(*cols)
+	if sort:
+		good = sorted(goodset)
+	else:
+		good = list(goodset)
+	dfs = tuple(df[good] for df in dfs)
+	assert len(set(map(lambda df: tuple(df.columns), dfs))) == 1
+
+	return dfs
 
 def pandas_json(obj):
 	# type: (Any, ) -> Any

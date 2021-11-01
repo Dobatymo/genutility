@@ -69,7 +69,7 @@ extras_require = {
 	"filesdb": ["tls-property"],
 	"fingerprinting": ["numpy", "numba", "pillow"],
 	"html": ["beautifulsoup4"],
-	"http": ["requests"],
+	"http": ["requests", "certifi"],
 	"http2": ["hyper"],
 	"image": ["numpy"],
 	"json": ["jsonschema"],
@@ -142,6 +142,5 @@ setup(
 		"typing-extensions"
 	],
 	extras_require=extras_require,
-	use_2to3=False,
 	license_files=["LICENSE"]
 )

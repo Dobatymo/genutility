@@ -4,13 +4,10 @@ import logging
 import os
 import subprocess  # nosec
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
-
-if TYPE_CHECKING:
-	from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +35,7 @@ class Rar(object):
 
 	windows_executable = Path("C:/Program Files/WinRAR/Rar.exe")
 
-	def __init__(self, archive, executable=None):
-		# type: (Path, Path) -> None
+	def __init__(self, archive: Path, executable: Optional[Path]=None) -> None:
 
 		"""archive: archive to work with, everything which is supported by winrar
 		executable: path/to/Rar.exe"""

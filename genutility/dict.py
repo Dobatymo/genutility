@@ -32,7 +32,7 @@ def get_one_of(d: Dict[T, U], keys: Iterable[T]) -> Tuple[T, U]:
 		except KeyError:
 			pass
 
-	raise KeyError("None of the {} keys could be found".format(len(keys)))
+	raise KeyError("None of the keys could be found")
 
 # similar: subdict
 def get_available(d: Dict[T, U], keys: Iterable[T]) -> Iterator[Tuple[T, U]]:
