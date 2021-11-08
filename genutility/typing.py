@@ -1,16 +1,19 @@
 from __future__ import generator_stop
 
 from collections.abc import Iterable, Sized
-from typing import TYPE_CHECKING
+from queue import Queue
+from typing import TYPE_CHECKING, Any, Generic, Optional, Sequence, TypeVar, Union
+
+T = TypeVar("T")
+
+class QueueT(Queue, Generic[T]):
+	pass
 
 if TYPE_CHECKING:
-
-	from typing import Any, Optional, Sequence, TypeVar, Union
 
 	from typing_extensions import Protocol
 
 	Number = Union[int, float]
-	T = TypeVar("T")
 
 	class SizedIterable(Iterable[T], Sized):
 		pass

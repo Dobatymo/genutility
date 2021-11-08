@@ -41,8 +41,7 @@ def write_pickle(result: Any, path: str, protocol: Optional[int]=None, safe: boo
 	with sopen(path, "wb", safe=safe) as fw:
 		pickle.dump(result, fw, protocol=protocol)
 
-def read_iter(path):
-	# type: (str, ) -> Iterator[Any]
+def read_iter(path: str) -> Iterator[Any]:
 
 	""" Read pickled iterable from `path`.
 		Warning: All usual security consideration regarding the pickle module still apply.
@@ -53,8 +52,7 @@ def read_iter(path):
 		while fr.peek(1):
 			yield unpickler.load()
 
-def write_iter(it, path, protocol=None, safe=False):
-	# type: (Iterable[Any], str, Optional[int], bool) -> Iterator[Any]
+def write_iter(it: Iterable[Any], path: str, protocol: Optional[int]=None, safe: bool=False) -> Iterator[Any]:
 
 	""" Write iterable `it` to `path` using pickle serialization. This uses much less memory than
 			writing a full list at once.
@@ -70,8 +68,9 @@ def write_iter(it, path, protocol=None, safe=False):
 			pickler.dump(result)
 			yield result
 
-def key_to_hash(key: Any, protocol: Optional[int]=None):
+def key_to_hash(key: Any, protocol: Optional[int]=None) -> str:
 	from hashlib import md5
+
 	binary = pickle.dumps(key, protocol=protocol)
 	return md5(binary).hexdigest()  # nosec
 
@@ -104,8 +103,6 @@ def cache(path: Path, duration: Optional[timedelta]=None, generator: bool=False,
 	else:
 		context = PrintStatementTime
 
-	file_ext = file_ext or ".p"
-
 	def decorator(func):
 		# type: (Callable, ) -> Callable
 
@@ -119,11 +116,13 @@ def cache(path: Path, duration: Optional[timedelta]=None, generator: bool=False,
 				if ignore_first_arg:
 					args = args[1:]
 
+				_file_ext = file_ext or ".p"
+
 				if keyfunc is None:
 					hashstr = key_to_hash(args_to_key(args, kwargs), protocol=protocol)
 				else:
 					hashstr = keyfunc(args, kwargs)
-				fullpath = os.path.join(strpath, hashstr + file_ext)
+				fullpath = os.path.join(strpath, hashstr + _file_ext)
 			else:
 				if keyfunc or file_ext:
 					raise ValueError("`keyfunc` or `file_ext` can only be specified if ignoreargs is False")
@@ -171,8 +170,7 @@ def cache(path: Path, duration: Optional[timedelta]=None, generator: bool=False,
 
 	return decorator
 
-def unpickle(path, requirements=()):
-	# type: (str, Iterable[Tuple[str, Optional[str]]]) -> Any
+def unpickle(path: str, requirements: Iterable[Tuple[str, Optional[str]]]=()) -> Any:
 
 	""" Can be used to unpickle objects when normal unpickling fails to import some dependencies correctly.
 		path: Path to the pickled file.
