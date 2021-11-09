@@ -11,7 +11,6 @@ from queue import Empty, Full, Queue
 from typing import Any, Callable, Generic, Iterable, Iterator, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 from .exceptions import NoResult, assert_choice
-from .typing import QueueT
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -24,8 +23,7 @@ class Worker(threading.Thread):
 	TASK_COMPLETE = 1
 	TASK_EXCEPTION = 2
 
-	def __init__(self, tasks, returns):
-		# type: (QueueT[Optional[Tuple[int, int, Callable, tuple, dict]]], QueueT[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]) -> None
+	def __init__(self, tasks: "Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]", returns: "Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]"):
 
 		threading.Thread.__init__(self)
 		self.tasks = tasks
@@ -74,8 +72,8 @@ class ThreadPool(object):
 		# type: (int, ) -> None
 
 		self.num_threads = num_threads
-		self.tasks = Queue()  # type: QueueT[Optional[Tuple[int, int, Callable, tuple, dict]]]
-		self.returns = Queue()  # type: QueueT[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]
+		self.tasks: "Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]" = Queue()
+		self.returns: "Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]" = Queue()
 		self.my_worker = [Worker(self.tasks, self.returns) for _ in range(num_threads)]
 		self.state = 0  # this is used to be able to cancel (or ignore the results of ongoing) tasks
 
@@ -96,7 +94,7 @@ class ThreadPool(object):
 			#  else: old result, ignore
 
 	@staticmethod
-	def clear(queue: QueueT[Any]) -> None:
+	def clear(queue: "Queue[Any]") -> None:
 
 		""" Only undocumented methods. """
 
@@ -106,7 +104,7 @@ class ThreadPool(object):
 			queue.unfinished_tasks = 0
 
 	@staticmethod
-	def _clear(queue: QueueT[Any]) -> None:
+	def _clear(queue: "Queue[Any]") -> None:
 
 		""" Only uses documented methods, but is slower. """
 
@@ -207,12 +205,12 @@ class IterWorker(threading.Thread):
 	CMD_RESUME = 0
 	CMD_ABORT = 1
 
-	def __init__(self, taskqueue: QueueT, onstatechange: Optional[Callable]=None):
+	def __init__(self, taskqueue: Queue, onstatechange: Optional[Callable]=None):
 
 		threading.Thread.__init__(self)
 		self.queue = taskqueue
 		self.onstatechange = onstatechange
-		self.control: QueueT[int] = Queue()
+		self.control: "Queue[int]" = Queue()
 		self.state = self.STATE_WAITING
 
 	@property
