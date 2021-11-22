@@ -4,14 +4,13 @@ import logging
 import mmap
 import re
 from struct import unpack
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, BinaryIO, Iterator, Optional, Set, Tuple, Union
 
 from ..exceptions import ParseError
 from ..file import read_or_raise
 from ..string import backslash_escaped_ascii
 
 if TYPE_CHECKING:
-	from typing import BinaryIO, Iterator, Set, Tuple, Union
 
 	from _hashlib import HASH as Hashobj
 	Segment = Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]
@@ -204,7 +203,7 @@ def iter_jpeg(path, translate=True):
 
 
 def copy_jpeg_fp(fin, fout, ignore_segments=None):
-	# type: (BinaryIO, BinaryIO, Set[str]) -> None
+	# type: (BinaryIO, BinaryIO, Optional[Set[str]]) -> None
 
 	""" Same as `copy_jpeg()` except that it accepts file-like objects.
 	"""

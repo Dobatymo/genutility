@@ -109,8 +109,11 @@ def assert_choice(name: str, value: Optional[T], choices: Set[T], optional: bool
 def assert_choices(name, values, choices, optional=False):
 	# type: (str, Optional[Sequence[T]], Set[T], bool) -> None
 
-	if optional and values is None:
-		return
+	if values is None:
+		if optional:
+			return
+		else:
+			raise TypeError("`None cannot be passed for `values` when `optional=False`")
 
 	if set(values) - choices:
 		raise ValueError("{} must be a subset of {}".format(name, ", ".join(map(str, choices))))

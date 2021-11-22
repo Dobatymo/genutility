@@ -9,6 +9,7 @@ from time import sleep
 from typing import (TYPE_CHECKING, Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar,
                     Union)
 
+from ._func import rename, renameobj  # noqa: F401
 from .iter import nonstriter, retrier
 
 if TYPE_CHECKING:

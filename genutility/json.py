@@ -111,8 +111,8 @@ def read_json(path, schema=None, cls=None, object_hook=None):
 	validate(obj, schema)
 	return obj
 
-def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False, **kw):
-	# type: (Any, PathStr, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[Union[str, int]], bool, Optional[Callable], bool, **Any) -> None
+def write_json(obj, path, mode="wt", schema=None, ensure_ascii=False, cls=None, indent=None, sort_keys=False, default=None, safe=False, **kw):
+	# type: (Any, PathStr, str, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[Union[str, int]], bool, Optional[Callable], bool, **Any) -> None
 
 	""" Writes python object `obj` to `path` as json files and optionally validates the object
 		according to `schema`. The validation requires `jsonschema`.
@@ -128,7 +128,7 @@ def write_json(obj, path, schema=None, ensure_ascii=False, cls=None, indent=None
 
 		validate(obj, schema)
 
-	with sopen(path, "wt", encoding="utf-8", safe=safe) as fw:
+	with sopen(path, mode, encoding="utf-8", safe=safe) as fw:
 		json.dump(obj, fw, ensure_ascii=ensure_ascii, cls=cls, indent=indent, sort_keys=sort_keys, default=default, **kw)
 
 class JsonLoadKwargs(TypedDict):

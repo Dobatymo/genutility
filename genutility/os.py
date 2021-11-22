@@ -2,13 +2,13 @@ from __future__ import generator_stop
 
 import os
 import platform
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Union
 
+from ._func import rename
 from .os_shared import is_os_64bit  # noqa: F401
 
 if TYPE_CHECKING:
 	from pathlib import Path
-	from typing import Callable, Union
 	PathStr = Union[Path, str]
 
 system = platform.system()
@@ -34,17 +34,7 @@ class CurrentWorkingDirectory(object):
 	def __exit__(self, exc_type, exc_value, traceback):
 		self.close()
 
-def rename(func_name):
-	# type: (str, ) -> Callable
-
-	def decorator(func):
-		func.__name__ = func_name
-		return func
-
-	return decorator
-
-def _not_available(func_name):
-	# type: (str) -> Callable
+def _not_available(func_name: str) -> Callable:
 
 	@rename(func_name)
 	def inner(*args, **kwargs):
