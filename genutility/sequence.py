@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 	from .typing import Comparable, Orderable
 	T = TypeVar("T")
 
-class LazyStringList(object):
+class LazyStringList:
 
 	def __init__(self, length):
 		# type: (int, ) -> None

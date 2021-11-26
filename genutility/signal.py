@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-class HandleKeyboardInterrupt(object):
+class HandleKeyboardInterrupt:
 
 	""" Context manager to handle ctrl-c (keyboard interrupts)
 

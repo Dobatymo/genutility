@@ -88,7 +88,7 @@ def iter_png_fp(stream, translate=True, verify_crc=True):
 
 		length, chunk_type = unpack(">I4s", data)
 		if not chunk_type_p.match(chunk_type):
-			raise ParseError("Invalid chunk type: {} at {}".format(chunk_type, stream.tell() - 4))
+			raise ParseError(f"Invalid chunk type: {chunk_type} at {stream.tell() - 4}")
 
 		chunk_type_ascii = chunk_type.decode("ascii")
 

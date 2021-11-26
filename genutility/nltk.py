@@ -11,5 +11,5 @@ if TYPE_CHECKING:
 def count_words_in_file(path, encoding="utf-8"):
 	# type: (PathLike, str) -> int
 
-	with open(path, "r", encoding=encoding) as fr:
+	with open(path, encoding=encoding) as fr:
 		return sum(len(word_tokenize(line)) for line in fr)

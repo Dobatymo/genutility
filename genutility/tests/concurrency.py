@@ -65,7 +65,7 @@ class ConcurrencyTest(MyTestCase):
 	def test_NotThreadSafe(self):
 
 		@NotThreadSafe(True)
-		class attr(object):
+		class attr:
 			test = 0
 
 		class access(threading.Thread):

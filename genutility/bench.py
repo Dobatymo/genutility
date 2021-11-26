@@ -4,7 +4,7 @@ import tracemalloc
 from typing import Optional
 
 
-class MeasureMemory(object):
+class MeasureMemory:
 
 	__slots__ = ("total", "snapshot")
 
@@ -47,4 +47,4 @@ class MeasureMemory(object):
 		else:
 			total = self._comp()
 
-		print("{} uses {:.3f} MiB of memory".format(name, total / 1024 / 1024))
+		print(f"{name} uses {total / 1024 / 1024:.3f} MiB of memory")

@@ -8,6 +8,7 @@ import os
 import os.path
 import socket
 import ssl
+from email.utils import parsedate_to_datetime
 from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib import request
 from urllib.error import URLError
@@ -62,31 +63,13 @@ class DownloadInterrupted(HTTPError, DownloadFailed):
 class NoRedirect(HTTPError):
 	pass
 
-try:
-	from email.utils import parsedate_to_datetime  # new in 3.3
-
-	def parsedate_to_timestamp(datestr): # correct timezone
-		# type: (str, ) -> float
-
-		return parsedate_to_datetime(datestr).timestamp()
-
-except ImportError:
-	import time
-
-	def parsedate_to_timestamp(datestr): # fixme: incorrect timezone
-		# type: (str, ) -> float
-
-		try:
-			#str fixed py2.x unicode bug
-			return time.mktime(time.strptime(datestr, str("%a, %d %b %Y %H:%M:%S %Z")))
-		except ValueError:
-			#time data 'Thu, 02 Aug 2007 06:54:23 GMT' does not match format u'%a, %d %b %Y %H:%M:%S +0000' # fixed with str()
-			return time.mktime(time.strptime(datestr, str("%a, %d %b %Y %H:%M:%S +0000")))
+def parsedate_to_timestamp(datestr: str) -> float:
+    return parsedate_to_datetime(datestr).timestamp()
 
 def get_filename(headers: "Message") -> Optional[str]:
 	return headers.get_filename()
 
-class URLRequestBuilder(object):
+class URLRequestBuilder:
 
 	def __init__(self, cookiejar: Optional["CookieJar"]=None, basicauth: Optional[Tuple[str, str, str]]=None) -> None:
 
@@ -112,7 +95,7 @@ class URLRequestBuilder(object):
 	def request(self, url: str, headers: Optional[dict]=None, timeout: float=DEFAULT_TIMEOUT, context: Optional[ssl.SSLContext]=None) -> "URLRequest":
 		return URLRequest(url, headers, timeout, context, openfunc=self.openfunc)
 
-class FileLike(object):
+class FileLike:
 
 	def __init__(self, urlrequest):
 		self.urlrequest = urlrequest
@@ -151,12 +134,12 @@ def get_redirect_url(url, headers=None):
 		if r.status_code in {301, 302, 303, 307, 308}:
 			return r.headers["Location"]
 		else:
-			raise NoRedirect("Unexpected status code: {}".format(r.status_code), response=r)
+			raise NoRedirect(f"Unexpected status code: {r.status_code}", response=r)
 
 	except KeyError: # Location not provided. is this really raised?
 		raise HTTPError("Location header not found", response=r)
 
-class URLRequest(object):
+class URLRequest:
 
 	headers: "HTTPMessage"
 
@@ -209,7 +192,7 @@ class URLRequest(object):
 			try:
 				return fp.read()
 			except URLError:
-				raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
+				raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
 
 	def _json(self) -> "JsonObject":
 
@@ -217,7 +200,7 @@ class URLRequest(object):
 			try:
 				return json.load(fp)
 			except URLError:
-				raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
+				raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
 
 	def _download(self, basepath: str, filename: Optional[str]=None, fn_prio: Optional[Tuple[int, int, int, int]]=None, overwrite: bool=False, suffix: str=".partial", report: Optional[Callable[[int, int], None]]=None) -> Tuple[Optional[int], str]:
 
@@ -254,10 +237,7 @@ class URLRequest(object):
 		if not overwrite and os.path.exists(fullpath):
 			raise FileExistsError(errno.EEXIST, "File already exists", fullpath)
 
-		try:
-			os.makedirs(basepath) # exist_ok=True is new in 3.2
-		except OSError:
-			pass
+		os.makedirs(basepath, exist_ok=True)
 
 		content_length = self._content_length()
 
@@ -268,8 +248,8 @@ class URLRequest(object):
 				transferred = copyfilelike(self.response, out, content_length, report=report)
 
 		except (socket.timeout, URLError):
-			logger.warning("Timeout after {}s at {}: {}".format(self.timeout, self.response.geturl(), self.headers))
-			raise TimeOut("Timed out after {}s".format(self.timeout), response=self.response)
+			logger.warning(f"Timeout after {self.timeout}s at {self.response.geturl()}: {self.headers}")
+			raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
 
 		except ConnectionResetError as e:
 			logger.warning("Connection was reset during download: %s", str(e))
@@ -280,7 +260,7 @@ class URLRequest(object):
 			raise
 
 		if content_length and content_length != transferred:
-			logger.info("{} {}".format(content_length, transferred))
+			logger.info(f"{content_length} {transferred}")
 			raise ContentInvalidLength(tmppath, content_length, transferred)
 
 		last_modified = self._last_modified()

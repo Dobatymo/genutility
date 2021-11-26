@@ -20,7 +20,7 @@ def assert_square(name, value):
 	"""
 
 	if not len(value.shape) == 2 or value.shape[0] != value.shape[1]:
-		raise ValueError("{} must be a square".format(name))
+		raise ValueError(f"{name} must be a square")
 
 def normalized_choice(p_ind, p_prob):  # is this neccessary? I think `np.random.choice` can handle unnormalized probabilities
 	return np.random.choice(p_ind, p=p_prob/np.sum(p_prob))
@@ -220,7 +220,7 @@ def shiftedexp(pvals):
 
 	return np.exp(pvals - np.amax(pvals, axis=-1)[...,None])
 
-class Sampler(object):
+class Sampler:
 
 	""" Sample from discrete CDF. """
 
@@ -408,7 +408,7 @@ def unblock(arr, n1, n2, axis1=-1, axis2=-2, blocksize=False):
 
 	s = np.array(arr.shape)
 	if s[axis1] % n1 != 0 or s[axis2] % n2 != 0:
-		raise ValueError("{}x{} does not divide by {}x{}".format(s[axis1], s[axis2], n1, n2))
+		raise ValueError(f"{s[axis1]}x{s[axis2]} does not divide by {n1}x{n2}")
 
 	if blocksize:
 		n1 = s[axis1] // n1

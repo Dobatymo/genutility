@@ -20,7 +20,7 @@ def iter_timer(it):
 	except StopIteration:
 		pass
 
-class TakeAtleast(object):
+class TakeAtleast:
 
 	__slots__ = ("delta", "wait_on_error", "now")
 
@@ -44,7 +44,7 @@ class TakeAtleast(object):
 			if elapsed < self.delta:
 				sleep(self.delta - elapsed)
 
-class DeltaTime(object):
+class DeltaTime:
 
 	__slots__ = ("start", "end")
 
@@ -81,7 +81,7 @@ class DeltaTime(object):
 		self.start, self.end = self.end, monotonic()
 		return self.end - self.start
 
-class PrintStatementTime(object):
+class PrintStatementTime:
 
 	__slots__ = ("tpl", "start")
 
@@ -105,7 +105,7 @@ class PrintStatementTime(object):
 		else:
 			print(msg)
 
-class MeasureTime(object):
+class MeasureTime:
 
 	__slots__ = ("delta", "start")
 
@@ -131,7 +131,7 @@ class MeasureTime(object):
 		else:
 			return monotonic() - self.start
 
-class TimeIt(object):
+class TimeIt:
 
 	def __init__(self):
 		# type: () -> None

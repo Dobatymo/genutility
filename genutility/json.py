@@ -85,7 +85,7 @@ class BuiltinRoundtripDecoder(json.JSONDecoder):
 def read_json_schema(path):
 	# type: (PathStr, ) -> JsonDict
 
-	with open(path, "r", encoding="utf-8") as fr:
+	with open(path, encoding="utf-8") as fr:
 		return json.load(fr)
 
 def read_json(path, schema=None, cls=None, object_hook=None):
@@ -139,7 +139,7 @@ class JsonLoadKwargs(TypedDict):
 	parse_constant: Optional[Callable]
 	object_pairs_hook: Optional[Callable]
 
-class json_lines(object):
+class json_lines:
 
 	""" Read and write files in the JSON Lines format (http://jsonlines.org).
 	"""
@@ -265,8 +265,7 @@ def read_json_lines(file, object_hook=None):
 	"""
 
 	with json_lines.from_path(file, mode="rt", object_hook=object_hook) as fr:
-		for obj in fr:
-			yield obj
+		yield from fr
 
 def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Sequence[str]], mode: str="xt") -> None:
 

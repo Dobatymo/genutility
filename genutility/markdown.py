@@ -27,9 +27,9 @@ def markdown_urls(s, ignore_trailing_dot=True):
 	def markdown_dotfix(m):
 		url, = m.groups()
 		if ignore_trailing_dot and url.endswith("."):
-			return "<{}>.".format(url[:-1])
+			return f"<{url[:-1]}>."
 		else:
-			return "<{}>".format(url)
+			return f"<{url}>"
 
 	# return _markdown_urls_pat.sub(r"<\1>", s)
 	return _markdown_urls_pat.sub(markdown_dotfix, s)

@@ -6,7 +6,7 @@ from setuptools import setup
 
 # nltk.download("punkt")
 
-with open("README.md", "r", encoding="utf-8") as fr:
+with open("README.md", encoding="utf-8") as fr:
 	long_description = fr.read()
 
 extras_require = {

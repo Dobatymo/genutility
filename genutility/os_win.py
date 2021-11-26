@@ -40,7 +40,7 @@ def get_stdout_handle():
 
 	return GetStdHandle(STD_OUTPUT_HANDLE)
 
-class EnableAnsi(object): # doesn't work for some reason...
+class EnableAnsi: # doesn't work for some reason...
 
 	def __init__(self):
 		# type: () -> None
@@ -128,7 +128,7 @@ def _get_appdata_dir():
 	try:
 		result = SHGetKnownFolderPath(rfid, Flags, Token, byref(Path))
 	except OSError:
-		logging.error("SHGetKnownFolderPath result: {:X}".format(result & 0xffffffff))
+		logging.error(f"SHGetKnownFolderPath result: {result & 0xffffffff:X}")
 		raise
 
 	ret = cast(Path, c_wchar_p).value
@@ -193,7 +193,7 @@ def _interrupt_windows():
 def _filemanager_cmd_windows(path):
 	# type: (str, ) -> str
 
-	return 'explorer.exe /select,"{}"'.format(path)
+	return f'explorer.exe /select,"{path}"'
 
 if __name__ == "__main__":
 	s = '\033[35m' + 'color-test' + '\033[39m' + " test end"

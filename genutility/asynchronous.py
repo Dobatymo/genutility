@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 	from numbers import Number
 	from typing import IO, Iterable, Optional, Sequence, Union
 
-class progress_content(object):
+class progress_content:
 
 	def __init__(self, it, length=None, refresh=1, file=sys.stdout):
 		# type: (Union[Iterable, Sequence], Optional[int], Number, Optional[IO[str]]) -> None
@@ -27,7 +27,7 @@ class progress_content(object):
 	def __aiter__(self):
 		return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
 
-	class AsyncIterProgress(object):
+	class AsyncIterProgress:
 
 		def __init__(self, it, length, refresh, file):
 			self.it = it.__aiter__()
@@ -47,15 +47,14 @@ class progress_content(object):
 				if current - self.last > self.refresh:
 					self.last = current
 					duration = current - self.start
-					print("{}{}, running for {} seconds ({:0.2e}/s).".format(self.total, self.lstr, int(duration), self.total/duration), end="\r", file=self.file)
+					print(f"{self.total}{self.lstr}, running for {int(duration)} seconds ({self.total/duration:0.2e}/s).", end="\r", file=self.file)
 				return elm
 
 			except StopAsyncIteration:
-				print("Finished {} in {} seconds.".format(self.total, int(self.last - self.start)), end="\r", file=self.file)
+				print(f"Finished {self.total} in {int(self.last - self.start)} seconds.", end="\r", file=self.file)
 				raise StopAsyncIteration
 
 if __name__ == "__main__":
-	# needs python 3.5
 
 	class gensync:
 

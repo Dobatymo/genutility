@@ -74,4 +74,4 @@ if __name__ == "__main__":
 	parser.add_argument("-f", "--hashfuncs", nargs='+', help='list of hash functions. Can be one or more of: {}'.format(", ".join(funcs)), required=True)
 	parser.add_argument("file", metavar="FILE", help="path to the file")
 	args = parser.parse_args()
-	print("\n".join("{}: {}".format(i, j) for i, j in zip(args.hashfuncs, multi_hash_file(args.file, args.hashfuncs))))
+	print("\n".join(f"{i}: {j}" for i, j in zip(args.hashfuncs, multi_hash_file(args.file, args.hashfuncs))))

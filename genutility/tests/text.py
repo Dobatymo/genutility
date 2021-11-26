@@ -12,7 +12,7 @@ def urls_iter():
 	# type: () -> Iterator[str]
 
 	for i in count(0):
-		yield "<URL_{}>".format(i)
+		yield f"<URL_{i}>"
 
 class TextTest(MyTestCase):
 

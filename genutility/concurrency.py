@@ -66,7 +66,7 @@ class Worker(threading.Thread):
 
 		self.running = False
 
-class ThreadPool(object):
+class ThreadPool:
 
 	def __init__(self, num_threads):
 		# type: (int, ) -> None
@@ -180,7 +180,7 @@ def NotThreadSafe(verify=False):
 				if self.thread_ident == threading.current_thread().ident:
 					orig_setattr(self, name, value)
 				else:
-					raise RuntimeError("{}.{} = {} called from different thread".format(TheClass.__name__, name, value))
+					raise RuntimeError(f"{TheClass.__name__}.{name} = {value} called from different thread")
 
 			def __init__(self, *args, **kws):
 				orig_setattr(self, "thread_ident", threading.current_thread().ident)
@@ -329,7 +329,7 @@ class ProgressWorker(threading.Thread):
 			return None
 
 # was: ThreadedDownloader
-class ProgressThreadPool(object):
+class ProgressThreadPool:
 
 	def __init__(self, concurrent=1):
 		# from config

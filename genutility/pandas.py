@@ -37,7 +37,7 @@ def pandas_json(obj):
 	elif isinstance(obj, Series):
 		return tuple(obj)
 
-	raise TypeError("object of type {} cannot be JSON serialized: {}".format(type(obj), obj))
+	raise TypeError(f"object of type {type(obj)} cannot be JSON serialized: {obj}")
 
 def strlist(sep):
 	# type: (str, ) -> Callable[[str], List[str]]

@@ -10,7 +10,7 @@ from hyper.http20.exceptions import StreamResetError
 from .http import HTTPError
 
 
-class WrappedHTTP20Connection(object):
+class WrappedHTTP20Connection:
 
 	def __init__(self, host):
 		self.host = host

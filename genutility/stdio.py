@@ -15,7 +15,7 @@ def print_line(char: str="-", length: int=_terminal_width, file: Optional[IO]=No
 
 	print(char*length, end="", file=file, flush=flush)
 
-class PrintOnError(object):
+class PrintOnError:
 
 	""" A context manager which can be used to output data
 		before an exception is printed by the python runtime.

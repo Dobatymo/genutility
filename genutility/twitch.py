@@ -9,7 +9,7 @@ from .ops import logical_xor
 if TYPE_CHECKING:
 	from typing import Callable, List, Optional, Tuple
 
-class StreamWatcher(object):
+class StreamWatcher:
 
 	def __init__(self, api):
 		self.api = api
@@ -34,7 +34,7 @@ class StreamWatcher(object):
 				self.followed_online[user_id] = False
 				notify_stopped(user_id, self.followed_names[user_id])
 
-class TwitchAPI(object):
+class TwitchAPI:
 
 	base = "https://api.twitch.tv/helix/"
 	login = "users"

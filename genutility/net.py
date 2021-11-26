@@ -43,7 +43,7 @@ def get_standard_gateway(default=None):
 		try:
 			socket.inet_aton(ipv4_gateway)
 			return ipv4_gateway
-		except socket.error:
+		except OSError:
 			pass
 
 	return default

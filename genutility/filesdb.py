@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 	from .filesystem import EntryType
 
-class GenericFileDb(object):
+class GenericFileDb:
 
 	def __init__(self, dbpath, table, debug=True):
 		# type: (str, str, bool) -> None
@@ -104,11 +104,11 @@ class GenericFileDb(object):
 	def setup(self):
 		# type: () -> None
 
-		fields = ", ".join("{} {}".format(n, t) for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived))
+		fields = ", ".join(f"{n} {t}" for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived))
 
 		# unique = "UNIQUE({})".format(n for n, t, v in chain(self._mandatory, self._derived))
 		# add to sql below?
-		sql = "CREATE TABLE IF NOT EXISTS {} ({})".format(self.table, fields)
+		sql = f"CREATE TABLE IF NOT EXISTS {self.table} ({fields})"
 
 		self.cursor.execute(sql)
 		self.commit()
@@ -141,7 +141,7 @@ class GenericFileDb(object):
 		else:
 			fields = ", ".join(n for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived) if n not in no)
 
-		self.cursor.execute("SELECT {} FROM {}".format(fields, self.table))  # nosec
+		self.cursor.execute(f"SELECT {fields} FROM {self.table}")  # nosec
 		return iterfetch(self.cursor)
 
 	def get_latest(self, path, filesize, mod_date, derived=None, ignore_null=True, only=frozenset(), no=frozenset()):
@@ -178,9 +178,9 @@ class GenericFileDb(object):
 		if not fields:
 			raise ValueError("No output fields selected")
 
-		conditions = " AND ".join("{} IS ?".format(n) for n, t, v in chain(self._mandatory, _derived))
+		conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
 		order_by = self.latest_order_by()
-		sql = "SELECT {} FROM {} WHERE {} ORDER BY {} LIMIT 1".format(fields, self.table, conditions, order_by)  # nosec
+		sql = f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {order_by} LIMIT 1"  # nosec
 
 		self.cursor.execute(sql, args)
 
@@ -209,7 +209,7 @@ class GenericFileDb(object):
 
 		fields = ", ".join(n for n, t, v in chain(self._auto, self._mandatory, self._derived))
 		values = ", ".join(v for n, t, v in chain(self._auto, self._mandatory, self._derived))
-		sql = "REPLACE INTO {} ({}) VALUES ({})".format(self.table, fields, values)
+		sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"
 		self.cursor.execute(sql, args)
 
 	def _add_file_no_dup(self, path, filesize, mod_date, derived=None, ignore_null=True):

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 def read_yaml(path):
 	# type: (str, ) -> Any
 
-	with open(path, "r", encoding="utf-8") as fr:
+	with open(path, encoding="utf-8") as fr:
 		yaml = YAML(typ="safe")
 		return yaml.load(fr)
 

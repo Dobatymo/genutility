@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-class Resource(object):
+class Resource:
 
 	def __init__(self, wmii=None):
 		if wmii:
@@ -125,7 +125,7 @@ def event_logs(server="localhost", source="System"):
 	handle = win32evtlog.OpenEventLog(server, source)
 	flags = win32evtlog.EVENTLOG_SEQUENTIAL_READ | win32evtlog.EVENTLOG_FORWARDS_READ
 
-	logger.debug("Preparing to read {} events".format(win32evtlog.GetNumberOfEventLogRecords(handle)))
+	logger.debug(f"Preparing to read {win32evtlog.GetNumberOfEventLogRecords(handle)} events")
 
 	try:
 		while True:

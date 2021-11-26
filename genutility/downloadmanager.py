@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-class DownloadTask(object):
+class DownloadTask:
 
 	def __init__(self, url, path="."):
 		# type: (str, str) -> None
@@ -43,7 +43,7 @@ class DownloadTask(object):
 		logger.info("finished download")
 		self.dt_finished = now()
 
-class DownloadManager(object):
+class DownloadManager:
 
 	def __init__(self):
 		# type: () -> None
@@ -124,7 +124,7 @@ class DownloadManager(object):
 					if accept_range != "bytes":
 						raise RuntimeError("Only bytes content ranges are supported")
 					bytes_range = response.headers.get('Content-Range') # 'bytes 0-10/46239'
-					raise RuntimeError("Range requests are not supported yet: {}".format(bytes_range))
+					raise RuntimeError(f"Range requests are not supported yet: {bytes_range}")
 
 				with open(task.path, "wb", buffering=self.chunksize) as fw:
 					async for data in stream.iter_any():
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
 	class TestFrame(wx.Frame):
 		def __init__(self, parent=None):
-			super(TestFrame, self).__init__(parent)
+			super().__init__(parent)
 			vbox = wx.BoxSizer(wx.VERTICAL)
 			button1 =  wx.Button(self, label="Submit")
 			self.edit =  wx.StaticText(self, style=wx.ALIGN_CENTRE_HORIZONTAL|wx.ST_NO_AUTORESIZE)

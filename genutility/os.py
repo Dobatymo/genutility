@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 system = platform.system()
 
-class CurrentWorkingDirectory(object):
+class CurrentWorkingDirectory:
 
 	__slots__ = ("oldcwd", )
 
@@ -38,7 +38,7 @@ def _not_available(func_name: str) -> Callable:
 
 	@rename(func_name)
 	def inner(*args, **kwargs):
-		raise OSError("{}() is not available for {}".format(func_name, system))
+		raise OSError(f"{func_name}() is not available for {system}")
 
 	return inner
 
@@ -101,7 +101,4 @@ islink.__doc__ = """ islink """
 uncabspath.__doc__ = """ uncabspath """
 interrupt.__doc__ = """ interrupt """
 
-import sys
-
-if sys.version_info >= (3, 3):
-	from shutil import disk_usage
+from shutil import disk_usage

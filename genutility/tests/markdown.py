@@ -84,15 +84,15 @@ class MarkdownTest(MyTestCase):
 		#("http://10.1.1.254", False)
 	)
 	def test_markdown_urls(self, url, valid):
-		truth = "asd <{}> qwe".format(url)
+		truth = f"asd <{url}> qwe"
 
-		result = markdown_urls("asd {} qwe".format(url))
+		result = markdown_urls(f"asd {url} qwe")
 		if valid:
 			self.assertEqual(truth, result)
 		else:
 			self.assertNotEqual(truth, result)
 
-		result = markdown_urls("asd <{}> qwe".format(url))
+		result = markdown_urls(f"asd <{url}> qwe")
 		if valid:
 			self.assertEqual(truth, result)
 

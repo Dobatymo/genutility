@@ -37,7 +37,7 @@ class NoKeyFrame(Exception):
 class BadFile(Exception):
 	pass
 
-class VideoBase(object):
+class VideoBase:
 
 	single_frame_ratio = 0.5
 
@@ -113,7 +113,7 @@ class CvVideo(VideoBase):
 		try:
 			duration = timedelta(seconds=frame_count / fps)
 		except ZeroDivisionError:
-			raise BadFile("Cannot open {}".format(path))
+			raise BadFile(f"Cannot open {path}")
 
 		self.native_duration = frame_count # exclusive
 		self.time_base = Fraction(1, 1)
@@ -190,7 +190,7 @@ class AvVideo(VideoBase):
 		try:
 			self.container = self.av.open(path, "r")
 		except self.av.error.InvalidDataError:
-			raise BadFile("Cannot open {}".format(path))
+			raise BadFile(f"Cannot open {path}")
 
 		if self.container.format.name == "matroska,webm":
 			raise BadFile("Matroska files are currently not supported :(")
@@ -213,7 +213,7 @@ class AvVideo(VideoBase):
 			logger.debug("Using container instead of video stream duration")
 
 		if not self.native_duration:
-			raise BadFile("Cannot open {}".format(path))
+			raise BadFile(f"Cannot open {path}")
 
 		# what to do with self.vstream.start_time?
 
@@ -241,7 +241,7 @@ class AvVideo(VideoBase):
 			try:
 				self.container.seek(offset, backward=True, any_frame=False, stream=self.vstream) # this can silently fail for broken files
 			except self.av.error.PermissionError:
-				raise NoKeyFrame("Failed to seek to {} of {}.".format(offset, self.container.duration))
+				raise NoKeyFrame(f"Failed to seek to {offset} of {self.container.duration}.")
 
 			try:
 				for vframe in self.container.decode(self.vstream): # can raise
@@ -283,7 +283,7 @@ def grab_pic(inpath, outpath, pos=0.5, overwrite=False, backend="cv"):
 	elif backend == "cv":
 		vf = CvVideo(inpath)
 	else:
-		raise ValueError("Unsupported backend: {}".format(backend))
+		raise ValueError(f"Unsupported backend: {backend}")
 
 	try:
 		outpath.parent.mkdir(parents=True, exist_ok=True)
@@ -293,7 +293,7 @@ def grab_pic(inpath, outpath, pos=0.5, overwrite=False, backend="cv"):
 			vf.save_frame_to_file(pos, outpath)
 		elif isinstance(pos, list):
 			for i, p in enumerate(pos):
-				outpathseq = outpath.with_suffix(".{}{}".format(i, outpath.suffix))
+				outpathseq = outpath.with_suffix(f".{i}{outpath.suffix}")
 				_raise_exists(outpathseq, overwrite)
 				vf.save_frame_to_file(p, outpathseq)
 		else:

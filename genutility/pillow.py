@@ -80,7 +80,7 @@ def write_text(img, text, alignment="TL", fillcolor=(255, 255, 255), outlinecolo
 	# (Image, str, str, Color, Color, Union[float, int], Union[float, Tuple[int, int]]) -> None
 
 	if alignment not in {"TL", "TC", "TR", "BL", "BC", "BR"}:
-		raise ValueError("Invalid alignment: {}".format(alignment))
+		raise ValueError(f"Invalid alignment: {alignment}")
 
 	if isinstance(fontsize, int):
 		pass

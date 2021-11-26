@@ -22,16 +22,16 @@ def film_to_ntsc(num):
 	return num * REAL_FILM_FPS/NTSC_PROG_FPS
 
 def to_msec(string):
-	h, m, s, ms = [int(i) for i in string.replace(",", ":").replace(".", ":").split(":")]
+	h, m, s, ms = (int(i) for i in string.replace(",", ":").replace(".", ":").split(":"))
 	return (h * 60 * 60 + m * 60 + s)*1000 + ms
 
 def to_srt_time(t):
 	r, ms = divmod(t, 1000)
 	r, s = divmod(r, 60)
 	h, m = divmod(r, 60)
-	return "{:02d}:{:02d}:{:02d},{:03d}".format(int(h), int(m), int(s), int(ms))
+	return f"{int(h):02d}:{int(m):02d}:{int(s):02d},{int(ms):03d}"
 
-class Subtitle(object):
+class Subtitle:
 
 	def __init__(self):
 		self.num = 0
@@ -48,7 +48,7 @@ class Subtitle(object):
 	def append(self, line):
 		self.lines.append(line)
 
-class SRTFile(object):
+class SRTFile:
 
 	nl = "\n"
 	sep = " --> "
@@ -91,7 +91,7 @@ class SRTFile(object):
 			try:
 				self.sub.num = int(line)
 			except ValueError:
-				raise MalformedFile("Error in line {}: srt malformed: {}".format(self.linenum,line))
+				raise MalformedFile(f"Error in line {self.linenum}: srt malformed: {line}")
 			self.state = 1
 		elif self.state == 1:
 			start, end = line.split(self.sep)
@@ -154,7 +154,7 @@ def srt2txt(srt_fp):
 
 def compare_srt_and_txt(srt_file, txt_file):
 
-	with SRTFile(srt_file, "r", encoding="utf-8-sig") as srt, open(txt_file, "r", encoding="utf-8-sig") as txt:
+	with SRTFile(srt_file, "r", encoding="utf-8-sig") as srt, open(txt_file, encoding="utf-8-sig") as txt:
 
 		srtiter = srt2txt(srt)
 
@@ -173,7 +173,7 @@ def compare_srt_and_txt(srt_file, txt_file):
 					while start <= len(line):
 						srtpart = next(srtiter)
 						txtpart = line[start:start+len(srtpart)]
-						logging.debug("Compare '{}' '{}'".format(txtpart, srtpart))
+						logging.debug(f"Compare '{txtpart}' '{srtpart}'")
 						if txtpart != srtpart:
 							#print("{} - {}".format(sub.start, sub.end))
 							yield (txtpart, srtpart)

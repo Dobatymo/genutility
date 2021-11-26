@@ -15,7 +15,7 @@ class AtomicTest(MyTestCase):
 			for value in values:
 				fw.write(value)
 
-		with open(path, "rt", encoding="utf-8") as fr:
+		with open(path, encoding="utf-8") as fr:
 			result = fr.read()
 
 		self.assertEqual("".join(values), result)

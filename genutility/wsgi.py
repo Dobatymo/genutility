@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 	from typing import Any, Callable, Dict, Iterable, Mapping, Optional
 	WsgiApp = Any
 
-class HostDispatcher(object):
+class HostDispatcher:
 
 	""" Dispatch WSGI apps by host.
 		app = HostDispatcher({'a.com': app_a, 'b.com': app_b})

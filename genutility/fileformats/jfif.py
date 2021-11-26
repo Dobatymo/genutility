@@ -104,7 +104,7 @@ segments = {
 
 markerp = re.compile(b"\xFF[^\x00]")  # don't use raw literals
 
-metadata_segments = {"COM", "TRAILER", } | set("APP{}".format(i) for i in range(16))
+metadata_segments = {"COM", "TRAILER", } | {f"APP{i}" for i in range(16)}
 
 def iter_jpeg_fp(fr, translate=True):
 	# type: (BinaryIO, bool) -> Iterator[Segment]
@@ -134,7 +134,7 @@ def iter_jpeg_fp(fr, translate=True):
 			try:
 				info = segments[marker]
 			except KeyError:
-				raise ParseError("Invalid segment marker: {} at {}".format(backslash_escaped_ascii(marker), mm.tell()))
+				raise ParseError(f"Invalid segment marker: {backslash_escaped_ascii(marker)} at {mm.tell()}")
 
 			name = info[0]
 			hasdata = info[1]
@@ -163,7 +163,7 @@ def iter_jpeg_fp(fr, translate=True):
 					try:
 						info = segments[marker]
 					except KeyError:
-						raise ParseError("Invalid segment marker: {} at {}".format(backslash_escaped_ascii(marker), start))
+						raise ParseError(f"Invalid segment marker: {backslash_escaped_ascii(marker)} at {start}")
 
 					name = info[0]
 

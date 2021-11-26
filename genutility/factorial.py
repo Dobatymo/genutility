@@ -1,7 +1,7 @@
 from __future__ import generator_stop
 
 
-class SplitRecursive(object):
+class SplitRecursive:
 
 	"""Fast non-prime-based factorial algorithm.
 		Python port of: http://www.luschny.de/math/factorial/java/FactorialSplit.java.html
@@ -11,7 +11,7 @@ class SplitRecursive(object):
 		# type: (int, ) -> int
 
 		if n < 0:
-			raise ArithmeticError("Factorial: n has to be >= 0, but was {}".format(n))
+			raise ArithmeticError(f"Factorial: n has to be >= 0, but was {n}")
 
 		if n < 2:
 			return 1

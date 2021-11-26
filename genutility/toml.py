@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 def read_toml(path):
 	# type: (str, ) -> Any
 
-	with open(path, "r", encoding="utf-8") as fr:
+	with open(path, encoding="utf-8") as fr:
 		return toml.load(fr)
 
 def write_toml(obj, path):

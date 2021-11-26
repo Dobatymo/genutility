@@ -22,7 +22,7 @@ def MSER_draw(img, boxes, centers, major_v, minor_v, labels):
 	labels_unique = np.unique(labels)
 	n_clusters = len(labels_unique)
 	colors = list(islice(rgb_colors(), n_clusters))
-	print("{} clusters found".format(n_clusters))
+	print(f"{n_clusters} clusters found")
 
 	for box, label in zip(boxes, labels):
 		cv2.ellipse(img, box, colors[label], 2)

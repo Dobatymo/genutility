@@ -3,7 +3,7 @@ from __future__ import generator_stop
 import numpy as np
 
 
-class LinearRegression(object):
+class LinearRegression:
 
 	""" Linear regression optimized by gradient descent. """
 

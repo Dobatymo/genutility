@@ -9,7 +9,7 @@ from .func import identity
 
 T = TypeVar("T")
 
-class GenericLabelEncoder(object):
+class GenericLabelEncoder:
 
 	""" Encodes all hashable objects to integers """
 

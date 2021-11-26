@@ -107,8 +107,7 @@ def _combination_indices(start, sizes):
 			for j in _combination_indices(i, sizes[1:]):
 				yield (i, ) + j
 	else:
-		for k in map(obj2tuple, range(start, sizes[0])): # type: ignore # mypy issue #1317
-			yield k # type: ignore # mypy issue #1317
+		yield from map(obj2tuple, range(start, sizes[0]))
 
 def combination_indices(*sizes):
 

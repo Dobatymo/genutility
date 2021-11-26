@@ -97,7 +97,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 			try:
 				return cls.load_a_format(islice(fin, limit), vs, vector_size, discard=discard)
 			except DuplicateEntry as e:
-				raise ValueError("duplicate word '{}' in {}".format(e, fname))
+				raise ValueError(f"duplicate word '{e}' in {fname}")
 
 	@classmethod
 	def load_glove_format(cls, fname: Union[str, TextIO], limit: int, vector_size: int, discard: Optional[Callable[[str], bool]]=None) -> KeyedVectorsOriginal:
@@ -110,7 +110,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 			try:
 				return cls.load_a_format(islice(fin, limit), limit, vector_size, discard=discard)
 			except DuplicateEntry as e:
-				raise ValueError("duplicate word '{}' in {}".format(e, fname))
+				raise ValueError(f"duplicate word '{e}' in {fname}")
 
 	def get_keras_embedding(self, train_embeddings: bool=False, mask_zero: bool=True) -> "Embedding":  # noqa: F821
 

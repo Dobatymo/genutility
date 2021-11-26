@@ -10,7 +10,7 @@ from cwinsdk.um.winnt import GENERIC_READ, GENERIC_WRITE
 _mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "w+": GENERIC_READ | GENERIC_WRITE}
 
 
-class WindowsHandle(object):
+class WindowsHandle:
 
 	def __init__(self, handle, doclose=True):
 		# type: (int, bool) -> None

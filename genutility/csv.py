@@ -12,14 +12,13 @@ from .func import compose, identity, zipmap
 def iter_csv(path, delimiter=",", encoding="utf-8", skip=0):
 	# type: (str, str, str, bool) -> Iterator[List[str]]
 
-	with open(path, "rt", encoding="utf-8", newline="") as fr:
-		for data in islice(csv.reader(fr, delimiter=delimiter), skip, None):
-			yield data
+	with open(path, encoding="utf-8", newline="") as fr:
+		yield from islice(csv.reader(fr, delimiter=delimiter), skip, None)
 
 def read_csv(path, delimiter=",", skip=0, usecols=None, dtype=None, encoding="utf-8"):
 	# type: (str, str, int, Optional[Sequence[int]], Optional[Sequence[Callable]], str) -> Iterator[tuple]
 
-	with open(path, "rt", encoding=encoding, newline="") as csvfile:
+	with open(path, encoding=encoding, newline="") as csvfile:
 		if usecols:
 			if dtype:
 				getcols = compose(partial(zipmap, dtype), itemgetter(usecols))

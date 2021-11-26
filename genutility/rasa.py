@@ -52,7 +52,7 @@ class RasaABC(Generic[ReturnT], metaclass=ABCMeta):
 		raise NotImplementedError
 
 
-class Rasa(object):
+class Rasa:
 
 	sender: str
 

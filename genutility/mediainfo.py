@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 	from pymediainfo import Track
 
-class MediaInfoHelper(object):
+class MediaInfoHelper:
 
 	def __init__(self, path):
 		# type: (Union[str, Path], ) -> None

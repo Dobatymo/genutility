@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 	from graphviz import Digraph
 
-class BKNode(object):
+class BKNode:
 
 	__slots__ = ["value", "leaves"]
 
@@ -24,7 +24,7 @@ class BKNode(object):
 	def __repr__(self):
 		return repr(self.value) + ": " + repr(self.leaves)
 
-class BKTree(object):
+class BKTree:
 
 	""" BK-tree. Used for nearest neighbor queries according to a discrete metric.
 		Examples for the metric are the Manhattan distance or the Levenshtein distance.
@@ -107,8 +107,7 @@ class BKTree(object):
 				nodeset = set(BKTree._values(bknode))
 				nodeset.add(node.value)
 				yield nodeset
-			for ret in BKTree._find_by_distance(bknode, distance):
-				yield ret
+			yield from BKTree._find_by_distance(bknode, distance)
 
 	def find_by_distance(self, distance):
 		# type: (int, ) -> Iterator[Set[Any]]
@@ -147,8 +146,7 @@ class BKTree(object):
 
 		yield node.value
 		for leaf in node.leaves.values():
-			for value in BKTree._values(leaf):
-				yield value
+			yield from BKTree._values(leaf)
 
 	def values(self):
 		# type: () -> Iterator[Any]
@@ -163,7 +161,7 @@ class BKTree(object):
 
 		return self.values()
 
-class RoutingObject(object):
+class RoutingObject:
 
 	def __init__(self, value):
 		# type: (T, ) -> None
@@ -175,13 +173,13 @@ class RoutingObject(object):
 		self.covering_radius = None # type: Optional[float]
 
 	def __repr__(self):
-		return "RoutingObject({}, radius={}, tree={})".format(self.value, self.covering_radius, self.subtree)
+		return f"RoutingObject({self.value}, radius={self.covering_radius}, tree={self.subtree})"
 
 	def set_subtree(self, node):
 		self.subtree = node
 		node.parent_object = self
 
-class LeafObject(object):
+class LeafObject:
 
 	def __init__(self, value):
 		# type: (T, ) -> None
@@ -191,7 +189,7 @@ class LeafObject(object):
 		self.distance_to_parent = None # type: Optional[float]
 
 	def __repr__(self):
-		return "LeafObject({})".format(self.value)
+		return f"LeafObject({self.value})"
 
 	def to_routing_object(self):
 		return RoutingObject(self.value)
@@ -202,7 +200,7 @@ def isid(obj):
 	else:
 		return id(obj)
 
-class MNode(object):
+class MNode:
 
 	maxsize = 4
 
@@ -349,7 +347,7 @@ def _partition_generalized_hyperplane(distance_func, objects, o1, o2):
 
 	return a, b
 
-class MTree(object):
+class MTree:
 
 	""" See: M-tree: An Efficient Access Method for Similarity Search in Metric Spaces (1997)
 	"""
@@ -372,13 +370,12 @@ class MTree(object):
 		}[partition or "generalized-hyperplane"]
 
 	def __repr__(self):
-		return "<MTree: {!r}>".format(self.root)
+		return f"<MTree: {self.root!r}>"
 
 	def _keys(self, node):
 		if isinstance(node, InternalNode):
 			for ro in node.objects:
-				for value in self._keys(ro.subtree):
-					yield value
+				yield from self._keys(ro.subtree)
 		else:
 			for lo in node.objects:
 				yield lo.value
@@ -465,8 +462,7 @@ class MTree(object):
 						yield lo.value
 
 	def keys(self):
-		for value in self._keys(self.root):
-			yield value
+		yield from self._keys(self.root)
 
 	def add(self, value):
 		# type: (T, ) -> None
@@ -494,7 +490,7 @@ def len_dist(s1, s2):
 def vals(start, end):
 	# type: (int, int) -> Set[str]
 
-	return set(str(i)*i for i in range(start, end+1))
+	return {str(i)*i for i in range(start, end+1)}
 
 from unittest import TestCase
 

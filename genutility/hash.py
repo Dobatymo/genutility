@@ -72,7 +72,7 @@ sha1_hash_file = partial(hash_file, hashcls=hashlib.sha1)
 def hashsum_file_format(hashobj, path):
 	# type: (Hashobj, str) -> str
 
-	return "{} *{}".format(hashobj.hexdigest(), path)
+	return f"{hashobj.hexdigest()} *{path}"
 
 ed2k_chunksize = 9728000
 

@@ -142,7 +142,7 @@ def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_in
 
 	return progress(it, length, refresh, end, file, extra_info_callback, disable, None)
 
-class Progress(object):
+class Progress:
 
 	""" Cannot create a decorator to do this to generic generators,
 		because attributes cannot be set on generator objects.
@@ -180,8 +180,7 @@ def flatten(it):
 
 	for elm in it:
 		if isinstance(elm, (tuple, list)):
-			for i in flatten(elm):
-				yield i
+			yield from flatten(elm)
 		else:
 			yield elm
 
@@ -708,8 +707,7 @@ def collapse_any(it, col_set):
 		if key in col_set:
 			yield key
 		else:
-			for i in g: # yield from g
-				yield i
+			yield from g
 
 def collapse_all(it, col_set, replacement):
 	# type: (Iterable[T], Set[T], T) -> Iterator[T]
@@ -725,8 +723,7 @@ def collapse_all(it, col_set, replacement):
 		if key:
 			yield replacement
 		else:
-			for i in g: # yield from g
-				yield i
+			yield from g
 
 def any_in_common(a, b):
 	# type: (Iterable[T], Iterable[T]) -> bool
@@ -750,7 +747,7 @@ def any_in(it, container):
 
 	return any(elm in container for elm in it)
 
-class CountIter(object):
+class CountIter:
 
 	""" Example:
 		c = CountIter()

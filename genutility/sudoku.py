@@ -32,7 +32,7 @@ class Sudoku(Generic[T]):
 			raise ValueError("board has an invalid size")
 
 		if self.outer_square_size != len(sym_set):
-			raise ValueError("sym_set length must be equal to the edge length of the board: {} vs {}".format(len(sym_set), self.outer_square_area))
+			raise ValueError(f"sym_set length must be equal to the edge length of the board: {len(sym_set)} vs {self.outer_square_area}")
 
 		self.inner_square_size = isqrt(self.outer_square_size)
 		if self.inner_square_size ** 2 != self.outer_square_size:
@@ -245,20 +245,20 @@ def is_valid_solution(board, sym_set):
 
 	# check rows
 	for j in range(edge_len):
-		row = set(board[j][i] for i in range(edge_len))
+		row = {board[j][i] for i in range(edge_len)}
 		if set(row) != sym_set:
 			return False
 
 	# check cols
 	for i in range(edge_len):
-		col = set(board[j][i] for j in range(edge_len))
+		col = {board[j][i] for j in range(edge_len)}
 		if col != sym_set:
 			return False
 
 	# check inner squares
 	for x in range(0, edge_len, square_len):
 		for y in range(0, edge_len, square_len):
-			square = set(board[i][j] for i in range(x, x + square_len) for j in range(y, y + square_len))
+			square = {board[i][j] for i in range(x, x + square_len) for j in range(y, y + square_len)}
 			if square != sym_set:
 				return False
 
@@ -288,8 +288,8 @@ if __name__ == "__main__":
 
 		s.print_square()
 		if is_valid_solution(args.board, sym_set):
-			print("Solved sudoku in {:.2} seconds, using {} steps and backtracked {} times.".format(t.get(), steps, backtracks))
+			print(f"Solved sudoku in {t.get():.2} seconds, using {steps} steps and backtracked {backtracks} times.")
 		else:
-			print("No valid solution was found in {:.2} seconds, using {} steps and backtracked {} times.".format(t.get(), steps, backtracks))
+			print(f"No valid solution was found in {t.get():.2} seconds, using {steps} steps and backtracked {backtracks} times.")
 	except Unsolvable:
 		print("Sudoku is not solvable")

@@ -119,7 +119,7 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 		else:
 			return None
 
-class AdvancedItemContainerMixin(object):
+class AdvancedItemContainerMixin:
 
 	def DeleteSelectedItems(self):
 		#might be faster with autoarrange of, no reversed -> autoarrange on

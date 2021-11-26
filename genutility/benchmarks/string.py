@@ -1,4 +1,3 @@
-
 def contains_digit_2(s):
 	# type: (str, ) -> bool
 

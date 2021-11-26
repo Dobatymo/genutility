@@ -3,7 +3,7 @@ from __future__ import generator_stop
 from typing import Callable, List, Optional
 
 
-class SegmentTree(object):
+class SegmentTree:
 
 	# ported from https://codeforces.com/blog/entry/18051
 
@@ -41,7 +41,7 @@ class SegmentTree(object):
 		# type: (int, int) -> int
 
 		if left >= right or not 0 <= left <= self.n or not 0 <= right <= self.n:
-			raise ValueError("Interval [{}, {}) out of range".format(left, right))
+			raise ValueError(f"Interval [{left}, {right}) out of range")
 
 		res = self.initializer
 		left += self.n

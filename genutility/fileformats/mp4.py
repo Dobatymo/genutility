@@ -462,8 +462,7 @@ def _enum_atoms(fin, total_size, depth, parse_atoms=True, unparsed_data=False, v
 		if boxtype == "cont":
 			yield depth, pos, type, size, content, None
 
-			for atom in _enum_atoms(fin, atom_end, depth+1, parse_atoms, unparsed_data, version):
-				yield atom
+			yield from _enum_atoms(fin, atom_end, depth+1, parse_atoms, unparsed_data, version)
 		elif boxtype == "leaf":
 			if unparsed_data:
 				leaf = fin.read(size - delta)
@@ -487,8 +486,7 @@ def enumerate_atoms(path: str, parse_atoms: bool=False, unparsed_data: bool=Fals
 	total_size = os.path.getsize(path)
 	with open(path, "rb") as fr:
 		try:
-			for atom in _enum_atoms(fr, total_size, 0, parse_atoms, unparsed_data):
-				yield atom
+			yield from _enum_atoms(fr, total_size, 0, parse_atoms, unparsed_data)
 		except Break:
 			pass
 		except EOFError:

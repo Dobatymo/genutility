@@ -99,7 +99,7 @@ def collapse_punctuation_symbols(s):
 	unwantedset = set.union(*cats)
 	return "".join(collapse_any(s, unwantedset))
 
-class ReplaceURLs(object):
+class ReplaceURLs:
 
 	def __init__(self, replacement, schemes=None):
 		# type: (Union[str, Iterable], Optional[Sequence[str]]) -> None

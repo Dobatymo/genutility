@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 def parse_imdb_csv(path):
 	# type: (str, ) -> Iterator[Dict[str, str]]
 
-	with open(path, "r", encoding="iso-8859-1", errors="strict", newline="") as fr:
+	with open(path, encoding="iso-8859-1", errors="strict", newline="") as fr:
 		csvreader = csv.DictReader(fr)
-		for row in csvreader:
-			yield row
+		yield from csvreader

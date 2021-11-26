@@ -84,7 +84,7 @@ class DatabaseUnavailable(ExternalError):
 class ClosedObjectUsed(RuntimeError):
 
 	def __init__(self, obj):
-		RuntimeError.__init__(self, "{} is already closed".format(obj.__class__.__name__))
+		RuntimeError.__init__(self, f"{obj.__class__.__name__} is already closed")
 
 # values, input errors
 
@@ -133,4 +133,4 @@ def assert_type(name: str, value: Any, types: Union[Type[Any], Tuple[Type[Any], 
 
 def assert_true(name, value):
 	if not value:
-		raise ValueError("{} must be set".format(name))
+		raise ValueError(f"{name} must be set")

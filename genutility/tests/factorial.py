@@ -21,7 +21,7 @@ class FactorialTest(MyTestCase):
 	def test_factorials(self, cls):
 		fac = cls()
 		for x, truth in self.tests.items():
-			with PrintStatementTime("%s(%s) took {delta}s" % (cls.__name__, x)):
+			with PrintStatementTime(f"{cls.__name__}({x}) took {{delta}}s"):
 				result = fac.factorial(x)
 			self.assertEqual(truth, result)
 

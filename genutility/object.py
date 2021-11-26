@@ -16,10 +16,10 @@ def cast(object, class_, instanceof=object, *args, **kwargs):
 		object.__class__ = class_
 		object.__init__(*args, **kwargs)
 	else:
-		raise TypeError("Object is not an instance of {}".format(instanceof.__name__))
+		raise TypeError(f"Object is not an instance of {instanceof.__name__}")
 	return object
 
-class STAR(object):
+class STAR:
 	pass
 
 def args_to_key(args, kwargs, separator=STAR):

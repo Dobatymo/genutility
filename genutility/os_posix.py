@@ -43,4 +43,4 @@ def _interrupt_posix():
 def _filemanager_cmd_posix(path):
 	# type: (str, ) -> str
 
-	return "nautilus \"{}\"".format(path) #gnome only. xdg-open for the rest?
+	return f"nautilus \"{path}\"" #gnome only. xdg-open for the rest?

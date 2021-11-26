@@ -43,7 +43,7 @@ def format_topics(topics, linesep="\n", tokensep="\t"):
 	buffer = []
 
 	for terms in topics:
-		buffer.append(tokensep.join("({},{})".format(term, prob) for term, prob in terms))
+		buffer.append(tokensep.join(f"({term},{prob})" for term, prob in terms))
 
 	return linesep.join(buffer)
 
@@ -67,9 +67,9 @@ class LDADocument(SizedIterable[int]):
 	def __repr__(self):
 		# type: () -> str
 
-		return "LDADocument({})".format(repr(self.words))
+		return f"LDADocument({repr(self.words)})"
 
-class LDABase(object):
+class LDABase:
 
 	K: int
 	nmk: np.ndarray
@@ -218,7 +218,7 @@ class LDABase(object):
 		for i in range(n_iter):
 			self.sample_all()
 			if verbose:
-				print("Step #{}, metric: {}".format(i, self.metric()))
+				print(f"Step #{i}, metric: {self.metric()}")
 
 	def theta(self):
 		# type: () -> np.ndarray

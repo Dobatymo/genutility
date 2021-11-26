@@ -194,7 +194,7 @@ def retry(func, waittime, exceptions=(Exception, ), attempts=-1, multiplier=1, j
 	else:
 		raise NotRetried
 
-class CustomCache(object):
+class CustomCache:
 
 	""" Class to build decorator cache function using custom reader and writer functions.
 		The cache method ignores all arguments of the decorated function.

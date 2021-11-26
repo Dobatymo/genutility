@@ -15,7 +15,7 @@ class SignalTest(MyTestCase):
 		MyTestCase.__init__(self, *args, **kwargs)
 
 	@staticmethod
-	def busywait(): # only works with python 3 (3.5+?)
+	def busywait():
 		for i in range(10):
 			time.sleep(0.1)
 
@@ -28,7 +28,7 @@ class SignalTest(MyTestCase):
 		try:
 			for i in range(10):
 				time.sleep(0.1)
-		except IOError as e: #
+		except OSError as e: #
 			if e.errno == errno.EINTR: # 4
 				pass
 			else:

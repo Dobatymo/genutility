@@ -9,18 +9,18 @@ from .time import PrintStatementTime
 
 # UNFINISHED!!! use re2 or hyperscan for pathological regex
 
-class Browscap(object):
+class Browscap:
 
 	def __init__(self, path="browscap.csv"):
 		self.path = path
 
 	@staticmethod
 	def convert_to_regex(pattern):
-		ret = "^{}$".format(re.escape(pattern)) # fnmatch.translate(pattern)
+		ret = f"^{re.escape(pattern)}$" # fnmatch.translate(pattern)
 		return ret.replace("\\?", ".").replace("\\*", ".*")
 
 	def iter_patterns(self):
-		with open(self.path, "rt", newline="") as fr:
+		with open(self.path, newline="") as fr:
 			csvreader = csv.reader(fr)
 			for row in islice(csvreader, 2, None):
 				yield self.convert_to_regex(row[0]), row[6]

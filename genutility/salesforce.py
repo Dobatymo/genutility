@@ -59,7 +59,7 @@ def _flatten_row(row):
 
 	return ret
 
-class MySalesforce(object):
+class MySalesforce:
 
 	def __init__(self, username, password, security_token, consumer_key, consumer_secret, test=False, cache_file=None, timeout=60):
 		# type: (str, str, str, str, str, bool, Optional[str], int) -> None
@@ -219,7 +219,7 @@ class MySalesforce(object):
 			Warning: `object_name` is not escaped!
 		"""
 
-		query_str = "SELECT QualifiedApiName, DataType, Label FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{}'".format(object_name)  # nosec
+		query_str = f"SELECT QualifiedApiName, DataType, Label FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{object_name}'"  # nosec
 
 		return self._query(query_str)
 
@@ -381,7 +381,7 @@ class LiveAgentBase(Generic[ReturnTGet, ReturnTPost]):
 					custom_detail.setdefault("transcriptFields", [])
 					custom_detail.setdefault("entityMaps", [])
 			except KeyError as e:
-				raise ValueError("slots is missing fields: {}".format(e))
+				raise ValueError(f"slots is missing fields: {e}")
 
 			prechat_details = slots
 

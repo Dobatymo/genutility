@@ -31,7 +31,7 @@ EntryType = Union[Path, DirEntry]
 
 logger = logging.getLogger(__name__)
 
-ascii_control = set(chr(i) for i in range(1, 32))
+ascii_control = {chr(i) for i in range(1, 32)}
 ntfs_illegal_chars = {"\0", "/"}
 fat_illegal_chars = {"\0", "/", "?", "<", ">", "\\", ":", "*", "|", '"', "^"} # ^ really?
 
@@ -48,7 +48,7 @@ mac_sep = r"/:"
 
 windows_reserved_names = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}
 
-class fileextensions(object):
+class fileextensions:
 	audio = ("wav", "mp3", "aac", "flac", "m4a", "m4b", "aiff", "ogg", "wma", "mka", "ac3", "dts")
 	video = ("avi", "mp4", "m4v", "mkv", "mpg", "mpeg", "wmv", "mov", "flv", "f4v", "webm", "vob", "ogv", "m2ts", "rm", "rmvb", "asf", "3gp", "nsv", "divx", "ogm")
 	images = ("bmp", "jpg", "jpeg", "png", "gif", "tif", "tiff", "tga")
@@ -81,7 +81,7 @@ class IllegalFilename(ValueError):
 class WindowsIllegalFilename(IllegalFilename):
 	pass
 
-class FileProperties(object):
+class FileProperties:
 
 	__slots__ = ("relpath", "size", "isdir", "abspath", "id", "modtime", "hash")
 
@@ -116,10 +116,10 @@ class FileProperties(object):
 	def __repr__(self):
 		# type: () -> str
 
-		args = ("{}={!r}".format(k, v) for k, v in zip(self.keys(), self.values()) if v is not None)
+		args = (f"{k}={v!r}" for k, v in zip(self.keys(), self.values()) if v is not None)
 		return "FileProperties({})".format(", ".join(args))
 
-class DirEntryStub(object):
+class DirEntryStub:
 	__slots__ = ("name", "path")
 
 	def __init__(self, name, path):
@@ -355,8 +355,7 @@ def _scandir_depth(rootentry, depth, errorfunc):
 			for entry in it:
 				if entry.is_dir():
 					yield depth, entry
-					for depth_entry in _scandir_depth(entry, depth + 1, errorfunc):
-						yield depth_entry
+					yield from _scandir_depth(entry, depth + 1, errorfunc)
 
 		with os.scandir(rootentry.path) as it:
 			for entry in it:
@@ -680,7 +679,7 @@ def normalize_seps(path):
 
 	return path.replace("\\", "/")
 
-class Counts(object):
+class Counts:
 	__slots__ = ("dirs", "files", "others")
 
 	def __init__(self):

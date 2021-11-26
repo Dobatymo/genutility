@@ -30,7 +30,7 @@ def _check_arguments(mode, encoding=None):
 	is_binary = "b" in mode
 
 	if not logical_xor(is_text, is_binary):
-		raise ValueError("Explicit text or binary mode required: {}".format(mode))
+		raise ValueError(f"Explicit text or binary mode required: {mode}")
 
 	if not logical_implication(is_binary, encoding is None):
 		raise ValueError("Encoding is not None for binary file")
@@ -169,7 +169,7 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
 
 	return open(file, mode, encoding=encoding, errors=errors, newline=newline)
 
-class OpenFileAndDeleteOnError(object):
+class OpenFileAndDeleteOnError:
 
 	""" Context manager which opens a file using the same arguments as `open`,
 		but deletes the file in case an exception occurs after opening.
@@ -203,7 +203,7 @@ class OpenFileAndDeleteOnError(object):
 			# see also: https://nullprogram.com/blog/2016/08/07/
 			os.remove(self.file)
 
-class OptionalWriteOnlyFile(object):
+class OptionalWriteOnlyFile:
 
 	def __init__(self, path=None, mode="xb", encoding=None, errors=None, newline=None, compresslevel=9):
 		# type: (Optional[PathType], str, Optional[str], Optional[str], Optional[str], int) -> None
@@ -229,7 +229,7 @@ class OptionalWriteOnlyFile(object):
 	def seek(self, offset, whence=None):
 		pass
 
-class StdoutFile(object):
+class StdoutFile:
 
 	def __init__(self, path=None, mode="xb", encoding=None, errors=None, newline=None, compresslevel=9):
 		# type: (Optional[PathType], str, Optional[str], Optional[str], Optional[str], int) -> None
@@ -244,7 +244,7 @@ class StdoutFile(object):
 			elif "t" in mode:
 				self.fp = stdout
 			else:
-				raise ValueError("Explicit text or binary mode required: {}".format(mode))
+				raise ValueError(f"Explicit text or binary mode required: {mode}")
 
 	def __enter__(self):
 		return self.fp
@@ -253,7 +253,7 @@ class StdoutFile(object):
 		if self.doclose:
 			self.fp.close()
 
-class PathOrBinaryIO(object):
+class PathOrBinaryIO:
 
 	def __init__(self, fname, mode="rb", close=False):
 		# type: (Union[PathType, BinaryIO], str, bool) -> None
@@ -274,7 +274,7 @@ class PathOrBinaryIO(object):
 		if self.doclose:
 			self.fp.close()
 
-class PathOrTextIO(object):
+class PathOrTextIO:
 
 	def __init__(self, fname, mode="rt", encoding="utf-8", errors="strict", newline=None, close=False):
 		# type: (Union[PathType, TextIO], str, str, str, Optional[str], bool) -> None
@@ -295,7 +295,7 @@ class PathOrTextIO(object):
 		if self.doclose:
 			self.fp.close()
 
-class LastLineFile(object):
+class LastLineFile:
 
 	chunk_size = 1024 * 4
 	nl = "\n"
@@ -356,7 +356,7 @@ class LastLineFile(object):
 		self.f.truncate()
 		return ret
 
-class Tell(object):
+class Tell:
 
 	def __init__(self, fp):
 		# type: (IO, ) -> None
@@ -412,7 +412,7 @@ class Tell(object):
 		return self._fp.writelines(lines)
 
 	def seek(self, offset, whence=SEEK_SET):
-		raise IOError("Stream is not seekable")
+		raise OSError("Stream is not seekable")
 
 	def tell(self):
 		return self._pos
@@ -594,8 +594,7 @@ def blockfileiter(path, mode="rb", encoding=None, errors=None, start=0, amount=N
 	encoding = _check_arguments(mode, encoding)
 
 	with open(path, mode, encoding=encoding, errors=errors) as fr:
-		for data in iterfilelike(fr, start, amount, chunk_size):
-			yield data
+		yield from iterfilelike(fr, start, amount, chunk_size)
 
 def blockfilesiter(paths, chunk_size=FILE_IO_BUFFER_SIZE):
 	# type: (Iterable[PathType], int) -> Iterator[bytes]
@@ -693,7 +692,7 @@ def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password
 
 	with ZipFile(file, newmode) as zf:
 		for zi in zf.infolist():
-			if not zi.is_dir():  # fixme: Py3.5 AttributeError: 'ZipInfo' object has no attribute 'is_dir'
+			if not zi.is_dir():
 				with zf.open(zi, newmode, password) as bf:
 					yield zi.filename, wrap_text(bf, mode, encoding, errors, newline)
 
@@ -840,4 +839,4 @@ def file_byte_reader(filename, inputblocksize, outputblocksize, DEBUG=True):
 		import os.path
 		filesize = os.path.getsize(filename)
 		if filesize != bytes_yielded:
-			print("{} bytes yielded, filesize: {}".format(bytes_yielded, filesize))
+			print(f"{bytes_yielded} bytes yielded, filesize: {filesize}")

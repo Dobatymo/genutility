@@ -12,14 +12,12 @@ def flatten(d: Union[Dict[T, U], List[U], Tuple[U, ...]]) -> Iterator[U]:
 	""" Flattens dicts/lists of (dicts/lists of ...) lists to lists. """
 
 	if isinstance(d, (list, tuple)):
-		for v in d:
-			yield v
+		yield from d
 	elif isinstance(d, dict):
 		for k, val in d.items():
-			for v in flatten(val):
-				yield v
+			yield from flatten(val)
 	else:
-		raise TypeError("Unsupported type: {}".format(type(d)))
+		raise TypeError(f"Unsupported type: {type(d)}")
 
 def get_one_of(d: Dict[T, U], keys: Iterable[T]) -> Tuple[T, U]:
 

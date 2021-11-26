@@ -19,7 +19,7 @@ def get_spacy_tokenizer(modelname, lemmatize=True):
 class NoParagraphsFound(Exception):
 	pass
 
-class QueryBasedParagraphExtraction(object):
+class QueryBasedParagraphExtraction:
 
 	def __init__(self, modelname="en_core_web_sm"):
 		self.tokenizer = get_spacy_tokenizer(modelname)

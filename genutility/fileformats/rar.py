@@ -31,7 +31,7 @@ class RarError(Exception):
 1	WARNING	Non fatal error(s) occurred
 0	SUCCESS	Successful operation (User exit)"""
 
-class Rar(object):
+class Rar:
 
 	windows_executable = Path("C:/Program Files/WinRAR/Rar.exe")
 
@@ -122,7 +122,7 @@ class Rar(object):
 		self.cmd = cmd.strip()
 
 	def _execute(self, args):
-		cmd = "{} {}".format(self.exe, args)
+		cmd = f"{self.exe} {args}"
 		logger.debug("CMD: " + cmd)
 		try:
 			ret = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
@@ -135,7 +135,7 @@ class Rar(object):
 		return ret
 
 	def test(self, password="-"):  # nosec
-		self._execute('t -p{} "{}"'.format(password, self.archive))
+		self._execute(f't -p{password} "{self.archive}"')
 
 	def get_files_str(self):
 		return surrounding_join(" ", self.filelist, "\"", "\"")
@@ -147,7 +147,7 @@ class Rar(object):
 		return surrounding_join(" ", [value[1] % value[0] for value in self.options.itervalues() if value[0] is not False], "-", "")
 
 	def _get_args(self, command):
-		return "%s %s %s %s \"%s\" %s" % (command, self.get_flag_str(), self.get_options_str(), self.cmd, self.archive, self.get_files_str())
+		return f"{command} {self.get_flag_str()} {self.get_options_str()} {self.cmd} \"{self.archive}\" {self.get_files_str()}"
 
 	def create(self):
 		self._execute(self._get_args("a"))
@@ -173,7 +173,7 @@ def create_rar_from_folder(path, dest_path=None, profile_setter_func=None, filte
 	with CurrentWorkingDirectory(path):
 
 		try:
-			r = Rar(dest_path / "{}.rar".format(name_transform(path.name)))
+			r = Rar(dest_path / f"{name_transform(path.name)}.rar")
 			if profile_setter_func:
 				profile_setter_func(r)
 			with os.scandir(".") as it:
@@ -181,7 +181,7 @@ def create_rar_from_folder(path, dest_path=None, profile_setter_func=None, filte
 					r.add_file(entry.path)
 			r.create()
 		except RarError as e:
-			logger.error("%s\n%s" % (str(e), e.output))
+			logger.error(f"{str(e)}\n{e.output}")
 			return False
 
 	return True
@@ -195,13 +195,13 @@ def create_rar_from_file(path, dest_path=Path("."), profile_setter_func=None, na
 	with CurrentWorkingDirectory(path.parent):
 
 		try:
-			r = Rar(dest_path / "{}.rar".format(name_transform(path.name)))
+			r = Rar(dest_path / f"{name_transform(path.name)}.rar")
 			if profile_setter_func:
 				profile_setter_func(r)
 			r.add_file(path.name)
 			r.create()
 		except RarError as e:
-			logger.error("%s\n%s" % (str(e), e.output))
+			logger.error(f"{str(e)}\n{e.output}")
 			return False
 
 	return True

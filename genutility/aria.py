@@ -30,7 +30,7 @@ def aria_bool(value):
 	else:
 		raise ValueError(str(value))
 
-class AriaDownloader(object):
+class AriaDownloader:
 
 	default_global_options = {
 		"max-concurrent-downloads": 5,
@@ -141,14 +141,14 @@ class AriaDownloader(object):
 					completed = sum(int(entry["completedLength"]) for entry in entries.values())
 					total = sum(int(entry["totalLength"]) for entry in entries.values())
 					speed = sum(int(entry["downloadSpeed"]) for entry in entries.values())
-					print("{} downloads: {}/{} bytes {} bytes/sec".format(len(entries), completed, total, speed), file=progress_file, end="\r")
+					print(f"{len(entries)} downloads: {completed}/{total} bytes {speed} bytes/sec", file=progress_file, end="\r")
 
 				sleep(self.poll)
 				continue
 
 			entries = self._entries(self.query("tell_waiting", 0, self.max_num_results)) # waiting or paused
 			if entries:
-				print("{} downloads waiting or paused".format(len(entries)), end="\r")
+				print(f"{len(entries)} downloads waiting or paused", end="\r")
 				sleep(self.poll)
 				continue
 
@@ -227,7 +227,7 @@ class AriaDownloader(object):
 					raise RuntimeError("Someone removed our download...")
 
 				else:
-					raise RuntimeError("Unexpected status: {}".format(status))
+					raise RuntimeError(f"Unexpected status: {status}")
 
 				sleep(self.poll)
 		finally:
@@ -268,7 +268,7 @@ class AriaDownloader(object):
 
 		return None
 
-class DownloadManager(object):
+class DownloadManager:
 
 	""" To use from a single thread.
 
@@ -351,7 +351,7 @@ if __name__ == "__main__":
 	d = AriaDownloader()
 	for uri in args.uris:
 		path = d.download_x(args.max, uri, args.path)
-		print("Downloaded {} to {}".format(uri, path))
+		print(f"Downloaded {uri} to {path}")
 
 	for a in d.block_all():
 		print(a)

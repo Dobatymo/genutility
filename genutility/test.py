@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 	T = TypeVar("T")
 	U = TypeVar("U")
 
-class nullcontext(object): # see: .compat.contextlib
+class nullcontext: # see: .compat.contextlib
 
 	def __init__(self, *args, **kwargs):
 		pass
@@ -43,7 +43,7 @@ class MyTestResult(TestResult):
 		return TestResult.__init__(self, stream, descriptions, verbosity)
 
 	def progress(self):
-		self.stream.write("Running test #{}, subtest #{}\r".format(self.current_test, self.current_subtest))
+		self.stream.write(f"Running test #{self.current_test}, subtest #{self.current_subtest}\r")
 
 	def startTest(self, test):
 		self.current_test += 1
@@ -79,7 +79,7 @@ class MyTestRunner(TextTestRunner):
 	def _makeResult(self):
 		return TextTestRunner._makeResult(self)
 
-class NoRaise(object):
+class NoRaise:
 
 	def __init__(self, testcase, message=None):
 		# type: (TestCase, Optional[str]) -> None
@@ -109,7 +109,7 @@ def make_comparable(d):
 	elif isinstance(d, dict):
 		return make_comparable(list(d.items()))
 	else:
-		raise ValueError("must be list, tuple or dict, not {}".format(type(d)))
+		raise ValueError(f"must be list, tuple or dict, not {type(d)}")
 
 def is_equal_unordered(seq_a, seq_b):
 	# type: (Collection, Collection) -> bool
@@ -152,7 +152,7 @@ class MyTestCase(TestCase):
 		for i, (a, b) in enumerate(zip_longest(first, second)):
 			if msg:
 				msg = " : " + str(msg)
-			self.assertEqual(a, b, msg="in iteration index {}: {}".format(i, msg))
+			self.assertEqual(a, b, msg=f"in iteration index {i}: {msg}")
 
 	def assertIterAlmostEqual(self, first, second, msg=None):
 		# type: (Iterable, Iterable, Optional[str]) -> None
@@ -161,7 +161,7 @@ class MyTestCase(TestCase):
 			if msg:
 				msg = " : " + str(msg)
 			try:
-				self.assertAlmostEqual(a, b, msg="in iteration index {}: {}".format(i, msg))
+				self.assertAlmostEqual(a, b, msg=f"in iteration index {i}: {msg}")
 			except TypeError:
 				raise AssertionError("Invalid types (probably different length iters)") # from None
 
@@ -179,7 +179,7 @@ class MyTestCase(TestCase):
 		for i, (a, b) in enumerate(zip_longest(first, second)):
 			if msg:
 				msg = " : " + str(msg)
-			self.assertIterEqual(a, b, msg="in iteration index {}: {}".format(i, msg))
+			self.assertIterEqual(a, b, msg=f"in iteration index {i}: {msg}")
 
 	def assertPriorityEqual(self, first, second, msg=None):
 		# type: (Iterable[Optional[Tuple[Hashable, Hashable]]], Iterable[Optional[Tuple[Hashable, Hashable]]], Optional[str]) -> None
@@ -291,7 +291,7 @@ def repeat(number):
 		return inner
 	return decorator
 
-class closeable_tempfile(object):
+class closeable_tempfile:
 
 	Uninterrupted = HandleKeyboardInterrupt()
 

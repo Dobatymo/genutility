@@ -19,7 +19,7 @@ from genutility.test import MyTestCase, parametrize
 nulllogger = logging.getLogger("null")
 nulllogger.addHandler(logging.NullHandler())
 
-class IteratorWithException(object):
+class IteratorWithException:
 
 	def __init__(self):
 		self.ret = [

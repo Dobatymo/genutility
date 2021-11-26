@@ -42,7 +42,7 @@ def decode_binary(key, tostring=False):
 	""" Decode bytes to either a string of 0s and 1s or an iterable of booleans.
 	"""
 
-	it = ("{:08b}".format(b) for b in key)
+	it = (f"{b:08b}" for b in key)
 
 	if tostring:
 		return "".join(it)

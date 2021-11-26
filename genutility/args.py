@@ -35,7 +35,7 @@ def get_args(argparser):
 			if confirm(str(k)):
 				args.append(k)
 		else:
-			instr = input("{} ({}): ".format(k, nargs))  # separate multiple value by whitespace, quoting supported.
+			instr = input(f"{k} ({nargs}): ")  # separate multiple value by whitespace, quoting supported.
 			args.append(k)
 			args.append(instr)
 
@@ -66,7 +66,7 @@ def multiple_of(divisor):
 		number = builtin_int(s)
 
 		if number % divisor != 0:
-			msg = "{0} is not clearly divisible by {1}".format(s, divisor)
+			msg = f"{s} is not clearly divisible by {divisor}"
 			raise ArgumentTypeError(msg)
 
 		return number
@@ -85,7 +85,7 @@ def in_range(start, stop, step=1):
 
 		r = range(start, stop, step)
 		if number not in r:
-			msg = "{0} is not in {1}".format(s, r)
+			msg = f"{s} is not in {r}"
 			raise ArgumentTypeError(msg)
 
 		return number
@@ -103,7 +103,7 @@ def between(start, stop):
 		number = builtin_float(s)
 
 		if not (start <= number < stop):
-			msg = "{0} is not in between {1} and {2}".format(s, start, stop)
+			msg = f"{s} is not in between {start} and {stop}"
 			raise ArgumentTypeError(msg)
 
 		return number
@@ -116,7 +116,7 @@ def suffix(s):
 	""" Checks if `s` is a valid suffix. """
 
 	if not s.startswith("."):
-		msg = "{0} is not a valid suffix. It must start with a dot.".format(s)
+		msg = f"{s} is not a valid suffix. It must start with a dot."
 		raise ArgumentTypeError(msg)
 
 	return s
@@ -135,7 +135,7 @@ def existing_path(path):
 	""" Checks if a path exists. """
 
 	if not path.exists():
-		msg = "{0} does not exist".format(path)
+		msg = f"{path} does not exist"
 		raise ArgumentTypeError(msg)
 
 	return path
@@ -147,7 +147,7 @@ def new_path(path):
 	""" Checks if a path exists. """
 
 	if path.exists():
-		msg = "{0} already exists".format(path)
+		msg = f"{path} already exists"
 		raise ArgumentTypeError(msg)
 
 	return path
@@ -159,7 +159,7 @@ def is_dir(path):
 	"""Checks if a path is an actual directory"""
 
 	if not path.is_dir():
-		msg = "{0} is not a directory".format(path)
+		msg = f"{path} is not a directory"
 		raise ArgumentTypeError(msg)
 
 	return path
@@ -179,7 +179,7 @@ def is_file(path):
 	"""Checks if a path is an actual file"""
 
 	if not path.is_file():
-		msg = "{0} is not a file".format(path)
+		msg = f"{path} is not a file"
 		raise ArgumentTypeError(msg)
 
 	return path
@@ -193,10 +193,10 @@ def future_file(path):
 	"""
 
 	if path.parent and not os.access(str(path.parent), os.W_OK):
-		msg = "cannot access directory {0}".format(path.parent)
+		msg = f"cannot access directory {path.parent}"
 		raise ArgumentTypeError(msg)
 	if path.is_file():
-		msg = "file {0} already exists".format(path)
+		msg = f"file {path} already exists"
 		raise ArgumentTypeError(msg)
 	return path
 
@@ -211,7 +211,7 @@ def out_dir(path):
 		try:
 			makedirs(path)
 		except OSError:
-			msg = "Error: '{}' is not a valid directory.".format(path)
+			msg = f"Error: '{path}' is not a valid directory."
 			raise ArgumentTypeError(msg)
 
 	return path
@@ -226,7 +226,7 @@ def empty_dir(dirname):
 
 	with os.scandir(dirname) as it:
 		if not is_empty(it):
-			msg = "directory {0} is not empty".format(dirname)
+			msg = f"directory {dirname} is not empty"
 			raise ArgumentTypeError(msg)
 
 	return dirname

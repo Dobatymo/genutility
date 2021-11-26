@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 	PathType = Union[str, PathLike]
 
 # http://stupidpythonideas.blogspot.tw/2014/07/getting-atomic-writes-right.html
-class TransactionalCreateFile(object):
+class TransactionalCreateFile:
 
 	def __init__(self, path, mode="wb", encoding=None, errors=None, newline=None, prefix="tmp"):
 		# type: (PathType, str, Optional[str], Optional[str], Optional[str], str) -> None

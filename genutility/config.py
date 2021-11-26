@@ -38,7 +38,7 @@ def _load(name):
 		spec = find_spec(name)
 
 		if spec is None:
-			raise ImportError("No module named '{}'".format(name)) # or FileNotFoundError?
+			raise ImportError(f"No module named '{name}'") # or FileNotFoundError?
 
 		if spec.has_location:
 			assert spec.origin # for mypy
@@ -57,7 +57,7 @@ def _load(name):
 	try:
 		return read_toml(configfilename)
 	except FileNotFoundError:
-		raise FileNotFoundError("{} could not be found in application data, module path or current directory".format(configfilename))
+		raise FileNotFoundError(f"{configfilename} could not be found in application data, module path or current directory")
 
 def load(name, json_schema=None):
 	# type: (str, Optional[Union[dict, str]]) -> Dict[str, Any]

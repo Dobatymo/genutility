@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 	from .typing import Connection, Cursor
 
-class TransactionCursor(object):
+class TransactionCursor:
 
 	""" Cursor context manager which starts a transaction and rolls back in case of error.
 	"""
@@ -35,7 +35,7 @@ class TransactionCursor(object):
 			self.cursor.execute("COMMIT TRANSACTION")
 		self.cursor.close()
 
-class CursorContext(object):
+class CursorContext:
 
 	""" Cursor context manager which creates a new cursor and closes it when it leaves the context.
 	"""
@@ -72,17 +72,17 @@ def upsert(cursor, primary, values, table):
 	if not primary:
 		raise ValueError("Empty primary mapping would result in an empty WHERE condition which would affect all rows")
 
-	set_str = ",".join("{}=?".format(k) for k in values.keys())
-	where_str = " AND ".join("{}=?".format(k) for k in primary.keys())
+	set_str = ",".join(f"{k}=?" for k in values.keys())
+	where_str = " AND ".join(f"{k}=?" for k in primary.keys())
 
-	cursor.execute("UPDATE {} SET {} WHERE {}".format(table, set_str, where_str),  # nosec
+	cursor.execute(f"UPDATE {table} SET {set_str} WHERE {where_str}",  # nosec
 		chain(values.values(), primary.values())
 	)
 
 	if cursor.rowcount == 0:
 		into_str = ",".join(chain(primary.keys(), values.keys()))
 		values_str = ",".join(repeat("?", len(primary) + len(values)))
-		cursor.execute("INSERT INTO {} ({}) VALUES ({})".format(table, into_str, values_str),  # nosec
+		cursor.execute(f"INSERT INTO {table} ({into_str}) VALUES ({values_str})",  # nosec
 			chain(primary.values(), values.values())
 		)
 		return True
@@ -113,5 +113,4 @@ def iterfetch(cursor, batchsize=1000):
 		results = cursor.fetchmany(batchsize)
 		if not results:
 			break
-		for result in results:
-			yield result
+		yield from results
