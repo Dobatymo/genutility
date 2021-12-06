@@ -62,7 +62,6 @@ class HandleKeyboardInterrupt:
 			logger.debug("SIGINT received. Delaying KeyboardInterrupt.")
 
 	def __exit__(self, type, value, traceback):
-		# should this show a warning for 'IOError: [Errno 4] Interrupted function call' on python 2.7?
 
 		signal.signal(signal.SIGINT, self.old_handler)
 		if self.signal_received and self.raise_after:

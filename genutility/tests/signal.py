@@ -1,6 +1,5 @@
 from __future__ import generator_stop
 
-import errno
 import time
 from unittest.mock import Mock
 
@@ -19,28 +18,13 @@ class SignalTest(MyTestCase):
 		for i in range(10):
 			time.sleep(0.1)
 
-	@staticmethod
-	def busywait_no_eintr():
-		""" sleep can raise 'IOError: [Errno 4] Interrupted function call'
-			on python 2.7 on signal
-		"""
-
-		try:
-			for i in range(10):
-				time.sleep(0.1)
-		except OSError as e: #
-			if e.errno == errno.EINTR: # 4
-				pass
-			else:
-				raise
-
 	def call(self, raise_after, a, b, c, d):
 		try:
 			with HandleKeyboardInterrupt(raise_after):
 				try:
 					a()
 					interrupt()
-					self.busywait_no_eintr()
+					self.busywait()
 					b()
 				except KeyboardInterrupt:
 					c()
@@ -54,7 +38,7 @@ class SignalTest(MyTestCase):
 		try:
 			a()
 			interrupt()
-			self.busywait_no_eintr()
+			self.busywait()
 			b()
 		except KeyboardInterrupt:
 			c()

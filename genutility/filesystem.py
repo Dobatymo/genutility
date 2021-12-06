@@ -736,14 +736,17 @@ def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, e
 		errorfunc(rootentry, e)
 
 def scandir_counts(path, files=True, others=True, rec=True, total=False, onerror=scandir_error_log):
-	# type: (str, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
+	# type: (PathType, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
 
 	""" A recursive variant of scandir() which also returns the number of files/directories
 		within directories.
 		If total is True, the numbers will be calculated recursively as well.
 	"""
 
-	entry = DirEntryStub(os.path.basename(path), uncabspath(path)) # for python 2 compat. and long filename support
+	if isinstance(path, PathLike):
+		path = fspath(path)
+
+	entry = DirEntryStub(os.path.basename(path), uncabspath(path))
 	return _scandir_counts(entry, files, others, rec, total, onerror)
 
 def shutil_onerror_remove_readonly(func, path, exc_info):
