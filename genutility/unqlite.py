@@ -21,6 +21,7 @@ def query_by_field_eq(db: UnQLite, col: str, key: Hashable, value: Any) -> List[
         vm.execute()
         return vm["data"]
 
+
 def query_by_field_intersect(db: UnQLite, col: str, key: Hashable, value: List[Any]) -> List[dict]:
     script = """
         $zCallback = function($doc) {

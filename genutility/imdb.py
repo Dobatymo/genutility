@@ -4,11 +4,12 @@ import csv
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from typing import Dict, Iterator
+    from typing import Dict, Iterator
+
 
 def parse_imdb_csv(path):
-	# type: (str, ) -> Iterator[Dict[str, str]]
+    # type: (str, ) -> Iterator[Dict[str, str]]
 
-	with open(path, encoding="iso-8859-1", errors="strict", newline="") as fr:
-		csvreader = csv.DictReader(fr)
-		yield from csvreader
+    with open(path, encoding="iso-8859-1", errors="strict", newline="") as fr:
+        csvreader = csv.DictReader(fr)
+        yield from csvreader

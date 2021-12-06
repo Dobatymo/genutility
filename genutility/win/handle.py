@@ -11,41 +11,40 @@ _mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "w+": GENERIC_READ
 
 
 class WindowsHandle:
+    def __init__(self, handle, doclose=True):
+        # type: (int, bool) -> None
 
-	def __init__(self, handle, doclose=True):
-		# type: (int, bool) -> None
+        if not isinstance(handle, int):
+            raise ValueError("handle must be an int")
 
-		if not isinstance(handle, int):
-			raise ValueError("handle must be an int")
+        self.handle = handle
+        self.doclose = doclose
 
-		self.handle = handle
-		self.doclose = doclose
+    @classmethod
+    def from_file(cls, fp):
+        return cls.from_fd(fp.fileno())
 
-	@classmethod
-	def from_file(cls, fp):
-		return cls.from_fd(fp.fileno())
+    @classmethod
+    def from_fd(cls, fd):
+        return cls(get_osfhandle(fd), doclose=False)
 
-	@classmethod
-	def from_fd(cls, fd):
-		return cls(get_osfhandle(fd), doclose=False)
+    def get_fd(self, flags):
+        return open_osfhandle(self.handle, flags)
 
-	def get_fd(self, flags):
-		return open_osfhandle(self.handle, flags)
+    def get_file(self, flags, mode="r", buffering=-1, encoding=None, errors=None, newline=None, closefd=True):
+        return fdopen(self.get_fd(flags), mode, buffering, encoding, errors, newline, closefd)
 
-	def get_file(self, flags, mode="r", buffering=-1, encoding=None, errors=None, newline=None, closefd=True):
-		return fdopen(self.get_fd(flags), mode, buffering, encoding, errors, newline, closefd)
+    def close(self):
+        # type: () -> None
 
-	def close(self):
-		# type: () -> None
+        if CloseHandle(self.handle) == 0:
+            raise WinError()
 
-		if CloseHandle(self.handle) == 0:
-			raise WinError()
+    def __enter__(self):
+        # type: () -> WindowsHandle
 
-	def __enter__(self):
-		# type: () -> WindowsHandle
+        return self
 
-		return self
-
-	def __exit__(self, exc_type, exc_value, traceback):
-		if self.doclose:
-			self.close()
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.doclose:
+            self.close()

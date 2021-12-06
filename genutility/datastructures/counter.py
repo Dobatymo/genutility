@@ -6,6 +6,7 @@ from typing import Callable, DefaultDict, Dict, Generic, Hashable, ItemsView, It
 H1 = TypeVar("H1", bound=Hashable)
 H2 = TypeVar("H2", bound=Hashable)
 
+
 class MultiCounter(Generic[H1, H2]):
     def __init__(self, transform: Optional[Callable[[H2], H2]] = None):
         self.counts: DefaultDict[H1, Dict[H2, int]] = defaultdict(dict)

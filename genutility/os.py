@@ -8,88 +8,95 @@ from ._func import rename
 from .os_shared import is_os_64bit  # noqa: F401
 
 if TYPE_CHECKING:
-	from pathlib import Path
-	PathStr = Union[Path, str]
+    from pathlib import Path
+
+    PathStr = Union[Path, str]
 
 system = platform.system()
 
+
 class CurrentWorkingDirectory:
 
-	__slots__ = ("oldcwd", )
+    __slots__ = ("oldcwd",)
 
-	def __init__(self, path):
-		# type: (PathStr, ) -> None
+    def __init__(self, path):
+        # type: (PathStr, ) -> None
 
-		self.oldcwd = os.getcwd()
-		os.chdir(path)
+        self.oldcwd = os.getcwd()
+        os.chdir(path)
 
-	def close(self):
-		# type: () -> None
+    def close(self):
+        # type: () -> None
 
-		os.chdir(self.oldcwd)
+        os.chdir(self.oldcwd)
 
-	def __enter__(self):
-		return self
+    def __enter__(self):
+        return self
 
-	def __exit__(self, exc_type, exc_value, traceback):
-		self.close()
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
 
 def _not_available(func_name: str) -> Callable:
+    @rename(func_name)
+    def inner(*args, **kwargs):
+        raise OSError(f"{func_name}() is not available for {system}")
 
-	@rename(func_name)
-	def inner(*args, **kwargs):
-		raise OSError(f"{func_name}() is not available for {system}")
+    return inner
 
-	return inner
 
 if system == "Windows":
 
-	from .os_win import _disk_usage_windows as disk_usage
-	from .os_win import _filemanager_cmd_windows as filemanager_cmd
-	from .os_win import _get_appdata_dir as get_appdata_dir
-	from .os_win import _interrupt_windows as interrupt
-	from .os_win import _islink as islink
-	from .os_win import _lock as lock
-	from .os_win import _uncabspath as uncabspath
-	from .os_win import _unlock as unlock
-	from .os_win import _volume_info_windows as volume_info
+    from .os_win import _disk_usage_windows as disk_usage
+    from .os_win import _filemanager_cmd_windows as filemanager_cmd
+    from .os_win import _get_appdata_dir as get_appdata_dir
+    from .os_win import _interrupt_windows as interrupt
+    from .os_win import _islink as islink
+    from .os_win import _lock as lock
+    from .os_win import _uncabspath as uncabspath
+    from .os_win import _unlock as unlock
+    from .os_win import _volume_info_windows as volume_info
 
 elif system == "Linux":
 
-	from .os_posix import _disk_usage_posix as disk_usage
-	from .os_posix import _lock as lock
-	from .os_posix import _unlock as unlock
-	volume_info = _not_available("volume_info")
-	from .os_posix import _filemanager_cmd_posix as filemanager_cmd
-	get_appdata_dir = _not_available("get_appdata_dir")
-	from os.path import abspath as uncabspath
-	from os.path import islink
+    from .os_posix import _disk_usage_posix as disk_usage
+    from .os_posix import _lock as lock
+    from .os_posix import _unlock as unlock
 
-	from .os_posix import _interrupt_posix as interrupt
+    volume_info = _not_available("volume_info")
+    from .os_posix import _filemanager_cmd_posix as filemanager_cmd
+
+    get_appdata_dir = _not_available("get_appdata_dir")
+    from os.path import abspath as uncabspath
+    from os.path import islink
+
+    from .os_posix import _interrupt_posix as interrupt
 
 elif system == "Darwin":
 
-	from .os_posix import _disk_usage_posix as disk_usage
-	from .os_posix import _lock as lock
-	from .os_posix import _unlock as unlock
-	volume_info = _not_available("volume_info")
-	from .os_mac import _filemanager_cmd_mac as filemanager_cmd
-	get_appdata_dir = _not_available("get_appdata_dir")
-	from os.path import abspath as uncabspath
-	from os.path import islink
+    from .os_posix import _disk_usage_posix as disk_usage
+    from .os_posix import _lock as lock
+    from .os_posix import _unlock as unlock
 
-	from .os_posix import _interrupt_posix as interrupt
+    volume_info = _not_available("volume_info")
+    from .os_mac import _filemanager_cmd_mac as filemanager_cmd
+
+    get_appdata_dir = _not_available("get_appdata_dir")
+    from os.path import abspath as uncabspath
+    from os.path import islink
+
+    from .os_posix import _interrupt_posix as interrupt
 
 else:
-	lock = _not_available("lock")
-	unlock = _not_available("unlock")
-	disk_usage = _not_available("disk_usage")
-	volume_info = _not_available("volume_info")
-	filemanager_cmd = _not_available("filemanager_cmd")
-	get_appdata_dir = _not_available("get_appdata_dir")
-	islink = _not_available("islink")
-	uncabspath = _not_available("uncabspath")
-	interrupt = _not_available("interrupt")
+    lock = _not_available("lock")
+    unlock = _not_available("unlock")
+    disk_usage = _not_available("disk_usage")
+    volume_info = _not_available("volume_info")
+    filemanager_cmd = _not_available("filemanager_cmd")
+    get_appdata_dir = _not_available("get_appdata_dir")
+    islink = _not_available("islink")
+    uncabspath = _not_available("uncabspath")
+    interrupt = _not_available("interrupt")
 
 lock.__doc__ = """ Locks access to the file (on Posix) or its contents (Windows). """
 unlock.__doc__ = """ Unlocks access to the file. """

@@ -10,26 +10,27 @@ from .func import compose, identity, zipmap
 
 
 def iter_csv(path, delimiter=",", encoding="utf-8", skip=0):
-	# type: (str, str, str, bool) -> Iterator[List[str]]
+    # type: (str, str, str, bool) -> Iterator[List[str]]
 
-	with open(path, encoding="utf-8", newline="") as fr:
-		yield from islice(csv.reader(fr, delimiter=delimiter), skip, None)
+    with open(path, encoding="utf-8", newline="") as fr:
+        yield from islice(csv.reader(fr, delimiter=delimiter), skip, None)
+
 
 def read_csv(path, delimiter=",", skip=0, usecols=None, dtype=None, encoding="utf-8"):
-	# type: (str, str, int, Optional[Sequence[int]], Optional[Sequence[Callable]], str) -> Iterator[tuple]
+    # type: (str, str, int, Optional[Sequence[int]], Optional[Sequence[Callable]], str) -> Iterator[tuple]
 
-	with open(path, encoding=encoding, newline="") as csvfile:
-		if usecols:
-			if dtype:
-				getcols = compose(partial(zipmap, dtype), itemgetter(usecols))
-			else:
-				getcols = itemgetter(usecols)
-		else:
-			if dtype:
-				getcols = partial(zipmap, dtype)
-			else:
-				getcols = identity
+    with open(path, encoding=encoding, newline="") as csvfile:
+        if usecols:
+            if dtype:
+                getcols = compose(partial(zipmap, dtype), itemgetter(usecols))
+            else:
+                getcols = itemgetter(usecols)
+        else:
+            if dtype:
+                getcols = partial(zipmap, dtype)
+            else:
+                getcols = identity
 
-		for row in islice(csv.reader(csvfile, delimiter=delimiter), skip, None):
-			print(row)
-			yield tuple(getcols(row))
+        for row in islice(csv.reader(csvfile, delimiter=delimiter), skip, None):
+            print(row)
+            yield tuple(getcols(row))

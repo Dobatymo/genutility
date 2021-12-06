@@ -7,74 +7,80 @@ from typing import TYPE_CHECKING
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 if TYPE_CHECKING:
-	from os import PathLike
-	from typing import Iterator, Union
+    from os import PathLike
+    from typing import Iterator, Union
+
 
 def join_pdfs_in_folder(path_in, file_out, overwrite=False):
-	# type: (Path, Union[PathLike, str], bool) -> None
+    # type: (Path, Union[PathLike, str], bool) -> None
 
-	""" Join all PDFs in `path_in` and write to `file_out`. """
+    """Join all PDFs in `path_in` and write to `file_out`."""
 
-	merger = PdfFileMerger(strict=True)
+    merger = PdfFileMerger(strict=True)
 
-	if not path_in.exists():
-		raise FileNotFoundError(path_in)
+    if not path_in.exists():
+        raise FileNotFoundError(path_in)
 
-	with ExitStack() as stack:
-		for path in path_in.glob("*.pdf"):
-			if path.is_file():
-				fr = stack.enter_context(path.open("rb")) # open does not support Path in <3.6
-				merger.append(fr)
+    with ExitStack() as stack:
+        for path in path_in.glob("*.pdf"):
+            if path.is_file():
+                fr = stack.enter_context(path.open("rb"))  # open does not support Path in <3.6
+                merger.append(fr)
 
-		if overwrite:
-			mode = "w"
-		else:
-			mode = "x"
+        if overwrite:
+            mode = "w"
+        else:
+            mode = "x"
 
-		with open(file_out, mode+"b") as fw:
-			merger.write(fw)
+        with open(file_out, mode + "b") as fw:
+            merger.write(fw)
+
 
 def iter_pdf_text(path):
-	# type: (str, ) -> Iterator[str]
+    # type: (str, ) -> Iterator[str]
 
-	with open(path, "rb") as fr:
-		pdf = PdfFileReader(fr)
-		for i in range(pdf.getNumPages()):
-			page = pdf.getPage(i)
-			yield page.extractText()
+    with open(path, "rb") as fr:
+        pdf = PdfFileReader(fr)
+        for i in range(pdf.getNumPages()):
+            page = pdf.getPage(i)
+            yield page.extractText()
+
 
 def _read_pdf_pdfminer(path):
-	from pdfminer.high_level import extract_text
+    from pdfminer.high_level import extract_text
 
-	return extract_text(path)
+    return extract_text(path)
+
 
 def _read_pdf_tika(path):
-	from tika import parser
+    from tika import parser
 
-	raw = parser.from_file(path)
+    raw = parser.from_file(path)
 
-	#return raw["metadata"]
-	return raw["content"]
+    # return raw["metadata"]
+    return raw["content"]
+
 
 def read_pdf(path, engine="pdfminer"):
-	# type: (str, str) -> str
+    # type: (str, str) -> str
 
-	try:
-		func = {
-			"pdfminer": _read_pdf_pdfminer,
-			"tika": _read_pdf_tika,
-		}[engine]
-	except KeyError:
-		raise ValueError(f"Engine {engine} doesn't exist")
+    try:
+        func = {
+            "pdfminer": _read_pdf_pdfminer,
+            "tika": _read_pdf_tika,
+        }[engine]
+    except KeyError:
+        raise ValueError(f"Engine {engine} doesn't exist")
 
-	return func(path)
+    return func(path)
+
 
 if __name__ == "__main__":
-	from argparse import ArgumentParser
+    from argparse import ArgumentParser
 
-	parser = ArgumentParser(description="Merge pdf files in directory into one file.")
-	parser.add_argument("dir", help="input directory")
-	parser.add_argument("out", help="output file path")
-	args = parser.parse_args()
+    parser = ArgumentParser(description="Merge pdf files in directory into one file.")
+    parser.add_argument("dir", help="input directory")
+    parser.add_argument("out", help="output file path")
+    args = parser.parse_args()
 
-	join_pdfs_in_folder(args.dir, args.out)
+    join_pdfs_in_folder(args.dir, args.out)

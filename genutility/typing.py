@@ -5,174 +5,168 @@ from typing import TYPE_CHECKING, Any, Optional, Sequence, TypeVar, Union
 
 if TYPE_CHECKING:
 
-	from typing_extensions import Protocol
+    from typing_extensions import Protocol
 
-	Number = Union[int, float]
-	T = TypeVar("T")
+    Number = Union[int, float]
+    T = TypeVar("T")
 
-	class SizedIterable(Iterable[T], Sized):
-		pass
+    class SizedIterable(Iterable[T], Sized):
+        pass
 
-	class Comparable(Protocol):
+    class Comparable(Protocol):
+        def __eq__(self, other):
+            # type: (Any, ) -> bool
+            ...
 
-		def __eq__(self, other):
-			# type: (Any, ) -> bool
-			...
+        def __ne__(self, other):
+            # type: (Any, ) -> bool
+            ...
 
-		def __ne__(self, other):
-			# type: (Any, ) -> bool
-			...
+    class Orderable(Protocol):
+        def __lt__(self, other):
+            # type: (Any, ) -> bool
+            ...
 
-	class Orderable(Protocol):
+        def __gt__(self, other):
+            # type: (Any, ) -> bool
+            ...
 
-		def __lt__(self, other):
-			# type: (Any, ) -> bool
-			...
+        def __le__(self, other):
+            # type: (Any, ) -> bool
+            ...
 
-		def __gt__(self, other):
-			# type: (Any, ) -> bool
-			...
+        def __ge__(self, other):
+            # type: (Any, ) -> bool
+            ...
 
-		def __le__(self, other):
-			# type: (Any, ) -> bool
-			...
+    class Computable(Protocol):
+        def __neg__(self):
+            # type: () -> Any
+            ...
 
-		def __ge__(self, other):
-			# type: (Any, ) -> bool
-			...
+        def __add__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-	class Computable(Protocol):
+        def __sub__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __neg__(self):
-			# type: () -> Any
-			...
+        def __mul__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __add__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __truediv__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __sub__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __floordiv__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __mul__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __abs__(self):
+            # type: () -> Any
+            ...
 
-		def __truediv__(self, other):
-			# type: (Any, ) -> Any
-			...
+    class MutableComputable(Protocol):
+        def __neg__(self):
+            # type: () -> Any
+            ...
 
-		def __floordiv__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __add__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __abs__(self):
-			# type: () -> Any
-			...
+        def __iadd__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-	class MutableComputable(Protocol):
+        def __sub__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __neg__(self):
-			# type: () -> Any
-			...
+        def __isub__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __add__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __mul__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __iadd__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __imul__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __sub__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __truediv__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __isub__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __itruediv__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __mul__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __floordiv__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __imul__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def __ifloordiv__(self, other):
+            # type: (Any, ) -> Any
+            ...
 
-		def __truediv__(self, other):
-			# type: (Any, ) -> Any
-			...
+    class Cursor(Protocol):
+        def callproc(self, procname, parameters):
+            # type: (str, Optional[Sequence[Any]]) -> None
+            ...
 
-		def __itruediv__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def close(self):
+            # type: () -> None
+            ...
 
-		def __floordiv__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def execute(self, operation, parameters):
+            # types: (str, Optional[Sequence[Any]]) -> None
+            ...
 
-		def __ifloordiv__(self, other):
-			# type: (Any, ) -> Any
-			...
+        def executemany(self, operation, seq_of_parameters):
+            # types: (str, Sequence[Sequence[Any]]) -> None
+            ...
 
-	class Cursor(Protocol):
+        def fetchone(self):
+            # types: () -> Optional[Sequence[Any]]
+            ...
 
-		def callproc(self, procname, parameters):
-			# type: (str, Optional[Sequence[Any]]) -> None
-			...
+        def fetchmany(self, size):
+            # types: (Optional[int], ) -> Sequence[Sequence[Any]]
+            ...
 
-		def close(self):
-			# type: () -> None
-			...
+        def fetchall(self):
+            # types: () -> Sequence[Sequence[Any]]
+            ...
 
-		def execute(self, operation, parameters):
-			# types: (str, Optional[Sequence[Any]]) -> None
-			...
+        def nextset(self):
+            # type: () -> Optional[bool]
+            ...
 
-		def executemany(self, operation, seq_of_parameters):
-			# types: (str, Sequence[Sequence[Any]]) -> None
-			...
+        def setinputsizes(self, sizes):
+            # types: (Sequence[int], ) -> None
+            ...
 
-		def fetchone(self):
-			# types: () -> Optional[Sequence[Any]]
-			...
+        def setoutputsize(self, size, column):
+            # type: (int, Optional[int]) -> None
+            ...
 
-		def fetchmany(self, size):
-			# types: (Optional[int], ) -> Sequence[Sequence[Any]]
-			...
+    class Connection(Protocol):
+        def close(self):
+            # type: () -> None
+            ...
 
-		def fetchall(self):
-			# types: () -> Sequence[Sequence[Any]]
-			...
+        def commit(self):
+            # type: () -> None
+            ...
 
-		def nextset(self):
-			# type: () -> Optional[bool]
-			...
+        def rollback(self):
+            # type: () -> None
+            ...
 
-		def setinputsizes(self, sizes):
-			# types: (Sequence[int], ) -> None
-			...
-
-		def setoutputsize(self, size, column):
-			# type: (int, Optional[int]) -> None
-			...
-
-	class Connection(Protocol):
-
-		def close(self):
-			# type: () -> None
-			...
-
-		def commit(self):
-			# type: () -> None
-			...
-
-		def rollback(self):
-			# type: () -> None
-			...
-
-		def cursor(self):
-			# type: () -> Cursor
-			...
+        def cursor(self):
+            # type: () -> Cursor
+            ...

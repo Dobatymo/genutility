@@ -7,11 +7,11 @@ from genutility.test import MyTestCase
 
 
 class AtaTest(MyTestCase):
-
-	def test_empty_buffer(self):
-		self.assertEqual(512, sizeof(IDENTIFY_DEVICE_DATA()))
+    def test_empty_buffer(self):
+        self.assertEqual(512, sizeof(IDENTIFY_DEVICE_DATA()))
 
 
 if __name__ == "__main__":
-	import unittest
-	unittest.main()
+    import unittest
+
+    unittest.main()

@@ -11,28 +11,27 @@ from .http import HTTPError
 
 
 class WrappedHTTP20Connection:
+    def __init__(self, host):
+        self.host = host
 
-	def __init__(self, host):
-		self.host = host
+    def connect(self):
+        self.conn = HTTP20Connection(self.host)
 
-	def connect(self):
-		self.conn = HTTP20Connection(self.host)
+    def _dl_url(self, path, headers, timeout):
+        self.conn.request("GET", path, headers=headers)
+        self.conn._sock._sck.settimeout(timeout)
+        resp = self.conn.get_response()
+        if resp.status >= 200 and resp.status < 300:
+            return resp.read()
 
-	def _dl_url(self, path, headers, timeout):
-		self.conn.request("GET", path, headers=headers)
-		self.conn._sock._sck.settimeout(timeout)
-		resp = self.conn.get_response()
-		if resp.status >= 200 and resp.status < 300:
-			return resp.read()
+        print(path, resp.status, resp.trailers, resp.headers)
+        raise HTTPError("non-2xx error", response=resp)
 
-		print(path, resp.status, resp.trailers, resp.headers)
-		raise HTTPError("non-2xx error", response=resp)
-
-	def dl_url(self, path, headers=None, timeout=60):
-		for i in count(1):
-			sleep(i)
-			try:
-				return self._dl_url(path, headers, timeout)
-			except (ConnectionResetError, SocketTimeout, StreamResetError):
-				self.connect()
-				continue
+    def dl_url(self, path, headers=None, timeout=60):
+        for i in count(1):
+            sleep(i)
+            try:
+                return self._dl_url(path, headers, timeout)
+            except (ConnectionResetError, SocketTimeout, StreamResetError):
+                self.connect()
+                continue

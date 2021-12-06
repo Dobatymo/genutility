@@ -8,95 +8,97 @@ from typing import TYPE_CHECKING
 from .iter import _lstr, progressdata
 
 if TYPE_CHECKING:
-	from numbers import Number
-	from typing import IO, Iterable, Optional, Sequence, Union
+    from numbers import Number
+    from typing import IO, Iterable, Optional, Sequence, Union
+
 
 class progress_content:
+    def __init__(self, it, length=None, refresh=1, file=sys.stdout):
+        # type: (Union[Iterable, Sequence], Optional[int], Number, Optional[IO[str]]) -> None
 
-	def __init__(self, it, length=None, refresh=1, file=sys.stdout):
-		# type: (Union[Iterable, Sequence], Optional[int], Number, Optional[IO[str]]) -> None
+        self.it = it
+        self.length = length
+        self.refresh = refresh
+        self.file = file
 
-		self.it = it
-		self.length = length
-		self.refresh = refresh
-		self.file = file
+    def __iter__(self):
+        return progressdata(self.it, self.length, self.refresh, file=self.file)
 
-	def __iter__(self):
-		return progressdata(self.it, self.length, self.refresh, file=self.file)
+    def __aiter__(self):
+        return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
 
-	def __aiter__(self):
-		return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
+    class AsyncIterProgress:
+        def __init__(self, it, length, refresh, file):
+            self.it = it.__aiter__()
+            self.refresh = refresh
+            self.file = file
 
-	class AsyncIterProgress:
+            self.length, self.lstr = _lstr(self.it, length)
+            self.last = self.start = time()
+            self.total = 0
 
-		def __init__(self, it, length, refresh, file):
-			self.it = it.__aiter__()
-			self.refresh = refresh
-			self.file = file
+        @asyncio.coroutine
+        def __anext__(self):
+            try:
+                elm = yield from self.it.__anext__()
+                self.total += len(elm)
+                current = time()
+                if current - self.last > self.refresh:
+                    self.last = current
+                    duration = current - self.start
+                    print(
+                        f"{self.total}{self.lstr}, running for {int(duration)} seconds ({self.total/duration:0.2e}/s).",
+                        end="\r",
+                        file=self.file,
+                    )
+                return elm
 
-			self.length, self.lstr = _lstr(self.it, length)
-			self.last = self.start = time()
-			self.total = 0
+            except StopAsyncIteration:
+                print(f"Finished {self.total} in {int(self.last - self.start)} seconds.", end="\r", file=self.file)
+                raise StopAsyncIteration
 
-		@asyncio.coroutine
-		def __anext__(self):
-			try:
-				elm = yield from self.it.__anext__()
-				self.total += len(elm)
-				current = time()
-				if current - self.last > self.refresh:
-					self.last = current
-					duration = current - self.start
-					print(f"{self.total}{self.lstr}, running for {int(duration)} seconds ({self.total/duration:0.2e}/s).", end="\r", file=self.file)
-				return elm
-
-			except StopAsyncIteration:
-				print(f"Finished {self.total} in {int(self.last - self.start)} seconds.", end="\r", file=self.file)
-				raise StopAsyncIteration
 
 if __name__ == "__main__":
 
-	class gensync:
+    class gensync:
+        def __init__(self):
+            self.i = 3
 
-		def __init__(self):
-			self.i = 3
+        def __iter__(self):
+            return self
 
-		def __iter__(self):
-			return self
+        def __next__(self):
+            if self.i > 0:
+                self.i -= 1
+                return "asd"
+            else:
+                raise StopIteration
 
-		def __next__(self):
-			if self.i > 0:
-				self.i -= 1
-				return "asd"
-			else:
-				raise StopIteration
+    class genasync:
+        def __init__(self):
+            self.i = 3
 
-	class genasync:
+        def __aiter__(self):
+            return self
 
-		def __init__(self):
-			self.i = 3
+        @asyncio.coroutine
+        def __anext__(self):
+            if self.i > 0:
+                self.i -= 1
+                return "asd"
+            else:
+                raise StopAsyncIteration
 
-		def __aiter__(self):
-			return self
+    for i in progress_content(gensync()):
+        pass
 
-		@asyncio.coroutine
-		def __anext__(self):
-			if self.i > 0:
-				self.i -= 1
-				return "asd"
-			else:
-				raise StopAsyncIteration
+    print()
 
-	for i in progress_content(gensync()):
-		pass
+    @asyncio.coroutine
+    async def run():
+        async for i in progress_content(genasync()):
+            pass
 
-	print()
-
-	@asyncio.coroutine
-	async def run():
-		async for i in progress_content(genasync()):
-			pass
-
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(run())
-	loop.close()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run())
+    loop.close()

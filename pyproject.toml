@@ -2,8 +2,11 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.black]
+line-length = 120
+
 [tool.isort]
-indent = "tab"
+profile = "black"
 src_paths = ["genutility"]
 line_length = 120
 known_third_party = ["flask", "gensim", "networkx", "nltk", "numba", "numpy", "pandas", "rasa", "scipy", "tensorflow", "toml", "torch", "twisted"]

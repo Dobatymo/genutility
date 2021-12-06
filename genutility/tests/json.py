@@ -5,69 +5,69 @@ import json
 import logging
 from io import StringIO
 
-from genutility.json import (BuiltinRoundtripDecoder, BuiltinRoundtripEncoder, JsonLinesFormatter, json_lines,
-                             read_json_lines)
+from genutility.json import (
+    BuiltinRoundtripDecoder,
+    BuiltinRoundtripEncoder,
+    JsonLinesFormatter,
+    json_lines,
+    read_json_lines,
+)
 from genutility.test import MyTestCase, closeable_tempfile, parametrize
 
 
 class JsonTest(MyTestCase):
+    @parametrize(("", tuple()), ('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1])))
+    def test_json_lines_from_stream(self, content, truth):
+        stream = StringIO(content)
+        with json_lines.from_stream(stream) as fr:
+            result = tuple(fr)
 
-	@parametrize(
-		("", tuple()),
-		('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1]))
-	)
-	def test_json_lines_from_stream(self, content, truth):
-		stream = StringIO(content)
-		with json_lines.from_stream(stream) as fr:
-			result = tuple(fr)
+        self.assertEqual(truth, result)
 
-		self.assertEqual(truth, result)
+    @parametrize(("", tuple()), ('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1])))
+    def test_read_json_lines(self, content, truth):
+        with closeable_tempfile(mode="wt", encoding="utf-8") as (f, fname):
+            f.write(content)
+            f.close()  # Windows compatibility, otherwise sharing violation
+            result = tuple(read_json_lines(fname))
 
-	@parametrize(
-		("", tuple()),
-		('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1]))
-	)
-	def test_read_json_lines(self, content, truth):
-		with closeable_tempfile(mode="wt", encoding="utf-8") as (f, fname):
-			f.write(content)
-			f.close() # Windows compatibility, otherwise sharing violation
-			result = tuple(read_json_lines(fname))
+        self.assertEqual(truth, result)
 
-		self.assertEqual(truth, result)
+    def test_JsonLinesFormatter(self):
 
-	def test_JsonLinesFormatter(self):
+        stream = StringIO()
 
-		stream = StringIO()
+        logger = logging.getLogger("JsonLinesFormatter")
+        logger.setLevel(logging.INFO)
+        handler = logging.StreamHandler(stream)
+        handler.setLevel(logging.INFO)
+        jl_formatter = JsonLinesFormatter(include={"datetime-str"}, builtins={"thread"})
+        handler.setFormatter(jl_formatter)
+        logger.addHandler(handler)
 
-		logger = logging.getLogger("JsonLinesFormatter")
-		logger.setLevel(logging.INFO)
-		handler = logging.StreamHandler(stream)
-		handler.setLevel(logging.INFO)
-		jl_formatter = JsonLinesFormatter(include={"datetime-str"}, builtins={"thread"})
-		handler.setFormatter(jl_formatter)
-		logger.addHandler(handler)
+        logger.info({"key": "test"})
+        d = json.loads(stream.getvalue())
 
-		logger.info({"key": "test"})
-		d = json.loads(stream.getvalue())
+        self.assertEqual(d["key"], "test")
+        self.assertIn("datetime-str", d)
+        self.assertIn("thread", d)
 
-		self.assertEqual(d["key"], "test")
-		self.assertIn("datetime-str", d)
-		self.assertIn("thread", d)
+    def test_BuiltinRoundtripDecoder(self):
+        dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
+        raw = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
 
-	def test_BuiltinRoundtripDecoder(self):
-		dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
-		raw = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
+        truth = {"dt": dt}
+        result = json.loads(raw, cls=BuiltinRoundtripDecoder)
+        self.assertEqual(truth, result)
 
-		truth = {"dt": dt}
-		result = json.loads(raw, cls=BuiltinRoundtripDecoder)
-		self.assertEqual(truth, result)
+    def test_BuiltinRoundtripEncoder(self):
+        dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
+        truth = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
+        result = json.dumps({"dt": dt}, cls=BuiltinRoundtripEncoder)
+        self.assertEqual(truth, result)
 
-	def test_BuiltinRoundtripEncoder(self):
-		dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
-		truth = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
-		result = json.dumps({"dt": dt}, cls=BuiltinRoundtripEncoder)
-		self.assertEqual(truth, result)
 
 if __name__ == "__main__":
-	import unittest
-	unittest.main()
+    import unittest
+
+    unittest.main()

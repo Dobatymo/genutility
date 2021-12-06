@@ -8,30 +8,35 @@ from .compat.math import prod
 from .math import reciprocal
 
 if TYPE_CHECKING:
-	from collections.abc import Collection
+    from collections.abc import Collection
+
 
 def sample_range(total, num):
-	return sample(range(total), min(num, total))
+    return sample(range(total), min(num, total))
+
 
 def arithmetic_mean(col):
-	# type: (Collection, ) -> float
+    # type: (Collection, ) -> float
 
-	""" Arithmetic mean of `col`. """
+    """Arithmetic mean of `col`."""
 
-	return sum(col) / len(col)
+    return sum(col) / len(col)
+
 
 mean = arithmetic_mean
 
+
 def harmonic_mean(col):
-	# type: (Collection, ) -> float
+    # type: (Collection, ) -> float
 
-	""" Harmonic mean of `col`. """
+    """Harmonic mean of `col`."""
 
-	return len(col) / sum(map(reciprocal, col))
+    return len(col) / sum(map(reciprocal, col))
+
 
 def geometric_mean(col):
-	# type: (Collection, ) -> float
+    # type: (Collection, ) -> float
 
-	""" Geometric mean of `col`. """
+    """Geometric mean of `col`."""
 
-	return pow(prod(col), reciprocal(len(col)))
+    return pow(prod(col), reciprocal(len(col)))

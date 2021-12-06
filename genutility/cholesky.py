@@ -9,45 +9,47 @@ from .numpy import is_square
 @opjit(["void(f4[:,:], f4[:], f4)", "void(f8[:,:], f8[:], f8)"])
 def _choldate(L, x, sign):
 
-	for k in range(L.shape[0]):
-		r = sqrt(L[k, k]*L[k, k] + sign * x[k]*x[k])
-		c = r / L[k, k]
-		s = x[k] / L[k, k]
-		L[k, k] = r
+    for k in range(L.shape[0]):
+        r = sqrt(L[k, k] * L[k, k] + sign * x[k] * x[k])
+        c = r / L[k, k]
+        s = x[k] / L[k, k]
+        L[k, k] = r
 
-		L[k+1:, k] = (L[k+1:, k] + sign * s * x[k+1:]) / c
-		x[k+1:] = c * x[k+1:] - s * L[k+1:, k]
+        L[k + 1 :, k] = (L[k + 1 :, k] + sign * s * x[k + 1 :]) / c
+        x[k + 1 :] = c * x[k + 1 :] - s * L[k + 1 :, k]
+
 
 def choldate(L, x, sign):
-	# type: (np.ndarray, np.ndarray, str) -> None
+    # type: (np.ndarray, np.ndarray, str) -> None
 
-	""" This function computes the lower triangular Cholesky decomposition L' of matrix A' from L in-place
-		(the cholesky decomp of A) where A' = A + sign*x*x^T.
-		Based on: https://en.wikipedia.org/wiki/Cholesky_decomposition#Rank-one_update
+    """This function computes the lower triangular Cholesky decomposition L' of matrix A' from L in-place
+    (the cholesky decomp of A) where A' = A + sign*x*x^T.
+    Based on: https://en.wikipedia.org/wiki/Cholesky_decomposition#Rank-one_update
 
-		L: square lower triangular matrix
-	"""
+    L: square lower triangular matrix
+    """
 
-	if not is_square(L) or x.shape != (L.shape[0], ):
-		raise ValueError("Invalid dimensions")
+    if not is_square(L) or x.shape != (L.shape[0],):
+        raise ValueError("Invalid dimensions")
 
-	try:
-		_sign = {"+": +1., "-": -1.}[sign]
-	except KeyError:
-		raise ValueError("Invalid sign")
+    try:
+        _sign = {"+": +1.0, "-": -1.0}[sign]
+    except KeyError:
+        raise ValueError("Invalid sign")
 
-	return _choldate(L, x, _sign)
+    return _choldate(L, x, _sign)
+
 
 if __name__ == "__main__":
-	import timeit
+    import timeit
 
-	import numpy as np
+    import numpy as np
 
-	from .numpy import random_triangular_matrix
+    from .numpy import random_triangular_matrix
 
-	size = 100
-	L = random_triangular_matrix(size)
-	x = np.random.uniform(0, 1, size)
+    size = 100
+    L = random_triangular_matrix(size)
+    x = np.random.uniform(0, 1, size)
 
-	choldate(L, x, "+") # warmup
-	print(min(timeit.repeat('choldate(L, x, "+")', number=10000, repeat=5, globals=globals())))
+    choldate(L, x, "+")  # warmup
+    print(min(timeit.repeat('choldate(L, x, "+")', number=10000, repeat=5, globals=globals())))

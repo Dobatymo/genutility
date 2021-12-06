@@ -8,5 +8,5 @@ parser.add_argument("--plain", action="store_true")
 args = parser.parse_args()
 
 if not args.plain:
-	install_markdown_excepthook()
+    install_markdown_excepthook()
 json_lines.from_path("s3://asd/qwe")

@@ -5,7 +5,6 @@ from genutility.test import MyTestCase, parametrize
 
 
 class HllTest(MyTestCase):
-
     @parametrize(
         (set(), 0),
         ({"asd", "qwe"}, 0),
@@ -17,6 +16,8 @@ class HllTest(MyTestCase):
         hll.update(values)
         self.assertLessEqual(abs(len(values) - len(hll)), delta)
 
+
 if __name__ == "__main__":
     import unittest
+
     unittest.main()
