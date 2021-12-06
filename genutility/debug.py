@@ -3,14 +3,10 @@ from __future__ import generator_stop
 import logging
 from collections import defaultdict
 from functools import wraps
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Any, Callable, Collection, Optional
+from typing import Any, Callable, Iterable, Optional
 
 
-def printr(*objs, end="\n", depth=0):
-    # type: (*Any, str, int) -> None
+def printr(*objs: Any, end: str = "\n", depth: int = 0) -> None:
 
     for i, obj in enumerate(objs, 1):
 
@@ -43,8 +39,7 @@ def printr(*objs, end="\n", depth=0):
         print(end=end)
 
 
-def _to_union(types):
-    # type: (Collection[str], ) -> str
+def _to_union(types: Iterable[str]) -> str:
 
     types = list(set(types))
 
@@ -58,14 +53,12 @@ def _to_union(types):
     assert False
 
 
-def _type_str(obj):
-    # type: (Any, ) -> str
+def _type_str(obj: Any) -> str:
 
     return type(obj).__name__
 
 
-def rec_repr(obj):
-    # type: (Any, ) -> str
+def rec_repr(obj: Any) -> str:
 
     if isinstance(obj, defaultdict):
         return _type_str(obj) + "[" + rec_repr(obj.default_factory) + "]"
@@ -77,8 +70,7 @@ def rec_repr(obj):
         return _type_str(obj)
 
 
-def _arg_str(arg, maxlen=None, app="...", repr_args=True):
-    # type: (Any, Optional[int], str, bool) -> str
+def _arg_str(arg: Any, maxlen: Optional[int] = None, app: str = "...", repr_args: bool = True) -> str:
 
     if repr_args:
         arg = repr(arg)
@@ -94,14 +86,12 @@ def _arg_str(arg, maxlen=None, app="...", repr_args=True):
         return arg
 
 
-def _kwarg_str(key, value, maxlen=None, app="...", repr_args=True):
-    # type: (str, Any, Optional[int], str, bool) -> str
+def _kwarg_str(key: str, value: Any, maxlen: Optional[int] = None, app: str = "...", repr_args: bool = True) -> str:
 
     return key + "=" + _arg_str(value, maxlen, app, repr_args)
 
 
-def args_str(args, kwargs, maxlen=20, app="...", repr_args=True):
-    # type: (tuple, dict, Optional[int], str, bool) -> str
+def args_str(args: tuple, kwargs: dict, maxlen: Optional[int] = 20, app: str = "...", repr_args: bool = True) -> str:
 
     """Creates printable string from function arguments.
     If the string needs to be truncated to fit `maxlen`, `app` will be appended.
@@ -125,16 +115,13 @@ def args_str(args, kwargs, maxlen=20, app="...", repr_args=True):
             return ""
 
 
-def log_call(s):
-    # type: (str, ) -> Callable
+def log_call(s: str) -> Callable:
 
     """Decorator to log function calls using template string `s`.
     Available format fields are: 'name', 'args' and 'kwargs'.
     """
 
-    def dec(func):
-        # type: (Callable, ) -> Callable
-
+    def dec(func: Callable) -> Callable:
         def inner(*args, **kwargs):
             logging.debug(s.format(name=func.__name__, args=args, kwargs=kwargs))
             return func(*args, **kwargs)
@@ -144,8 +131,7 @@ def log_call(s):
     return dec
 
 
-def log_wrap_call(func):
-    # type: (Callable, ) -> Callable
+def log_wrap_call(func: Callable) -> Callable:
 
     """Decorator which logs all calls to `func` with all arguments."""
 
@@ -165,8 +151,7 @@ def log_wrap_call(func):
     return inner
 
 
-def log_methodcall(func):
-    # type: (Callable, ) -> Callable
+def log_methodcall(func: Callable) -> Callable:
 
     """Decorator to log method calls with arguments."""
 
@@ -180,8 +165,7 @@ def log_methodcall(func):
     return inner
 
 
-def log_methodcall_result(func):
-    # type: (Callable, ) -> Callable
+def log_methodcall_result(func: Callable) -> Callable:
 
     """Decorator to log method calls with arguments and results."""
 
