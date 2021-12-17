@@ -16,6 +16,11 @@ def is_aware(dt: datetime) -> bool:
 
     return dt.tzinfo is not None and dt.tzinfo.utcoffset(dt) is not None
 
+def naive_to_aware(dt, tzinfo=timezone.utc) -> datetime:
+    if is_aware(dt):
+        return dt
+    else:
+        return dt.replace(tzinfo=tzinfo)
 
 def now(aslocal: bool = False) -> datetime:
 

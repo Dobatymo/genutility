@@ -217,7 +217,7 @@ def logtrace(m):
     """
 
     """ note: performance cannot easily be improve by numba.
-        `np.diagonal` not supported by numba 0.50.0
+        `np.diagonal` not supported by numba 0.52.0
     """
 
     return np.sum(np.log(np.diagonal(m, axis1=-2, axis2=-1)), axis=-1)
