@@ -9,15 +9,20 @@ from .dict import itemgetter
 from .func import compose, identity, zipmap
 
 
-def iter_csv(path, delimiter=",", encoding="utf-8", skip=0):
-    # type: (str, str, str, bool) -> Iterator[List[str]]
+def iter_csv(path: str, delimiter: str = ",", encoding: str = "utf-8", skip: int = 0) -> Iterator[List[str]]:
 
     with open(path, encoding="utf-8", newline="") as fr:
         yield from islice(csv.reader(fr, delimiter=delimiter), skip, None)
 
 
-def read_csv(path, delimiter=",", skip=0, usecols=None, dtype=None, encoding="utf-8"):
-    # type: (str, str, int, Optional[Sequence[int]], Optional[Sequence[Callable]], str) -> Iterator[tuple]
+def read_csv(
+    path: str,
+    delimiter: str = ",",
+    skip: int = 0,
+    usecols: Optional[Sequence[int]] = None,
+    dtype: Optional[Sequence[Callable]] = None,
+    encoding: str = "utf-8",
+) -> Iterator[tuple]:
 
     with open(path, encoding=encoding, newline="") as csvfile:
         if usecols:

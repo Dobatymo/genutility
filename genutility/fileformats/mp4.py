@@ -7,7 +7,7 @@ import struct
 import warnings
 from base64 import b64decode
 from collections import namedtuple
-from typing import IO, Dict, Iterable, Iterator, List, Optional, Tuple
+from typing import IO, Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
 
 import pkg_resources
 
@@ -27,19 +27,19 @@ from ..iter import batch
 
 
 class BoxParser:
-    def __init__(self, fin, size=None):
+    def __init__(self, fin: IO[bytes], size: Optional[int] = None):
         self.fin = fin
         self.size = size
         self.delta = 0
 
-    def unpack(self, format, size):
+    def unpack(self, format: str, size: int):
         ret = struct.unpack(format, read_or_raise(self.fin, size))
         self.delta += size
         return ret
 
     @staticmethod
-    def read_c_string(fin, size):
-        ret = []
+    def read_c_string(fin: IO[bytes], size: int) -> bytes:
+        ret: List[bytes] = []
         while len(ret) < size:
             c = fin.read(1)
             ret.append(c)
@@ -47,7 +47,8 @@ class BoxParser:
                 break
         return b"".join(ret)
 
-    def c_string(self, encoding=None):
+    def c_string(self, encoding: Optional[str] = None) -> Union[bytes, str]:
+        assert self.size
         s = self.read_c_string(self.fin, self.size - self.delta)
         self.delta += len(s)
         s = s.rstrip(b"\0")
@@ -63,6 +64,7 @@ class BoxParser:
 
 
 def named_batch(entries: Iterable, length: int, named_tuple_cls: object) -> List[namedtuple]:
+    assert len(named_tuple_cls._fields) == length
     return list(batch(entries, length, named_tuple_cls._make))
 
 
@@ -72,11 +74,15 @@ SampleToChunkEntry = namedtuple("SampleToChunkEntry", ["first_chunk", "samples_p
 CompositionOffsetEntry = namedtuple("CompositionOffsetEntry", ["sample_count", "sample_offset"])
 TimeToSampleEntry = namedtuple("TimeToSampleEntry", ["sample_count", "sample_delta"])
 FilePartitionEntry = namedtuple("FilePartitionEntry", ["block_count", "block_size"])
+ItemLocationEntryWithIndex = namedtuple(
+    "ItemLocationEntryWithIndex", ["extent_index", "extent_offset", "extent_length"]
+)
+ItemLocationEntry = namedtuple("ItemLocationEntry", ["extent_offset", "extent_length"])
 
 # atoms
 
 
-def stco(fin, size, version, flags):
+def stco(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """ChunkOffsetBox"""
 
     assert version == 0
@@ -88,7 +94,7 @@ def stco(fin, size, version, flags):
     return {"chunk_offsets": chunk_offsets}, p.delta
 
 
-def fpar(fin, size, version, flags):
+def fpar(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """FilePartitionBox"""
 
     assert version in (0, 1)
@@ -130,7 +136,7 @@ def fpar(fin, size, version, flags):
     }, p.delta
 
 
-def mfhd(fin, size, version, flags):
+def mfhd(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """MovieFragmentHeaderBox"""
 
     assert version == 0
@@ -141,7 +147,7 @@ def mfhd(fin, size, version, flags):
     return {"sequence_number": sequence_number}, p.delta
 
 
-def co64(fin, size, version, flags):
+def co64(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0
     p = BoxParser(fin, size)
 
@@ -151,7 +157,7 @@ def co64(fin, size, version, flags):
     return {"chunk_offsets": chunk_offsets}, p.delta
 
 
-def prft(fin, size, version, flags):
+def prft(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
 
     p = BoxParser(fin, size)
 
@@ -165,32 +171,53 @@ def prft(fin, size, version, flags):
     return {"reference_track_ID": reference_track_ID, "ntp_timestamp": ntp_timestamp, "media_time": media_time}, p.delta
 
 
-def dimg(fin, size, version, flags):
-
-    """Not a fullbox, inherits parent version"""
+def iref_parser(fin, size, version):
 
     p = BoxParser(fin, size)
-
     if version == 0:
         (from_item_id,) = p.unpack(">H", 2)
     elif version == 1:
         (from_item_id,) = p.unpack(">L", 4)
     else:
-        assert False
+        assert False, f"Unsupported version: {version}"
 
-    (to_item_ids_num,) = p.unpack(">H", 2)
-
-    if version == 0:
-        to_item_ids = p.unpack(f">{to_item_ids_num}H", to_item_ids_num * 2)
-    elif version == 1:
-        to_item_ids = p.unpack(f">{to_item_ids_num}L", to_item_ids_num * 4)
+    if size == p.delta:  # empty box, found in test files, is this standard?
+        to_item_ids = ()
     else:
-        assert False
+        (to_item_ids_num,) = p.unpack(">H", 2)
+
+        if version == 0:
+            to_item_ids = p.unpack(f">{to_item_ids_num}H", to_item_ids_num * 2)
+        elif version == 1:
+            to_item_ids = p.unpack(f">{to_item_ids_num}L", to_item_ids_num * 4)
+        else:
+            assert False, f"Unsupported version: {version}"
 
     return {"from_item_id": from_item_id, "to_item_ids": to_item_ids}, p.delta
 
 
-def ctts(fin, size, version, flags):
+def dimg(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+
+    """Not a fullbox, inherits parent version"""
+
+    return iref_parser(fin, size, version)
+
+
+def thmb(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+
+    """Not a fullbox, inherits parent version"""
+
+    return iref_parser(fin, size, version)
+
+
+def cdsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+
+    """Not a fullbox, inherits parent version"""
+
+    return iref_parser(fin, size, version)
+
+
+def ctts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Composition Time to Sample Box / CompositionOffsetBox"""
     p = BoxParser(fin, size)
 
@@ -206,7 +233,7 @@ def ctts(fin, size, version, flags):
     return {"composition_offset_entries": named_batch(entries, 2, CompositionOffsetEntry)}, p.delta
 
 
-def stsc(fin, size, version, flags):
+def stsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Sample To Chunk Box"""
 
     assert version == 0
@@ -216,7 +243,7 @@ def stsc(fin, size, version, flags):
     return {"sample_to_chunk_entries": named_batch(entries, 3, SampleToChunkEntry)}, p.delta
 
 
-def stts(fin, size, version, flags):
+def stts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """TimeToSampleBox"""
 
     assert version == 0
@@ -226,33 +253,33 @@ def stts(fin, size, version, flags):
     return {"time_to_samples_entries": named_batch(entries, 2, TimeToSampleEntry)}, p.delta
 
 
-def uuid(fin, size, version, flags):
+def uuid(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     (uuid,) = p.unpack(">16s", 16)
     return {"uuid": uuid}, p.delta
 
 
-def ftyp(fin, size, version, flags):
+def ftyp(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     major_brand, minor_version = p.unpack(">4sL", 8)
     return {"major_brand": major_brand, "minor_version": minor_version}, p.delta
 
 
-def stsd(fin, size, version, flags):
+def stsd(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
     return {"entry_count": entry_count}, p.delta
 
 
-def url(fin, size, version, flags):
+def url(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0
     p = BoxParser(fin, size)
     url = p.c_string("utf-8")
     return {"url": url}, p.delta
 
 
-def urn(fin, size, version, flags):
+def urn(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0
     p = BoxParser(fin, size)
     urn = p.c_string("utf-8")
@@ -260,13 +287,13 @@ def urn(fin, size, version, flags):
     return {"urn": urn, "name": name}, p.delta
 
 
-def dref(fin, size, version, flags):  # needs to be parsed!!!
+def dref(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:  # needs to be parsed!!!
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
     return {"entry_count": entry_count}, p.delta
 
 
-def iinf(fin, size, version, flags):  # needs to be parsed!!!
+def iinf(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:  # needs to be parsed!!!
     p = BoxParser(fin, size)
     if version == 0:
         (entry_count,) = p.unpack(">H", 2)
@@ -278,7 +305,7 @@ def iinf(fin, size, version, flags):  # needs to be parsed!!!
     return {"entry_count": entry_count}, p.delta
 
 
-def pitm(fin, size, version, flags):
+def pitm(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Primary Item Box"""
 
     p = BoxParser(fin, size)
@@ -292,7 +319,7 @@ def pitm(fin, size, version, flags):
     return {"item_ID": item_ID}, p.delta
 
 
-def hdlr(fin, size, version, flags):
+def hdlr(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0
 
     p = BoxParser(fin, size)
@@ -302,7 +329,7 @@ def hdlr(fin, size, version, flags):
     return {"handler_type": handler_type, "name": name}, p.delta
 
 
-def tfdt(fin, size, version, flags):
+def tfdt(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     if version == 0:
         baseMediaDecodeTime = p.unpack(">L", 4)
@@ -312,26 +339,26 @@ def tfdt(fin, size, version, flags):
     return {"baseMediaDecodeTime": baseMediaDecodeTime}, p.delta
 
 
-def frma(fin, size, version, flags):
+def frma(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     (data_format,) = p.unpack(">4s", 4)
 
     return {"data_format": data_format}, p.delta
 
 
-def schm(fin, size, version, flags):
+def schm(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
 
     scheme_type, scheme_version = p.unpack(">4sL", 8)
     ret = {"scheme_type": scheme_type, "scheme_version": scheme_version}
-    if flags & 0x000001:
+    if int.from_bytes(flags, byteorder="big") & 0x000001:
         scheme_uri = p.c_string()
         ret["scheme_uri"] = scheme_uri
 
     return ret, p.delta
 
 
-def infe(fin, size, version, flags):
+def infe(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     ret = {}
     if version in (0, 1):
@@ -367,6 +394,77 @@ def infe(fin, size, version, flags):
     return ret, p.delta
 
 
+def size_to_format_char(size: int) -> str:
+    return {4: "L", 8: "Q"}[size]
+
+
+def iloc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+    p = BoxParser(fin, size)
+    ret: Dict[str, Any] = {}
+
+    # assert fin.tell() % 8 == 0
+
+    a, b = p.unpack(">BB", 2)
+    offset_size, length_size = divmod(a, 16)
+    base_offset_size, index_size_reserved = divmod(b, 16)
+
+    if version == 1 or version == 2:
+        index_size = index_size_reserved
+    else:
+        reserved = index_size_reserved
+
+    if version < 2:
+        (item_count,) = p.unpack(">H", 2)
+    elif version == 2:
+        (item_count,) = p.unpack(">L", 4)
+
+    ret["items"] = []
+
+    for i in range(item_count):
+        if version < 2:
+            (item_ID,) = p.unpack(">H", 2)
+        elif version == 2:
+            (item_ID,) = p.unpack(">L", 4)
+
+        if version == 1 or version == 2:
+            (a,) = p.unpack(">H", 2)
+            reserved, construction_method = divmod(a, 16)
+        else:
+            construction_method = None
+
+        if base_offset_size == 0:
+            data_reference_index, extent_count = p.unpack(">HH", 4)
+            base_offset = None
+        else:
+            fmt_char = size_to_format_char(base_offset_size)
+            data_reference_index, base_offset, extent_count = p.unpack(f">H{fmt_char}H", 4 + base_offset_size)
+
+        if (version == 1 or version == 2) and index_size > 0:
+            fmt_chars = (
+                size_to_format_char(index_size) + size_to_format_char(offset_size) + size_to_format_char(length_size)
+            )
+            entries = p.unpack(
+                f">{'{fmt_chars}'*extent_count}", (index_size + offset_size + length_size) * extent_count
+            )
+            entries = named_batch(entries, 3, ItemLocationEntryWithIndex)
+        else:
+            fmt_chars = size_to_format_char(offset_size) + size_to_format_char(length_size)
+            entries = p.unpack(f">{fmt_chars*extent_count}", (offset_size + length_size) * extent_count)
+            entries = named_batch(entries, 2, ItemLocationEntry)
+
+        ret["items"].append(
+            {
+                "item_ID": item_ID,
+                "construction_method": construction_method,
+                "data_reference_index": data_reference_index,
+                "base_offset": base_offset,
+                "entries": entries,
+            }
+        )
+
+    return ret, p.delta
+
+
 parsers = {
     "stsd": stsd,
     "iinf": iinf,
@@ -390,6 +488,9 @@ parsers = {
     "stts": stts,
     "mfhd": mfhd,
     "fpar": fpar,
+    "thmb": thmb,
+    "cdsc": cdsc,
+    "iloc": iloc,
 }
 
 versions = {
@@ -401,13 +502,12 @@ versions = {
 }
 
 
-def _load_atoms():
-    # type: () -> Dict[str, Tuple[str, str, str]]
+def _load_atoms() -> Dict[str, Tuple[str, str, str]]:
 
     package_name = __package__ or "genutility"
     atoms_path = pkg_resources.resource_filename(package_name, "data/mp4-atoms.tsv")
 
-    out = {}  # type: Dict[str, Tuple[str, str, str]]
+    out: Dict[str, Tuple[str, str, str]] = {}
 
     try:
         for fourcc, type, boxtype, description, _ in iter_csv(atoms_path, delimiter="\t", skip=1):
@@ -421,10 +521,10 @@ def _load_atoms():
 
 
 atoms = _load_atoms()
-atomcodep = re.compile(br"[0-9a-zA-Z ]{4}")  # what do the specs say here?
+atomcodep = re.compile(rb"[0-9a-zA-Z ]{4}")  # what do the specs say here?
 
 
-def parse_atom(fin, code, size, version, flags):
+def parse_atom(fin: IO[bytes], code: str, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     try:
         func = parsers[code]
         content, delta = func(fin, size, version, flags)
@@ -435,8 +535,7 @@ def parse_atom(fin, code, size, version, flags):
     return content, delta
 
 
-def read_atom(fin, parent_version=None):
-    # type: (IO[bytes], Optional[int]) -> Tuple[int, str, int, int, dict]
+def read_atom(fin: IO[bytes], parent_version: Optional[int] = None) -> Tuple[int, str, int, int, int, bytes]:
 
     pos = fin.tell()
 
@@ -469,13 +568,19 @@ def read_atom(fin, parent_version=None):
 
     else:
         version = parent_version
-        flags = None
+        flags = b""
 
     return pos, code, size, p.delta, version, flags
 
 
-def _enum_atoms(fin, total_size, depth, parse_atoms=True, unparsed_data=False, version=None):
-    # type: (IO[bytes], int, int, bool, bool, Optional[int]) -> Iterator[Tuple[int, int, str, int, Optional[bytes]]]
+def _enum_atoms(
+    fin: IO[bytes],
+    total_size: int,
+    depth: int,
+    parse_atoms: bool = True,
+    unparsed_data: bool = False,
+    version: Optional[int] = None,
+) -> Iterator[Tuple[int, int, str, int, Optional[dict], Optional[bytes]]]:
 
     while fin.tell() < total_size:
         pos, type, size, delta, version, flags = read_atom(fin, version)
@@ -517,7 +622,7 @@ def _enum_atoms(fin, total_size, depth, parse_atoms=True, unparsed_data=False, v
 
 def enumerate_atoms(
     path: str, parse_atoms: bool = False, unparsed_data: bool = False
-) -> Iterator[Tuple[int, int, str, int, Optional[bytes]]]:
+) -> Iterator[Tuple[int, int, str, int, Optional[dict], Optional[bytes]]]:
 
     """Takes an ISO/IEC base media file format / mp4 file `path`
     and yields (depth, position, code, size, parsed_data, unparsed_data) tuples.

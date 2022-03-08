@@ -49,3 +49,7 @@ def _filemanager_cmd_posix(path):
     # type: (str, ) -> str
 
     return f'nautilus "{path}"'  # gnome only. xdg-open for the rest?
+
+
+def _get_appdata_dir(roaming: bool = False) -> str:
+    return os.getenv("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))

@@ -42,9 +42,9 @@ def median_of_medians(seq, cmp_=None, left=0, right=None, depth=0):
     Currently only works for len(seq) == GROUP_SIZE ** x
     """
 
-    offset = (GROUP_SIZE ** (depth + 1) - GROUP_SIZE ** depth) // 2
+    offset = (GROUP_SIZE ** (depth + 1) - GROUP_SIZE**depth) // 2
 
-    gap = GROUP_SIZE ** depth
+    gap = GROUP_SIZE**depth
 
     cmp_ = cmp_ or cmp
 

@@ -14,7 +14,7 @@ def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=No
     """
 
     def sqr(x):
-        return x ** 2
+        return x**2
 
     # (m1x, m1y), (m2x, m2y), (m3x, m3y), (m4x, m4y) = corners
     (m1x, m1y), (m3x, m3y), (m4x, m4y), (m2x, m2y) = corners

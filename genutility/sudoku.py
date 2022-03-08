@@ -27,7 +27,7 @@ class Sudoku(Generic[T]):
         self.sym_free = sym_free
 
         self.outer_square_size = isqrt(len(board))
-        self.outer_square_area = self.outer_square_size ** 2
+        self.outer_square_area = self.outer_square_size**2
         if self.outer_square_area != len(board):
             raise ValueError("board has an invalid size")
 
@@ -37,7 +37,7 @@ class Sudoku(Generic[T]):
             )
 
         self.inner_square_size = isqrt(self.outer_square_size)
-        if self.inner_square_size ** 2 != self.outer_square_size:
+        if self.inner_square_size**2 != self.outer_square_size:
             raise ValueError("board has an invalid size")
 
         self.solved = False

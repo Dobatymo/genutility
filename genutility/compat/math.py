@@ -65,4 +65,4 @@ except ImportError:
             Install `gmpy2` for improved speed and accuracy.
             """
 
-            return int(n ** 0.5)
+            return int(n**0.5)

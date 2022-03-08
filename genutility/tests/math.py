@@ -27,13 +27,13 @@ from genutility.test import MyTestCase, parametrize
 
 class TestPosInfInt(MyTestCase):
     def test_cmp(self):
-        self.assertTrue(PosInfInt > 2 ** 128)
+        self.assertTrue(PosInfInt > 2**128)
         self.assertTrue(PosInfInt > 0)
-        self.assertTrue(PosInfInt > -(2 ** 128))
+        self.assertTrue(PosInfInt > -(2**128))
 
-        self.assertFalse(PosInfInt < 2 ** 128)
+        self.assertFalse(PosInfInt < 2**128)
         self.assertFalse(PosInfInt < 0)
-        self.assertFalse(PosInfInt < -(2 ** 128))
+        self.assertFalse(PosInfInt < -(2**128))
 
     def test_addsub(self):
         self.assertTrue(PosInfInt + 1 is PosInfInt)
@@ -126,13 +126,13 @@ class MathTest(MyTestCase):
         (0, 0, "Byte"),
         (0.0, 0, "Byte"),
         (1000, 1000, "Byte"),
-        (1024 ** 1, 1.0, "KiB"),
-        (1024 ** 2, 1.0, "MiB"),
-        (1024 ** 3, 1.0, "GiB"),
-        (1024 ** 4, 1.0, "TiB"),
-        (1024 ** 5, 1.0, "PiB"),
+        (1024**1, 1.0, "KiB"),
+        (1024**2, 1.0, "MiB"),
+        (1024**3, 1.0, "GiB"),
+        (1024**4, 1.0, "TiB"),
+        (1024**5, 1.0, "PiB"),
         (100000, 97.65625, "KiB"),
-        (1024 ** 2 + 10 * 1024 * 1, 1.009765625, "MiB"),
+        (1024**2 + 10 * 1024 * 1, 1.009765625, "MiB"),
     )
     def test_byte2size(self, number, truth1, truth2):
         num, val = byte2size(number)
@@ -144,11 +144,11 @@ class MathTest(MyTestCase):
         (0.0, 0, "0 Byte"),
         (0, 1, "0 Byte"),
         (1000, 0, "1000 Byte"),
-        (1024 ** 1, 1, "1.0 KiB"),
-        (1024 ** 2 + 10 * 1024, 2, "1.01 MiB"),
-        (1024 ** 3, 3, "1.000 GiB"),
-        (1024 ** 4, 4, "1.0000 TiB"),
-        (1024 ** 5, 5, "1.00000 PiB"),
+        (1024**1, 1, "1.0 KiB"),
+        (1024**2 + 10 * 1024, 2, "1.01 MiB"),
+        (1024**3, 3, "1.000 GiB"),
+        (1024**4, 4, "1.0000 TiB"),
+        (1024**5, 5, "1.00000 PiB"),
     )
     def test_byte2size_str(self, number, roundval, truth):
         result = byte2size_str(number, roundval)

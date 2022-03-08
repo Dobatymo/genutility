@@ -39,14 +39,14 @@ def hu_moments(channels):
     coords_y = np.expand_dims(coords_y, axis=-1)  # for batch input, some change is needed here
 
     def M(p, q):
-        return np.sum(coords_x ** p * coords_y ** q * channels, axis=(-2, -3))
+        return np.sum(coords_x**p * coords_y**q * channels, axis=(-2, -3))
 
     def mu(p, q, xb, yb):
         return np.sum((coords_x - xb) ** p * (coords_y - yb) ** q * channels, axis=(-2, -3))
 
     def eta(p, q, xb, yb, mu00):
         gamma = (p + q) / 2 + 1
-        return mu(p, q, xb, yb) / mu00 ** gamma
+        return mu(p, q, xb, yb) / mu00**gamma
 
     def loop():
 
@@ -71,7 +71,7 @@ def hu_moments(channels):
         eta03 = eta(0, 3, xb, yb, mu00)
 
         phi1 = eta20 + eta02
-        phi2 = (eta20 - eta02) ** 2 + 4 * eta11 ** 2
+        phi2 = (eta20 - eta02) ** 2 + 4 * eta11**2
         phi3 = (eta30 - 3 * eta12) ** 2 + (3 * eta21 - eta03) ** 2
         phi4 = (eta30 + eta12) ** 2 + (eta21 + eta03) ** 2
         phi5 = (eta30 - 3 * eta12) * (eta30 + eta12) * ((eta30 + eta12) ** 2 - 3 * (eta21 + eta03) ** 2) + (
@@ -128,7 +128,7 @@ def phash_blockmean_array(arr, bits=256):
         raise ValueError("arr must be 2-dimensional")
 
     n = int(np.sqrt(bits))
-    if n ** 2 != bits:
+    if n**2 != bits:
         raise ValueError("bits must be a square number")
 
     blocks = unblock(arr, n, n)

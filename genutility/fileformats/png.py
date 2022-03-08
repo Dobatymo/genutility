@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from _hashlib import HASH as Hashobj
 
 png_sig = b"\x89PNG\r\n\x1a\n"
-chunk_type_p = re.compile(br"^[a-zA-Z]{4}$")
+chunk_type_p = re.compile(rb"^[a-zA-Z]{4}$")
 
 image_chunks = {b"IHDR", b"IDAT", b"PLTE", b"tRNS", b"acTL", b"fcTL", b"fdAT", b"IEND"}
 image_meta_chunks = {b"sBIT", b"pHYs", b"vpAg", b"gAMA", b"sRGB", b"cHRM", b"iCCP"}

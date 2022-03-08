@@ -3,12 +3,9 @@ from __future__ import generator_stop
 import os.path
 from configparser import ConfigParser
 from importlib.util import find_spec
-from typing import TYPE_CHECKING
+from typing import Any, Dict, Optional, Union
 
 from .os import get_appdata_dir
-
-if TYPE_CHECKING:
-    from typing import Any, Dict, Optional, Union
 
 
 def sort_config(inpath, outpath):
@@ -22,16 +19,17 @@ def sort_config(inpath, outpath):
         config.write(fw)
 
 
-def _load(name):
-    # type: (str, ) -> Dict[str, Any]
+def _load(*names: str) -> Dict[str, Any]:
 
     from .toml import read_toml
 
+    name = names[-1]
     configfilename = name + ".toml"
 
     # try appdata directory
     try:
-        return read_toml(os.path.join(get_appdata_dir(), name, configfilename))
+        appdata_path = os.path.join(get_appdata_dir(), *names, configfilename)
+        return read_toml(appdata_path)
     except FileNotFoundError:
         pass
 
@@ -64,12 +62,11 @@ def _load(name):
         )
 
 
-def load(name, json_schema=None):
-    # type: (str, Optional[Union[dict, str]]) -> Dict[str, Any]
+def load(*names: str, json_schema: Optional[Union[dict, str]] = None) -> Dict[str, Any]:
 
     from .json import read_json_schema
 
-    obj = _load(name)
+    obj = _load(*names)
 
     if json_schema is None:
         return obj

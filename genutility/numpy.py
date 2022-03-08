@@ -535,7 +535,7 @@ def histogram_correlation(hist1, hist2):
     h2norm = (hist2.T - np.mean(hist2, axis=-1)).T
 
     num = np.sum(h1norm * h2norm, axis=-1)
-    denom = np.sqrt(np.sum(h1norm ** 2, axis=-1) * np.sum(h2norm ** 2, axis=-1))
+    denom = np.sqrt(np.sum(h1norm**2, axis=-1) * np.sum(h2norm**2, axis=-1))
     return num / denom
 
 

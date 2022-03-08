@@ -21,7 +21,7 @@ from cwinsdk.um.fileapi import (
     LockFileEx,
     UnlockFileEx,
 )
-from cwinsdk.um.KnownFolders import FOLDERID_RoamingAppData
+from cwinsdk.um.KnownFolders import FOLDERID_LocalAppData, FOLDERID_RoamingAppData
 from cwinsdk.um.minwinbase import LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY, OVERLAPPED
 from cwinsdk.um.processenv import GetStdHandle
 from cwinsdk.um.ShlObj_core import SHGetKnownFolderPath
@@ -127,12 +127,16 @@ def _unlock(fp):
     UnlockFileEx(handle, 0, 0xFFFFFFFF, 0xFFFFFFFF, overlapped)
 
 
-def _get_appdata_dir():
-    # type: () -> str
+def _get_appdata_dir(roaming: bool = False) -> str:
+
+    if roaming:
+        folderid = FOLDERID_RoamingAppData
+    else:
+        folderid = FOLDERID_LocalAppData
 
     KF_FLAG_CREATE = 0x00008000
 
-    rfid = byref(FOLDERID_RoamingAppData)
+    rfid = byref(folderid)
     Flags = KF_FLAG_CREATE
     Token = None
     Path = PWSTR()

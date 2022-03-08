@@ -60,16 +60,15 @@ if system == "Windows":
 elif system == "Linux":
 
     from .os_posix import _disk_usage_posix as disk_usage
+    from .os_posix import _get_appdata_dir as get_appdata_dir
     from .os_posix import _lock as lock
     from .os_posix import _unlock as unlock
 
     volume_info = _not_available("volume_info")
-    from .os_posix import _filemanager_cmd_posix as filemanager_cmd
-
-    get_appdata_dir = _not_available("get_appdata_dir")
     from os.path import abspath as uncabspath
     from os.path import islink
 
+    from .os_posix import _filemanager_cmd_posix as filemanager_cmd
     from .os_posix import _interrupt_posix as interrupt
 
 elif system == "Darwin":

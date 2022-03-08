@@ -35,7 +35,7 @@ class Browscap:
 
     def match_v2(self, useragent):
         pattern = "|".join(p for p, t in self.iter_patterns())
-        pattern = re.compile(pattern, re.IGNORECASE, max_mem=1024 ** 3)
+        pattern = re.compile(pattern, re.IGNORECASE, max_mem=1024**3)
 
         with PrintStatementTime():
             if pattern.match(useragent):

@@ -249,7 +249,7 @@ def open_physical_drive(DriveIndex):
     # type: (int, ) -> Any
 
     assert isinstance(DriveIndex, int)
-    drive = fr"\\.\PHYSICALDRIVE{DriveIndex}"
+    drive = rf"\\.\PHYSICALDRIVE{DriveIndex}"
     FileName = create_unicode_buffer(drive)
 
     return open_device(FileName)

@@ -68,7 +68,7 @@ def MSER(img, show=True):
 
 
 def norm(v):
-    return np.sqrt(np.sum(v ** 2, axis=-1))
+    return np.sqrt(np.sum(v**2, axis=-1))
 
 
 def shape_dissimmilarity(R_u, R_v, i, j):

@@ -1,13 +1,11 @@
 from __future__ import generator_stop
 
 import json
-from typing import TYPE_CHECKING
+import ssl
+from typing import Callable, List, Optional, Tuple
 
 from .http import URLRequest
 from .ops import logical_xor
-
-if TYPE_CHECKING:
-    from typing import Callable, List, Optional, Tuple
 
 
 class StreamWatcher:
@@ -42,13 +40,19 @@ class TwitchAPI:
     follows = "users/follows"
     streams = "streams?user_id={}"
 
-    def __init__(self, client_id, userid=None, username=None):
-        # type: (str, Optional[str], Optional[str]) -> None
+    def __init__(
+        self,
+        client_id: str,
+        userid: Optional[str] = None,
+        username: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+    ) -> None:
 
         if not logical_xor(userid, username):
             raise ValueError("Either the userid or the username must be given")
 
         self.client_id = client_id
+        self.ssl_context = ssl_context
 
         if userid:
             self.userid = userid
@@ -60,7 +64,7 @@ class TwitchAPI:
         # type: (str, List[Tuple[str, str]]) -> dict
 
         qs = "&".join(k + "=" + v for k, v in params)
-        data = URLRequest(url + "?" + qs, headers={"Client-ID": self.client_id}).load()
+        data = URLRequest(url + "?" + qs, headers={"Client-ID": self.client_id}, context=self.ssl_context).load()
         return json.loads(data)
 
     def get_userid(self, username):

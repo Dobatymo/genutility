@@ -29,7 +29,7 @@ def rgb_colors():
     """Yields a stream of (noncryptographic) random RGB color tuples."""
 
     while True:
-        rgb = randrange(0, 256 ** 3)  # nosec
+        rgb = randrange(0, 256**3)  # nosec
         rg, b = divmod(rgb, 256)
         r, g = divmod(rg, 256)
         yield (r, g, b)

@@ -31,9 +31,9 @@ class HyperLogLog:
         else:
             self.width = bitness()
 
-        self.maxsize = 2 ** self.width
+        self.maxsize = 2**self.width
 
-        self.m = 2 ** self.b
+        self.m = 2**self.b
 
         if self.m == 16:
             self.alpha = 0.673
@@ -50,7 +50,7 @@ class HyperLogLog:
     def error(self):
         # type: () -> float
 
-        return 1.04 / (self.m ** 0.5)
+        return 1.04 / (self.m**0.5)
 
     def _merge_registers(self, other):
         # type: (HyperLogLog, ) -> List[int]
@@ -68,7 +68,7 @@ class HyperLogLog:
         # memory layout: zeros[hashbits-b], register[b].
         # register first and then zeros doesn't work as well in python,
         # because shifting to the left doesn't cut off
-        register = (2 ** self.b - 1) & h  # same as h % self.b
+        register = (2**self.b - 1) & h  # same as h % self.b
         zeroes = self.width - self.b - (h >> self.b).bit_length()
 
         self.registers[register] = max(self.registers[register], zeroes)
@@ -85,7 +85,7 @@ class HyperLogLog:
     def __len__(self):
         # type: () -> int
 
-        DV_est = self.alpha * self.m ** 2 * 1 / sum(2 ** (-r) for r in self.registers)
+        DV_est = self.alpha * self.m**2 * 1 / sum(2 ** (-r) for r in self.registers)
 
         if DV_est < 5 / 2 * self.m:  # small range correction
             V = self.registers.count(0)
