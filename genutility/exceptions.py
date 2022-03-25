@@ -18,6 +18,10 @@ class ParseError(Exception):
     which we don't have any control over.
     """
 
+    def __init__(self, *args, data=None):
+        super().__init__(*args)
+        self.data = data
+
 
 class DownloadFailed(Exception):
     """Raised when a download from an external resource by HTTP or any other protocol did not
@@ -155,7 +159,11 @@ def assert_choice_map(name, value, choices):
 def assert_type(name: str, value: Any, types: Union[Type[Any], Tuple[Type[Any], ...]]) -> None:
 
     if not isinstance(value, types):
-        raise TypeError("{} must be one of these types: {}".format(name, ", ".join(map(str, types))))
+        if not isinstance(types, tuple):
+            types = (types,)
+        raise TypeError(
+            "{} must be one of these types: {}. Not: {}".format(name, ", ".join(map(str, types)), type(value))
+        )
 
 
 def assert_true(name, value):

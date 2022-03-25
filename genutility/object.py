@@ -1,10 +1,9 @@
 from __future__ import generator_stop
 
+from builtins import sorted as _builtin_sorted
 from copy import copy
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Any, List
+from json import dumps
+from typing import Any, List
 
 
 def cast(object, class_, instanceof=object, *args, **kwargs):
@@ -61,3 +60,40 @@ def compress(value):
         return {k: compress(v) for k, v in value.items()}
     else:
         return value
+
+
+def _sorted(value: List, *, reverse: bool = False) -> Any:
+    def keyfunc(value: Any) -> Any:
+        if isinstance(value, dict):
+            return dumps(value)
+        else:
+            return value
+
+    return _builtin_sorted(value, key=keyfunc)
+
+
+def sorted(value: Any, *, reverse: bool = False) -> Any:
+    if isinstance(value, list):
+        return _sorted([sorted(v, reverse=reverse) for v in value], reverse=reverse)
+    elif isinstance(value, tuple):
+        return tuple(_sorted([sorted(v, reverse=reverse) for v in value], reverse=reverse))
+    elif isinstance(value, dict):
+        return dict(_sorted([(k, sorted(v, reverse=reverse)) for k, v in value.items()], reverse=reverse))
+    else:
+        return value
+
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+    from pathlib import Path
+
+    from genutility.json import read_json, write_json
+
+    parser = ArgumentParser(description="Sort json files recursively, both lists and objects")
+    parser.add_argument("--inpath", type=Path)
+    parser.add_argument("--outpath", type=Path)
+    parser.add_argument("--indent")
+    args = parser.parse_args()
+
+    obj = read_json(args.inpath)
+    write_json(sorted(obj), args.outpath, indent=args.indent)
