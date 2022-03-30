@@ -3,7 +3,7 @@ from __future__ import generator_stop
 import sys
 from collections.abc import Sequence
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Set, TextIO, Tuple
 
 from aria2p import Client
 from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
@@ -12,12 +12,8 @@ from requests.exceptions import ConnectionError
 from .dict import update
 from .exceptions import DownloadFailed, ExternalProcedureUnavailable, InconsistentState, WouldBlockForever, assert_type
 
-if TYPE_CHECKING:
-    from typing import Any, List, Optional, Set, TextIO, Tuple
 
-
-def aria_bool(value):
-    # type: (Optional[bool], ) -> Optional[str]
+def aria_bool(value: Optional[bool]) -> Optional[str]:
 
     """aria2 rpc requires strings for some boolean arguments like 'continue'"""
 
@@ -50,8 +46,14 @@ class AriaDownloader:
         Tries to respect other users of the same instance and doesn't interfere with them.
     """
 
-    def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT, secret="", poll=1.0, global_options=None):  # nosec
-        # type: (str, int, str, float, Optional[dict]) -> None
+    def __init__(  # nosec
+        self,
+        host: str = DEFAULT_HOST,
+        port: int = DEFAULT_PORT,
+        secret: str = "",
+        poll: float = 1.0,
+        global_options: Optional[dict] = None,
+    ) -> None:
 
         """Initialize the aria2 client with `host`, `port` and `secret`.
         Poll aria2 every `poll` seconds.
@@ -69,7 +71,7 @@ class AriaDownloader:
 
         self.gids = set()  # type: Set[str]
 
-    def query(self, method, *args, **kwargs):
+    def query(self, method: str, *args: Any, **kwargs: Any) -> Any:
 
         try:
             return getattr(self.aria2, method)(*args, **kwargs)
@@ -82,28 +84,24 @@ class AriaDownloader:
         except ConnectionError as e:
             raise ExternalProcedureUnavailable(e)
 
-    def pause_all(self):
-        # type: () -> None
+    def pause_all(self) -> None:
 
         for gid in self.gids:
             self.query("pause", gid)
 
-    def resume_all(self):
-        # type: () -> None
+    def resume_all(self) -> None:
 
         for gid in self.gids:
             self.query("unpause", gid)
 
-    def _entries(self, entries):
+    def _entries(self, entries: Dict[str, Any]):
         return {entry["gid"]: entry for entry in entries if entry["gid"] in self.gids}
 
-    def managed_downloads(self):
-        # type: () -> int
+    def managed_downloads(self) -> int:
 
         return len(self.gids)
 
-    def block_one(self, progress_file=sys.stdout):
-        # type: (Optional[TextIO], ) -> Tuple[str, str]
+    def block_one(self, progress_file: Optional[TextIO] = sys.stdout) -> Tuple[str, str]:
 
         """Blocks until one download is done."""
 
@@ -169,10 +167,9 @@ class AriaDownloader:
 
             raise WouldBlockForever("No downloads active or waiting")
 
-    def block_all(self):
-        # type: () -> List[Tuple[Any, Any]]
+    def block_all(self) -> List[Tuple[Any, Optional[str]]]:
 
-        ret = []  # type: List[Tuple[Any, Any]]
+        ret: List[Tuple[Any, Optional[str]]] = []
 
         while True:
             try:
@@ -185,8 +182,7 @@ class AriaDownloader:
 
         return ret
 
-    def remove_stopped(self, gid):
-        # type: (str, ) -> None
+    def remove_stopped(self, gid: str) -> None:
 
         self.gids.remove(gid)
 
@@ -194,8 +190,7 @@ class AriaDownloader:
         # fails on active/waiting/paused (on CTRL-C for example)
         self.query("remove_download_result", gid)
 
-    def block_gid(self, gid, progress_file=sys.stdout):
-        # type: (str, Optional[TextIO]) -> str
+    def block_gid(self, gid: str, progress_file: Optional[TextIO] = sys.stdout) -> str:
 
         """Blocks until download is done.
         If progress printing is not needed, `progress_file` should be set to `None`.
@@ -253,16 +248,15 @@ class AriaDownloader:
 
     def download(
         self,
-        uri,
-        path=None,
-        filename=None,
-        headers=None,
-        max_connections=None,
-        split=None,
-        continue_=None,
-        retry_wait=None,
-    ):
-        # type: (str, Optional[str], Optional[str], Optional[Sequence[str]], Optional[int], Optional[int], Optional[bool], Optional[int]) -> str
+        uri: str,
+        path: Optional[str] = None,
+        filename: Optional[str] = None,
+        headers: Optional[Sequence[str]] = None,
+        max_connections: Optional[int] = None,
+        split: Optional[int] = None,
+        continue_: Optional[bool] = None,
+        retry_wait: Optional[int] = None,
+    ) -> str:
 
         """Downloads `uri` to directory `path`.
         Does not block. Returns a download identifier.
@@ -291,17 +285,16 @@ class AriaDownloader:
 
     def download_x(
         self,
-        num,
-        uri,
-        path=None,
-        filename=None,
-        headers=None,
-        max_connections=None,
-        split=None,
-        continue_=None,
-        retry_wait=None,
-    ):
-        # type: (int, str, Optional[str], Optional[str], Optional[Sequence[str]], Optional[int], Optional[int], Optional[bool], Optional[int]) -> Optional[Tuple[str, str, str]]
+        num: int,
+        uri: str,
+        path: Optional[str] = None,
+        filename: Optional[str] = None,
+        headers: Optional[Sequence[str]] = None,
+        max_connections: Optional[int] = None,
+        split: Optional[int] = None,
+        continue_: Optional[bool] = None,
+        retry_wait: Optional[int] = None,
+    ) -> Optional[Tuple[str, str, str]]:
 
         queued_gid = self.download(uri, path, filename, headers, max_connections, split, continue_, retry_wait)
         if self.managed_downloads() >= num:

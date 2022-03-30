@@ -151,8 +151,7 @@ def batch_vTAv(A, v):
     return np.einsum("...k,...kl,...l->...", v, A, v)
 
 
-def batch_inner(a, b, verify=True):
-    # type: (np.ndarray, np.ndarray, bool) -> np.ndarray
+def batch_inner(a: np.ndarray, b: np.ndarray, verify: bool = True) -> np.ndarray:
 
     """Performs a batched inner product over the last dimension.
     Replacement for deprecated `from numpy.core.umath_tests import inner1d`.
@@ -168,8 +167,7 @@ def batch_inner(a, b, verify=True):
     return np.einsum("...i,...i->...", a, b)  # faster than np.sum(a * b, axis=-1)
 
 
-def batch_outer(a, b, verify=True):
-    # type: (np.ndarray, np.ndarry, bool) -> np.ndarray
+def batch_outer(a: np.ndarray, b: np.ndarray, verify: bool = True) -> np.ndarray:
 
     """Performs a batched outer product over the last dimension.
     Shapes: (B, X), (B, Y) -> (B, X, Y)
@@ -181,8 +179,9 @@ def batch_outer(a, b, verify=True):
     return np.einsum("...i,...j->...ij", a, b)  # slightly faster than np.multiply(a[...,:,None], b[...,None,:])
 
 
-def batchtopk(probs, k=None, axis=-1, reverse=False):
-    # type: (np.ndarray, np.ndarray, int, bool) -> np.ndarray
+def batchtopk(
+    probs: np.ndarray, k: Optional[int] = None, axis: int = -1, reverse: bool = False
+) -> Tuple[np.ndarray, np.ndarray]:
 
     """`probs` values ndarray
     `k` take the smallest `k` elements, if `reverse` is False
@@ -393,8 +392,7 @@ def _two_sample_kolmogorov_smirnov_pmf(pmf1, pmf2, alpha=0.05):
     return statistic, pvalue, reject
 
 
-def inf_matrix_power(pm):
-    # type: (np.ndarray, ) -> np.ndarray
+def inf_matrix_power(pm: np.ndarray, dtype=np.float64) -> np.ndarray:
 
     """Calculate stochastic matrix `pm` to the power of infinity,
     by finding the eigenvector which corresponds to the eigenvalue 1.
@@ -408,18 +406,18 @@ def inf_matrix_power(pm):
         raise ValueError("The first eigenvalue is not none. Is this a right stochastic matrix?")
 
     vi = np.linalg.inv(v)
-    d = np.zeros(pm.shape[0], dtype=np.float)
+    d = np.zeros(pm.shape[0], dtype=dtype)
     d[0] = 1.0
 
     return np.matmul(v, np.matmul(np.diag(d), vi))
 
 
-def decompress(selectors, data, default):
-    # type: (np.ndarray[bool], np.ndarray[T], T) -> None
+def decompress(selectors: np.ndarray, data: np.ndarray, default) -> np.ndarray:
 
     """Same result as:
     `np.array(list(genutility.iter.decompress(selectors, iter(data), default)))`
-    but faster
+    but faster.
+    `selectors` should be a bool array.
     """
 
     out = np.full(len(selectors), default)
@@ -491,8 +489,7 @@ def block2d(arr: np.ndarray, bn1: int, bn2: int, bs1: int, bs2: int) -> np.ndarr
     return arr.reshape(bn1, bn2, bs1, bs2).swapaxes(1, 2).reshape(bn1 * bs1, bn2 * bs2)
 
 
-def remove_color(img, ratio, neutral_color=RGB_WHITE):
-    # type: (np.ndarray, float, Tuple[int, int, int]) -> np.ndarray
+def remove_color(img: np.ndarray, ratio: float, neutral_color: Tuple[int, int, int] = RGB_WHITE) -> None:
 
     """Replace colored pixels with a `neutral_color`. The `ratio` defines the 'colorfulness' above
     which level the pixel should be replace.
@@ -522,8 +519,7 @@ def sliding_window_2d(image, window_size, step_size=(1, 1)):
             yield image[y : y + win_y, x : x + win_x, ...]
 
 
-def histogram_correlation(hist1, hist2):
-    # type: (np.ndarray, np.ndarray) -> np.ndarray
+def histogram_correlation(hist1: np.ndarray, hist2: np.ndarray) -> np.ndarray:
 
     """Input shape of `hist1` and `hist2`: [batch..., levels]. The correlation is calculated over `levels`
     and then batched over the remaining dimensions.

@@ -1,15 +1,11 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Callable, MutableSequence, Optional, TypeVar
 
-if TYPE_CHECKING:
-    from typing import Callable, MutableSequence, TypeVar
-
-    T = TypeVar("T")
+T = TypeVar("T")
 
 
-def _insertion(seq, cmp_, left, right, gap):
-    # type: (MutableSequence, Callable, int, int, int) -> None
+def _insertion(seq: MutableSequence, cmp_: Callable, left: int, right: int, gap: int) -> None:
 
     loc = left + gap
     while loc <= right:
@@ -25,8 +21,7 @@ def _insertion(seq, cmp_, left, right, gap):
 GROUP_SIZE = 5
 
 
-def cmp(x, y):
-    # type: (T, T) -> int
+def cmp(x: T, y: T) -> int:
 
     """
     Return negative if x<y, zero if x==y, positive if x>y.
@@ -34,8 +29,9 @@ def cmp(x, y):
     return (x > y) - (x < y)
 
 
-def median_of_medians(seq, cmp_=None, left=0, right=None, depth=0):
-    # type: (MutableSequence, Callable, int, int, int) -> int
+def median_of_medians(
+    seq: MutableSequence, cmp_: Optional[Callable] = None, left: int = 0, right: Optional[int] = None, depth: int = 0
+) -> int:
 
     """Approximate median selection algorithm.
     This is not the full median of medians algorithm.

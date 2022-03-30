@@ -2,19 +2,21 @@ from __future__ import generator_stop
 
 import asyncio
 import sys
+from numbers import Number
 from time import time
-from typing import TYPE_CHECKING
+from typing import Iterable, Optional, Sequence, TextIO, Union
 
 from .iter import _lstr, progressdata
 
-if TYPE_CHECKING:
-    from numbers import Number
-    from typing import IO, Iterable, Optional, Sequence, Union
-
 
 class progress_content:
-    def __init__(self, it, length=None, refresh=1, file=sys.stdout):
-        # type: (Union[Iterable, Sequence], Optional[int], Number, Optional[IO[str]]) -> None
+    def __init__(
+        self,
+        it: Union[Iterable, Sequence],
+        length: Optional[int] = None,
+        refresh: Number = 1,
+        file: Optional[TextIO] = sys.stdout,
+    ) -> None:
 
         self.it = it
         self.length = length
@@ -28,7 +30,9 @@ class progress_content:
         return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
 
     class AsyncIterProgress:
-        def __init__(self, it, length, refresh, file):
+        def __init__(
+            self, it: Union[Iterable, Sequence], length: Optional[int], refresh: Number, file: Optional[TextIO]
+        ):
             self.it = it.__aiter__()
             self.refresh = refresh
             self.file = file

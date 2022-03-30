@@ -1,22 +1,25 @@
 from __future__ import generator_stop
 
 import os.path
-from os import fspath, remove, replace
+from os import PathLike, fspath, remove, replace
 from tempfile import mkstemp
-from typing import TYPE_CHECKING
+from typing import IO, ContextManager, Optional, Union
 
 from .file import copen
 
-if TYPE_CHECKING:
-    from os import PathLike
-    from typing import IO, ContextManager, Optional, Union
-
-    PathType = Union[str, PathLike]
+PathType = Union[str, PathLike]
 
 # http://stupidpythonideas.blogspot.tw/2014/07/getting-atomic-writes-right.html
 class TransactionalCreateFile:
-    def __init__(self, path, mode="wb", encoding=None, errors=None, newline=None, prefix="tmp"):
-        # type: (PathType, str, Optional[str], Optional[str], Optional[str], str) -> None
+    def __init__(
+        self,
+        path: PathType,
+        mode: str = "wb",
+        encoding: Optional[str] = None,
+        errors: Optional[str] = None,
+        newline: Optional[str] = None,
+        prefix: str = "tmp",
+    ) -> None:
 
         is_text = "t" in mode
 
@@ -26,20 +29,17 @@ class TransactionalCreateFile:
         fd, self.tmppath = mkstemp(suffix, prefix, curdir, is_text)
         self.fp = copen(fd, mode, encoding=encoding, errors=errors, newline=newline, ext=suffix)
 
-    def commit(self):
-        # type: () -> None
+    def commit(self) -> None:
 
         self.fp.close()
         replace(self.tmppath, self.path)  # should be atomic
 
-    def rollback(self):
-        # type: () -> None
+    def rollback(self) -> None:
 
         self.fp.close()
         remove(self.tmppath)
 
-    def __enter__(self):
-        # type: () -> IO
+    def __enter__(self) -> IO:
 
         return self.fp
 
@@ -51,8 +51,14 @@ class TransactionalCreateFile:
             self.commit()
 
 
-def sopen(path, mode="rb", encoding=None, errors=None, newline=None, safe=False):
-    # type: (PathType, str, Optional[str], Optional[str], Optional[str], bool) -> ContextManager[IO]
+def sopen(
+    path: PathType,
+    mode: str = "rb",
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+    newline: Optional[str] = None,
+    safe: bool = False,
+) -> ContextManager[IO]:
 
     if safe:
         return TransactionalCreateFile(path, mode, encoding=encoding, errors=errors, newline=newline)
@@ -60,8 +66,14 @@ def sopen(path, mode="rb", encoding=None, errors=None, newline=None, safe=False)
         return copen(path, mode, encoding=encoding, errors=errors, newline=newline)
 
 
-def write_file(data, path, mode="wb", encoding=None, errors=None, newline=None):
-    # type: (Union[str, bytes], PathType, str, Optional[str], Optional[str], Optional[str]) -> None
+def write_file(
+    data: Union[str, bytes],
+    path: PathType,
+    mode: str = "wb",
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+    newline: Optional[str] = None,
+) -> None:
 
     """Writes/overwrites files in a safe way. That means either the original file
     will be left untouched, or it will be replaced with the complete new file.

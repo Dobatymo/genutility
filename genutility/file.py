@@ -4,7 +4,21 @@ import os.path
 from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from os import PathLike, fdopen, fspath, scandir
 from sys import stdout
-from typing import IO, TYPE_CHECKING, BinaryIO, Iterator, Optional, Tuple, Union, overload
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    BinaryIO,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    Optional,
+    TextIO,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from ._files import entrysuffix
 from .iter import consume, iter_equal, resizer
@@ -13,7 +27,6 @@ from .ops import logical_implication, logical_xor
 
 if TYPE_CHECKING:
     from mmap import mmap
-    from typing import Callable, Iterable, TextIO, TypeVar
 
     PathType = Union[str, PathLike[str]]
     Data = TypeVar("Data", str, bytes)
@@ -804,7 +817,9 @@ def iter_dir(
 
     encoding = _check_arguments(mode, encoding)
 
-    archive_funcs = {
+    archive_funcs: Dict[
+        str, Callable[[str, str, Optional[str], Optional[str], Optional[str]], Iterator[Tuple[str, IO]]]
+    ] = {
         ".zip": iter_zip,
         ".tar": iter_tar,
         ".tgz": iter_tar,  # what about tar.gz

@@ -6,27 +6,14 @@ from datetime import datetime, timedelta
 from functools import partial, reduce, wraps
 from sys import stdout
 from time import sleep
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    Iterator,
-    Optional,
-    Sequence,
-    TextIO,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
 
 from ._func import rename, renameobj  # noqa: F401
 from .iter import nonstriter, retrier
 
-if TYPE_CHECKING:
-    T = TypeVar("T")
-    U = TypeVar("U")
+T = TypeVar("T")
+U = TypeVar("U")
+It = TypeVar("It", bound=Iterable)
 
 logger = logging.getLogger(__name__)
 
@@ -35,24 +22,21 @@ class NotRetried(RuntimeError):
     pass
 
 
-def identity(x):
-    # type: (T, ) -> T
+def identity(x: T) -> T:
 
     """Identity function."""
 
     return x
 
 
-def nop():
-    # type: () -> None
+def nop() -> None:
 
     """Function which does absolutely nothing (aka pass, noop)."""
 
     pass
 
 
-def partial_decorator(*args, **kwargs):
-    # type: (*Any, **Any) -> Callable
+def partial_decorator(*args: Any, **kwargs: Any) -> Callable:
 
     """Same as `functools.partial` but applied as a decorator."""
 
@@ -80,8 +64,7 @@ def compose(*functions):
     return reduce(compose_two, functions, identity)
 
 
-def apply(f, x):  # *args, **kwargs
-    # type: (Callable[[T], U], T) -> U
+def apply(f: Callable[[T], U], x: T) -> U:  # *args, **kwargs
 
     """Same as `f(x)`."""
 
@@ -107,8 +90,7 @@ def multiapply(funcs, elm):
     return elm
 
 
-def multimap(funcs, it):
-    # type: (Sequence[Callable], Iterable[Any]) -> Iterator[Any]
+def multimap(funcs: Sequence[Callable], it: Iterable) -> Iterator:
 
     """Applies functions `funcs` to each element of `it` iteratively."""
 
@@ -116,8 +98,7 @@ def multimap(funcs, it):
         yield multiapply(funcs, i)
 
 
-def deepmap(func, *iterables):
-    # type: (Callable, *Iterable) -> Iterator
+def deepmap(func: Callable, *iterables: Iterable) -> Iterator:
 
     """Simlar to `map`, but it maps recursively over sequences of sequnces.
     Returns a generator of generators.
@@ -139,8 +120,7 @@ def deepmap(func, *iterables):
             yield deepmap(func, *its)
 
 
-def outermap(func, iterable):
-    # type: (Callable[[T], U], Iterable) -> U
+def outermap(func: Callable[[T], U], iterable: It) -> Union[It, U]:
 
     """Examples:
     outermap(list, (1, (2, 3))) -> [1, [2, 3]]
@@ -155,8 +135,7 @@ def outermap(func, iterable):
         return func(outermap(func, i) for i in it)
 
 
-def recmap(func, iterable):
-    # type: (Callable, Iterable) -> list
+def recmap(func: Callable, iterable: Iterable[Any]) -> list:
 
     """Simlar to `map`, but it maps recursively over sequences of sequnces and puts the result into a list of lists.
     To return a generator of generators use `deepmap` instead.
@@ -168,8 +147,7 @@ def recmap(func, iterable):
     return outermap(list, deepmap(func, iterable))
 
 
-def call_repeated(num):
-    # type: (int, ) -> Callable[[Callable], Callable]
+def call_repeated(num: int) -> Callable[[Callable], Callable]:
 
     """Function decorator to call decorated function `num` times with the same arguments.
     Returns the results of the last call.
@@ -191,8 +169,7 @@ def call_repeated(num):
     return dec
 
 
-def print_return_type(func, file=stdout):
-    # type: (Callable, TextIO) -> Callable
+def print_return_type(func: Callable, file: TextIO = stdout) -> Callable:
 
     """Wraps function to print the return type after calling."""
 
@@ -205,30 +182,39 @@ def print_return_type(func, file=stdout):
     return inner
 
 
+def get_callable_name(func: Callable) -> str:
+    """Unwraps common function wrappers and tries to return the full qualified function name."""
+
+    if isinstance(func, partial):
+        func = func.func
+
+    return getattr(func, "__qualname__", repr(func))
+
+
 def retry(
-    func,
-    waittime,
-    exceptions=(Exception,),
-    attempts=-1,
-    multiplier=1,
-    jitter=0,
-    max_wait=None,
-    jitter_dist="uniform",
-    waitfunc=sleep,
-):
-    # type: (Callable[[], T], float, Union[Type[Exception], Tuple[Type[Exception]]], int, float, float, Optional[float], str, Callable[[float], Any]) -> T
+    func: Callable[[], T],
+    waittime: float,
+    exceptions: Union[Type[Exception], Tuple[Type[Exception], ...]] = (Exception,),
+    attempts: int = -1,
+    multiplier: float = 1,
+    jitter: float = 0,
+    max_wait: Optional[float] = None,
+    jitter_dist: str = "uniform",
+    waitfunc: Callable[[float], Any] = sleep,
+) -> T:
 
     """Retry function `func` multiple times in case of raised `exceptions`.
     See `genutility.iter.retrier()` for the remaining arguments.
     Reraises the last exception in case the function call doesn't succeed after retrying.
     """
 
-    last_exception = None  # type: Optional[Exception]
+    last_exception: Optional[Exception] = None
     for i in retrier(waittime, attempts, multiplier, jitter, max_wait, jitter_dist, waitfunc):
         try:
             return func()
         except exceptions as e:
-            logger.info("Attempt %s failed: %s", i + 1, e)
+            name = get_callable_name(func)
+            logger.info("Attempt %s (%s) failed: %s", i + 1, name, e)
             last_exception = e
 
     if last_exception:

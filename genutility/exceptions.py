@@ -31,7 +31,7 @@ class DownloadFailed(Exception):
 
 
 class AccessDenied(Exception):
-    pass
+    cached: Optional[bool]
 
 
 class TemporaryError(Exception):

@@ -4,14 +4,14 @@ import os
 import os.path
 import shlex
 import sys
-from argparse import ArgumentTypeError
+from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from functools import wraps
 from os import makedirs
 from pathlib import Path
 from typing import Any, Callable, Union
 
 
-def get_args(argparser):
+def get_args(argparser: ArgumentParser) -> Namespace:
     """get commandline arguments from std input instead"""
 
     from pprint import pprint
@@ -44,9 +44,7 @@ def get_args(argparser):
     return argparser.parse_args(args)
 
 
-def arg_to_path(func):
-    # type: (Callable[[Path], Path], ) -> Callable
-
+def arg_to_path(func: Callable[[Path], Path]) -> Callable:
     @wraps(func)
     def inner(path):
         return func(Path(path))
@@ -54,8 +52,7 @@ def arg_to_path(func):
     return inner
 
 
-def multiple_of(divisor):
-    # type: (int, ) -> Callable[[str], int]
+def multiple_of(divisor: int) -> Callable[[str], int]:
 
     from builtins import int as builtin_int
 
@@ -64,8 +61,7 @@ def multiple_of(divisor):
         error: argument --multiple: invalid int value: 'a'
     """
 
-    def int(s):
-        # type: (str, ) -> builtin_int
+    def int(s: str) -> builtin_int:
 
         number = builtin_int(s)
 
@@ -78,13 +74,11 @@ def multiple_of(divisor):
     return int
 
 
-def in_range(start, stop, step=1):
-    # type: (int, int, int) -> Callable[[str], int]
+def in_range(start: int, stop: int, step: int = 1) -> Callable[[str], int]:
 
     from builtins import int as builtin_int
 
-    def int(s):  # see: multiple_of()
-        # type: (str, ) -> builtin_int
+    def int(s: str) -> builtin_int:  # see: multiple_of()
 
         number = builtin_int(s)
 
@@ -98,13 +92,11 @@ def in_range(start, stop, step=1):
     return int
 
 
-def between(start, stop):
-    # type: (float, float) -> Callable[[str], float]
+def between(start: float, stop: float) -> Callable[[str], float]:
 
     from builtins import float as builtin_float
 
-    def float(s):
-        # type: (str, ) -> builtin_float
+    def float(s: str) -> builtin_float:
 
         number = builtin_float(s)
 
@@ -117,8 +109,7 @@ def between(start, stop):
     return float
 
 
-def suffix(s):
-    # type: (str, ) -> str
+def suffix(s: str) -> str:
 
     """Checks if `s` is a valid suffix."""
 
@@ -129,8 +120,7 @@ def suffix(s):
     return s
 
 
-def lowercase(s):
-    # type: (str, ) -> str
+def lowercase(s: str) -> str:
 
     """Converts argument to lowercase."""
 
@@ -138,8 +128,7 @@ def lowercase(s):
 
 
 @arg_to_path
-def existing_path(path):
-    # type: (Path, ) -> Path
+def existing_path(path: Path) -> Path:
 
     """Checks if a path exists."""
 
@@ -151,8 +140,7 @@ def existing_path(path):
 
 
 @arg_to_path
-def new_path(path):
-    # type: (Path, ) -> Path
+def new_path(path: Path) -> Path:
 
     """Checks if a path exists."""
 
@@ -164,8 +152,7 @@ def new_path(path):
 
 
 @arg_to_path
-def is_dir(path):
-    # type: (Path, ) -> Path
+def is_dir(path: Path) -> Path:
 
     """Checks if a path is an actual directory"""
 
@@ -177,8 +164,7 @@ def is_dir(path):
 
 
 @arg_to_path
-def abs_path(path):
-    # type: (Path, ) -> Path
+def abs_path(path: Path) -> Path:
 
     """Checks if a path is an actual directory"""
 
@@ -186,8 +172,7 @@ def abs_path(path):
 
 
 @arg_to_path
-def is_file(path):
-    # type: (Path, ) -> Path
+def is_file(path: Path) -> Path:
 
     """Checks if a path is an actual file"""
 
@@ -199,8 +184,7 @@ def is_file(path):
 
 
 @arg_to_path
-def future_file(path):
-    # type: (Path, ) -> Path
+def future_file(path: Path) -> Path:
 
     """Tests if file can be created to catch errors early.
     Checks if directory is writeable and file does not exist yet.
@@ -216,8 +200,7 @@ def future_file(path):
 
 
 @arg_to_path
-def out_dir(path):
-    # type: (Path, ) -> Path
+def out_dir(path: Path) -> Path:
 
     """Tests if `path` is a directory. If not it tries to create one."""
 
@@ -232,8 +215,7 @@ def out_dir(path):
 
 
 @arg_to_path
-def empty_dir(dirname):
-    # type: (Path, ) -> Path
+def empty_dir(dirname: Path) -> Path:
 
     """tests if directory is empty"""
 
@@ -259,8 +241,6 @@ def json_file(path: Union[str, Path]) -> Any:
 
 
 if __name__ == "__main__":
-
-    from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument("--str")
