@@ -1,6 +1,7 @@
 from __future__ import generator_stop
 
 from collections import UserDict, defaultdict
+from copy import deepcopy
 from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List, Mapping, Tuple, TypeVar, Union
 
 T = TypeVar("T")
@@ -89,8 +90,7 @@ def itemgetter(it: Iterable[T]) -> Callable[[Mapping[T, U]], Iterator[U]]:
     return lambda d: (d[i] for i in it)
 
 
-def subdictdefault(d, it, default=None):
-    # type: (Mapping[T, U], Iterable[T], Union[U, V]) -> Dict[T, Union[U, V]]
+def subdictdefault(d: Mapping[T, U], it: Iterable[T], default: Union[U, V] = None) -> Dict[T, Union[U, V]]:
 
     """Uses the elements of `it` as keys to extract a new sub-dictionary."""
 
@@ -110,8 +110,7 @@ class keydefaultdict(defaultdict):
 
     """defaultdict which passes a key to the default factory."""
 
-    def __missing__(self, key):
-        # type: (Hashable, ) -> Any
+    def __missing__(self, key: Hashable) -> Any:
 
         if self.default_factory is None:
             raise KeyError(key)
@@ -128,10 +127,88 @@ class NoOverwriteDict(UserDict):
 
     """Dictionary which does not allow overwriting existing items."""
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Hashable, value: Any) -> None:
         if key in self.data:
             raise KeyExistsError(repr(key))
         self.data[key] = value
 
-    def overwrite(self, key, value):
+    def overwrite(self, key: Hashable, value: Any) -> None:
         self.data[key] = value
+
+
+def _merge_schema(d1: dict, d2: dict) -> dict:
+
+    """Merge `d2` into `d1`. `d2` stays unmodified."""
+
+    a = d1.keys()
+    b = d2.keys()
+
+    for k in a & b:
+        if type(d1[k]) != type(d2[k]):  # noqa: E721
+            raise TypeError(f"Type of {k} changed from {type(d1[k])} to {type(d2[k])}")
+
+        if isinstance(d1[k], list):
+            if d1[k] and d2[k]:
+                if type(d1[k][0]) != type(d2[k][0]):  # noqa: E721
+                    raise TypeError(f"Type of list {k} changed from {type(d1[k][0])} to {type(d2[k][0])}")
+                if isinstance(d1[k][0], dict):
+                    _merge_schema(d1[k][0], d2[k][0])
+
+        elif isinstance(d1[k], dict):
+            _merge_schema(d1[k], d2[k])
+
+        elif isinstance(d1[k], int):
+            d1[k] = max(d1[k], d2[k])
+
+    for k in b - a:
+        if isinstance(d2[k], list):
+            d1[k] = deepcopy(d2[k][:1])
+        else:
+            d1[k] = deepcopy(d2[k])
+
+
+def _get_intsize(num: int) -> str:
+    if num >= 2**63:
+        return "uint64"
+    elif num >= 2**32:
+        return "int64"
+    elif num >= 2**31:
+        return "uint32"
+    else:
+        return "int32"
+
+
+def _post_schema(d: dict) -> dict:
+
+    for k in d:
+        if isinstance(d[k], dict):
+            _post_schema(d[k])
+        elif isinstance(d[k], list):
+            if d[k]:
+                if isinstance(d[k][0], dict):
+                    _post_schema(d[k][0])
+                elif isinstance(d[k][0], int):
+                    d[k][0] = _get_intsize(d[k][0])
+                else:
+                    d[k][0] = type(d[k][0]).__name__
+        elif isinstance(d[k], int):
+            d[k] = _get_intsize(d[k])
+        else:
+            d[k] = type(d[k]).__name__
+
+
+def get_schema_simple(d: Iterable[dict]) -> dict:
+    """Returns a combined schema definition for the dicts provided by iterable `d`.
+    - Keys are assumed to be optional.
+    - Type unions are not supported. Changing field types will throw an exception.
+    - Ints are combined to the largest type (eg. int32->int64)
+    - For lists, only the first element is looked at, and it is assumed that all following elements
+        are of the same type. This is not verified however.
+    """
+
+    schema = {}
+    for i in d:
+        _merge_schema(schema, i)
+
+    _post_schema(schema)
+    return schema

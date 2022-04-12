@@ -1,6 +1,14 @@
 from __future__ import generator_stop
 
-from genutility.dict import KeyExistsError, NoOverwriteDict, keydefaultdict, mapmap, subdict, subdictdefault
+from genutility.dict import (
+    KeyExistsError,
+    NoOverwriteDict,
+    get_schema_simple,
+    keydefaultdict,
+    mapmap,
+    subdict,
+    subdictdefault,
+)
 from genutility.test import MyTestCase, parametrize
 
 
@@ -63,6 +71,17 @@ class DictTest(MyTestCase):
             d.update({2: 3})
 
         self.assertEqual(d, {1: 1, 2: 2})
+
+    def test_get_schema_simple(self):
+        d = [{"a": 1}, {"a": 2, "b": "asd"}, {"c": [1, 2]}, {"c": [3], "d": [{"a": 1.1}]}]
+        result = get_schema_simple(d)
+        truth = {
+            "a": "int32",
+            "b": "str",
+            "c": ["int32"],
+            "d": [{"a": "float"}],
+        }
+        self.assertEqual(truth, result)
 
 
 if __name__ == "__main__":

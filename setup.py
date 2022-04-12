@@ -102,7 +102,7 @@ extras_require = {
     "nltk": ["nltk"],
     "networkx": ["networkx"],
     "pandas": ["pandas"],
-    "pdf": ["PyPDF2"],
+    "pdf": ["PyPDF2<1.27.0"],
     "pillow": ["pillow", "piexif"],
     "powerpoint": ["python-pptx"],
     "rasa": ["requests", "aiohttp>=2.3", "ruamel.yaml"],
@@ -121,7 +121,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
     author="Dobatymo",
     name="genutility",
-    version="0.0.80",
+    version="0.0.81",
     url="https://github.com/Dobatymo/genutility",
     description="A collection of various Python utilities",
     long_description=long_description,

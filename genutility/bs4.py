@@ -1,13 +1,11 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:
-    import bs4
+import bs4
 
 
-def find_one(node, *args, **kwargs):
-    # type: (bs4.element.Tag, *Any, **Any) -> bs4.element.Tag
+def find_one(node: bs4.element.Tag, *args: Any, **kwargs: Any) -> bs4.element.Tag:
 
     nodes = node.find_all(*args, **kwargs)
 
@@ -15,3 +13,15 @@ def find_one(node, *args, **kwargs):
         raise ValueError(f"Found {len(nodes)} nodes for: {args} {kwargs}")
 
     return nodes[0]
+
+
+def find_zero_or_one(node: bs4.element.Tag, *args: Any, **kwargs: Any) -> bs4.element.Tag:
+
+    nodes = node.find_all(*args, **kwargs)
+
+    if len(nodes) == 0:
+        return None
+    elif len(nodes) == 1:
+        return nodes[0]
+    else:
+        raise ValueError(f"Found {len(nodes)} nodes for: {args} {kwargs}")
