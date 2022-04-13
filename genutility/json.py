@@ -7,6 +7,7 @@ import logging
 from functools import partial, wraps
 from itertools import islice
 from pathlib import Path
+from types import ModuleType
 from typing import IO, Any, Callable, Dict, FrozenSet, Iterator, Optional, Sequence, Tuple, Type, Union
 
 from typing_extensions import TypedDict
@@ -269,7 +270,7 @@ with open("{file}", "r") as fr:
         try:
             import simplejson as sjson
 
-            _json = sjson
+            _json: ModuleType = sjson
         except ImportError:
             _json = json
 

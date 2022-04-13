@@ -168,9 +168,12 @@ class Rar:
 
 
 def create_rar_from_folder(
-    path, dest_path=None, profile_setter_func=None, filter_func=lambda x: True, name_transform=lambda x: x
-):
-    # type: (Path, Optional[Path], Callable, Callable, Callable) -> bool
+    path: Path,
+    dest_path: Optional[Path] = None,
+    profile_setter_func: Optional[Callable] = None,
+    filter_func: Callable = lambda x: True,
+    name_transform: Callable = lambda x: x,
+) -> bool:
 
     if not path.is_dir():
         return False
@@ -195,8 +198,12 @@ def create_rar_from_folder(
     return True
 
 
-def create_rar_from_file(path, dest_path=Path("."), profile_setter_func=None, name_transform=lambda x: x):
-    # type: (Path, Path, Callable[[Rar], Any], Callable) -> bool
+def create_rar_from_file(
+    path: Path,
+    dest_path: Path = Path("."),
+    profile_setter_func: Optional[Callable[[Rar], Any]] = None,
+    name_transform: Callable = lambda x: x,
+) -> bool:
 
     if dest_path == ".":
         dest_path = path.parent

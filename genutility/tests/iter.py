@@ -26,21 +26,25 @@ from genutility.iter import (
     every_n,
     extrema,
     filternone,
+    find_majority_element,
     findfirst,
     first_not_none,
     flatten,
+    interleave,
     is_empty,
     iter_different,
     iter_equal,
     iter_except,
     iter_except_ignore,
     iterrandrange,
+    itersort,
     last,
     lastdefault,
     list_except,
     multi_join,
     no_dupes,
     pairwise,
+    pairwise_skip,
     peaks,
     powerset,
     product_range_repeat,
@@ -652,6 +656,69 @@ class IterTest(MyTestCase):
     )
     def test_remove_consecutive_dupes(self, input, truth):
         result = remove_consecutive_dupes(input)
+        self.assertIterEqual(truth, result)
+
+    @parametrize(
+        (tuple(), None),
+        ((1,), 1),
+        ((1, 1), 1),
+        ((1, 1, 2), 1),
+        ((1, 2, 2), 2),
+        ((1, 2, 2, 3), 2),
+    )
+    def test_find_majority_element(self, seq, truth):
+        result = find_majority_element(seq)
+        self.assertEqual(truth, result)
+
+    @parametrize(
+        ([], []),
+        ([1], []),
+        ([1, 2], [(1, 2)]),
+        ([1, 2, 3], [(1, 2)]),
+        ([1, 2, 3, 4], [(1, 2)]),
+        ([1, 2, 3, 4, 5], [(1, 2), (4, 5)]),
+    )
+    def test_pairwise_skip(self, seq, truth):
+        func = lambda x: x == 3  # noqa: E731
+        result = pairwise_skip(seq, func)
+        self.assertIterEqual(truth, result)
+
+    @parametrize(((empty(),), empty()), (((1, 3), (2, 4)), (1, 2, 3, 4)))
+    def test_interleave(self, iterables, truth):
+        result = interleave(*iterables)
+        self.assertIterEqual(truth, result)
+
+    def test_interleave_lazy(self):
+        """tests if implementation is really lazy"""
+
+        class C:
+            def __init__(self):
+                self.i = 0
+
+            def __iter__(self):
+                while self.i < 5:
+                    yield self.i
+                    self.i += 1
+
+        a = C()
+        b = C()
+        it = interleave(a, b)
+
+        self.assertEqual([0, 0, 1], list(islice(it, 3)))
+        self.assertEqual(1, a.i)
+        self.assertEqual(1, b.i)
+        self.assertEqual(1, next(it))
+        self.assertEqual(1, a.i)
+        self.assertEqual(1, b.i)
+
+    @parametrize(
+        ([], [], 2),
+        (range(10), range(10), 3),
+        (reversed(range(10)), [6, 5, 4, 3, 2, 1, 0, 7, 8, 9], 4),
+        ([9, 1, 0, 2, 5, 8, 3, 4, 7, 6], [0, 1, 2, 5, 3, 4, 7, 6, 8, 9], 3),
+    )
+    def test_itersort(self, seq, truth, num):
+        result = itersort(seq, num)
         self.assertIterEqual(truth, result)
 
 

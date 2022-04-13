@@ -1,33 +1,33 @@
 from __future__ import generator_stop
 
+import csv
+from datetime import datetime
+from decimal import Decimal
 from itertools import chain, repeat
-from typing import TYPE_CHECKING
+from operator import itemgetter
+from typing import Any, Iterator
 
+from .dict import mapmap
 from .exceptions import InconsistentState, NoResult
-
-if TYPE_CHECKING:
-    from typing import Any, Iterator
-
-    from .typing import Connection, Cursor
+from .file import copen
+from .iter import progress
+from .typing import Connection, Cursor
 
 
 class TransactionCursor:
 
     """Cursor context manager which starts a transaction and rolls back in case of error."""
 
-    def __init__(self, conn):
-        # type: (Connection, ) -> None
+    def __init__(self, conn: Connection) -> None:
 
         self.cursor = conn.cursor()
 
-    def __enter__(self):
-        # type: () -> Cursor
+    def __enter__(self) -> Cursor:
 
         self.cursor.execute("BEGIN TRANSACTION")
         return self.cursor
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        # type: (Any, Any, Any) -> None
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
 
         if exc_type:
             self.cursor.execute("ROLLBACK TRANSACTION")
@@ -40,24 +40,20 @@ class CursorContext:
 
     """Cursor context manager which creates a new cursor and closes it when it leaves the context."""
 
-    def __init__(self, conn):
-        # type: (Connection, ) -> None
+    def __init__(self, conn: Connection) -> None:
 
         self.cursor = conn.cursor()
 
-    def __enter__(self):
-        # type: () -> Cursor
+    def __enter__(self) -> Cursor:
 
         return self.cursor
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        # type: (Any, Any, Any) -> None
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
 
         self.cursor.close()
 
 
-def upsert(cursor, primary, values, table):
-    # type: (Cursor, dict, dict, str) -> bool
+def upsert(cursor: Cursor, primary: dict, values: dict, table: str) -> bool:
 
     """Inserts `table` fields specified by `primary` and `values` keys,
     with the corresponding values.
@@ -89,8 +85,7 @@ def upsert(cursor, primary, values, table):
     return False
 
 
-def fetchone(cursor):
-    # type: (Cursor, ) -> Any
+def fetchone(cursor: Cursor) -> Any:
 
     """Fetch results from `cursor` and assure only one result was returned."""
 
@@ -103,8 +98,7 @@ def fetchone(cursor):
         raise InconsistentState("More than one result found")
 
 
-def iterfetch(cursor, batchsize=1000):
-    # type: (Cursor, int) -> Iterator[Any]
+def iterfetch(cursor: Cursor, batchsize: int = 1000) -> Iterator[Any]:
 
     """Iterate all results from `cursor`."""
 
@@ -113,3 +107,37 @@ def iterfetch(cursor, batchsize=1000):
         if not results:
             break
         yield from results
+
+
+sqltypes_to_str = {
+    str: "str",
+    datetime: "datetime",
+    int: "int",
+    Decimal: "decimal",
+}
+
+
+def export_sql_to_csv(
+    connection: Connection, path: str, query: str, queryargs: tuple = (), verbose: bool = False
+) -> None:
+
+    """Exports the result of `query` from a SQL database to a csv file `path`.
+    `queryargs` will be passed to the query.
+    """
+
+    with CursorContext(connection) as cursor:
+        cursor.execute(query, queryargs)
+        columns = tuple(map(itemgetter(0), cursor.description))
+        types = tuple(mapmap(sqltypes_to_str, map(itemgetter(1), cursor.description)))
+
+        with copen(path, "wt", encoding="utf-8", newline="") as csvfile:
+            fw = csv.writer(csvfile)
+            fw.writerow(columns)
+            fw.writerow(types)
+            if verbose:
+                it = progress(iterfetch(cursor))
+            else:
+                it = iterfetch(cursor)
+
+            for row in it:
+                fw.writerow(row)

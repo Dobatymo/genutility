@@ -20,9 +20,9 @@ def get_calling_functions(level: Union[int, Sequence[int]] = 2, sep: str = "->")
         return sep.join(f"{Path(calframe[level].filename).stem}:{calframe[level].function}" for level in level)
 
 
-def caller_file(depth: int = 1) -> str:
+def caller_file(depth: int = 1) -> Path:
     return Path(getfile(_getframe(depth))).resolve().parent
 
 
-def caller_sourcefile(depth: int = 1) -> str:
+def caller_sourcefile(depth: int = 1) -> Path:
     return Path(getsourcefile(_getframe(depth))).resolve().parent

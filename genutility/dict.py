@@ -136,7 +136,7 @@ class NoOverwriteDict(UserDict):
         self.data[key] = value
 
 
-def _merge_schema(d1: dict, d2: dict) -> dict:
+def _merge_schema(d1: dict, d2: dict) -> None:
 
     """Merge `d2` into `d1`. `d2` stays unmodified."""
 
@@ -178,7 +178,7 @@ def _get_intsize(num: int) -> str:
         return "int32"
 
 
-def _post_schema(d: dict) -> dict:
+def _post_schema(d: dict) -> None:
 
     for k in d:
         if isinstance(d[k], dict):
@@ -206,7 +206,7 @@ def get_schema_simple(d: Iterable[dict]) -> dict:
         are of the same type. This is not verified however.
     """
 
-    schema = {}
+    schema: Dict[str, Any] = {}
     for i in d:
         _merge_schema(schema, i)
 

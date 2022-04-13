@@ -5,6 +5,7 @@ import random
 import sys
 from collections import deque
 from functools import partial
+from heapq import heappop, heappush, heapreplace
 from itertools import chain, combinations, count, groupby, islice, product, repeat, starmap, tee, zip_longest
 from operator import add, itemgetter
 from random import randrange
@@ -921,3 +922,85 @@ class CachedIterable(Generic[T]):
             self.vals.append(val)
             yield val
         self.done = True
+
+
+def find_majority_element(it: Iterable[T]) -> Optional[T]:
+
+    """Find most common element of `it` in constant space and linear time (under the assumption,
+    that there is indeed one majority element).
+    Returns `None` if the iterable is empty.
+    """
+
+    counter = 0
+    current = None
+
+    for i in it:
+        if counter == 0:
+            current = i
+            counter += 1
+        elif i == current:
+            counter += 1
+        else:
+            counter -= 1
+
+    return current
+
+
+def pairwise_skip(it: Iterable[T], func: Callable[[T], bool]) -> Iterator[Tuple[T, T]]:
+
+    """Yields pairs from iterable `it`, but skips elements where `func(element)` is `True`.
+    For example: func = lambda x: x == 2
+    (0, 1, 2, 3, 4) -> (0, 1), (3, 4)
+    """
+
+    it = iter(it)
+
+    class CustomStopIteration(Exception):
+        pass
+
+    def yielduntil():
+        try:
+            while True:
+                elm = next(it)
+                if func(elm):
+                    return
+                yield elm
+        except StopIteration:
+            raise CustomStopIteration() from None
+
+    try:
+        while True:
+            yield from pairwise(yielduntil())
+    except CustomStopIteration:
+        pass
+
+
+def interleave(*iterables: Iterable) -> Iterator:
+
+    """Interleaves the outputs of multiple iterables into one.
+    ((1,3), (2,4)) -> 1,2,3,4
+    """
+
+    return chain.from_iterable(zip(*iterables))
+
+
+def itersort(it: Iterable[T], buffer_size: int) -> Iterator[T]:
+
+    """Partially sorts iterator. Keeps at most `buffer_size` items in memory."""
+
+    heap: List[T] = []
+    for item in it:
+        if len(heap) == buffer_size:
+            yield heapreplace(heap, item)
+        else:
+            heappush(heap, item)
+
+    while heap:
+        yield heappop(heap)
+
+
+def itershuffle(it: Iterable[T], buffer_size: int) -> Iterator[T]:
+
+    """Partially shuffles `it`. Keeps at most `buffer_size` items in memory."""
+
+    return map(itemgetter(1), itersort(zip(iterrandrange(0, buffer_size), it), buffer_size))

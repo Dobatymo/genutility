@@ -94,7 +94,7 @@ class AriaDownloader:
         for gid in self.gids:
             self.query("unpause", gid)
 
-    def _entries(self, entries: Dict[str, Any]):
+    def _entries(self, entries: Dict[str, Any]) -> Dict[str, Any]:
         return {entry["gid"]: entry for entry in entries if entry["gid"] in self.gids}
 
     def managed_downloads(self) -> int:

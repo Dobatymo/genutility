@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, TypeVar, Union
 
 import pyarrow as pa
 from pyarrow import parquet as pq
@@ -33,7 +33,7 @@ def _to_pq_schema(d: Dict[str, Any], sort_keys: bool, outer: Callable[[list], T]
     fields = []
 
     if sort_keys:
-        keys = sorted(d)
+        keys: Iterable[str] = sorted(d)
     else:
         keys = d
 

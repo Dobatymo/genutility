@@ -3,9 +3,9 @@ from __future__ import generator_stop
 from collections.abc import Iterable, Sized
 from typing import TYPE_CHECKING, Any, Optional, Sequence, TypeVar, Union
 
-if TYPE_CHECKING:
+from typing_extensions import Protocol
 
-    from typing_extensions import Protocol
+if TYPE_CHECKING:
 
     Number = Union[int, float]
     T = TypeVar("T")
@@ -113,60 +113,62 @@ if TYPE_CHECKING:
             # type: (Any, ) -> Any
             ...
 
-    class Cursor(Protocol):
-        def callproc(self, procname, parameters):
-            # type: (str, Optional[Sequence[Any]]) -> None
-            ...
 
-        def close(self):
-            # type: () -> None
-            ...
+class Cursor(Protocol):
+    def callproc(self, procname, parameters):
+        # type: (str, Optional[Sequence[Any]]) -> None
+        ...
 
-        def execute(self, operation, parameters):
-            # types: (str, Optional[Sequence[Any]]) -> None
-            ...
+    def close(self):
+        # type: () -> None
+        ...
 
-        def executemany(self, operation, seq_of_parameters):
-            # types: (str, Sequence[Sequence[Any]]) -> None
-            ...
+    def execute(self, operation, parameters):
+        # types: (str, Optional[Sequence[Any]]) -> None
+        ...
 
-        def fetchone(self):
-            # types: () -> Optional[Sequence[Any]]
-            ...
+    def executemany(self, operation, seq_of_parameters):
+        # types: (str, Sequence[Sequence[Any]]) -> None
+        ...
 
-        def fetchmany(self, size):
-            # types: (Optional[int], ) -> Sequence[Sequence[Any]]
-            ...
+    def fetchone(self):
+        # types: () -> Optional[Sequence[Any]]
+        ...
 
-        def fetchall(self):
-            # types: () -> Sequence[Sequence[Any]]
-            ...
+    def fetchmany(self, size):
+        # types: (Optional[int], ) -> Sequence[Sequence[Any]]
+        ...
 
-        def nextset(self):
-            # type: () -> Optional[bool]
-            ...
+    def fetchall(self):
+        # types: () -> Sequence[Sequence[Any]]
+        ...
 
-        def setinputsizes(self, sizes):
-            # types: (Sequence[int], ) -> None
-            ...
+    def nextset(self):
+        # type: () -> Optional[bool]
+        ...
 
-        def setoutputsize(self, size, column):
-            # type: (int, Optional[int]) -> None
-            ...
+    def setinputsizes(self, sizes):
+        # types: (Sequence[int], ) -> None
+        ...
 
-    class Connection(Protocol):
-        def close(self):
-            # type: () -> None
-            ...
+    def setoutputsize(self, size, column):
+        # type: (int, Optional[int]) -> None
+        ...
 
-        def commit(self):
-            # type: () -> None
-            ...
 
-        def rollback(self):
-            # type: () -> None
-            ...
+class Connection(Protocol):
+    def close(self):
+        # type: () -> None
+        ...
 
-        def cursor(self):
-            # type: () -> Cursor
-            ...
+    def commit(self):
+        # type: () -> None
+        ...
+
+    def rollback(self):
+        # type: () -> None
+        ...
+
+    def cursor(self):
+        # type: () -> Cursor
+        ...

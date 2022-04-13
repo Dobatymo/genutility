@@ -1,13 +1,9 @@
 from __future__ import generator_stop
 
-from logging import Formatter
-from typing import TYPE_CHECKING
+from logging import Formatter, LogRecord
+from typing import Any, Dict, Literal, Optional
 
 from .datetime import datetime_from_utc_timestamp
-
-if TYPE_CHECKING:
-    from logging import LogRecord
-    from typing import Any, Dict, Optional
 
 
 class IsoDatetimeFormatter(Formatter):
@@ -18,8 +14,16 @@ class IsoDatetimeFormatter(Formatter):
     can be passed.
     """
 
-    def __init__(self, fmt=None, datefmt=None, style="%", validate=True, sep="T", timespec="auto", aslocal=False):
-        # type: (Optional[str], None, str, bool, str, str, bool) -> None
+    def __init__(
+        self,
+        fmt: Optional[str] = None,
+        datefmt: type(None) = None,
+        style: Literal["%", "{", "$"] = "%",
+        validate: bool = True,
+        sep: str = "T",
+        timespec: str = "auto",
+        aslocal: bool = False,
+    ) -> None:
 
         Formatter.__init__(self, fmt, datefmt, style, validate)
         assert datefmt is None
@@ -27,8 +31,7 @@ class IsoDatetimeFormatter(Formatter):
         self.timespec = timespec
         self.aslocal = aslocal
 
-    def formatTime(self, record, datefmt):
-        # type: (LogRecord, None) -> str
+    def formatTime(self, record: LogRecord, datefmt: type(None)) -> str:
 
         return datetime_from_utc_timestamp(record.created, aslocal=self.aslocal).isoformat(self.sep, self.timespec)
 
