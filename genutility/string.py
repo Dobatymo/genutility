@@ -5,16 +5,13 @@ from collections import OrderedDict
 from functools import partial
 from itertools import chain
 from locale import strxfrm
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Dict, Iterable, Iterator, Mapping, Optional, Tuple, TypeVar, Union
 
 from .binary import decode_binary, encode_binary
 from .iter import switched_enumerate
 
-if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, Union
-
-    T = TypeVar("T")
-    UnicodeOrdinalT = Union[int, str]
+T = TypeVar("T")
+UnicodeOrdinalT = Union[int, str]
 
 english_consonants = "bcdfghjklmnpqrstvwxz"  # y?
 english_vowels = "aeiouy"  # y?
@@ -312,3 +309,18 @@ def contains_digit(s):
     """Tests if a digit is contained in string `s`."""
 
     return _contains_digit.search(s) is not None
+
+
+def all_splits(text: str, include_start: bool = False, include_end: bool = True) -> Iterator[Tuple[str, str]]:
+
+    if include_start:
+        start = 0
+    else:
+        start = 1
+
+    if include_end:
+        end = 1
+    else:
+        end = 0
+
+    return ((text[:i], text[i:]) for i in range(start, len(text) + end))

@@ -2,6 +2,7 @@ from __future__ import generator_stop
 
 import logging
 from itertools import chain, islice
+from operator import add
 from os import devnull
 from unittest.mock import Mock
 
@@ -47,6 +48,7 @@ from genutility.iter import (
     pairwise_skip,
     peaks,
     powerset,
+    product_map,
     product_range_repeat,
     progress,
     remove_consecutive_dupes,
@@ -719,6 +721,14 @@ class IterTest(MyTestCase):
     )
     def test_itersort(self, seq, truth, num):
         result = itersort(seq, num)
+        self.assertIterEqual(truth, result)
+
+    @parametrize(
+        (add, [], [], []),
+        (add, [1, 2], [3, 4], [4, 5, 5, 6]),
+    )
+    def test_product_map(self, func, a, b, truth):
+        result = product_map(func, a, b)
         self.assertIterEqual(truth, result)
 
 

@@ -212,3 +212,17 @@ def get_schema_simple(d: Iterable[dict]) -> dict:
 
     _post_schema(schema)
     return schema
+
+
+# was: zipmap
+def zipget(objs: Iterable[Mapping[T, U]], keys: Iterable[T]) -> Iterator[U]:
+
+    """Gets a list of keys from a list of mappings.
+        zipget([[1, 2], [3, 4]], [0, 1]) -> (1, 4)
+
+    Similar to numpy indexing:
+        a = np.array([[1, 2], [3, 4]])
+        a[np.arange(len(a)), [0, 1]] -> array([1, 4])
+    """
+
+    return (obj[key] for obj, key in zip(objs, keys))

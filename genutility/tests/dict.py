@@ -8,6 +8,7 @@ from genutility.dict import (
     mapmap,
     subdict,
     subdictdefault,
+    zipget,
 )
 from genutility.test import MyTestCase, parametrize
 
@@ -82,6 +83,13 @@ class DictTest(MyTestCase):
             "d": [{"a": "float"}],
         }
         self.assertEqual(truth, result)
+
+    @parametrize(
+        ([[1, 2], [3, 4]], [0, 1], [1, 4]),
+    )
+    def test_zipget(self, objs, keys, truth):
+        result = zipget(objs, keys)
+        self.assertIterEqual(truth, result)
 
 
 if __name__ == "__main__":

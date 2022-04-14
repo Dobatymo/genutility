@@ -71,16 +71,14 @@ def apply(f: Callable[[T], U], x: T) -> U:  # *args, **kwargs
     return f(x)
 
 
-def zipmap(funcs, vals):
-    # type: (Iterable[Callable[[T], U]], Iterable[T]) -> Iterator[U]
+def zipmap(funcs: Iterable[Callable[[T], U]], vals: Iterable[T]) -> Iterator[U]:
 
     """Applies a list of functions to a list of values."""
 
     return map(apply, funcs, vals)
 
 
-def multiapply(funcs, elm):
-    # type: (Iterable[Callable], Any) -> Any
+def multiapply(funcs: Iterable[Callable], elm: Any) -> Any:
 
     """Applies functions `funcs` to element `elm` iteratively."""
 
@@ -283,3 +281,11 @@ class RunScheduled:
         if self.lastrun is None or now - self.lastrun > self.delta:
             self.func(*args, **kwargs)
             self.lastrun = now
+
+
+def applymap(func, it):
+    # type: (Callable[..., T], Iterable[tuple]) -> Iterator[T]
+
+    """Maps `func` over the unpacked `it`."""
+
+    return (func(*args) for args in it)

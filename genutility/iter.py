@@ -1004,3 +1004,9 @@ def itershuffle(it: Iterable[T], buffer_size: int) -> Iterator[T]:
     """Partially shuffles `it`. Keeps at most `buffer_size` items in memory."""
 
     return map(itemgetter(1), itersort(zip(iterrandrange(0, buffer_size), it), buffer_size))
+
+
+def product_map(func: Callable, *parts: Iterable) -> Iterator:
+
+    for pc in product(*parts):
+        yield func(*pc)

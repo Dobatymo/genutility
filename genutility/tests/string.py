@@ -5,6 +5,7 @@ from random import shuffle
 from hypothesis import given, strategies
 
 from genutility.string import (
+    all_splits,
     are_parentheses_matched,
     backslash_unescape,
     backslashcontrol_escape,
@@ -160,6 +161,18 @@ class StringTest(MyTestCase):
     def test_replace_pairs_bytes(self, s, items, truth):
         result = replace_pairs_bytes(s, items)
         self.assertEqual(truth, result)
+
+    @parametrize(
+        ("", False, False, []),
+        ("", True, True, [("", "")]),
+        ("a", False, True, [("a", "")]),
+        ("ab", False, True, [("a", "b"), ("ab", "")]),
+        ("abc", True, True, [("", "abc"), ("a", "bc"), ("ab", "c"), ("abc", "")]),
+        ("abc", False, False, [("a", "bc"), ("ab", "c")]),
+    )
+    def test_all_splits(self, s, start, end, truth):
+        result = all_splits(s, start, end)
+        self.assertIterEqual(truth, result)
 
 
 if __name__ == "__main__":
