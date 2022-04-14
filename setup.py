@@ -94,7 +94,7 @@ extras_require = {
     "av": ["av"],
     "cv": ["opencv-python", "numpy"],
     "flask": ["flask", "werkzeug>=0.11.11"],
-    "gensim": ["gensim>=3.3.0", "numpy"],
+    "gensim": ["gensim>=4.0.0", "numpy"],
     "msgpack": ["msgpack>=0.6.0"],
     "mediainfo": ["pymediainfo"],
     "numpy": ["numpy"],
@@ -121,7 +121,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
     author="Dobatymo",
     name="genutility",
-    version="0.0.82",
+    version="0.0.83",
     url="https://github.com/Dobatymo/genutility",
     description="A collection of various Python utilities",
     long_description=long_description,

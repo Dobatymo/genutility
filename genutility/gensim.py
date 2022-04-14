@@ -1,13 +1,15 @@
 from __future__ import generator_stop
 
+from collections import namedtuple
 from itertools import islice
 from typing import Any, Callable, Collection, Iterable, Iterator, Optional, TextIO, Tuple, Union
 
 import numpy as np
 from gensim.models.keyedvectors import KeyedVectors as KeyedVectorsOriginal
-from gensim.models.keyedvectors import Vocab
 
 from .file import PathOrTextIO
+
+Vocab = namedtuple("Vocab", ["index", "count"])
 
 
 class DuplicateEntry(ValueError):
@@ -40,6 +42,7 @@ class KeyedVectors(KeyedVectorsOriginal):
         result = cls(vector_size)
         result.vector_size = vector_size
         result.vectors = np.zeros((vocab_size, vector_size), dtype=datatype)
+        result.expandos["count"] = np.zeros(vocab_size, dtype=np.int64)
 
         for line in fin:
             word, vect = line.rstrip().split(" ", 1)
@@ -50,21 +53,23 @@ class KeyedVectors(KeyedVectorsOriginal):
             weights = np.fromstring(vect, sep=" ", dtype=np.float32)
             # raise ValueError("invalid vector on line %s; is vector_size incorrect or file otherwise damaged?" % (i+1,))
 
-            if word in result.vocab:
+            if word in result.key_to_index:
                 raise DuplicateEntry(word)
 
-            word_id = len(result.index2word)
-            result.vocab[word] = Vocab(index=word_id, count=vocab_size - word_id)
+            word_id = len(result.index_to_key)
+            result.key_to_index[word] = word_id
+            result.expandos["count"][word_id] = vocab_size - word_id
             result.vectors[word_id] = weights
-            result.index2word.append(word)
+            result.index_to_key.append(word)
 
-        real_size = len(result.index2word)
+        real_size = len(result.index_to_key)
 
         if real_size != vocab_size:
             if discard is None:
                 raise EOFError("unexpected end of input; is vocab_size incorrect or file otherwise damaged?")
             else:
                 result.vectors.resize((real_size, vector_size))  # this should be no-copy
+                result.expandos["count"].resize(real_size)  # this should be no-copy
 
         return result
 
@@ -74,13 +79,15 @@ class KeyedVectors(KeyedVectorsOriginal):
 
         vocab_size, vector_size = self.vectors.shape
         self.vectors.resize((vocab_size + len(wwc), vector_size))
+        self.expandos["count"].resize(vocab_size + len(wwc))
+
         for i, (word, weights, count) in enumerate(wwc):
             word_id = vocab_size + i
-            voc = Vocab(index=word_id, count=count)
-            self.vocab[word] = voc
+            self.key_to_index[word] = word_id
+            self.expandos["count"][word_id] = count
             self.vectors[word_id] = weights
-            self.index2word.append(word)
-            yield voc
+            self.index_to_key.append(word)
+            yield Vocab(word_id, count)
 
     def add_word(self, word: str, weights: Optional[np.ndarray] = None, count: int = 1):
         if weights is None:
@@ -133,7 +140,7 @@ class KeyedVectors(KeyedVectorsOriginal):
             raise ImportError("Please install Keras to use this function")
 
         if mask_zero:
-            self.index2word = [None] + self.index2word
+            self.index_to_key = [None] + self.index_to_key
             zero_vec = np.zeros((1, self.vector_size))
             self.vectors = np.concatenate([zero_vec, self.vectors], axis=0)
 
@@ -152,7 +159,7 @@ class KeyedVectors(KeyedVectorsOriginal):
 
     def transform_words_to_indices(self, words: Collection[str]) -> Iterator[int]:
 
-        return (self.vocab[word].index for word in words)
+        return (self.key_to_index[word] for word in words)
 
     def transform_words_to_indices_tuple(self, words: Collection[str]) -> Tuple[int, ...]:
 
@@ -164,11 +171,15 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("glove_file")
-    parser.add_argument("muse_file")
+    parser.add_argument("--glove-file")
+    parser.add_argument("--muse-file")
+    parser.add_argument("--dimensions", type=int, default=300)
     args = parser.parse_args()
 
-    word_vectors = KeyedVectors.load_glove_format(args.glove_file, 400000, 300)
-    print(word_vectors.most_similar(positive=["woman", "king"], negative=["man"]))
-    word_vectors = KeyedVectors.load_muse_format(args.muse_file)
-    print(word_vectors.most_similar(positive=["woman", "king"], negative=["man"]))
+    if args.glove_file:
+        word_vectors = KeyedVectors.load_glove_format(args.glove_file, 400000, args.dimensions)
+        print(word_vectors.most_similar(positive=["woman", "king"], negative=["man"]))
+
+    if args.muse_file:
+        word_vectors = KeyedVectors.load_muse_format(args.muse_file)
+        print(word_vectors.most_similar(positive=["woman", "king"], negative=["man"]))
