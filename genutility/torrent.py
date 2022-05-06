@@ -2,10 +2,10 @@ from __future__ import generator_stop
 
 import logging
 from hashlib import sha1
-from itertools import compress, repeat, zip_longest
+from itertools import compress, repeat, zip_longest, chain
 from os import fspath
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, Optional, Union
+from typing import Any, Dict, Iterable, Iterator, Optional, Union, List
 
 import bencode
 
@@ -93,8 +93,6 @@ def iter_fastresume(path: str) -> Iterator[FileProperties]:
     - file_priority contains priorities for each file. Priority 0 means not downloaded.
     """
 
-    path_torrent = fspath(Path(path).with_suffix(".torrent"))
-
     try:
         d = bencode.bread(path)
     except bencode.BencodeDecodeError as e:
@@ -103,26 +101,27 @@ def iter_fastresume(path: str) -> Iterator[FileProperties]:
 
     save_path = Path(d["qBt-savePath"])
     save_path_ = Path(d["save_path"])
-
     assert save_path == save_path_, f"{save_path}, {save_path_}"
 
-    try:
-        file_priority = d["file_priority"]
-    except KeyError:
-        file_priority = repeat(1)
-
+    path_torrent = fspath(Path(path).with_suffix(".torrent"))
     try:
         files = list(iter_torrent(path_torrent))
     except bencode.BencodeDecodeError as e:
         logger.warning("%s: %s", path_torrent, e)
         raise
 
-    mapped_files = d.get("mapped_files", [])
+    # file_priority is truncated, remainder should be filled with 1
+    file_priority: List[int] = d.get("file_priority", [])
+    assert len(file_priority) <= len(files)
+    file_priority = list(chain(file_priority, repeat(1, len(files) - len(file_priority))))
+
+    # mapped_files is truncated, remainder should be filled with ""
+    mapped_files: List[str] = d.get("mapped_files", [])
     assert len(mapped_files) <= len(files)
 
     it = compress(zip_longest(files, mapped_files), file_priority)
     for file, mapped_file in it:
-        if mapped_file is None:
+        if not mapped_file: # either None from zip_longest, or "" as placeholder in fastresume file
             file.abspath = uncabspath(fspath(save_path / file.relpath))
         else:
             file.abspath = uncabspath(fspath(save_path / mapped_file))
@@ -188,3 +187,34 @@ def create_torrent(path: Path, piece_size: int, announce: str = "") -> bytes:
     torrent = {"info": info, "announce": announce}
 
     return bencode.bencode(torrent)
+
+if __name__ == "__main__":
+    from pprint import pprint
+    from argparse import ArgumentParser
+    from genutility.object import compress as _compress
+
+    parser = ArgumentParser()
+    parser.add_argument("path")
+    args = parser.parse_args()
+
+    p = Path(args.path)
+    if p.suffix == ".torrent":
+        path_torrent = fspath(p)
+        path_fastresume = fspath(p.with_suffix(".fastresume"))
+    elif p.suffix == ".fastresume":
+        path_torrent = fspath(p.with_suffix(".torrent"))
+        path_fastresume = fspath(p)
+    else:
+        parser.error("Invalid file extension")
+
+    d = bencode.bread(path_torrent)
+    del d["info"]["pieces"]
+    pprint(_compress(d), width=120)
+    print()
+    d = bencode.bread(path_fastresume)
+    d.pop("pieces", None)
+    d.pop("piece_priority", None)
+    d.pop("peers", None)
+    pprint(_compress(d), width=120)
+    print()
+    pprint(list(iter_fastresume(path_fastresume)), width=120)
