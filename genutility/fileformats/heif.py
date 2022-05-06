@@ -68,4 +68,9 @@ if __name__ == "__main__":
             logging.error("%s: AssertionError: %s", relpath, e)
         else:
             exif = piexif.load(data)
-            print(relpath, exif["0th"][271].decode("ascii"), exif["0th"][272].decode("ascii"))
+            print(
+                relpath,
+                exif["0th"][271].decode("ascii"),
+                exif["0th"][272].decode("ascii"),
+                exif["0th"][piexif.ImageIFD.DateTime].decode("ascii"),
+            )

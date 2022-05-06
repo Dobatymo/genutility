@@ -28,8 +28,9 @@ from .ops import logical_implication, logical_xor
 if TYPE_CHECKING:
     from mmap import mmap
 
-    PathType = Union[str, PathLike[str]]
     Data = TypeVar("Data", str, bytes)
+
+PathType = Union[str, PathLike]
 
 FILE_IO_BUFFER_SIZE = 8 * 1024 * 1024
 
@@ -38,8 +39,7 @@ class Empty(OSError):
     pass
 
 
-def _check_arguments(mode, encoding=None):
-    # type: (str, Optional[str]) -> Optional[str]
+def _check_arguments(mode: str, encoding: Optional[str] = None) -> Optional[str]:
 
     is_text = "t" in mode
     is_binary = "b" in mode
@@ -56,12 +56,13 @@ def _check_arguments(mode, encoding=None):
     return encoding
 
 
-def _stripmode(mode):
+def _stripmode(mode: str) -> str:
     return "".join(set(mode) - {"t", "b"})
 
 
-def read_file(path, mode="b", encoding=None, errors=None):
-    # type: (PathType, str, Optional[str], Optional[str]) -> bytes
+def read_file(
+    path: PathType, mode: str = "b", encoding: Optional[str] = None, errors: Optional[str] = None
+) -> Union[str, bytes]:
 
     """Reads and returns whole file. If content is not needed use consume_file()"""
 
@@ -74,8 +75,13 @@ def read_file(path, mode="b", encoding=None, errors=None):
         return fr.read()
 
 
-def write_file(data, path, mode="wb", encoding=None, errors=None):
-    # type: (Union[str, bytes], PathType, str, Optional[str], Optional[str]) -> None
+def write_file(
+    data: Union[str, bytes],
+    path: PathType,
+    mode: str = "wb",
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+) -> None:
 
     """Writes file."""
 
@@ -114,16 +120,14 @@ def read_or_raise(fin, size):
     return data
 
 
-def get_file_range(path, start, size):
-    # type: (PathType, int, int) -> bytes
+def get_file_range(path: PathType, start: int, size: int) -> bytes:
 
     with open(path, "rb") as fp:
         fp.seek(start)
         return fp.read(size)
 
 
-def truncate_file(path, size):
-    # type: (PathType, int) -> None
+def truncate_file(path: PathType, size: int) -> None:
 
     with open(path, "r+b") as fp:
         fp.truncate(size)
@@ -750,7 +754,7 @@ def iter_zip(file, mode="rb", encoding=None, errors=None, newline=None, password
 
 
 def iter_7zip(
-    file: Union[BinaryIO, str, PathLike],
+    file: Union[BinaryIO, PathType],
     mode: str = "rb",
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
@@ -799,7 +803,7 @@ def iter_tar(file, mode="rb", encoding=None, errors=None, newline=None):
 
 
 def iter_dir(
-    path: str,
+    path: PathType,
     mode: str = "rb",
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
@@ -847,8 +851,13 @@ def iter_dir(
                 yield from iter_dir(entry.path, mode, encoding, errors, newline, follow_symlinks, archives)
 
 
-def iter_lines(path, encoding="utf-8", errors="strict", newline=None, verbose=False):
-    # type: (str, str, str, Optional[str], bool) -> Iterator[str]
+def iter_lines(
+    path: PathType,
+    encoding: str = "utf-8",
+    errors: str = "strict",
+    newline: Optional[str] = None,
+    verbose: bool = False,
+) -> Iterator[str]:
 
     """Yield lines from text file. Handles compressed files as well.
     if verbose is True, print a progress bar
@@ -879,8 +888,9 @@ def iter_lines(path, encoding="utf-8", errors="strict", newline=None, verbose=Fa
                 yield line
 
 
-def iter_stripped(path, encoding="utf-8", errors="strict", newline=None):
-    # type: (str, str, str, Optional[str]) -> Iterator[str]
+def iter_stripped(
+    path: PathType, encoding: str = "utf-8", errors: str = "strict", newline: Optional[str] = None
+) -> Iterator[str]:
 
     """Yield lines from text file with trailing newlines stripped.
     Handles compressed files as well.

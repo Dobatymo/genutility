@@ -6,10 +6,10 @@ import os.path
 import pickle  # nosec
 from datetime import timedelta
 from functools import wraps
-from os import fspath
+from os import PathLike, fspath
 from pathlib import Path
 from pickle import HIGHEST_PROTOCOL  # nosec
-from typing import Any, Callable, ContextManager, Iterable, Iterator, Optional, Tuple
+from typing import Any, Callable, ContextManager, Iterable, Iterator, Optional, Tuple, Union
 
 from .atomic import sopen
 from .compat.contextlib import nullcontext
@@ -21,8 +21,10 @@ from .time import PrintStatementTime
 
 logger = logging.getLogger(__name__)
 
+PathType = Union[str, PathLike]
 
-def read_pickle(path: str) -> Any:
+
+def read_pickle(path: PathType) -> Any:
 
     """Read pickle file from `path`.
     Warning: All usual security consideration regarding the pickle module still apply.
@@ -32,7 +34,7 @@ def read_pickle(path: str) -> Any:
         return pickle.load(fr)  # nosec
 
 
-def write_pickle(result: Any, path: str, protocol: Optional[int] = None, safe: bool = False) -> None:
+def write_pickle(result: Any, path: PathType, protocol: Optional[int] = None, safe: bool = False) -> None:
 
     """Write `result` to `path` using pickle serialization.
 
@@ -44,7 +46,7 @@ def write_pickle(result: Any, path: str, protocol: Optional[int] = None, safe: b
         pickle.dump(result, fw, protocol=protocol)
 
 
-def read_iter(path: str) -> Iterator[Any]:
+def read_iter(path: PathType) -> Iterator[Any]:
 
     """Read pickled iterable from `path`.
     Warning: All usual security consideration regarding the pickle module still apply.
@@ -56,7 +58,7 @@ def read_iter(path: str) -> Iterator[Any]:
             yield unpickler.load()
 
 
-def write_iter(it: Iterable[Any], path: str, protocol: Optional[int] = None, safe: bool = False) -> Iterator[Any]:
+def write_iter(it: Iterable[Any], path: PathType, protocol: Optional[int] = None, safe: bool = False) -> Iterator[Any]:
 
     """Write iterable `it` to `path` using pickle serialization. This uses much less memory than
             writing a full list at once.
@@ -189,7 +191,7 @@ def cache(
     return decorator
 
 
-def unpickle(path: str, requirements: Iterable[Tuple[str, Optional[str]]] = ()) -> Any:
+def unpickle(path: PathType, requirements: Iterable[Tuple[str, Optional[str]]] = ()) -> Any:
 
     """Can be used to unpickle objects when normal unpickling fails to import some dependencies correctly.
     path: Path to the pickled file.

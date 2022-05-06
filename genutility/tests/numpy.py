@@ -19,6 +19,7 @@ from genutility.numpy import (
     shannon_entropy,
     shiftedexp,
     sliding_window_2d,
+    stochastic,
     unblock,
 )
 from genutility.test import MyTestCase, parametrize, repeat
@@ -265,6 +266,12 @@ class NumpyTest(MyTestCase):
         result_1 = bincount_batch(arr)
         result_2 = bincount_batch_2(arr)
         np.testing.assert_equal(result_1, result_2)
+
+    def test_stochastic(self):
+        x = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        truth = np.array([[1 / 6, 2 / 6, 3 / 6], [4 / 15, 5 / 15, 6 / 15], [7 / 24, 8 / 24, 9 / 24]])
+        result = stochastic(x)
+        np.testing.assert_allclose(truth, result)
 
 
 if __name__ == "__main__":

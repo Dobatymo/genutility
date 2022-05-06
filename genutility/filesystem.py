@@ -8,13 +8,14 @@ import platform
 import re
 import shutil
 import stat
+from datetime import datetime
 from fnmatch import fnmatch
 from functools import partial
 from itertools import zip_longest
 from operator import attrgetter
 from os import DirEntry, PathLike, fspath
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
 from ._files import BaseDirEntry, MyDirEntryT, entrysuffix
 from .datetime import datetime_from_utc_timestamp
@@ -22,9 +23,6 @@ from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
 from .iter import is_empty
 from .ops import logical_implication
 from .os import _not_available, islink, uncabspath
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 PathType = Union[str, PathLike]
 EntryType = Union[Path, DirEntry]
@@ -134,8 +132,19 @@ class FileProperties:
 
     __slots__ = ("relpath", "size", "isdir", "abspath", "id", "modtime", "hash")
 
-    def __init__(self, relpath, size, isdir, abspath=None, id=None, modtime=None, hash=None):
-        # type: (str, int, bool, Optional[str], Optional[Any], Optional[datetime], Optional[str]) -> None
+    def __init__(
+        self,
+        relpath: Optional[str] = None,
+        size: Optional[int] = None,
+        isdir: Optional[bool] = None,
+        abspath: Optional[str] = None,
+        id: Optional[Any] = None,
+        modtime: Optional[datetime] = None,
+        hash: Optional[str] = None,
+    ) -> None:
+
+        if relpath is None and abspath is None:
+            raise ValueError("Either `relpath` or `abspath` (or both) must be given")
 
         self.relpath = relpath
         self.size = size

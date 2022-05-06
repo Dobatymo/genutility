@@ -543,3 +543,18 @@ def bincount_batch(x, axis=-1, minlength=0):
 
     minlength = max(minlength, x.max() + 1)
     return np.apply_along_axis(np.bincount, axis, x, minlength=minlength)
+
+
+def stochastic(x: np.ndarray) -> np.ndarray:
+
+    """It normalizes the last dimension of an ndarray to sum to 1.
+    It can be used to convert (batches of) vectors to stochastic vectors
+    or (batches of) matrices to *right* stochastic matrices.
+    Right stochastic matrices are also called transitions matrices.
+    """
+
+    n = np.linalg.norm(x, 1, axis=-1, keepdims=True)
+    # n = np.sum(x, axis=-1, keepdims=True) # todo: same result (except dtype), which is faster?
+
+    with np.errstate(invalid="raise"):  # see: `normalized`
+        return x / n

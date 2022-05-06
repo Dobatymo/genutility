@@ -48,7 +48,7 @@ class BoxParser:
         return b"".join(ret)
 
     def c_string(self, encoding: Optional[str] = None) -> Union[bytes, str]:
-        assert self.size
+        assert self.size is not None, "Size not specified"
         s = self.read_c_string(self.fin, self.size - self.delta)
         self.delta += len(s)
         s = s.rstrip(b"\0")
@@ -64,7 +64,7 @@ class BoxParser:
 
 
 def named_batch(entries: Iterable, length: int, named_tuple_cls: object) -> List[namedtuple]:
-    assert len(named_tuple_cls._fields) == length
+    assert len(named_tuple_cls._fields) == length, "length parameter doesn't match named tuple size"
     return list(batch(entries, length, named_tuple_cls._make))
 
 
@@ -85,7 +85,7 @@ ItemLocationEntry = namedtuple("ItemLocationEntry", ["extent_offset", "extent_le
 def stco(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """ChunkOffsetBox"""
 
-    assert version == 0
+    assert version == 0, "Version not 0"
     p = BoxParser(fin, size)
 
     (entry_count,) = p.unpack(">L", 4)
@@ -97,7 +97,7 @@ def stco(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
 def fpar(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """FilePartitionBox"""
 
-    assert version in (0, 1)
+    assert version in (0, 1), "Version not 0 or 1"
     p = BoxParser(fin, size)
 
     if version == 0:
@@ -228,7 +228,7 @@ def ctts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     elif version == 1:
         entries = p.unpack(f">{'Ll'*entry_count}", entry_count * 2 * 4)
     else:
-        assert False
+        assert False, f"Unsupported version: {version}"
 
     return {"composition_offset_entries": named_batch(entries, 2, CompositionOffsetEntry)}, p.delta
 
@@ -236,7 +236,7 @@ def ctts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
 def stsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Sample To Chunk Box"""
 
-    assert version == 0
+    assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
     entries = p.unpack(f">{entry_count*3}L", entry_count * 3 * 4)
@@ -246,7 +246,7 @@ def stsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
 def stts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """TimeToSampleBox"""
 
-    assert version == 0
+    assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
     entries = p.unpack(f">{entry_count*2}L", entry_count * 2 * 4)
@@ -266,21 +266,21 @@ def ftyp(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
 
 
 def stsd(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-    assert version == 0
+    assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
     return {"entry_count": entry_count}, p.delta
 
 
 def url(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-    assert version == 0
+    assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     url = p.c_string("utf-8")
     return {"url": url}, p.delta
 
 
 def urn(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-    assert version == 0
+    assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     urn = p.c_string("utf-8")
     name = p.c_string("utf-8")
@@ -300,7 +300,7 @@ def iinf(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     elif version == 1:
         (entry_count,) = p.unpack(">L", 4)
     else:
-        assert False
+        assert False, f"Unsupported version: {version}"
 
     return {"entry_count": entry_count}, p.delta
 
@@ -314,13 +314,13 @@ def pitm(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     elif version == 1:
         (item_ID,) = p.unpack(">L", 4)
     else:
-        assert False
+        assert False, f"Unsupported version: {version}"
 
     return {"item_ID": item_ID}, p.delta
 
 
 def hdlr(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-    assert version == 0
+    assert version == 0, f"Unsupported version: {version}"
 
     p = BoxParser(fin, size)
     pre_defined, handler_type, reserved, reserved, reserved = p.unpack(">L4sLLL", 20)
@@ -511,7 +511,7 @@ def _load_atoms() -> Dict[str, Tuple[str, str, str]]:
 
     try:
         for fourcc, type, boxtype, description, _ in iter_csv(atoms_path, delimiter="\t", skip=1):
-            assert fourcc not in out, fourcc
+            assert fourcc not in out, f"Invalid fourcc: {fourcc}"
             out[fourcc] = (type, boxtype, description)
     except ValueError:
         logging.exception("Failed to parse atoms file at line %s", len(out) + 1)
@@ -562,7 +562,7 @@ def read_atom(fin: IO[bytes], parent_version: Optional[int] = None) -> Tuple[int
 
         try:
             supported = versions[code]
-            assert version in supported
+            assert version in supported, "Version not supported"
         except KeyError:
             pass
 
@@ -614,7 +614,7 @@ def _enum_atoms(
                 yield depth, pos, type, size, content, None
                 fin.seek(atom_end, os.SEEK_SET)
         else:
-            assert False
+            assert False, "Invalid boxtype"
 
     if fin.tell() != total_size:
         raise ParseError(f"Invalid file structure. Possibly truncated. {fin.tell()}/{total_size}")

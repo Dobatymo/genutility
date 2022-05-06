@@ -5,26 +5,22 @@ import os.path
 import sqlite3
 from itertools import chain
 from os import fspath
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optional, Tuple, TypeVar
 
 from tls_property import tls_property
 
 from .exceptions import NoResult
-from .filesystem import normalize_seps
+from .filesystem import EntryType, normalize_seps
 from .sql import fetchone, iterfetch
 from .sqlite import quote_identifier
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
-    from typing import Any, Dict, FrozenSet, Iterable, Iterator, Optional, Tuple
-
-    from .filesystem import EntryType
+T = TypeVar("T")
 
 
 class GenericFileDb:
-    def __init__(self, dbpath, table, debug=True):
-        # type: (str, str, bool) -> None
+    def __init__(self, dbpath: str, table: str, debug: bool = True) -> None:
 
         self.table = quote_identifier(table)
         self._primary = self.primary()
@@ -47,11 +43,11 @@ class GenericFileDb:
     def cursor(self):
         return self.connection.cursor()
 
-    def trace(self, query):
+    def trace(self, query: str) -> None:
         logger.debug("SQL trace: %s", query)
 
     @classmethod
-    def latest_order_by(cls):
+    def latest_order_by(cls) -> str:
         return "entry_date DESC"
 
     @classmethod
@@ -92,16 +88,14 @@ class GenericFileDb:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
 
         """Only closes connections and cursors opened in the current thread"""
 
         self.cursor.close()
         self.connection.close()
 
-    def setup(self):
-        # type: () -> None
+    def setup(self) -> None:
 
         fields = ", ".join(f"{n} {t}" for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived))
 
@@ -115,13 +109,18 @@ class GenericFileDb:
     def normalize_path(self, path):
         raise NotImplementedError
 
-    def commit(self):
-        # type: () -> None
+    def commit(self) -> None:
 
         self.connection.commit()
 
-    def _args(self, path, filesize, mod_date, derived=None, ignore_null=True):
-        # type: (str, int, int, Optional[Dict[str, Any]], bool) -> tuple
+    def _args(
+        self,
+        path: str,
+        filesize: int,
+        mod_date: int,
+        derived: Optional[Dict[str, Any]] = None,
+        ignore_null: bool = True,
+    ) -> tuple:
 
         derived = derived or {}
         if ignore_null:
@@ -154,8 +153,16 @@ class GenericFileDb:
         self.cursor.execute(f"SELECT {fields} FROM {self.table}")  # nosec
         return iterfetch(self.cursor)
 
-    def get_latest(self, path, filesize, mod_date, derived=None, ignore_null=True, only=frozenset(), no=frozenset()):
-        # type: (str, int, int, Optional[Dict[str, Any]], bool, FrozenSet[str], FrozenSet[str]) -> tuple
+    def get_latest(
+        self,
+        path: str,
+        filesize: int,
+        mod_date: int,
+        derived: Optional[Dict[str, Any]] = None,
+        ignore_null: bool = True,
+        only: FrozenSet[str] = frozenset(),
+        no: FrozenSet[str] = frozenset(),
+    ) -> tuple:
 
         """Retrieve latest row based on mandatory and derived information.
 
@@ -263,6 +270,17 @@ class GenericFileDb:
             yield self._add_file_no_dup(path, filesize, mod_date, derived)
 
         self.commit()
+
+    def setdefault(self, path: EntryType, key: str, func: Callable[[], T]) -> T:
+        try:
+            (value,) = self.get(path, only={key})
+            logger.debug("Found %s of %s in db: %s", key, path, value)
+        except NoResult:
+            value = func()
+            self.add(path, derived={key: value})
+            logger.debug("Added %s of %s to db: %s", key, path, value)
+
+        return value
 
 
 class FileDbHistory(GenericFileDb):
