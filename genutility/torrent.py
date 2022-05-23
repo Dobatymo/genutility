@@ -1,15 +1,19 @@
 from __future__ import generator_stop
 
+import binascii
+import gzip
 import logging
 from hashlib import sha1
-from itertools import compress, repeat, zip_longest, chain
+from itertools import chain, compress, repeat, zip_longest
 from os import fspath
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, Optional, Union, List
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
 
 import bencode
+import bencodepy
+import requests
 
-from .exceptions import assert_choice
+from .exceptions import ParseError, assert_choice
 from .file import blockfileiter, blockfilesiter
 from .filesystem import FileProperties
 from .os import uncabspath
@@ -121,7 +125,7 @@ def iter_fastresume(path: str) -> Iterator[FileProperties]:
 
     it = compress(zip_longest(files, mapped_files), file_priority)
     for file, mapped_file in it:
-        if not mapped_file: # either None from zip_longest, or "" as placeholder in fastresume file
+        if not mapped_file:  # either None from zip_longest, or "" as placeholder in fastresume file
             file.abspath = uncabspath(fspath(save_path / file.relpath))
         else:
             file.abspath = uncabspath(fspath(save_path / mapped_file))
@@ -188,9 +192,51 @@ def create_torrent(path: Path, piece_size: int, announce: str = "") -> bytes:
 
     return bencode.bencode(torrent)
 
+
+def scrape(tracker_url: str, hashes: List[str]) -> Dict[str, dict]:
+
+    if not tracker_url.startswith(("http://", "https://")):
+        raise ValueError(f"Only http(s) scrape is supported: <{tracker_url}>")
+
+    base, announce = tracker_url.rsplit("/", 1)
+    if "announce" not in announce:
+        raise ValueError(f"Scrape not supported for {tracker_url}")
+
+    scrape = announce.replace("announce", "scrape")
+    scrape_url = f"{base}/{scrape}"
+
+    hashes = [binascii.a2b_hex(hash) for hash in hashes]
+
+    dec = bencodepy.BencodeDecoder(encoding="utf-8", encoding_fallback="all")
+
+    r = requests.get(scrape_url, params={"info_hash": hashes})
+    r.raise_for_status()
+    data = r.content
+    try:
+        tmp = dec.decode(data)
+    except bencodepy.exceptions.BencodeDecodeError:
+        tmp = data.rstrip(b"\n")
+        try:
+            tmp = gzip.decompress(tmp)
+        except gzip.BadGzipFile:
+            raise ParseError("Failed to parse scrape response", data=data)
+        tmp = dec.decode(tmp)
+
+    try:
+        files = tmp["files"]
+    except KeyError:
+        raise ParseError("Missing `files` key in scrape response", data=tmp)
+
+    if len(files) < len(hashes):
+        logger.warning("Less hashes returned (%s) than requested (%s)", len(files), len(hashes))
+
+    return {k.hex(): v for k, v in files.items()}
+
+
 if __name__ == "__main__":
-    from pprint import pprint
     from argparse import ArgumentParser
+    from pprint import pprint
+
     from genutility.object import compress as _compress
 
     parser = ArgumentParser()

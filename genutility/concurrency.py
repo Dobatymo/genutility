@@ -8,7 +8,7 @@ from collections import deque
 from concurrent.futures._base import FINISHED
 from multiprocessing import Pool
 from queue import Empty, Full, Queue
-from typing import Any, Callable, Generic, Iterable, Iterator, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Deque, Generic, Iterable, Iterator, Optional, Set, Tuple, TypeVar, Union
 
 from .exceptions import NoResult, assert_choice
 
@@ -146,17 +146,19 @@ class ThreadPool:
 
 
 def gather_all_unsorted(
-    threadpool: ThreadPool, func: Callable, params: Sequence, *args: Any, **kwargs: Any
+    threadpool: ThreadPool, func: Callable, params: Iterable, *args: Any, **kwargs: Any
 ) -> Iterator[Tuple[Any, Any]]:
 
     """Runs multiple tasks concurrently and returns all results in the order
     of execution finish as soon as possible.
     """
 
+    num_params = 0
     for i, param in enumerate(params):
         threadpool.add_task(i, func, param, *args, **kwargs)
+        num_params = i + 1
 
-    for i in range(len(params)):
+    for i in range(num_params):
         yield threadpool.get()
 
 
@@ -442,7 +444,7 @@ class BufferedIterable(Generic[T]):
     def __init__(self, it: Iterable[T], bufsize: int):
         self.iterable = it
         self.iterator = None
-        self.buffer = deque([])
+        self.buffer: Deque[T] = deque([])
         self.bufsize = bufsize
 
     def __iter__(self) -> Iterator[T]:
@@ -558,6 +560,7 @@ def parallel_map(
                     q.done()
             except GeneratorExit:
                 logging.warning("interrupted")
+                # q.timeout = 1  # does this help?
                 q.done()  # the semaphore in the bounded queue might block otherwise
                 raise
     else:

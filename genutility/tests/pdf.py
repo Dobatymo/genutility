@@ -1,17 +1,12 @@
 from __future__ import generator_stop
 
-import sys
-import unittest
 from pathlib import Path
 
-from genutility.pdf import join_pdfs_in_folder
+from genutility.pdf import iter_pdf_text, join_pdfs_in_folder
 from genutility.test import MyTestCase, parametrize
-
-LESSTHANPY36 = sys.version_info < (3, 6)
 
 
 class PdfTest(MyTestCase):
-    @unittest.skipIf(LESSTHANPY36, "pdf key order is random")
     @parametrize(
         ("testfiles/pdf/", "testtemp/joined.pdf", "testfiles/joined.pdf"),
     )
@@ -20,6 +15,12 @@ class PdfTest(MyTestCase):
             join_pdfs_in_folder(Path(path), out, overwrite=True)
 
         self.assertFilesEqual(out, truth)
+
+    def test_iter_pdf_text(self):
+        truth = ["Hello World\n", "Hello World\n"]
+        result = iter_pdf_text("testfiles/joined.pdf")
+
+        self.assertIterEqual(truth, result)
 
 
 if __name__ == "__main__":

@@ -1,22 +1,20 @@
 from __future__ import generator_stop
 
 from contextlib import ExitStack
+from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Iterator, Union
 
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfMerger, PdfReader
 
-if TYPE_CHECKING:
-    from os import PathLike
-    from typing import Iterator, Union
+PathType = Union[PathLike, str]
 
 
-def join_pdfs_in_folder(path_in, file_out, overwrite=False):
-    # type: (Path, Union[PathLike, str], bool) -> None
+def join_pdfs_in_folder(path_in: Path, file_out: PathType, overwrite: bool = False) -> None:
 
     """Join all PDFs in `path_in` and write to `file_out`."""
 
-    merger = PdfFileMerger(strict=True)
+    merger = PdfMerger(strict=True)
 
     if not path_in.exists():
         raise FileNotFoundError(path_in)
@@ -36,14 +34,12 @@ def join_pdfs_in_folder(path_in, file_out, overwrite=False):
             merger.write(fw)
 
 
-def iter_pdf_text(path):
-    # type: (str, ) -> Iterator[str]
+def iter_pdf_text(path: str) -> Iterator[str]:
 
     with open(path, "rb") as fr:
-        pdf = PdfFileReader(fr)
-        for i in range(pdf.getNumPages()):
-            page = pdf.getPage(i)
-            yield page.extractText()
+        pdf = PdfReader(fr)
+        for page in pdf.pages:
+            yield page.extract_text()
 
 
 def _read_pdf_pdfminer(path):

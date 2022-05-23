@@ -17,7 +17,7 @@ except AttributeError:
     isoformatre = re.compile(r"^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{6}))?(\+|-)(\d{2}):(\d{2})$")
     isoformatre2 = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 
-    class datetime(_datetime):
+    class datetime(_datetime):  # type: ignore[no-redef]
         @classmethod
         def fromisoformat(cls, date_string):
             # (str, ) -> datetime

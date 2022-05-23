@@ -8,7 +8,7 @@ from functools import partial, wraps
 from itertools import islice
 from pathlib import Path
 from types import ModuleType
-from typing import IO, Any, Callable, Dict, FrozenSet, Iterator, Optional, Sequence, Tuple, Type, Union
+from typing import IO, Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optional, Sequence, Tuple, Type, Union
 
 from typing_extensions import TypedDict
 
@@ -26,8 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class BuiltinEncoder(json.JSONEncoder):
-    def __init__(self, *args, sort_sets=False, **kwargs):
-        # type: (*Any, bool, **Any) -> None
+    def __init__(self, *args: Any, sort_sets: bool = False, **kwargs: Any) -> None:
 
         json.JSONEncoder.__init__(self, *args, **kwargs)
         self.sort_sets = sort_sets
@@ -85,15 +84,15 @@ class BuiltinRoundtripDecoder(json.JSONDecoder):
         return obj
 
 
-def read_json_schema(path):
-    # type: (PathStr, ) -> JsonDict
+def read_json_schema(path: PathStr) -> JsonDict:
 
     with open(path, encoding="utf-8") as fr:
         return json.load(fr)
 
 
-def read_json(path, schema=None, cls=None, object_hook=None):
-    # type: (PathStr, Optional[Union[str, JsonDict]], Any, Any) -> Any
+def read_json(
+    path: PathStr, schema: Optional[Union[str, JsonDict]] = None, cls: Any = None, object_hook: Any = None
+) -> Any:
 
     """Read the json file at `path` and optionally validates the input according to `schema`.
     The validation requires `jsonschema`.
@@ -293,18 +292,17 @@ with open("{file}", "r") as fr:
 
     def write(
         self,
-        obj,
-        skipkeys=False,
-        ensure_ascii=False,
-        check_circular=True,
-        allow_nan=True,
-        cls=None,
-        separators=None,
-        default=None,
-        sort_keys=False,
-        **kw,
-    ):
-        # type: (Any, bool, bool, bool, bool, Optional[Type[json.JSONEncoder]], Optional[Tuple[str, str]], Optional[Callable], bool, **Any) -> None
+        obj: Any,
+        skipkeys: bool = False,
+        ensure_ascii: bool = False,
+        check_circular: bool = True,
+        allow_nan: bool = True,
+        cls: Optional[Type[json.JSONEncoder]] = None,
+        separators: Optional[Tuple[str, str]] = None,
+        default: Optional[Callable] = None,
+        sort_keys: bool = False,
+        **kw: Any,
+    ) -> None:
 
         json.dump(
             obj,
@@ -321,6 +319,22 @@ with open("{file}", "r") as fr:
             **kw,
         )
         self.f.write(self.newline)
+
+    def writelines(
+        self,
+        objs: Iterable[Any],
+        skipkeys: bool = False,
+        ensure_ascii: bool = False,
+        check_circular: bool = True,
+        allow_nan: bool = True,
+        cls: Optional[Type[json.JSONEncoder]] = None,
+        separators: Optional[Tuple[str, str]] = None,
+        default: Optional[Callable] = None,
+        sort_keys: bool = False,
+        **kw: Any,
+    ) -> None:
+        for obj in objs:
+            self.write(obj)
 
     def close(self):
         # type: () -> None

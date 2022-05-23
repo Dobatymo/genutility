@@ -5,7 +5,7 @@ from collections import OrderedDict
 from functools import partial
 from itertools import chain
 from locale import strxfrm
-from typing import Any, Callable, Dict, Iterable, Iterator, Mapping, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
 from .binary import decode_binary, encode_binary
 from .iter import switched_enumerate
@@ -26,14 +26,12 @@ german_vowels = "aeiou"
 #     return s[:start] + s[end] + s[start:end] + s[end+1:]
 
 
-def backslash_escaped_ascii(text):
-    # type: (bytes, ) -> str
+def backslash_escaped_ascii(text: bytes) -> str:
 
     return text.decode("ascii", "backslashreplace")
 
 
-def truncate(text, width, placeholder="..."):
-    # type: (str, int, str) -> str
+def truncate(text: str, width: int, placeholder: str = "...") -> str:
 
     """Simple character based truncate method.
     To truncate at word boundaries use `textwrap.shorten`.
@@ -51,8 +49,7 @@ def truncate(text, width, placeholder="..."):
         return text[0 : width - len(placeholder)] + placeholder
 
 
-def toint(obj, default=None):
-    # type: (Any, Optional[T]) -> Union[int, Optional[T]]
+def toint(obj: Any, default: Optional[T] = None) -> Union[int, Optional[T]]:
 
     """Converts `obj` to int if possible and returns `default` otherwise."""
 
@@ -62,8 +59,7 @@ def toint(obj, default=None):
         return default
 
 
-def tryint(obj):
-    # type: (T, ) -> Union[int, T]
+def tryint(obj: T) -> Union[int, T]:
 
     """Converts `obj` to int if possible and returns the original object otherwise."""
 
@@ -73,10 +69,9 @@ def tryint(obj):
         return obj
 
 
-def removeprefix(s, prefix):
-    # type: (str, str) -> str
+def removeprefix(s: str, prefix: str) -> str:
 
-    """If string `s` starts with `pre` cut it off and return the remaining string."""
+    """If string `s` starts with `prefix` cut it off and return the remaining string."""
 
     if s.startswith(prefix):
         return s[len(prefix) :]
@@ -84,8 +79,18 @@ def removeprefix(s, prefix):
         return s
 
 
-def removesuffix(s, suffix):
-    # type: (str, str) -> str
+def removeprefixes(s: str, prefixes: Iterable[str]) -> str:
+
+    """If string `s` starts with one of `prefixes` cut it off and return the remaining string."""
+
+    for prefix in prefixes:
+        if s.startswith(prefix):
+            return s[len(prefix) :]
+
+    return s
+
+
+def removesuffix(s: str, suffix: str) -> str:
 
     """If string `s` ends with `suffix` cut it off and return the preceding string."""
 
@@ -95,23 +100,32 @@ def removesuffix(s, suffix):
         return s
 
 
-def encode_case(s):
-    # type: (str, ) -> bytes
+def removesuffixes(s: str, suffixes: Iterable[str]) -> str:
+
+    """If string `s` ends with one of the `suffixes` cut it off and return the preceding string."""
+
+    for suffix in suffixes:
+        if s.endswith(suffix):
+            return s[: -len(suffix)]
+
+    return s
+
+
+def encode_case(s: str) -> bytes:
 
     """Encode case information of a string to a bit-encoded bytes string."""
 
     return encode_binary(c.isupper() for c in s)
 
 
-def decode_case(s, key):
-    # type: (str, bytes) -> str
+def decode_case(s: str, key: bytes) -> str:
 
     """Apply the case information encoded in `key` to string `s`."""
 
     return "".join(c.upper() if b else c for c, b in zip(s, decode_binary(key)))
 
 
-def locale_sorted(seq, case_insensitive=True, lower_before_upper=True):
+def locale_sorted(seq: Sequence[str], case_insensitive: bool = True, lower_before_upper: bool = True) -> List[str]:
     if case_insensitive:
         if lower_before_upper:
 
@@ -135,8 +149,7 @@ def locale_sorted(seq, case_insensitive=True, lower_before_upper=True):
     return sorted(seq, key=key)
 
 
-def build_multiple_replace(d, escape=True):
-    # type: (Mapping[str, str], bool) -> Callable[[str], str]
+def build_multiple_replace(d: Mapping[str, str], escape: bool = True) -> Callable[[str], str]:
 
     """Returns a callable, which when applied to a string,
     replaces all the keys in `d` with the corresponding values.
@@ -155,8 +168,7 @@ def build_multiple_replace(d, escape=True):
     return partial(cp.sub, lambda m: d[m.group(0)])
 
 
-def multiple_replace(d, s):
-    # type: (Mapping[str, str], str) -> str
+def multiple_replace(d: Mapping[str, str], s: str) -> str:
 
     """Uses mapping `d` to replace keys with values in `s`.
     This is a wrapper for `build_multiple_replace`,
@@ -168,8 +180,7 @@ def multiple_replace(d, s):
     return f(s)
 
 
-def replace_multiple(s, d):  # cython candidate...
-    # type: (Iterable[str], Mapping[str, str]) -> str
+def replace_multiple(s: Iterable[str], d: Mapping[str, str]) -> str:  # cython candidate...
 
     """Use dictionary `d` to replace instances of key with value.
     If input `s` is a string, the keys must be strings of length 1.
@@ -182,8 +193,7 @@ def replace_multiple(s, d):  # cython candidate...
     return "".join(d.get(c, c) for c in s)
 
 
-def backslash_unescape(s):
-    # type: (str, ) -> str
+def backslash_unescape(s: str) -> str:
 
     """Converts strings with backslash-escaped entities like \n or \u1234
     to a string with these entities.
@@ -199,8 +209,7 @@ def backslash_unescape(s):
 _backslashquote_escape = build_multiple_replace(OrderedDict([("\\", "\\\\"), ('"', '\\"')]))
 
 
-def backslashquote_escape(s):
-    # type: (str, ) -> str
+def backslashquote_escape(s: str) -> str:
 
     """Converts \\ to \\\\ and " to \\" """
 
@@ -210,8 +219,7 @@ def backslashquote_escape(s):
 _backslashquote_unescape = build_multiple_replace(OrderedDict([('\\"', '"'), ("\\\\", "\\")]))
 
 
-def backslashquote_unescape(s):
-    # type: (str, ) -> str
+def backslashquote_unescape(s: str) -> str:
 
     """Unescapes \\ and \" in `s`."""
 
@@ -223,8 +231,7 @@ _backslashcontrol_escape = build_multiple_replace(
 )
 
 
-def backslashcontrol_escape(s):
-    # type: (str, ) -> str
+def backslashcontrol_escape(s: str) -> str:
 
     return _backslashcontrol_escape(s)
 
@@ -234,14 +241,12 @@ _backslashcontrol_unescape = build_multiple_replace(
 )
 
 
-def backslashcontrol_unescape(s):
-    # type: (str, ) -> str
+def backslashcontrol_unescape(s: str) -> str:
 
     return _backslashcontrol_unescape(s)
 
 
-def are_parentheses_matched(s, open="([{", close=")]}"):
-    # type: (str, str, str) -> bool
+def are_parentheses_matched(s: str, open: str = "([{", close: str = ")]}") -> bool:
 
     stack = list()
     parentheses = dict(chain(switched_enumerate(open), switched_enumerate(close)))
@@ -260,8 +265,7 @@ def are_parentheses_matched(s, open="([{", close=")]}"):
     return len(stack) == 0  # unclosed parentheses left
 
 
-def filter_join(s, it, func=None):
-    # type: (str, Iterable[str], Optional[Callable]) -> str
+def filter_join(s: str, it: Iterable[str], func: Optional[Callable[[str], bool]] = None) -> str:
 
     if func is None:
         return s.join(i for i in it if i)

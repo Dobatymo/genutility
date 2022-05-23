@@ -84,7 +84,7 @@ extras_require = {
     "scene_change_detection": ["numpy"],
     "sudoku": ["setuptools"],
     "tls": ["cryptography", "pyOpenSSL>=17.5.0"],
-    "torrent": ["bencode.py>=2.0.0"],  # bencoding ?
+    "torrent": ["bencode.py>=2.0.0", "requests"],  # bencoding ?
     "videofile": ["opencv-python", "av"],
     "win32": ["wmi", "pypiwin32"],
     "widgets": ["wxPython"],
@@ -102,7 +102,7 @@ extras_require = {
     "nltk": ["nltk"],
     "networkx": ["networkx"],
     "pandas": ["pandas"],
-    "pdf": ["PyPDF2<1.27.0"],
+    "pdf": ["PyPDF2>=1.28.0"],
     "pillow": ["pillow", "piexif"],
     "powerpoint": ["python-pptx"],
     "rasa": ["requests", "aiohttp>=2.3", "ruamel.yaml"],
@@ -121,7 +121,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
     author="Dobatymo",
     name="genutility",
-    version="0.0.83",
+    version="0.0.84",
     url="https://github.com/Dobatymo/genutility",
     description="A collection of various Python utilities",
     long_description=long_description,

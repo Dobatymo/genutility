@@ -115,7 +115,7 @@ class keydefaultdict(defaultdict):
         if self.default_factory is None:
             raise KeyError(key)
         else:
-            value = self[key] = self.default_factory(key)
+            value = self[key] = self.default_factory(key)  # type: ignore[call-arg]
             return value
 
 

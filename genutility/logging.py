@@ -1,9 +1,26 @@
 from __future__ import generator_stop
 
 from logging import Formatter, LogRecord
-from typing import Any, Dict, Literal, Optional
+from logging import basicConfig as _basicConfig
+from logging import root as _root
+from typing import Any, Dict, Literal, Optional, Type
 
 from .datetime import datetime_from_utc_timestamp
+
+
+def basicConfig(formatter: Optional[Formatter] = None, **kwargs) -> None:
+    """Same as `logging.basicConfig`, but allows to specify a formatter instance
+    to be added to the handlers instead of the default `logging.Formatter`
+    """
+
+    if formatter is not None and (kwargs.get("format") is not None or kwargs.get("datefmt") is not None):
+        raise ValueError("Cannot specify `format` or `datefmt` with `formatter`")
+
+    _basicConfig(**kwargs)
+
+    if formatter is not None:
+        for handler in _root.handlers:
+            handler.setFormatter(formatter)
 
 
 class IsoDatetimeFormatter(Formatter):
@@ -17,7 +34,7 @@ class IsoDatetimeFormatter(Formatter):
     def __init__(
         self,
         fmt: Optional[str] = None,
-        datefmt: type(None) = None,
+        datefmt: Type[None] = None,
         style: Literal["%", "{", "$"] = "%",
         validate: bool = True,
         sep: str = "T",
@@ -31,7 +48,7 @@ class IsoDatetimeFormatter(Formatter):
         self.timespec = timespec
         self.aslocal = aslocal
 
-    def formatTime(self, record: LogRecord, datefmt: type(None)) -> str:
+    def formatTime(self, record: LogRecord, datefmt: Type[None]) -> str:
 
         return datetime_from_utc_timestamp(record.created, aslocal=self.aslocal).isoformat(self.sep, self.timespec)
 

@@ -9,15 +9,14 @@ from functools import wraps
 from os import PathLike, fspath
 from pathlib import Path
 from pickle import HIGHEST_PROTOCOL  # nosec
-from typing import Any, Callable, ContextManager, Iterable, Iterator, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, Iterator, Optional, Tuple, Union
 
 from .atomic import sopen
-from .compat.contextlib import nullcontext
 from .datetime import now
 from .file import copen
 from .filesystem import mdatetime
 from .object import args_to_key
-from .time import PrintStatementTime
+from .time import MeasureTime
 
 logger = logging.getLogger(__name__)
 
@@ -89,11 +88,11 @@ def cache(
     protocol: int = HIGHEST_PROTOCOL,
     ignoreargs: bool = False,
     ignore_first_arg: bool = False,
-    verbose: bool = False,
     keyfunc: Optional[Callable[[tuple, dict], str]] = None,
     consume: bool = False,
     return_cached: bool = False,
     file_ext: Optional[str] = None,
+    cached_only: bool = False,
 ) -> Callable[[Callable], Callable]:
 
     """Decorator to cache function calls. Doesn't take function arguments into regard.
@@ -104,24 +103,18 @@ def cache(
     `duration`: maximum age of cache
     `generator`: set to True to store the results of generator objects
     `protocol`: pickle protocol version
-    `verbose`: print loading times if `generator` is False
 
     If `ignoreargs` is True, the cache won't take function arguments into regard.
             The path will be interpreted as template string to a file instead of a directory.
     """
 
     if not generator and consume:
-        raise ValueError("consume can onlt be used for generator")
+        raise ValueError("consume can only be used for generator")
 
     if duration is None:
         _duration = timedelta.max
     else:
         _duration = duration
-
-    if not verbose:
-        context: Callable[[str], ContextManager] = nullcontext
-    else:
-        context = PrintStatementTime
 
     def decorator(func):
         # type: (Callable, ) -> Callable
@@ -156,30 +149,35 @@ def cache(
                 invalid = True
 
             if invalid:
+
+                if cached_only:
+                    raise LookupError("Not in cache")
+
                 cached = False
                 if not ignoreargs:
                     path.mkdir(parents=True, exist_ok=True)
 
                 if generator and not consume:
                     it = func(*args, **kwargs)
-                    logger.info("Writing iterable to cache: %s", fullpath)
+                    logger.debug("Writing iterable to <%s>", fullpath)
                     result: Any = write_iter(it, fullpath, protocol=protocol, safe=True)
                 else:
-                    with context("Result calculated in {delta} seconds"):
+                    with MeasureTime() as m:
                         if generator and consume:
                             result = list(func(*args, **kwargs))
                         else:
                             result = func(*args, **kwargs)
-                    logger.info("Writing result to cache: %s", fullpath)
+                    logger.debug("Result calculated in %s seconds and written to <%s>", m.get(), fullpath)
                     write_pickle(result, fullpath, protocol=protocol, safe=True)
             else:
                 cached = True
                 if generator and not consume:
-                    logger.info("Loading iterable from cache: %s", fullpath)
+                    logger.debug("Loading iterable from <%s>", fullpath)
                     result = read_iter(fullpath)
                 else:
-                    with context(f"Result loaded from {fullpath} in {{delta}} seconds"):
+                    with MeasureTime() as m:
                         result = read_pickle(fullpath)
+                    logger.debug("Result loaded from <%s> in %s seconds", fullpath, m.get())
 
             if return_cached:
                 return cached, result

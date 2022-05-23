@@ -270,6 +270,8 @@ class StdoutFile:
     def __init__(self, path=None, mode="xb", encoding=None, errors=None, newline=None, compresslevel=9):
         # type: (Optional[PathType], str, Optional[str], Optional[str], Optional[str], int) -> None
 
+        encoding = _check_arguments(mode, encoding)
+
         if path:
             self.fp = copen(path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel)
             self.doclose = True
