@@ -300,8 +300,7 @@ class UnboundedSparseMatrix(Generic[T]):
         self.rows = max(self.rows, r + 1)
         self.m[slice] = value
 
-    def todense(self):
-        # type: () -> np.ndarray
+    def todense(self) -> np.ndarray:
 
         ret = np.zeros((self.cols, self.rows), dtype=self.dtype)
 

@@ -141,8 +141,17 @@ def wrap_text(bf, mode, encoding, errors, newline):
     return bf
 
 
-def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newline=None, compresslevel=9, ext=None):
-    # type: (Union[PathType, IO, int], str, Optional[str], Optional[str], Optional[str], Optional[str], int, Optional[str]) -> IO
+def copen(
+    file: Union[PathType, IO, int],
+    mode: str = "rt",
+    archive_file: Optional[str] = None,
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+    newline: Optional[str] = None,
+    compresslevel: int = 9,
+    ext: Optional[str] = None,
+    handle_archives: bool = True,
+) -> IO:
 
     """Generic file open method. It supports transparent compression and improved text-mode handling.
 
@@ -154,12 +163,17 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
             Only used if a compressed format is specified.
     `ext`: if `file` is a file-like object, than this can be one of {".gz", ".bz2", ".zip"}
             to enable transparent compression
+    `handle_archives`: Allow transparent handling of archives. Defaults to `True`.
+        If `archive_file` is not given for archives which require it, the archive file will be treated as a normal file.
 
     Returns a file-like object. If `file` was a fd,
             it will be closed when the file-like object is closed.
     """
 
     encoding = _check_arguments(mode, encoding)
+
+    if archive_file is not None and handle_archives is False:
+        raise ValueError("handle_archives must be True to allow archive_file to be used")
 
     if isinstance(file, (str, PathLike)):
         ext = os.path.splitext(file)[1].lower()
@@ -169,30 +183,29 @@ def copen(file, mode="rt", archive_file=None, encoding=None, errors=None, newlin
     else:
         ext = ext and ext.lower()
 
-    if ext == ".gz":
-        import gzip
+    if handle_archives:
+        if ext == ".gz":
+            import gzip
 
-        return gzip.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
+            return gzip.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
-    elif ext == ".bz2":
-        import bz2
+        elif ext == ".bz2":
+            import bz2
 
-        return bz2.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
+            return bz2.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
-    elif ext == ".zip":
-        if archive_file is None:
-            raise ValueError("archive_file must be specified")
+        elif ext == ".zip" and archive_file:
 
-        from zipfile import ZipFile
+            from zipfile import ZipFile
 
-        newmode = _stripmode(mode)
+            newmode = _stripmode(mode)
 
-        with ZipFile(
-            file, newmode
-        ) as zf:  # note: even if the outer zip file is closed, the inner file can still be read apparently
-            bf = zf.open(archive_file, newmode, force_zip64=True)
+            with ZipFile(
+                file, newmode
+            ) as zf:  # note: even if the outer zip file is closed, the inner file can still be read apparently
+                bf = zf.open(archive_file, newmode, force_zip64=True)
 
-        return wrap_text(bf, mode, encoding, errors, newline)
+            return wrap_text(bf, mode, encoding, errors, newline)
 
     if isinstance(file, TextIOWrapper):
         return file

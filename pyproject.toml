@@ -11,8 +11,9 @@ src_paths = ["genutility"]
 line_length = 120
 known_third_party = ["flask", "gensim", "networkx", "nltk", "numba", "numpy", "pandas", "rasa", "scipy", "tensorflow", "toml", "torch", "twisted"]
 
-[mypy]
+[tool.mypy]
 ignore_missing_imports = true
+warn_unused_configs = true
 
 [tool.coverage.report]
 exclude_lines = [

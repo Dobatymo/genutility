@@ -17,7 +17,7 @@ class PdfTest(MyTestCase):
         self.assertFilesEqual(out, truth)
 
     def test_iter_pdf_text(self):
-        truth = ["Hello World\n", "Hello World\n"]
+        truth = ["Hello World", "Hello World"]
         result = iter_pdf_text("testfiles/joined.pdf")
 
         self.assertIterEqual(truth, result)

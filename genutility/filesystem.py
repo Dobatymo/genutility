@@ -155,24 +155,21 @@ class FileProperties:
         self.hash = hash
 
     @classmethod
-    def keys(cls):
+    def keys(cls) -> Tuple[str, ...]:
         return cls.__slots__
 
     def values(self):
         return attrgetter(*self.__slots__)(self)
 
-    def __iter__(self):
-        # type: () -> tuple
+    def __iter__(self) -> tuple:
 
         return iter(self.values())
 
-    def __eq__(self, other):
-        # type: (Any, ) -> bool
+    def __eq__(self, other: Any) -> bool:
 
         return self.values() == other.values()
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
 
         args = (f"{k}={v!r}" for k, v in zip(self.keys(), self.values()) if v is not None)
         return "FileProperties({})".format(", ".join(args))
@@ -181,7 +178,7 @@ class FileProperties:
 class DirEntryStub:
     __slots__ = ("name", "path")
 
-    def __init__(self, name, path):
+    def __init__(self, name: str, path: str) -> None:
         self.name = name
         self.path = path
 
@@ -192,13 +189,12 @@ class MyDirEntry(BaseDirEntry):
     def __init__(self, entry):
         BaseDirEntry.__init__(self, entry)
 
-        self.basepath = None  # type: Optional[str]
-        self._relpath = None  # type: Optional[str]
+        self.basepath: Optional[str] = None
+        self._relpath: Optional[str] = None
         self.follow = True
 
     @property
-    def relpath(self):
-        # type: () -> str
+    def relpath(self) -> str:
 
         if self._relpath is not None:
             return self._relpath
@@ -210,14 +206,12 @@ class MyDirEntry(BaseDirEntry):
         return self._relpath
 
     @relpath.setter
-    def relpath(self, path):
-        # type: (str, ) -> None
+    def relpath(self, path: str) -> None:
 
         self._relpath = path
 
 
-def mdatetime(path, aslocal=False):
-    # type: (PathType, bool) -> datetime
+def mdatetime(path: PathType, aslocal: bool = False) -> datetime:
 
     """Returns the last modified date of `path`
     as a timezone aware datetime object.
@@ -234,8 +228,7 @@ def mdatetime(path, aslocal=False):
     return datetime_from_utc_timestamp(mtime, aslocal)
 
 
-def rename(old, new):
-    # type: (PathType, PathType) -> None
+def rename(old: PathType, new: PathType) -> None:
 
     """Renames `old` to `new`. Fails if `new` already exists.
     This is the default behaviour of `os.rename` on Windows.
@@ -251,8 +244,9 @@ def rename(old, new):
     os.renames(old, new)  # fixme: don't use rename*s*
 
 
-def copy_file_generator(source, dest, buffer_size=FILE_IO_BUFFER_SIZE, overwrite_readonly=False):
-    # type: (PathType, PathType, int, bool) -> Iterator[None]
+def copy_file_generator(
+    source: PathType, dest: PathType, buffer_size: int = FILE_IO_BUFFER_SIZE, overwrite_readonly: bool = False
+) -> Iterator[None]:
 
     """Partial file is not deleted if exception gets raised anywhere."""
 
@@ -277,8 +271,7 @@ def copy_file_generator(source, dest, buffer_size=FILE_IO_BUFFER_SIZE, overwrite
     shutil.copystat(source, dest)
 
 
-def st_mode_to_str(st_mode):
-    # type: (int, ) -> str
+def st_mode_to_str(st_mode: int) -> str:
 
     if stat.S_ISDIR(st_mode):
         return "directory"
@@ -298,8 +291,7 @@ def st_mode_to_str(st_mode):
         return "unknown"
 
 
-def append_to_filename(path, s):
-    # type: (PathType, str) -> str
+def append_to_filename(path: PathType, s: str) -> str:
 
     """Add `s` to the filename given in `path`. It's added before the extension, not after."""
 
@@ -307,20 +299,25 @@ def append_to_filename(path, s):
     return root + s + ext
 
 
-def scandir_error_log(entry, exception):
+def scandir_error_log(entry: DirEntry, exception):
     logger.exception("Error in %s", entry.path, exc_info=exception)
 
 
-def scandir_error_raise(entry, exception):
+def scandir_error_raise(entry: DirEntry, exception):
     raise exception
 
 
-def scandir_error_ignore(entry, exception):
+def scandir_error_ignore(entry: DirEntry, exception):
     pass
 
 
-def _scandir_rec_skippable(rootentry, files=True, others=False, follow_symlinks=True, errorfunc=scandir_error_raise):
-    # type: (DirEntry, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[MyDirEntry]
+def _scandir_rec_skippable(
+    rootentry: DirEntry,
+    files: bool = True,
+    others: bool = False,
+    follow_symlinks: bool = True,
+    errorfunc: Callable[[DirEntry, Exception], None] = scandir_error_raise,
+) -> Iterator[MyDirEntry]:
 
     try:
         with os.scandir(rootentry.path) as it:
@@ -343,9 +340,14 @@ def _scandir_rec_skippable(rootentry, files=True, others=False, follow_symlinks=
 
 
 def _scandir_rec(
-    rootentry, files=True, dirs=False, others=False, rec=True, follow_symlinks=True, errorfunc=scandir_error_raise
-):
-    # type: (DirEntry, bool, bool, bool, bool, bool, Callable[[DirEntry, Exception], None]) -> Iterator[DirEntry]
+    rootentry: DirEntry,
+    files: bool = True,
+    dirs: bool = False,
+    others: bool = False,
+    rec: bool = True,
+    follow_symlinks: bool = True,
+    errorfunc: Callable[[DirEntry, Exception], None] = scandir_error_raise,
+) -> Iterator[DirEntry]:
 
     try:
         with os.scandir(rootentry.path) as it:
@@ -370,17 +372,16 @@ def _scandir_rec(
 
 
 def scandir_rec(
-    path,
-    files=True,
-    dirs=False,
-    others=False,
-    rec=True,
-    follow_symlinks=True,
-    relative=False,
-    allow_skip=False,
-    errorfunc=scandir_error_log,
-):
-    # type: (PathType, bool, bool, bool, bool, bool, bool, bool, Callable[[MyDirEntryT, Exception], None]) -> Iterator[MyDirEntryT]
+    path: PathType,
+    files: bool = True,
+    dirs: bool = False,
+    others: bool = False,
+    rec: bool = True,
+    follow_symlinks: bool = True,
+    relative: bool = False,
+    allow_skip: bool = False,
+    errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log,
+) -> Iterator[MyDirEntryT]:
 
     if not logical_implication(allow_skip, dirs and rec):
         raise ValueError("allow_skip implies dirs and rec")
@@ -415,6 +416,20 @@ def scandir_rec(
         return map(modpathrelative, it)
 
 
+def scandir_rec_simple(
+    path: str,
+    files: bool = True,
+    dirs: bool = False,
+    others: bool = False,
+    rec: bool = True,
+    follow_symlinks: bool = True,
+    errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log,
+) -> Iterator[DirEntry]:
+
+    entry = DirEntryStub(os.path.basename(path), path)
+    return _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, errorfunc)
+
+
 def scandir_ext(
     path: PathType,
     extensions: Set[str],
@@ -444,7 +459,7 @@ def scandir_ext_2(path: str, extensions: Set[str], rec: bool = True) -> Iterator
             yield p
 
 
-def _scandir_depth(rootentry, depth, errorfunc):
+def _scandir_depth(rootentry: DirEntry, depth: int, errorfunc: Callable):
 
     try:
         with os.scandir(rootentry.path) as it:
@@ -462,8 +477,7 @@ def _scandir_depth(rootentry, depth, errorfunc):
         errorfunc(rootentry, e)
 
 
-def scandir_depth(path, depth=0, onerror=scandir_error_log):
-    # type: (str, int, Callable) -> Iterator[Tuple[int, DirEntry]]
+def scandir_depth(path: str, depth: int = 0, onerror: Callable = scandir_error_log) -> Iterator[Tuple[int, DirEntry]]:
 
     """Recursive version of `scandir` which yields the current path depth
     along with the DirEntry.
@@ -475,8 +489,7 @@ def scandir_depth(path, depth=0, onerror=scandir_error_log):
     return _scandir_depth(entry, depth, onerror)
 
 
-def make_readonly(path, stats=None):
-    # type: (PathType, Optional[os.stat_result]) -> None
+def make_readonly(path: PathType, stats: Optional[os.stat_result] = None) -> None:
 
     """deletes all write flags"""
     if not stats:
@@ -484,8 +497,7 @@ def make_readonly(path, stats=None):
     os.chmod(path, stat.S_IMODE(stats.st_mode) & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
 
 
-def make_writeable(path, stats=None):
-    # type: (PathType, Optional[os.stat_result]) -> None
+def make_writeable(path: PathType, stats: Optional[os.stat_result] = None) -> None:
 
     """set owner write flag"""
     if not stats:
@@ -493,46 +505,39 @@ def make_writeable(path, stats=None):
     os.chmod(path, stat.S_IMODE(stats.st_mode) | stat.S_IWRITE)
 
 
-def is_writeable(stats):
-    # type: (os.stat_result, ) -> bool
+def is_writeable(stats: os.stat_result) -> bool:
 
     return stats.st_mode & stat.S_IWRITE != 0
 
 
-def is_readable(stats):
-    # type: (os.stat_result, ) -> bool
+def is_readable(stats: os.stat_result) -> bool:
 
     return stats.st_mode & stat.S_IREAD != 0
 
 
-def isfile(stats):
-    # type: (os.stat_result, ) -> bool
+def isfile(stats: os.stat_result) -> bool:
 
     return stat.S_ISREG(stats.st_mode)
 
 
-def isdir(stats):
-    # type: (os.stat_result, ) -> bool
+def isdir(stats: os.stat_result) -> bool:
 
     return stat.S_ISDIR(stats.st_mode)
 
 
 # was: islink
-def statsislink(stats):
-    # type: (os.stat_result, ) -> bool
+def statsislink(stats: os.stat_result) -> bool:
 
     return stat.S_ISLNK(stats.st_mode)
 
 
-def extract_basic_stat_info(stats):
-    # type: (os.stat_result, ) -> tuple
+def extract_basic_stat_info(stats: os.stat_result) -> Tuple[int, int, int, int]:
 
     """Returns size, modification, creation time and access mode."""
     return (stats.st_size, stats.st_mtime, stats.st_ctime, stats.st_mode)
 
 
-def safe_filename(filename, replacement=""):
-    # type: (str, str) -> str
+def safe_filename(filename: str, replacement: str = "") -> str:
 
     WIN = windows_illegal_chars
     UNIX = unix_illegal_chars
@@ -547,8 +552,7 @@ def safe_filename(filename, replacement=""):
 safe_filename_simple = safe_filename
 
 
-def _char_subber(s, illegal_chars, replacement):
-    # type: (str, Set[str], str) -> str
+def _char_subber(s: str, illegal_chars: Set[str], replacement: str) -> str:
 
     if set(replacement) & illegal_chars:
         raise ValueError("replace character cannot be a illegal character")
@@ -557,15 +561,13 @@ def _char_subber(s, illegal_chars, replacement):
     return re.sub(regex, replacement, s)
 
 
-def _char_splitter(s, chars):
-    # type: (str, Iterable[str]) -> List[str]
+def _char_splitter(s: str, chars: Iterable[str]) -> List[str]:
 
     regex = "[" + re.escape("".join(chars)) + "]"
     return re.split(regex, s)
 
 
-def _special_subber(s, replacement="_"):
-    # type: (str, str) -> str
+def _special_subber(s: str, replacement: str = "_") -> str:
 
     if s == "." or s == "..":
         return s.replace(".", replacement)
@@ -573,8 +575,7 @@ def _special_subber(s, replacement="_"):
     return s
 
 
-def windows_compliant_filename(filename, replacement="_"):
-    # type: (str, str) -> str
+def windows_compliant_filename(filename: str, replacement: str = "_") -> str:
     """https://msdn.microsoft.com/en-us/library/aa365247.aspx"""
     # reg. wikipedia: \x7f is valid!
     # trailing dots and spaces are ignored by windows
@@ -589,8 +590,7 @@ def windows_compliant_filename(filename, replacement="_"):
     return ret
 
 
-def windows_compliant_dirname(filename, replacement):
-    # type: (str, str) -> str
+def windows_compliant_dirname(filename: str, replacement: str) -> str:
     """https://msdn.microsoft.com/en-us/library/aa365247.aspx"""
     # reg. wikipedia: \x7f is valid!
     # trailing dots and spaces are ignored by windows
@@ -605,46 +605,39 @@ def windows_compliant_dirname(filename, replacement):
     return ret
 
 
-def linux_compliant_filename(filename, replacement="_"):
-    # type: (str, str) -> str
+def linux_compliant_filename(filename: str, replacement: str = "_") -> str:
 
     filename = _special_subber(filename, replacement)
     return _char_subber(filename, unix_illegal_chars, replacement)
 
 
-def linux_compliant_dirname(filename, replacement="_"):
-    # type: (str, str) -> str
+def linux_compliant_dirname(filename: str, replacement: str = "_") -> str:
 
     return _char_subber(filename, unix_illegal_chars, replacement)
 
 
-def mac_compliant_filename(filename, replacement="_"):
-    # type: (str, str) -> str
+def mac_compliant_filename(filename: str, replacement: str = "_") -> str:
 
     filename = _special_subber(filename, replacement)
     return _char_subber(filename, mac_illegal_chars, replacement)
 
 
-def mac_compliant_dirname(filename, replacement="_"):
-    # type: (str, str) -> str
+def mac_compliant_dirname(filename: str, replacement: str = "_") -> str:
 
     return _char_subber(filename, mac_illegal_chars, replacement)
 
 
-def windows_split_path(s):
-    # type: (str, ) -> List[str]
+def windows_split_path(s: str) -> List[str]:
 
     return _char_splitter(s, windows_sep)
 
 
-def linux_split_path(s):
-    # type: (str, ) -> List[str]
+def linux_split_path(s: str) -> List[str]:
 
     return _char_splitter(s, linux_sep)
 
 
-def mac_split_path(s):
-    # type: (str, ) -> List[str]
+def mac_split_path(s: str) -> List[str]:
 
     return _char_splitter(s, mac_sep)
 
@@ -669,8 +662,7 @@ else:
     split_path = _not_available("split_path")
 
 
-def compliant_path(path, replace="_"):
-    # type: (str, str) -> str
+def compliant_path(path: str, replace: str = "_") -> str:
 
     fn_func = partial(compliant_dirname, replace=replace)
     path_compontents = split_path(path)
@@ -680,8 +672,7 @@ def compliant_path(path, replace="_"):
     return ret
 
 
-def reldirname(path):
-    # type: (PathType, ) -> str
+def reldirname(path: PathType) -> str:
 
     ret = os.path.dirname(path)
     if not ret:
@@ -716,8 +707,7 @@ def equal_dirs(dir1, dir2):
     return is_empty(equal_dirs_iter(dir1, dir2))
 
 
-def realpath_win(path):
-    # type: (PathType, ) -> str
+def realpath_win(path: PathType) -> str:
 
     """fix for os.path.realpath() which doesn't work under Win7"""
 
@@ -728,8 +718,14 @@ def realpath_win(path):
         return path
 
 
-def search(directories, pattern, dirs=True, files=True, rec=True, follow_symlinks=False):
-    # type: (Iterable[PathType], str, bool, bool, bool, bool) -> Iterator[DirEntry]
+def search(
+    directories: Iterable[PathType],
+    pattern: str,
+    dirs: bool = True,
+    files: bool = True,
+    rec: bool = True,
+    follow_symlinks: bool = False,
+) -> Iterator[DirEntry]:
 
     """Search for files and folders matching the wildcard `pattern`."""
 
@@ -739,8 +735,9 @@ def search(directories, pattern, dirs=True, files=True, rec=True, follow_symlink
                 yield entry
 
 
-def rename_files_in_folder(path, pattern, transform, template, rec=True, follow_symlinks=False):
-    # type: (PathType, str, Callable, str, bool, bool) -> None
+def rename_files_in_folder(
+    path: PathType, pattern: str, transform: Callable, template: str, rec: bool = True, follow_symlinks: bool = False
+) -> None:
 
     cpattern = re.compile(pattern)
 
@@ -757,8 +754,7 @@ def rename_files_in_folder(path, pattern, transform, template, rec=True, follow_
         os.rename(filepath, os.path.join(base, to))
 
 
-def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
-    # type: (PathType, str, bool, bool) -> None
+def clean_directory_by_extension(path: PathType, ext: str, rec: bool = True, follow_symlinks: bool = False) -> None:
 
     """Deletes all files of type `ext` if the same file without the ext exists
     and rename if it does not exit."""
@@ -789,8 +785,7 @@ def clean_directory_by_extension(path, ext, rec=True, follow_symlinks=False):
                 break
 
 
-def iter_links(path):
-    # type: (PathType, ) -> Iterator[str]
+def iter_links(path: PathType) -> Iterator[str]:
 
     """Yields all directory symlinks (and junctions on windows)."""
 
@@ -801,8 +796,7 @@ def iter_links(path):
                 yield joined
 
 
-def normalize_seps(path):
-    # type: (str, ) -> str
+def normalize_seps(path: str) -> str:
 
     """Converts \\ to /"""
 
@@ -817,8 +811,7 @@ class Counts:
         self.files = 0
         self.others = 0
 
-    def __iadd__(self, other):
-        # type: (Counts, ) -> Counts
+    def __iadd__(self, other: "Counts") -> "Counts":
 
         self.dirs += other.dirs
         self.files += other.files
@@ -826,14 +819,19 @@ class Counts:
 
         return self
 
-    def null(self):
-        # type: () -> bool
+    def null(self) -> bool:
 
         return self.dirs == 0 and self.files == 0 and self.others == 0
 
 
-def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, errorfunc=scandir_error_raise):
-    # type: (MyDirEntryT, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
+def _scandir_counts(
+    rootentry: MyDirEntryT,
+    files: bool = True,
+    others: bool = True,
+    rec: bool = True,
+    total: bool = False,
+    errorfunc: Callable = scandir_error_raise,
+) -> Iterator[Tuple[DirEntry, Optional[Counts]]]:
 
     counts = Counts()
 
@@ -867,8 +865,14 @@ def _scandir_counts(rootentry, files=True, others=True, rec=True, total=False, e
         errorfunc(rootentry, e)
 
 
-def scandir_counts(path, files=True, others=True, rec=True, total=False, onerror=scandir_error_log):
-    # type: (PathType, bool, bool, bool, bool, Callable) -> Iterator[Tuple[DirEntry, Optional[Counts]]]
+def scandir_counts(
+    path: PathType,
+    files: bool = True,
+    others: bool = True,
+    rec: bool = True,
+    total: bool = False,
+    onerror: Callable = scandir_error_log,
+) -> Iterator[Tuple[DirEntry, Optional[Counts]]]:
 
     """A recursive variant of scandir() which also returns the number of files/directories
     within directories.

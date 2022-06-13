@@ -49,7 +49,7 @@ def truncate(text: str, width: int, placeholder: str = "...") -> str:
         return text[0 : width - len(placeholder)] + placeholder
 
 
-def toint(obj: Any, default: Optional[T] = None) -> Union[int, Optional[T]]:
+def toint(obj: Any, default: T = None) -> Union[int, T]:
 
     """Converts `obj` to int if possible and returns `default` otherwise."""
 

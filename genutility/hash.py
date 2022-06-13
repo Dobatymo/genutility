@@ -4,34 +4,44 @@ import hashlib
 import zlib
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import IO, Callable, Iterable, Optional, Union
 
-from .file import blockfileiter, read_file
+from _hashlib import HASH as Hashobj
 
-if TYPE_CHECKING:
-    from typing import Callable, Iterable, Optional, Union
+from .file import blockfileiter, iterfilelike, read_file
 
-    from _hashlib import HASH as Hashobj
-
-    HashCls = Union[Callable[[], Hashobj], str]
+HashCls = Union[Callable[[], Hashobj], str]
 
 FILE_IO_BUFFER_SIZE = 8 * 1024 * 1024
 
 
-def hash_file(path, hashcls, chunksize=FILE_IO_BUFFER_SIZE, mode="rb", encoding=None):
-    # type: (str, HashCls, int, str, Optional[str]) -> Hashobj
+def hash_file(
+    path: str, hashcls: HashCls, chunk_size: int = FILE_IO_BUFFER_SIZE, mode: str = "rb", encoding: Optional[str] = None
+) -> Hashobj:
+
+    # fixme: does this even work with `mode="rt"`?
 
     if isinstance(hashcls, str):
         m = hashlib.new(hashcls)
     else:
         m = hashcls()
-    for d in blockfileiter(path, mode, encoding, chunk_size=chunksize):
+    for d in blockfileiter(path, mode, encoding, chunk_size=chunk_size):
         m.update(d)
     return m
 
 
-def hash_data(data, hashcls):
-    # type: (bytes, HashCls) -> Hashobj
+def hash_filelike(fr: IO[bytes], hashcls: HashCls, chunk_size: int = FILE_IO_BUFFER_SIZE) -> Hashobj:
+    if isinstance(hashcls, str):
+        m = hashlib.new(hashcls)
+    else:
+        m = hashcls()
+
+    for d in iterfilelike(fr, chunk_size=chunk_size):
+        m.update(d)
+    return m
+
+
+def hash_data(data: bytes, hashcls: HashCls) -> Hashobj:
 
     """Hashes `data` with `hashcls`.
     `hashcls` can either be a string like "md5" or a hash object like `hashlib.md5`.
@@ -62,12 +72,12 @@ def crc32_hash_iter(it):
     return prev & 0xFFFFFFFF  # see https://docs.python.org/3/library/zlib.html#zlib.crc32
 
 
-def crc32_hash_file(path, chunksize=FILE_IO_BUFFER_SIZE, mode="rb", encoding=None):
+def crc32_hash_file(path, chunk_size=FILE_IO_BUFFER_SIZE, mode="rb", encoding=None):
     # type: (str, int, str, Optional[str]) -> str
 
     """Return crc32 hash of file at `path`."""
 
-    crcint = crc32_hash_iter(blockfileiter(path, mode, encoding, chunk_size=chunksize))
+    crcint = crc32_hash_iter(blockfileiter(path, mode, encoding, chunk_size=chunk_size))
     return format(crcint, "08x")
 
 

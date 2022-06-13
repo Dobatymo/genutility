@@ -90,7 +90,7 @@ def itemgetter(it: Iterable[T]) -> Callable[[Mapping[T, U]], Iterator[U]]:
     return lambda d: (d[i] for i in it)
 
 
-def subdictdefault(d: Mapping[T, U], it: Iterable[T], default: Union[U, V] = None) -> Dict[T, Union[U, V]]:
+def subdictdefault(d: Mapping[T, U], it: Iterable[T], default: V = None) -> Dict[T, Union[U, V]]:
 
     """Uses the elements of `it` as keys to extract a new sub-dictionary."""
 
@@ -134,6 +134,9 @@ class NoOverwriteDict(UserDict):
 
     def overwrite(self, key: Hashable, value: Any) -> None:
         self.data[key] = value
+
+    def dict(self):
+        return self.data
 
 
 def _merge_schema(d1: dict, d2: dict) -> None:

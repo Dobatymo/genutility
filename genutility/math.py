@@ -6,25 +6,25 @@ from itertools import islice
 from math import factorial, log, pi, sqrt
 from operator import gt, lt, mul
 from random import sample
-from typing import TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    DefaultDict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    SupportsFloat,
+    Tuple,
+    TypeVar,
+)
 
 from .compat.math import isqrt, prod
 from .exceptions import EmptyIterable
 from .iter import range_count
 
 if TYPE_CHECKING:
-    from typing import (
-        Callable,
-        DefaultDict,
-        Iterable,
-        Iterator,
-        List,
-        Optional,
-        Sequence,
-        SupportsFloat,
-        Tuple,
-        TypeVar,
-    )
 
     from .typing import Computable, Orderable
 
@@ -216,35 +216,42 @@ def relative_luminance(r, g, b):
     return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
 
-# sys.maxsize
 class _PosInfInt:
-    def __lt__(self, rhs):
+
+    """A fancy version of `sys.maxsize`"""
+
+    def __lt__(self, rhs) -> bool:
         return False
 
-    def __gt__(self, rhs):
+    def __gt__(self, rhs) -> bool:
         return True
 
-    def __eq__(self, rhs):
-        raise ArithmeticError("don't compare to other PosInfInt...")
+    def __eq__(self, rhs) -> bool:
+        if isinstance(rhs, _PosInfInt):
+            raise ArithmeticError("Cannot compare inf with inf")
 
-    def __add__(self, rhs):
+        return False
+
+    def __add__(self, rhs) -> "_PosInfInt":
         return self
 
-    def __sub__(self, rhs):
+    def __sub__(self, rhs) -> "_PosInfInt":
+        if isinstance(rhs, _PosInfInt):
+            raise ArithmeticError("Cannot subtract inf from inf")
+
         return self
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "PosInfInt"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "PosInfInt"
 
 
 PosInfInt = _PosInfInt()
 
 
-def multinomial_coefficient(n, ks):
-    # type: (int, Iterable[int]) -> int
+def multinomial_coefficient(n: int, ks: Iterable[int]) -> int:
 
     return factorial(n) / prod(map(factorial, ks))
 

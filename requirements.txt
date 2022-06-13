@@ -24,7 +24,7 @@ Pillow>=8.1.1
 pymediainfo
 pymongo
 pyOpenSSL>=17.5.0 # OpenSSL
-PyPDF2>=1.28.0
+PyPDF2>=2.1.1
 python-pptx
 pywin32; sys_platform=='win32' # win32evtlog, winerror
 requests

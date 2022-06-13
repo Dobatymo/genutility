@@ -19,6 +19,7 @@ class TransactionalCreateFile:
         errors: Optional[str] = None,
         newline: Optional[str] = None,
         prefix: str = "tmp",
+        handle_archives: bool = True,
     ) -> None:
 
         is_text = "t" in mode
@@ -27,7 +28,9 @@ class TransactionalCreateFile:
         suffix = os.path.splitext(self.path)[1].lower()
         curdir = os.path.dirname(self.path)
         fd, self.tmppath = mkstemp(suffix, prefix, curdir, is_text)
-        self.fp = copen(fd, mode, encoding=encoding, errors=errors, newline=newline, ext=suffix)
+        self.fp = copen(
+            fd, mode, encoding=encoding, errors=errors, newline=newline, ext=suffix, handle_archives=handle_archives
+        )
 
     def commit(self) -> None:
 

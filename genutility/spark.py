@@ -54,7 +54,7 @@ def schema_simple_to_spark(d: dict, sort_keys: bool = False) -> t.StructType:
     if sort_keys:
         keys: Iterable = sorted(d)
     else:
-        keys: Iterable = d
+        keys = d
 
     for k in keys:
         if isinstance(d[k], dict):
