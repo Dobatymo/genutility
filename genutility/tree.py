@@ -1,7 +1,9 @@
 from __future__ import generator_stop
 
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Hashable
+from typing import Iterable as IterableT
+from typing import Iterator, List, Optional, Tuple, Union
 
 
 class SequenceTree(MutableMapping):
@@ -21,10 +23,9 @@ class SequenceTree(MutableMapping):
 
     # __slots__ = ("root", "endkey")
 
-    def __init__(self, data=None, endkey="_"):
-        # type: (Optional[Union[Mapping, Iterable]], Hashable) -> None
+    def __init__(self, data: Optional[Union[Mapping, Iterable]] = None, endkey: Hashable = "_") -> None:
 
-        self.root = dict()  # type: Dict[Hashable, Any]
+        self.root: Dict[Hashable, Any] = {}
         self.endkey = endkey
         if data is None:
             pass
@@ -47,15 +48,13 @@ class SequenceTree(MutableMapping):
                     yield [k] + a, b
 
     @classmethod
-    def fromtree(cls, tree, endkey="_"):
-        # type: (dict, Hashable) -> SequenceTree
+    def fromtree(cls, tree: dict, endkey: Hashable = "_") -> "SequenceTree":
 
         seqtree = cls(endkey=endkey)
         seqtree.root = tree
         return seqtree
 
-    def __contains__(self, keys):
-        # type: (Iterable[Hashable], ) -> bool
+    def __contains__(self, keys: IterableT[Hashable]) -> bool:
 
         try:
             self[keys]
@@ -63,16 +62,14 @@ class SequenceTree(MutableMapping):
         except KeyError:
             return False
 
-    def __getitem__(self, keys):
-        # type: (Iterable[Hashable], ) -> Any
+    def __getitem__(self, keys: IterableT[Hashable]) -> Any:
 
         node = self.root
         for word in keys:
             node = node[word]
         return node[self.endkey]
 
-    def __setitem__(self, keys, value):
-        # type: (Iterable[Hashable], Any) -> None
+    def __setitem__(self, keys: IterableT[Hashable], value: Any) -> None:
 
         node = self.root
         for key in keys:
@@ -80,8 +77,7 @@ class SequenceTree(MutableMapping):
 
         node[self.endkey] = value
 
-    def set(self, keys, value):
-        # type: (Iterable[Hashable], Any) -> bool
+    def set(self, keys: IterableT[Hashable], value: Any) -> bool:
 
         """Same as `__setitem__`, except it returns `True` if the key wasn't used before."""
 
@@ -96,16 +92,14 @@ class SequenceTree(MutableMapping):
             node[self.endkey] = value
             return True
 
-    def __delitem__(self, keys):
-        # type: (Iterable[Hashable], ) -> None
+    def __delitem__(self, keys: IterableT[Hashable]) -> None:
 
         node = self.root
         for key in keys:
             node = node[key]
         del node[self.endkey]
 
-    def _copy(self, node):
-        # type: (dict, ) -> dict
+    def _copy(self, node: dict) -> dict:
 
         ret = dict()
 
@@ -117,53 +111,46 @@ class SequenceTree(MutableMapping):
 
         return ret
 
-    def copy(self):
-        # type: () -> SequenceTree
+    def copy(self) -> "SequenceTree":
 
         """shallow copy"""
 
         tree = self._copy(self.root)
         return self.fromtree(tree, self.endkey)
 
-    def __iter__(self):
-        # type: () -> Iterator
+    def __iter__(self) -> Iterator:
 
         return iter(self.keys())
 
-    def __eq__(self, rhs):
-        # type: (object, ) -> bool
+    def __eq__(self, rhs: object) -> bool:
 
         if isinstance(rhs, SequenceTree):
             return self.root == rhs.root and self.endkey == rhs.endkey
         else:
             return False
 
-    def __ne__(self, rhs):
-        # type: (object, ) -> bool
+    def __ne__(self, rhs: object) -> bool:
 
         if isinstance(rhs, SequenceTree):
             return self.root != rhs.root or self.endkey != rhs.endkey
         else:
             return False
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
 
         return str(self.root)
 
     def __len__(self):
         raise NotImplementedError("use slower SequenceTree.calc_leaves()")
 
-    def pop(self, keys):
-        # type: (Iterable[Hashable], ) -> Any
+    def pop(self, keys: IterableT[Hashable]) -> Any:
 
         node = self.root
         for key in keys:
             node = node[key]
         return node.pop(self.endkey)
 
-    def popdefault(self, keys, default=None):
-        # type: (Iterable[Hashable], Optional[Any]) -> Any
+    def popdefault(self, keys: IterableT[Hashable], default: Optional[Any] = None) -> Any:
 
         try:
             return self.pop(keys)
@@ -179,8 +166,7 @@ class SequenceTree(MutableMapping):
 			raise KeyError("tree is empty") from None
 	"""
 
-    def _popitem(self, node, branch):
-        # type: (Dict[Hashable, Any], Tuple[Hashable, ...]) -> Tuple[Tuple[Hashable, ...], Any]
+    def _popitem(self, node: Dict[Hashable, Any], branch: Tuple[Hashable, ...]) -> Tuple[Tuple[Hashable, ...], Any]:
 
         for key, value in node.items():
             if key != self.endkey:
@@ -197,14 +183,12 @@ class SequenceTree(MutableMapping):
             raise KeyError("tree is empty") from None
         return ret
 
-    def popitem(self):
-        # type: () -> Tuple[Tuple[Hashable, ...], Any]
+    def popitem(self) -> Tuple[Tuple[Hashable, ...], Any]:
         """leaves empty dicts behind. thus it's not good for looping."""
 
         return self._popitem(self.root, ())
 
-    def _optimized(self, node):
-        # type: (Dict[Hashable, Any], ) -> Dict[Hashable, Any]
+    def _optimized(self, node: Dict[Hashable, Any]) -> Dict[Hashable, Any]:
 
         opt = {}
 
@@ -216,8 +200,7 @@ class SequenceTree(MutableMapping):
 
         return {k: v for k, v in opt.items() if v}
 
-    def optimized(self):
-        # type: () -> SequenceTree
+    def optimized(self) -> "SequenceTree":
 
         """Returns shallow copy with empty branches removed."""
 
@@ -227,23 +210,20 @@ class SequenceTree(MutableMapping):
     def update(self, other):
         raise NotImplementedError("update does not work yet")
 
-    def clear(self):
-        # type: () -> None
+    def clear(self) -> None:
 
         """Removes all leaves and branches from tree."""
 
         self.root.clear()
 
-    def get(self, keys, default=None):
-        # type: (Iterable[Hashable], Optional[Any]) -> Any
+    def get(self, keys: IterableT[Hashable], default: Optional[Any] = None) -> Any:
 
         try:
             return self[keys]
         except KeyError:
             return default
 
-    def setdefault(self, keys, default=None):
-        # type: (Iterable[Hashable], Optional[Any]) -> Any
+    def setdefault(self, keys: IterableT[Hashable], default: Optional[Any] = None) -> Any:
 
         node = self.root
         for word in keys:
@@ -251,8 +231,7 @@ class SequenceTree(MutableMapping):
 
         return node.setdefault(self.endkey, default)
 
-    def _values(self, node):
-        # type: (Dict[Hashable, Any], ) -> Iterator[Any]
+    def _values(self, node: Dict[Hashable, Any]) -> Iterator[Any]:
 
         for key, value in node.items():
             if key != self.endkey:
@@ -260,13 +239,11 @@ class SequenceTree(MutableMapping):
             else:
                 yield value
 
-    def values(self):  # itervalues
-        # type: () -> Iterator[Any]
+    def values(self) -> Iterator[Any]:  # itervalues
 
         return self._values(self.root)
 
-    def _keys(self, node, branch):
-        # type: (Dict[Hashable, Any], Tuple[Hashable, ...]) -> Iterator[Tuple[Hashable, ...]]
+    def _keys(self, node: Dict[Hashable, Any], branch: Tuple[Hashable, ...]) -> Iterator[Tuple[Hashable, ...]]:
 
         for key, value in node.items():
             if key != self.endkey:
@@ -274,13 +251,13 @@ class SequenceTree(MutableMapping):
             else:
                 yield branch
 
-    def keys(self):  # iterkeys
-        # type: () -> Iterator[Tuple[Hashable, ...]]
+    def keys(self) -> Iterator[Tuple[Hashable, ...]]:  # iterkeys
 
         return self._keys(self.root, ())
 
-    def _items(self, node, branch):
-        # type: (Dict[Hashable, Any], Tuple[Hashable, ...]) -> Iterator[Tuple[Tuple[Hashable, ...], Any]]
+    def _items(
+        self, node: Dict[Hashable, Any], branch: Tuple[Hashable, ...]
+    ) -> Iterator[Tuple[Tuple[Hashable, ...], Any]]:
 
         for key, value in node.items():
             if key != self.endkey:
@@ -288,14 +265,12 @@ class SequenceTree(MutableMapping):
             else:
                 yield branch, value
 
-    def items(self):  # iteritems
-        # type: () -> Iterator[Tuple[tuple, Any]]
+    def items(self) -> Iterator[Tuple[tuple, Any]]:  # iteritems
         return self._items(self.root, ())
 
     # others
 
-    def longest_prefix(self, keys, full=True):
-        # type: (Iterable, bool) -> Tuple[list, Any]
+    def longest_prefix(self, keys: Iterable, full: bool = True) -> Tuple[list, Any]:
 
         node = self.root
         ret = []
@@ -317,24 +292,21 @@ class SequenceTree(MutableMapping):
         return node
 
     @classmethod
-    def _calc_max_depth(cls, node):
-        # type: (dict, ) -> int
+    def _calc_max_depth(cls, node: dict) -> int:
 
         if node:
             return max(cls._calc_max_depth(v) for v in node.values()) + 1
         else:
             return 0
 
-    def calc_max_depth(self):
-        # type: () -> int
+    def calc_max_depth(self) -> int:
 
         if self.root:
             return self._calc_max_depth(self.root) - 1
         else:
             return 0
 
-    def _calc_branches(self, node):
-        # type: (dict, ) -> int
+    def _calc_branches(self, node: dict) -> int:
 
         ret = 0
 
@@ -345,12 +317,10 @@ class SequenceTree(MutableMapping):
                 ret += 1
         return ret
 
-    def calc_branches(self):
-        # type: () -> int
+    def calc_branches(self) -> int:
         return self._calc_branches(self.root)
 
-    def _calc_leaves(self, node):
-        # type: (dict, ) -> int
+    def _calc_leaves(self, node: dict) -> int:
         ret = 0
 
         for k, v in node.items():
@@ -360,6 +330,5 @@ class SequenceTree(MutableMapping):
                 ret += 1
         return ret
 
-    def calc_leaves(self):
-        # type: () -> int
+    def calc_leaves(self) -> int:
         return self._calc_leaves(self.root)

@@ -9,8 +9,7 @@ from typing import Any, Optional
 """
 
 
-def find_local_in_call_stack(funcname, varname, stacklevel=2):
-    # type: (str, str, int) -> Any
+def find_local_in_call_stack(funcname: str, varname: str, stacklevel: int = 2) -> Any:
 
     """Finds a local variable by name `varname` by going up the call stack,
     looking for functions called `funcname`.
@@ -32,7 +31,7 @@ def find_local_in_call_stack(funcname, varname, stacklevel=2):
             func_a()
     """
 
-    frame = sys._getframe(stacklevel)  # type: Optional[FrameType]
+    frame: Optional[FrameType] = sys._getframe(stacklevel)
     while frame:
         if frame.f_code.co_name == funcname and varname in frame.f_locals:
             return frame.f_locals[varname]

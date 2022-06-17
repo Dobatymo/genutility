@@ -31,19 +31,45 @@ def write_torrent(data: dict, path: str) -> None:
     bencode.bwrite(data, path)
 
 
-def read_torrent_info_dict(path: str) -> dict:
-
-    return bencode.bread(path)["info"]
-
-
-def iterdecode(items: Iterable[Union[str, bytes]], encoding="latin1") -> Iterator[str]:
+def iterdecode(items: Iterable[Union[str, bytes]], encoding: str = "latin1") -> Iterator[str]:
     for item in items:
         if isinstance(item, str):
             yield item
         elif isinstance(item, bytes):
             yield item.decode(encoding)
         else:
-            raise TypeError
+            raise TypeError(f"items must be strings or bytes, not {type(item)}")
+
+
+def read_torrent_info_dict(path: str, normalize_string_fields: bool = False) -> dict:
+
+    info = bencode.bread(path)["info"]
+
+    if normalize_string_fields:
+        if isinstance(info["name"], bytes):
+
+            try:
+                info["name"] = info["name.utf-8"]
+                del info["name.utf-8"]
+                assert isinstance(info["name"], str)
+            except KeyError:
+                info["name"] = info["name"].decode("latin1")
+
+        try:
+            files = info["files"]
+        except KeyError:
+            pass
+        else:
+            for fd in files:
+                if any(isinstance(p, bytes) for p in fd["path"]):
+                    try:
+                        fd["path"] = fd["path.utf-8"]
+                        del fd["path.utf-8"]
+                        assert all(isinstance(p, str) for p in fd["path"])
+                    except KeyError:
+                        fd["path"] = iterdecode(fd["path"])
+
+    return info
 
 
 def iter_torrent(path: str) -> Iterator[FileProperties]:
@@ -56,23 +82,7 @@ def iter_torrent(path: str) -> Iterator[FileProperties]:
         Now every string should be utf-8 encoded anyway, but in ancient times the encoding was not specified.
     """
 
-    info = read_torrent_info_dict(path)
-
-    if isinstance(info["name"], bytes):
-
-        try:
-            info["name"] = info["name"].decode("utf-8")
-            assert False
-        except UnicodeDecodeError:
-            pass
-
-        try:
-            info["name"] = info["name.utf-8"]
-            logger.warning("Non-standard `name.utf-8` key in torrent file: %s", path)
-            assert isinstance(info["name"], str)
-        except KeyError:
-            info["name"] = info["name"].decode("latin1")
-            logger.warning("info/name value uses invalid encoding in torrent file: %s", path)
+    info = read_torrent_info_dict(path, normalize_string_fields=True)
 
     try:
         files = info["files"]
@@ -80,15 +90,7 @@ def iter_torrent(path: str) -> Iterator[FileProperties]:
         yield FileProperties(info["name"], info["length"], False, hash=info.get("sha1"))
     else:
         for fd in files:
-            try:
-                path = "/".join(fd["path"])
-            except TypeError:
-                try:
-                    path = "/".join(fd["path.utf-8"])
-                except KeyError:
-                    path = "/".join(iterdecode(fd["path"]))
-
-            yield FileProperties(info["name"] + "/" + path, fd["length"], False, hash=fd.get("sha1"))
+            yield FileProperties(info["name"] + "/" + "/".join(fd["path"]), fd["length"], False, hash=fd.get("sha1"))
 
 
 def iter_fastresume(path: str) -> Iterator[FileProperties]:

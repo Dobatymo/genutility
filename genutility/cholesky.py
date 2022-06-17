@@ -2,6 +2,8 @@ from __future__ import generator_stop
 
 from math import sqrt
 
+import numpy as np
+
 from .numba import opjit
 from .numpy import is_square
 
@@ -19,8 +21,7 @@ def _choldate(L, x, sign):
         x[k + 1 :] = c * x[k + 1 :] - s * L[k + 1 :, k]
 
 
-def choldate(L, x, sign):
-    # type: (np.ndarray, np.ndarray, str) -> None
+def choldate(L: np.ndarray, x: np.ndarray, sign: str) -> None:
 
     """This function computes the lower triangular Cholesky decomposition L' of matrix A' from L in-place
     (the cholesky decomp of A) where A' = A + sign*x*x^T.
@@ -42,8 +43,6 @@ def choldate(L, x, sign):
 
 if __name__ == "__main__":
     import timeit
-
-    import numpy as np
 
     from .numpy import random_triangular_matrix
 

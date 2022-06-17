@@ -4,17 +4,14 @@ import logging
 from datetime import timedelta
 from fractions import Fraction
 from os import PathLike, fspath
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import Any, Iterator, Sequence, Tuple, Union
 
-if TYPE_CHECKING:
-    from pathlib import Path
-    from typing import Any, Iterator, Sequence, Tuple, Union
+import numpy as np
 
-    import numpy as np
+from av import VideoFrame
 
-    from av import VideoFrame
-
-    WsgiApp = Any
+WsgiApp = Any
 
 # if __debug__:
 #     import av
@@ -23,8 +20,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _raise_exists(outpath, overwrite=False):
-    # type: (Path, bool) -> None
+def _raise_exists(outpath: Path, overwrite: bool = False) -> None:
 
     if not overwrite and outpath.exists():
         raise FileExistsError()
@@ -46,23 +42,19 @@ class VideoBase:
 
     single_frame_ratio = 0.5
 
-    def calculate_offsets(self, time_base, duration):
-        # type: (Fraction, int) -> Iterator[int]
+    def calculate_offsets(self, time_base: Fraction, duration: int) -> Iterator[int]:
 
         raise NotImplementedError
 
-    def _get_frame(self, offset, native=False):
-        # type: (int, bool) -> Tuple[float, np.ndarray]
+    def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
 
         raise NotImplementedError
 
-    def _frame_to_file(self, frame, outpath):
-        # type: (Any, PathLike) -> None
+    def _frame_to_file(self, frame: Any, outpath: PathLike) -> None:
 
         raise NotImplementedError
 
-    def iterate(self):
-        # type: () -> Iterator[Tuple[float, np.ndarray]]
+    def iterate(self) -> Iterator[Tuple[float, np.ndarray]]:
 
         for offset in self.calculate_offsets(self.time_base, self.native_duration):
             try:
@@ -70,8 +62,7 @@ class VideoBase:
             except NoKeyFrame as e:
                 yield offset, e
 
-    def save_frame_to_file(self, pos, outpath):
-        # type: (float, PathLike) -> None
+    def save_frame_to_file(self, pos: float, outpath: PathLike) -> None:
 
         frametime, frame = self._get_frame(int(self.native_duration * pos), native=True)
         self._frame_to_file(frame, outpath)
@@ -92,8 +83,7 @@ def fourcc(integer):
 
 
 class CvVideo(VideoBase):
-    def __init__(self, path):
-        # type: (Union[str, PathLike, int], ) -> None
+    def __init__(self, path: Union[str, PathLike, int]) -> None:
 
         self.cv2 = self.import_backend()
 
@@ -142,13 +132,11 @@ class CvVideo(VideoBase):
 
         return cv2
 
-    def time_to_seconds(self, offset):
-        # type: (int, ) -> float
+    def time_to_seconds(self, offset: int) -> float:
 
         return offset / self.meta["fps"]
 
-    def _get_frame(self, offset, native=False):
-        # type: (int, bool) -> Tuple[float, np.ndarray]
+    def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
 
         self.cap.set(self.cv2.CAP_PROP_POS_FRAMES, offset)
 
@@ -160,15 +148,13 @@ class CvVideo(VideoBase):
         else:
             raise NoGoodFrame("Could not find good frame")
 
-    def _frame_to_file(self, frame, outpath):
-        # type: (np.ndarray, PathLike) -> None
+    def _frame_to_file(self, frame: np.ndarray, outpath: PathLike) -> None:
 
         is_success, im_buf = self.cv2.imencode(outpath.suffix, frame)  # type: Tuple[bool, np.ndarray]
         assert is_success
         im_buf.tofile(fspath(outpath))  # cv2.imwrite doesn't handle unicode paths correctly
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
 
         self.cap.release()
 
@@ -201,8 +187,7 @@ class AvVideo(VideoBase):
         "width",
     ]
 
-    def __init__(self, path, videostream=0):
-        # type: (PathLike, int) -> None
+    def __init__(self, path: PathLike, videostream: int = 0) -> None:
 
         self.av = self.import_backend()
 
@@ -256,8 +241,7 @@ class AvVideo(VideoBase):
 
         return av
 
-    def _get_frame(self, offset, native=False):
-        # type: (int, bool) -> Tuple[float, np.ndarray]
+    def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
 
         for i in range(1):  # trying x times to find good frames
             try:
@@ -295,19 +279,22 @@ class AvVideo(VideoBase):
 
         raise NoGoodFrame("Could not find good frame after trying various offsets")
 
-    def _frame_to_file(self, frame, outpath):
-        # type: (VideoFrame, Path) -> None
+    def _frame_to_file(self, frame: VideoFrame, outpath: Path) -> None:
 
         frame.to_image(fspath(outpath))
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
 
         self.container.close()
 
 
-def grab_pic(inpath, outpath, pos=0.5, overwrite=False, backend="cv"):
-    # type: (Union[str, PathLike], Path, Union[float, Sequence[float]], bool, str) -> None
+def grab_pic(
+    inpath: Union[str, PathLike],
+    outpath: Path,
+    pos: Union[float, Sequence[float]] = 0.5,
+    overwrite: bool = False,
+    backend: str = "cv",
+) -> None:
 
     if backend == "av":
         vf = AvVideo(inpath)

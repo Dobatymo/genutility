@@ -8,22 +8,19 @@ class MeasureMemory:
 
     __slots__ = ("total", "snapshot")
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
 
         tracemalloc.start()
 
-        self.total = None  # type: Optional[int]
+        self.total: Optional[int] = None
 
-    def _comp(self):
-        # type: () -> int
+    def _comp(self) -> int:
 
         snapshot_now = tracemalloc.take_snapshot()
         stats = snapshot_now.compare_to(self.snapshot, "lineno")
         return sum(stat.size for stat in stats)
 
-    def __enter__(self):
-        # type: () -> MeasureMemory
+    def __enter__(self) -> "MeasureMemory":
 
         self.snapshot = tracemalloc.take_snapshot()
         return self
@@ -31,16 +28,14 @@ class MeasureMemory:
     def __exit__(self, type, value, traceback):
         self.total = self._comp()
 
-    def get(self):
-        # type: () -> int
+    def get(self) -> int:
 
         if self.total:
             return self.total
         else:
             return self._comp()
 
-    def print(self, name):
-        # type: (str, ) -> None
+    def print(self, name: str) -> None:
 
         if self.total:
             total = self.total

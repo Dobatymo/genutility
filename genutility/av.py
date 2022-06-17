@@ -1,21 +1,17 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Iterator
+
+import numpy as np
 
 import av
-
-if TYPE_CHECKING:
-    from typing import Iterator
-
-    import numpy as np
 
 
 class CorruptFile(Exception):
     pass
 
 
-def iter_video(path):
-    # type: (str, ) -> Iterator[np.ndarray]
+def iter_video(path: str) -> Iterator[np.ndarray]:
 
     """Yield frames from a video file. For video device support see `genutility.cv.iter_video`."""
 

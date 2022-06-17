@@ -38,8 +38,7 @@ class Worker(threading.Thread):
         self.running = True
         self.start()
 
-    def run(self):
-        # type: () -> None
+    def run(self) -> None:
 
         while self.running:
             # self.returns.put((self.TASK_IDLE, self))
@@ -66,15 +65,13 @@ class Worker(threading.Thread):
 
         logger.debug("thread ended")
 
-    def cancel(self):
-        # type: () -> None
+    def cancel(self) -> None:
 
         self.running = False
 
 
 class ThreadPool:
-    def __init__(self, num_threads):
-        # type: (int, ) -> None
+    def __init__(self, num_threads: int) -> None:
 
         self.num_threads = num_threads
         self.tasks: "Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]" = Queue()
@@ -88,8 +85,12 @@ class ThreadPool:
 
     def get(self) -> Tuple[int, Optional[Any]]:
 
+        state: int
+        type: int
+        result: Tuple[int, Union[Any, Exception]]
+
         while True:  # so invalid states can be ignored
-            state, type, result = self.returns.get(True)  # type: Tuple[int, int, Tuple[int, Union[Any, Exception]]]
+            state, type, result = self.returns.get(True)
             if state == self.state:
                 if type == Worker.TASK_COMPLETE:
                     return result  # (id, ret)
@@ -174,8 +175,7 @@ def gather_any(threadpool: ThreadPool, func: Callable, params: Iterable, *args: 
     raise NoResult("No task returned a valid result")
 
 
-def NotThreadSafe(verify=False):
-    # type: (bool, ) -> Callable[[type], type]
+def NotThreadSafe(verify: bool = False) -> Callable[[type], type]:
 
     """Class decorator. Only works on new style classes (object)
     `verify=True` prohibits write access to attributes.
@@ -229,14 +229,12 @@ class IterWorker(threading.Thread):
         self.state = self.STATE_WAITING
 
     @property
-    def state(self):
-        # type: () -> int
+    def state(self) -> int:
 
         return self._state
 
     @state.setter
-    def state(self, value):
-        # type: (int, ) -> None
+    def state(self, value: int) -> None:
 
         assert_choice("value", value, (0, 1, 2, 3, 4))
 
@@ -244,8 +242,7 @@ class IterWorker(threading.Thread):
         if self.onstatechange:
             self.onstatechange(value)
 
-    def run(self):
-        # type: () -> None
+    def run(self) -> None:
 
         while True:
             iter = self.queue.get()
@@ -270,26 +267,22 @@ class IterWorker(threading.Thread):
             self.queue.task_done()  # untested
             self.state = self.STATE_WAITING
 
-    def pause(self):
-        # type: () -> None
+    def pause(self) -> None:
 
         if self.state == self.STATE_RUNNING:
             self.state = self.STATE_PAUSING
 
-    def resume(self):
-        # type: () -> None
+    def resume(self) -> None:
 
         if self.state == self.STATE_PAUSED:
             self.control.put(self.CMD_RESUME)
 
-    def stop(self):
-        # type: () -> None
+    def stop(self) -> None:
 
         if self.state < self.STATE_STOPPED:
             self.queue.put(None)
 
-    def clear(self):
-        # type: () -> None
+    def clear(self) -> None:
 
         try:
             while True:
@@ -298,8 +291,7 @@ class IterWorker(threading.Thread):
         except Empty:
             pass
 
-    def abort(self):
-        # type: () -> None
+    def abort(self) -> None:
 
         self.pause()
         self.control.put(self.CMD_ABORT)
@@ -409,22 +401,25 @@ class BoundedQueue:
     Other semaphore classes like `multiprocessing.BoundedSemaphore` can be used as well.
     """
 
-    def __init__(self, size, it, timeout=None, semaphore=threading.BoundedSemaphore):
-        # type: (int, Iterable[T], Optional[float], Callable[[int], Any]) -> None
+    def __init__(
+        self,
+        size: int,
+        it: Iterable[T],
+        timeout: Optional[float] = None,
+        semaphore: Callable[[int], Any] = threading.BoundedSemaphore,
+    ) -> None:
 
         self.semaphore = semaphore(size)
         self.iterable = it
         self.timeout = timeout
-        self.iterator = None  # type: Optional[Iterator[T]]
+        self.iterator: Optional[Iterator[T]] = None
 
-    def __iter__(self):
-        # type: () -> Iterator[T]
+    def __iter__(self) -> Iterator[T]:
 
         self.iterator = iter(self.iterable)
         return self
 
-    def __next__(self):
-        # type: () -> T
+    def __next__(self) -> T:
 
         if self.iterator is None:
             raise TypeError
@@ -434,8 +429,7 @@ class BoundedQueue:
 
         return next(self.iterator)
 
-    def done(self):
-        # type: () -> None
+    def done(self) -> None:
 
         self.semaphore.release()
 
@@ -510,8 +504,7 @@ class CompletedFutures:
             future.cancel()
 
 
-def _ignore_sigint():
-    # type: () -> None
+def _ignore_sigint() -> None:
 
     """This need to be pickle'able to work with `multiprocessing.Pool`."""
 

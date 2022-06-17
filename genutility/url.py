@@ -3,12 +3,8 @@ from __future__ import generator_stop
 import os.path
 import re
 from string import ascii_letters, digits
-from typing import TYPE_CHECKING
-from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
-
-if TYPE_CHECKING:
-    from typing import Dict, Iterable, Optional
-    from urllib.parse import SplitResult
+from typing import Dict, Iterable, Optional
+from urllib.parse import SplitResult, parse_qs, urlencode, urlsplit, urlunsplit
 
 # URI RFC
 gen_delims = ":/?#[]@"
@@ -21,21 +17,18 @@ uri_schemes = ("http", "https", "ftp", "sftp", "irc", "magnet", "file", "data")
 url_base_pattern = r"(?:(?:{}:\/\/)|www\.)(?:[{}]|%[a-zA-Z0-9]{{2}})+"
 
 
-def get_url_pattern(schemes=None):
-    # type: (Optional[Iterable[str]], ) -> re.Pattern
+def get_url_pattern(schemes: Optional[Iterable[str]] = None) -> "re.Pattern":  # py3.6 fix
 
     schemes = schemes or uri_schemes
     return re.compile(url_base_pattern.format("|".join(schemes), re.escape(valid_uri_characters)))
 
 
-def get_filename_from_url(url, strip=None):
-    # type: (str, Optional[str]) -> str
+def get_filename_from_url(url: str, strip: Optional[str] = None) -> str:
 
     return urlsplit(url).path.rstrip(strip).rsplit("/", 1)[1]
 
 
-def get_url_argument(split_url, argument, path=None):
-    # type: (SplitResult, str, Optional[str]) -> Optional[str]
+def get_url_argument(split_url: SplitResult, argument: str, path: Optional[str] = None) -> Optional[str]:
 
     """Extracts a parameter value from the url query string. Optionally compares the url path.
     For example:
@@ -51,8 +44,7 @@ def get_url_argument(split_url, argument, path=None):
     return None
 
 
-def url_replace_query(split_url, query, drop_fragment=True):
-    # type: (SplitResult, Dict[str, str], bool) -> str
+def url_replace_query(split_url: SplitResult, query: Dict[str, str], drop_fragment: bool = True) -> str:
 
     """Replace the query part of an URL with a new one.
     For example:
@@ -69,12 +61,11 @@ def url_replace_query(split_url, query, drop_fragment=True):
     return urlunsplit((scheme, netloc, path, _query, fragment))
 
 
-def path_ext(path):
+def path_ext(path: str) -> str:
     return os.path.splitext(path)[1][1:].lower()
 
 
-def url_ext(url):
-    # type: (str, ) -> str
+def url_ext(url: str) -> str:
 
     """Returns the lowercase file extension of the URI/URL."""
 

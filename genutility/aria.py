@@ -69,7 +69,7 @@ class AriaDownloader:
         else:
             self.aria2.change_global_option(self.default_global_options)
 
-        self.gids = set()  # type: Set[str]
+        self.gids: Set[str] = set()
 
     def query(self, method: str, *args: Any, **kwargs: Any) -> Any:
 

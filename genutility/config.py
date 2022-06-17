@@ -8,8 +8,7 @@ from typing import Any, Dict, Optional, Union
 from .os import get_appdata_dir
 
 
-def sort_config(inpath, outpath):
-    # type: (str, str) -> None
+def sort_config(inpath: str, outpath: str) -> None:
 
     from sortedcontainers import SortedDict
 

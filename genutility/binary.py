@@ -1,15 +1,11 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Iterable, Iterator, Union
 
 from .exceptions import assert_choice
 
-if TYPE_CHECKING:
-    from typing import Iterable, Iterator, Union
 
-
-def encode_binary(boolit, pad="0"):
-    # type: (Union[str, Iterator[bool]], str) -> bytes
+def encode_binary(boolit: Union[str, Iterator[bool]], pad: str = "0") -> bytes:
 
     """Encode a string consisting of 0s and 1s or an iterable returns boolean values
     to bytes.
@@ -31,16 +27,14 @@ def encode_binary(boolit, pad="0"):
     return bytes(int(bin[x : x + 8], 2) for x in range(0, len(bin), 8))
 
 
-def _str2bool_it(s):
-    # type: (Iterable[str], ) -> Iterator[bool]
+def _str2bool_it(s: Iterable[str]) -> Iterator[bool]:
 
     for chunk in s:
         for c in chunk:
             yield True if c == "1" else False
 
 
-def decode_binary(key, tostring=False):
-    # type: (bytes, bool) -> Union[str, Iterator[bool]]
+def decode_binary(key: bytes, tostring: bool = False) -> Union[str, Iterator[bool]]:
 
     """Decode bytes to either a string of 0s and 1s or an iterable of booleans."""
 
