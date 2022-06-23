@@ -303,6 +303,10 @@ def scandir_error_log(entry: DirEntry, exception):
     logger.exception("Error in %s", entry.path, exc_info=exception)
 
 
+def scandir_error_log_warning(entry: DirEntry, exception):
+    logger.warning("Error in %s", entry.path, exc_info=exception)
+
+
 def scandir_error_raise(entry: DirEntry, exception):
     raise exception
 
@@ -423,7 +427,7 @@ def scandir_rec_simple(
     others: bool = False,
     rec: bool = True,
     follow_symlinks: bool = True,
-    errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log,
+    errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log_warning,
 ) -> Iterator[DirEntry]:
 
     entry = DirEntryStub(os.path.basename(path), path)

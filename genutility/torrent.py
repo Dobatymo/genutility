@@ -9,7 +9,6 @@ from os import fspath
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
 
-import bencode
 import bencodepy
 import requests
 
@@ -20,15 +19,30 @@ from .os import uncabspath
 
 logger = logging.getLogger(__name__)
 
+BENCODE_BINARY = bencodepy.Bencode(
+    encoding=None,
+    encoding_fallback=None,
+    dict_ordered=False,
+    dict_ordered_sort=False,
+)
+BENCODE_UTF8 = bencodepy.Bencode(
+    encoding='utf-8',
+    encoding_fallback='value',
+    dict_ordered=True,
+    dict_ordered_sort=True
+)
 
-def read_torrent(path: str) -> dict:
+def read_torrent(path: str, binary: bool=True) -> dict:
 
-    return bencode.bread(path)
+    if binary:
+        return BENCODE_BINARY.read(path)
+    else:
+        return BENCODE_UTF8.read(path)
 
 
 def write_torrent(data: dict, path: str) -> None:
 
-    bencode.bwrite(data, path)
+    BENCODE_BINARY.write(data, path)
 
 
 def iterdecode(items: Iterable[Union[str, bytes]], encoding: str = "latin1") -> Iterator[str]:
@@ -43,7 +57,10 @@ def iterdecode(items: Iterable[Union[str, bytes]], encoding: str = "latin1") -> 
 
 def read_torrent_info_dict(path: str, normalize_string_fields: bool = False) -> dict:
 
-    info = bencode.bread(path)["info"]
+    if normalize_string_fields:
+        info = BENCODE_UTF8.read(path)["info"]
+    else:
+        info = BENCODE_BINARY.read(path)[b"info"]
 
     if normalize_string_fields:
         if isinstance(info["name"], bytes):
@@ -100,8 +117,8 @@ def iter_fastresume(path: str) -> Iterator[FileProperties]:
     """
 
     try:
-        d = bencode.bread(path)
-    except bencode.BencodeDecodeError as e:
+        d = BENCODE_UTF8.read(path)
+    except bencodepy.BencodeDecodeError as e:
         logger.warning("%s: %s", path, e)
         raise
 
@@ -112,7 +129,7 @@ def iter_fastresume(path: str) -> Iterator[FileProperties]:
     path_torrent = fspath(Path(path).with_suffix(".torrent"))
     try:
         files = list(iter_torrent(path_torrent))
-    except bencode.BencodeDecodeError as e:
+    except bencodepy.BencodeDecodeError as e:
         logger.warning("%s: %s", path_torrent, e)
         raise
 
@@ -180,7 +197,7 @@ def create_torrent_info_dict(path: Path, piece_size: int, private: Optional[int]
 
 
 def torrent_info_hash(d: dict) -> str:
-    return sha1(bencode.bencode(d)).hexdigest()  # nosec
+    return sha1(BENCODE_BINARY.encode(d)).hexdigest()  # nosec
 
 
 def get_torrent_hash(path: str) -> str:
@@ -192,7 +209,7 @@ def create_torrent(path: Path, piece_size: int, announce: str = "") -> bytes:
     info = create_torrent_info_dict(path, piece_size)
     torrent = {"info": info, "announce": announce}
 
-    return bencode.bencode(torrent)
+    return BENCODE_BINARY.encode(torrent)
 
 
 def scrape(tracker_url: str, hashes: List[str]) -> Dict[str, dict]:
@@ -216,7 +233,7 @@ def scrape(tracker_url: str, hashes: List[str]) -> Dict[str, dict]:
     data = r.content
     try:
         tmp = dec.decode(data)
-    except bencodepy.exceptions.BencodeDecodeError:
+    except bencodepy.BencodeDecodeError:
         tmp = data.rstrip(b"\n")
         try:
             tmp = gzip.decompress(tmp)
@@ -255,11 +272,11 @@ if __name__ == "__main__":
     else:
         parser.error("Invalid file extension")
 
-    d = bencode.bread(path_torrent)
+    d = BENCODE_UTF8.read(path_torrent)
     del d["info"]["pieces"]
     pprint(_compress(d), width=120)
     print()
-    d = bencode.bread(path_fastresume)
+    d = BENCODE_UTF8.read(path_fastresume)
     d.pop("pieces", None)
     d.pop("piece_priority", None)
     d.pop("peers", None)
