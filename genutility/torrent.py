@@ -25,14 +25,10 @@ BENCODE_BINARY = bencodepy.Bencode(
     dict_ordered=False,
     dict_ordered_sort=False,
 )
-BENCODE_UTF8 = bencodepy.Bencode(
-    encoding='utf-8',
-    encoding_fallback='value',
-    dict_ordered=True,
-    dict_ordered_sort=True
-)
+BENCODE_UTF8 = bencodepy.Bencode(encoding="utf-8", encoding_fallback="value", dict_ordered=True, dict_ordered_sort=True)
 
-def read_torrent(path: str, binary: bool=True) -> dict:
+
+def read_torrent(path: str, binary: bool = True) -> dict:
 
     if binary:
         return BENCODE_BINARY.read(path)

@@ -3,7 +3,9 @@ from __future__ import generator_stop
 import sys
 from collections.abc import Sequence
 from time import sleep
-from typing import Any, Dict, List, Optional, Set, TextIO, Tuple
+from typing import Any, Dict, List, Optional
+from typing import Sequence as SequenceT
+from typing import Set, TextIO, Tuple
 
 from aria2p import Client
 from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
@@ -251,7 +253,7 @@ class AriaDownloader:
         uri: str,
         path: Optional[str] = None,
         filename: Optional[str] = None,
-        headers: Optional[Sequence[str]] = None,
+        headers: Optional[SequenceT[str]] = None,
         max_connections: Optional[int] = None,
         split: Optional[int] = None,
         continue_: Optional[bool] = None,
@@ -289,7 +291,7 @@ class AriaDownloader:
         uri: str,
         path: Optional[str] = None,
         filename: Optional[str] = None,
-        headers: Optional[Sequence[str]] = None,
+        headers: Optional[SequenceT[str]] = None,
         max_connections: Optional[int] = None,
         split: Optional[int] = None,
         continue_: Optional[bool] = None,

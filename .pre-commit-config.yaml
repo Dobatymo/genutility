@@ -21,7 +21,7 @@ repos:
       - id: pyupgrade
         args: ["--py36-plus"]
   - repo: https://github.com/psf/black
-    rev: '22.3.0'
+    rev: '22.6.0'
     hooks:
       - id: black
         language_version: python3 # Should be a command that runs python3.6+
@@ -91,3 +91,7 @@ repos:
           - wmi; sys_platform=='win32'
           - wxasync
           - wxPython>=4
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.2.0
+    hooks:
+      - id: detect-secrets

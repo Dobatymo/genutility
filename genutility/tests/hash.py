@@ -20,21 +20,21 @@ class HashTest(MyTestCase):
         self.assertEqual(truth, result)
 
     @parametrize(
-        ("testtemp/hash.bin", "32d10c7b8cf96570ca04ce37f2a19d84240d3a89"),
+        ("testtemp/hash.bin", "32d10c7b8cf96570ca04ce37f2a19d84240d3a89"),  # pragma: allowlist secret
     )
     def test_sha1_hash_file(self, path, truth):
         result = sha1_hash_file(path).hexdigest()
         self.assertEqual(truth, result)
 
     @parametrize(
-        ("testtemp/hash.bin", "c3fcd3d76192e4007dfb496cca67e13b"),
+        ("testtemp/hash.bin", "c3fcd3d76192e4007dfb496cca67e13b"),  # pragma: allowlist secret
     )
     def test_md5_hash_file(self, path, truth):
         result = md5_hash_file(path).hexdigest()
         self.assertEqual(truth, result)
 
     @parametrize(
-        (Path("testtemp/hash.bin"), "d79e1c308aa5bbcdeea8ed63df412da9"),
+        (Path("testtemp/hash.bin"), "d79e1c308aa5bbcdeea8ed63df412da9"),  # pragma: allowlist secret
     )
     def test_hash_file_v1v2(self, path, truth):
         result = ed2k_hash_file_v1(path)
