@@ -40,7 +40,9 @@ class BadFile(Exception):
 
 class VideoBase:
 
-    single_frame_ratio = 0.5
+    single_frame_ratio = 0.5  # fixme: what is this used for?
+    time_base: Fraction
+    native_duration: int
 
     def calculate_offsets(self, time_base: Fraction, duration: int) -> Iterator[int]:
 
@@ -66,6 +68,9 @@ class VideoBase:
 
         frametime, frame = self._get_frame(int(self.native_duration * pos), native=True)
         self._frame_to_file(frame, outpath)
+
+    def close(self):
+        raise NotImplementedError
 
     def __enter__(self):
         return self
@@ -150,7 +155,10 @@ class CvVideo(VideoBase):
 
     def _frame_to_file(self, frame: np.ndarray, outpath: PathLike) -> None:
 
-        is_success, im_buf = self.cv2.imencode(outpath.suffix, frame)  # type: Tuple[bool, np.ndarray]
+        is_success: bool
+        im_buf: np.ndarray
+
+        is_success, im_buf = self.cv2.imencode(outpath.suffix, frame)
         assert is_success
         im_buf.tofile(fspath(outpath))  # cv2.imwrite doesn't handle unicode paths correctly
 
@@ -295,6 +303,8 @@ def grab_pic(
     overwrite: bool = False,
     backend: str = "cv",
 ) -> None:
+
+    vf: VideoBase
 
     if backend == "av":
         vf = AvVideo(inpath)

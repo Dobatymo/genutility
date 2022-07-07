@@ -1,6 +1,7 @@
 from __future__ import generator_stop
 
 import logging
+from typing import Collection, Dict, List, Optional, Sequence
 
 import wx
 from wx.lib.mixins.listctrl import ColumnSorterMixin
@@ -26,10 +27,10 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
         self.insertcount = 0
         self.idtopos = {}
 
-    def GetListCtrl(self):
+    def GetListCtrl(self) -> "AdvancedListCtrl":
         return self
 
-    def ClearAll(self, clear_columns=True):
+    def ClearAll(self, clear_columns: bool = True) -> None:
         if clear_columns:
             wx.ListCtrl.ClearAll(self)
             self.columns = 0
@@ -37,13 +38,13 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
             wx.ListCtrl.DeleteAllItems(self)
         self._init()
 
-    def Setup(self, columns):
+    def Setup(self, columns: Collection[str]) -> None:
         self.columns = len(columns)
         self.SetColumnCount(self.columns)
         for i, col in enumerate(columns):
             self.InsertColumn(i, col)
 
-    def Append(self, items):
+    def Append(self, items: Sequence[str]) -> None:
         if len(items) != self.columns:
             raise ValueError("Length of items doesn't match available columns")
 
@@ -67,12 +68,13 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
         return self.insertcount - 1
 
-    def Edit(self, pos, items):
+    def Edit(self, pos: int, items: Dict[int, str]):
         """items is dict with col as key and string als value"""
+
         for col, val in items.items():
             self.SetItem(pos, col, val)
 
-    def GetSelections(self):
+    def GetSelections(self) -> List[int]:
         indexes = []
         pos = self.GetFirstSelected()
         while pos != -1:
@@ -80,7 +82,7 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
             pos = self.GetNextSelected(pos)
         return indexes
 
-    def DeleteSelectedItems(self):
+    def DeleteSelectedItems(self) -> List[int]:
         # might be faster with autoarrange (listbox only??) off, no reversed -> autoarrange on
         indexes = self.GetSelections()
 
@@ -93,16 +95,16 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
         return indexes
 
-    def Get(self, pos=0):
+    def Get(self, pos: int = 0) -> str:
         if pos < 0:
             return self.GetItem(self.GetItemCount() + 1 + pos).GetText()
         else:
             return self.GetItem(pos).GetText()
 
-    def IDtoPos(self, id):
+    def IDtoPos(self, id: int) -> int:
         return self.idtopos[id]
 
-    def Delete(self, pos=0):
+    def Delete(self, pos: int = 0) -> Optional[str]:
         if pos < 0:
             index = self.GetItemCount() + 1 + pos
         else:
@@ -122,7 +124,7 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
 
 class AdvancedItemContainerMixin:
-    def DeleteSelectedItems(self):
+    def DeleteSelectedItems(self) -> List[int]:
         # might be faster with autoarrange of, no reversed -> autoarrange on
         indexes = self.GetSelections()
 
@@ -133,5 +135,5 @@ class AdvancedItemContainerMixin:
 
 
 class AdvancedListBox(wx.ListBox, AdvancedItemContainerMixin):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         wx.ListBox.__init__(self, *args, **kwargs)

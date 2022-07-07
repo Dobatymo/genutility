@@ -14,8 +14,7 @@ class HostDispatcher:
     app = HostDispatcher({'a.com': app_a, 'b.com': app_b})
     """
 
-    def __init__(self, hosts, default=None):
-        # type: (Dict[str, WsgiApp], Optional[WsgiApp]) -> None
+    def __init__(self, hosts: Dict[str, WsgiApp], default: Optional[WsgiApp] = None) -> None:
 
         self.hosts = hosts
         self.default = default or BadRequest()  # rfc7230#section-5.4

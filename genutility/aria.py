@@ -258,6 +258,10 @@ class AriaDownloader:
         split: Optional[int] = None,
         continue_: Optional[bool] = None,
         retry_wait: Optional[int] = None,
+        max_tries: Optional[int] = None,
+        connect_timeout: Optional[int] = None,
+        timeout: Optional[int] = None,
+        no_netrc: Optional[bool] = None,
     ) -> str:
 
         """Downloads `uri` to directory `path`.
@@ -273,11 +277,15 @@ class AriaDownloader:
             {
                 "dir": path,
                 "out": filename,
+                "header": headers,
                 "max-connection-per-server": max_connections,
                 "split": split,
                 "continue": aria_bool(continue_),
                 "retry-wait": retry_wait,
-                "header": headers,
+                "max-tries": max_tries,
+                "connect-timeout": connect_timeout,
+                "timeout": timeout,
+                "no-netrc": aria_bool(no_netrc),
             },
         )
 
@@ -296,9 +304,26 @@ class AriaDownloader:
         split: Optional[int] = None,
         continue_: Optional[bool] = None,
         retry_wait: Optional[int] = None,
+        max_tries: Optional[int] = None,
+        connect_timeout: Optional[int] = None,
+        timeout: Optional[int] = None,
+        no_netrc: Optional[bool] = None,
     ) -> Optional[Tuple[str, str, str]]:
 
-        queued_gid = self.download(uri, path, filename, headers, max_connections, split, continue_, retry_wait)
+        queued_gid = self.download(
+            uri,
+            path,
+            filename,
+            headers,
+            max_connections,
+            split,
+            continue_,
+            retry_wait,
+            max_tries,
+            connect_timeout,
+            timeout,
+            no_netrc,
+        )
         if self.managed_downloads() >= num:
             finished_gid, path = self.block_one()
             return queued_gid, finished_gid, path

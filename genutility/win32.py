@@ -3,31 +3,28 @@ from __future__ import generator_stop
 import logging
 from datetime import datetime
 from math import nan
-from typing import TYPE_CHECKING
+from typing import Iterator, List, Tuple
 
 import win32evtlog
 import winerror
 import wmi
 
-if TYPE_CHECKING:
-    from typing import Iterator
-
 logger = logging.getLogger(__name__)
 
 
 class Resource:
-    def __init__(self, wmii=None):
+    def __init__(self, wmii=None) -> None:
         if wmii:
             self.wmii = wmii
         else:
             self.wmii = wmi.WMI()
 
-    def __iter__(self):
+    def __iter__(self) -> "Resource":
         return self
 
 
 class os_resources(Resource):
-    def __next__(self):
+    def __next__(self) -> Tuple[int, int, int]:
         threads = 0
         handles = 0
         pagefaults = 0
@@ -39,7 +36,7 @@ class os_resources(Resource):
 
 
 class cpu_usage(Resource):
-    def __init__(self, wmii=None, proc_name="_Total"):
+    def __init__(self, wmii=None, proc_name: str = "_Total") -> None:
 
         """proc_name is the name of the processor,
         default value mean across all processors.
@@ -54,10 +51,10 @@ class cpu_usage(Resource):
         self.ts0 = nan
 
     @staticmethod
-    def get_proc_names(wmii):
+    def get_proc_names(wmii) -> List[str]:
         return [proc.name for proc in wmii.Win32_PerfRawData_PerfOS_Processor()]
 
-    def __next__(self):
+    def __next__(self) -> Tuple[float, float, float, float]:
         (p,) = self.wmii.Win32_PerfRawData_PerfOS_Processor(name=self.proc_name)
 
         real = int(p.PercentProcessorTime)
@@ -84,7 +81,7 @@ class cpu_usage(Resource):
 
 
 class ram_usage(Resource):
-    def __next__(self):
+    def __next__(self) -> float:
         (p,) = self.wmii.Win32_OperatingSystem()
         total = int(p.TotalVisibleMemorySize)
         free = int(p.FreePhysicalMemory)
@@ -93,7 +90,7 @@ class ram_usage(Resource):
 
 
 class hdd_usage(Resource):
-    def __next__(self):
+    def __next__(self) -> List[Tuple[str, float]]:
         ret = []
         for disk in self.wmii.Win32_LogicalDisk(DriveType=3):
             total = int(disk.Size)
@@ -102,8 +99,7 @@ class hdd_usage(Resource):
         return ret
 
 
-def event_logs(server="localhost", source="System"):
-    # type: (str, str) -> Iterator[dict]
+def event_logs(server: str = "localhost", source: str = "System") -> Iterator[dict]:
 
     """
     EventType: severity level

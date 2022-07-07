@@ -3,7 +3,7 @@ from __future__ import generator_stop
 from lxml import etree  # nosec
 
 
-def xml_xslt_to_xhtml(path_xml, path_xslt, path_xhtml):
+def xml_xslt_to_xhtml(path_xml: str, path_xslt: str, path_xhtml: str) -> None:
 
     """Only use with trusted xml data"""
 
