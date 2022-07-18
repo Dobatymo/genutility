@@ -11,7 +11,31 @@ from .dict import mapmap
 from .exceptions import InconsistentState, NoResult
 from .file import copen
 from .iter import progress
+from .sqlite import quote_identifier
+from .string import build_multiple_replace
 from .typing import Connection, Cursor
+
+sqltypes_to_str = {
+    str: "str",
+    datetime: "datetime",
+    int: "int",
+    Decimal: "decimal",
+}
+
+str_to_sqlitetype = {
+    "str": "TEXT",
+    "datetime": "TEXT",
+    "int": "INTEGER",
+    "decimal": "REAL",
+}
+
+
+_convert_mysql_to_sqlite = build_multiple_replace({"\\\\": "\\", "\\'": "''"})
+
+
+def convert_mysql_to_sqlite(s: str) -> str:
+
+    return _convert_mysql_to_sqlite(s)
 
 
 class TransactionCursor:
@@ -109,14 +133,6 @@ def iterfetch(cursor: Cursor, batchsize: int = 1000) -> Iterator[Any]:
         yield from results
 
 
-sqltypes_to_str = {
-    str: "str",
-    datetime: "datetime",
-    int: "int",
-    Decimal: "decimal",
-}
-
-
 def export_sql_to_csv(
     connection: Connection, path: str, query: str, queryargs: tuple = (), verbose: bool = False
 ) -> None:
@@ -141,3 +157,34 @@ def export_sql_to_csv(
 
             for row in it:
                 fw.writerow(row)
+
+
+def import_csv_to_sqlite(connection: Connection, path: str, tablename: str, overwrite: bool = False) -> None:
+
+    """Imports a csv file `path` into a SQLite database.
+    If `overwrite` is True, the table will be dropped and recreated.
+    """
+
+    tablename = quote_identifier(tablename)
+
+    with CursorContext(connection) as cursor:
+        with copen(path, "rt", encoding="utf-8") as csvfile:
+            fr = csv.reader(csvfile)
+            columns = next(fr)
+            types = next(fr)
+            assert len(columns) == len(types)
+
+            if overwrite:
+                query = f"DROP TABLE IF EXISTS {tablename}"
+                cursor.execute(query)
+
+            zipped = zip(columns, mapmap(str_to_sqlitetype, types))
+            typedcolsstr = ", ".join(quote_identifier(col) + " " + typ for col, typ in zipped)
+            query = f"CREATE TABLE {tablename} ({typedcolsstr})"
+            cursor.execute(query)
+
+            valueparamsstr = ", ".join(repeat("?", len(columns)))
+            query = f"INSERT INTO {tablename} VALUES ({valueparamsstr})"  # nosec
+            cursor.executemany(query, fr)
+
+    connection.commit()
