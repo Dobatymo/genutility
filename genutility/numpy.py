@@ -1,7 +1,7 @@
 from __future__ import generator_stop
 
 from math import exp, sqrt
-from typing import Callable, Dict, Generic, Iterator, Optional, Tuple, TypeVar
+from typing import Any, Callable, Dict, Generic, Iterator, Optional, Sequence, Tuple, TypeVar
 
 import numpy as np
 
@@ -557,3 +557,130 @@ def stochastic(x: np.ndarray) -> np.ndarray:
 
     with np.errstate(invalid="raise"):  # see: `normalized`
         return x / n
+
+
+def sequence_mask(lengths: np.ndarray, maxlen: Optional[int] = None, dtype: Any = None) -> np.ndarray:
+
+    """cf. tf.sequence_mask
+    lengths: [N]
+    """
+
+    if not lengths:
+        return np.array([], dtype=dtype or np.bool_)
+
+    if maxlen is None:
+        maxlen = max(lengths)
+    row_vector = np.arange(maxlen)
+    matrix = np.expand_dims(lengths, -1)
+
+    ret = row_vector < matrix
+    if dtype is not None:
+        ret = ret.astype(dtype)
+
+    return ret
+
+
+# @opjit() # doesn't work atm because numba doesn't support `None` indexing
+def _viterbi_dense_masked(
+    p_emit: np.ndarray, p_trans: np.ndarray, p_trans0: np.ndarray, mask: np.ndarray
+) -> np.ndarray:
+
+    batch_size, T, N = p_emit.shape
+
+    N1, N2 = p_trans.shape
+    assert N == N1 == N2
+
+    assert (batch_size, T) == mask.shape
+    assert (N,) == p_trans0.shape
+
+    trellis = np.zeros((T, batch_size, N), dtype=p_emit.dtype)
+    states = np.zeros((T, batch_size, N), dtype=np.intp)
+
+    # even if sequences of length 0 should be allowed, this does not have to be masked, as there cannot be a wrong result
+    trellis[0] = p_trans0 + p_emit[:, 0, :]  # broadcast p_trans0: [N] -> batch_size*[[N]]
+
+    for t in range(1, T):
+        masked_p_trans = (
+            mask[:, t, None, None] * p_trans[None, :, :]
+        )  # [batch_size, 1, 1] * [1, N, N] == [batch_size, N, N]
+        weighted_scores = (
+            trellis[t - 1, :, :, None] + masked_p_trans
+        )  # [batch_size, N, N] # scores and p_trans broadcasted
+        max_scores = np.amax(weighted_scores, axis=1)  # [batch_size, N]
+        trellis[t] = max_scores + p_emit[:, t, :]  # [batch_size, N] remember highest score of each path
+        states[t] = np.argmax(
+            weighted_scores, axis=1
+        )  # [batch_size, N] remember index of best path, should be repeated for padding vals
+
+    tokens = np.zeros((T, batch_size), dtype=np.intp)
+    tokens[T - 1] = np.argmax(trellis[T - 1], axis=1)  # [batch_size]
+
+    for t in range(T - 1, 0, -1):
+        tokens[t - 1] = states[t, np.arange(batch_size), tokens[t]]  # [batch_size]
+
+    return tokens.T  # [batch_size, T]
+
+
+def viterbi_dense(
+    p_emit: np.ndarray, p_trans: np.ndarray, p_trans0: Optional[np.ndarray] = None, mask: Optional[np.ndarray] = None
+) -> np.ndarray:
+
+    """Viterbi algorithm for finding the optimal path.
+    One square transition matrix can be specified.
+
+    T: max sequence length
+    N: vocab size
+    batch_size: to vectorize
+
+    p_emit: masked emission scores [batch_size, T, N] float
+    p_trans: transition scores [N, N] float
+    p_trans0: initial transition scores [N] float
+    mask: mask out padding values in transitions [batch_size, T] float
+    """
+
+    batch_size, T, N = p_emit.shape
+
+    if mask is None:
+        mask = np.ones((batch_size, T), dtype=p_trans.dtype)
+
+    if p_trans0 is None:
+        p_trans0 = np.zeros(N, dtype=p_emit.dtype)
+
+    return _viterbi_dense_masked(p_emit, p_trans, p_trans0, mask)
+
+
+# @opjit() # doesn't work atm because numba cannot store arbitrary elements in lists I think
+def viterbi_sparse(p_emit: Sequence[np.ndarray], p_trans: Sequence[np.ndarray]) -> np.ndarray:
+
+    """Viterbi algorithm for finding the optimal path.
+    The number of emission probabilities per index can vary
+    and a separate matrix can be specified for each transition.
+
+    p_emit: Sequence of [x] matrices, where x can vary for every entry
+    p_trans: Sequence of [y, z] matrices, where y and z can vary for every entry
+
+    todo: using `Iterable`s instead of Sequence`s should be possible.
+    """
+
+    T = len(p_emit)
+
+    assert T - 1 == len(p_trans)
+
+    trellis = [p_emit[0]]
+    states = [None]
+
+    for t in range(1, T):
+        weighted_scores = trellis[-1][:, None] + p_trans[t - 1]  # [x, y] # scores and p_trans broadcasted
+        max_scores = np.amax(weighted_scores, axis=0)  # [y]
+        trellis.append(np.add(max_scores, p_emit[t]))  # [y] remember highest score of each path
+        states.append(np.argmax(weighted_scores, axis=0))  # [y] remember index of best path
+
+    assert len(trellis) == T and len(states) == T
+
+    tokens = [None] * T  # [T]
+    tokens[-1] = np.argmax(trellis[-1], axis=0)  # []
+
+    for t in range(T - 1, 0, -1):
+        tokens[t - 1] = states[t][tokens[t]]  # []
+
+    return tokens

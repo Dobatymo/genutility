@@ -13,7 +13,7 @@ lxml
 msgpack>=0.6.0
 netifaces
 networkx
-nltk
+nltk>=3.6.1
 # numba
 numpy
 opencv-python # cv2

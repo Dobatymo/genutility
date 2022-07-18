@@ -1,20 +1,26 @@
 from __future__ import generator_stop
 
 from itertools import islice
-from typing import TYPE_CHECKING
+from string import ascii_letters
+from typing import Dict, Iterable, Iterator, List, Optional, Sequence, TextIO, Union
 
 from nltk.tokenize import word_tokenize as tokenize
+from nltk.tokenize.treebank import TreebankWordDetokenizer
 
 from .file import PathOrTextIO
+from .gensim import KeyedVectors
 
-if TYPE_CHECKING:
-    from typing import Dict, Iterable, Iterator, List, Optional, TextIO, Union
-
-    from .gensim import KeyedVectors
+english_word_chars = set(ascii_letters) | {"-", "'"}
 
 
-def gensim_indexer(embeddings, doc, ignore=True):
-    # type: (KeyedVectors, str, bool) -> Iterator[int]
+def resembles_english_word(word: str) -> bool:
+
+    """Returns True if `word` only consists of English letters and - or '."""
+
+    return all(t in english_word_chars for t in word)
+
+
+def gensim_indexer(embeddings: KeyedVectors, doc: str, ignore: bool = True) -> Iterator[int]:
 
     for word in tokenize(doc):
         try:
@@ -26,15 +32,13 @@ def gensim_indexer(embeddings, doc, ignore=True):
                 raise
 
 
-def batch_gensim_indexer(embeddings, docs, ignore=True):
-    # type: (KeyedVectors, Iterable[str], bool) -> Iterator[List[int]]
+def batch_gensim_indexer(embeddings: KeyedVectors, docs: Iterable[str], ignore: bool = True) -> Iterator[List[int]]:
 
     for doc in docs:
         yield list(gensim_indexer(embeddings, doc, ignore))
 
 
-def load_freqs(fname, normalize=False, limit=None):
-    # type: (Union[str, TextIO], bool, Optional[int]) -> Dict[str, int]
+def load_freqs(fname: Union[str, TextIO], normalize: bool = False, limit: Optional[int] = None) -> Dict[str, int]:
 
     with PathOrTextIO(fname, "rt", encoding="utf-8") as fin:
         freqs = dict()
@@ -50,3 +54,14 @@ def load_freqs(fname, normalize=False, limit=None):
             freqs[word] = count / total
 
     return freqs
+
+
+def detokenize(tokens: Sequence[str]) -> str:
+
+    """Simply wraps the nltk `TreebankWordDetokenizer` into a convenience function."""
+
+    detokenizer = (
+        TreebankWordDetokenizer()
+    )  # doesn't use custom `__init__` so should be fast enough to instantiate every time
+    s = detokenizer.detokenize(tokens)
+    return s

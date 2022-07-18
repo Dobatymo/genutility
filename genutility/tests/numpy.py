@@ -16,11 +16,14 @@ from genutility.numpy import (
     logtrace,
     remove_color,
     rgb_to_hsi,
+    sequence_mask,
     shannon_entropy,
     shiftedexp,
     sliding_window_2d,
     stochastic,
     unblock,
+    viterbi_dense,
+    viterbi_sparse,
 )
 from genutility.test import MyTestCase, parametrize, repeat
 
@@ -33,6 +36,123 @@ YELLOW = [255, 255, 0]
 BLACK = [0, 0, 0]
 GRAY = [128, 128, 128]
 WHITE = [255, 255, 255]
+
+
+class ViterbiTest(MyTestCase):
+    def test_viterbi_sparse_emit(self):
+        p_emit = [np.array([1.0, 2.0]), np.array([4.0, 3.0])]
+        p_trans = [np.array([[0.0, 0.0], [0.0, 0.0]])]
+
+        truth = [1, 0]
+        result = viterbi_sparse(p_emit, p_trans)
+        self.assertEqual(truth, result)
+
+    def test_viterbi_sparse_trans(self):
+        p_emit = [np.array([0.0, 1.0]), np.array([0.0, 0.0])]
+        p_trans = [np.array([[0.0, 1.0], [1.0, 0.0]])]
+
+        truth = [1, 0]
+        result = viterbi_sparse(p_emit, p_trans)
+        self.assertEqual(truth, result)
+
+    def test_viterbi_sparse_combined(self):
+        # 1
+        p_emit = [np.array([0.5, 0.5]), np.array([0.1, 0.9])]
+        p_trans = [np.array([[0.2, 0.8], [0.7, 0.3]])]
+
+        truth = [0, 1]
+        result = viterbi_sparse(p_emit, p_trans)
+        self.assertEqual(truth, result)
+
+        # 2
+        p_emit = [np.array([0.6, 0.4]), np.array([0.3, 0.7])]
+        p_trans = [np.array([[0.2, 0.8], [0.7, 0.3]])]
+
+        truth = [0, 1]
+        result = viterbi_sparse(p_emit, p_trans)
+        self.assertEqual(truth, result)
+
+    def test_viterbi_dense_emit(self):
+        p_emit = np.array([[[1.0, 2.0], [4.0, 3.0]]])
+        p_trans = np.array([[0.0, 0.0], [0.0, 0.0]])
+        p_trans0 = np.array([0.0, 0.0])
+
+        # trellis[0]: [ [1., 2.] ]
+        # states[0]: [None]
+        # scores: [ [[1.], [2.]] ]
+        # weighted_scores = [ [[1., 1.], [2., 2.]] ]
+        # max_scores = [ [2., 2.] ]
+        # trellis[1] = [ [6., 5.] ]
+        # states[1] = [ [1, 1] ]
+        # tokens[1] = [0]
+        # tokens[0] = [1]
+
+        truth = np.array([[1, 0]])
+        result = viterbi_dense(p_emit, p_trans, p_trans0)
+        np.testing.assert_equal(truth, result)
+
+    def test_viterbi_dense_trans(self):
+        p_emit = np.array([[[0.0, 0.0], [0.0, 0.0]]])
+        p_trans = np.array([[0.0, 1.0], [1.0, 0.0]])
+        p_trans0 = np.array([0.0, 1.0])
+
+        # trellis[0]: [ [0., 1.] ]
+        # states[0]: [None]
+        # scores: [ [[0.], [1.]] ]
+        # weighted_scores = [ [[0., 1.], [2., 0.]] ]
+        # max_scores = [ [2., 1.] ]
+        # trellis[1] = [ [2., 1.] ]
+        # states[1] = [ [1, 0] ]
+        # tokens[1] = [0]
+        # tokens[0] = [1]
+
+        truth = np.array([[1, 0]])
+        result = viterbi_dense(p_emit, p_trans, p_trans0)
+        np.testing.assert_equal(truth, result)
+
+    def test_viterbi_dense_combined_with_batch(self):
+        # 1
+        p_emit = np.array([[[0.5, 0.5], [0.1, 0.9]], [[0.6, 0.4], [0.3, 0.7]]])
+        p_trans = np.array([[0.2, 0.8], [0.7, 0.3]])
+        p_trans0 = np.array([0.4, 0.6])
+
+        # trellis[0]: [[0.9, 1.1], [1.0, 1.0]]
+        # states[0]: [None]
+        # scores: [[[0.9], [1.1]], [[1.0], [1.0]]]
+        # weighted_scores = [ [[1.1, 1.7], [1.8, 1.4]], [[1.2, 1.8], [1.7, 1.3]] ]
+        # max_scores = [[1.8, 1.7], [1.7, 1.8]]
+        # trellis[1] = [[1.9, 2.6], [2.0, 2.5]]
+        # states[1] = [[1, 0], [1, 0]]
+        # tokens[1] = [1, 1]
+        # tokens[0] = [0, 0]
+
+        truth = np.array([[0, 1], [0, 1]])
+        result = viterbi_dense(p_emit, p_trans, p_trans0)
+        np.testing.assert_equal(truth, result)
+
+    def test_viterbi_dense_combined_with_mask(self):
+        # 1
+        p_emit = np.array([[[0.45, 0.55], [0.0, 0.0]]])
+        p_trans = np.array([[0.1, 0.9], [0.6, 0.4]])
+        p_trans0 = np.array([0.45, 0.55])
+        sequence_lengths = np.array([1])
+        mask = sequence_mask(sequence_lengths, 2, dtype=p_trans.dtype)  # [batch_size, T]
+
+        # UNMASKED VERSION
+
+        # trellis[0]: [ [0.9, 1.1] ]
+        # states[0]: [None]
+        # scores: [ [[0.9], [1.1]] ]
+        # weighted_scores = [ [[1.0, 1.8], [1.7, 1.5]] ]
+        # max_scores = [ [1.7, 1.8] ]
+        # trellis[1] = [ [1.7, 1.8] ]
+        # states[1] = [ [1, 0] ]
+        # tokens[1] = [1]
+        # tokens[0] = [0]
+
+        truth = np.array([[1, 0]])
+        result = viterbi_dense(p_emit, p_trans, p_trans0, mask)
+        np.testing.assert_equal(truth, result)
 
 
 class NumpyTest(MyTestCase):
@@ -272,6 +392,19 @@ class NumpyTest(MyTestCase):
         truth = np.array([[1 / 6, 2 / 6, 3 / 6], [4 / 15, 5 / 15, 6 / 15], [7 / 24, 8 / 24, 9 / 24]])
         result = stochastic(x)
         np.testing.assert_allclose(truth, result)
+
+    def test_sequence_mask(self):
+        x = []
+        truth = np.array([], dtype=np.bool_)
+        result = sequence_mask(x)
+        np.testing.assert_equal(truth, result)
+        self.assertEqual(truth.dtype, result.dtype)
+
+        x = [3, 1, 2]
+        truth = np.array([[True, True, True], [True, False, False], [True, True, False]])
+        result = sequence_mask(x)
+        np.testing.assert_equal(truth, result)
+        self.assertEqual(truth.dtype, result.dtype)
 
 
 if __name__ == "__main__":
