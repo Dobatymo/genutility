@@ -1,10 +1,7 @@
 from __future__ import generator_stop
 
-from random import choice, randrange
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Iterator, Tuple
+from random import choice, randrange, sample
+from typing import Iterator, Sequence, Tuple
 
 
 def randstr(length: int, charset: str) -> str:
@@ -33,3 +30,10 @@ def rgb_colors():
         rg, b = divmod(rgb, 256)
         r, g = divmod(rg, 256)
         yield (r, g, b)
+
+
+def randomized(seq: Sequence) -> Sequence:
+
+    """Like `random.shuffle`, but not in-place."""
+
+    return sample(seq, len(seq))
