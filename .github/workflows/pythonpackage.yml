@@ -43,6 +43,7 @@ jobs:
         python -m pip install -U pip wheel
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        python -m nltk.downloader punkt
     - name: Run tests
       run: |
         python -OO -m unittest discover -v genutility.tests "*.py"

@@ -1,6 +1,7 @@
 from __future__ import generator_stop
 
 from collections import defaultdict
+from difflib import unified_diff
 from functools import wraps
 from itertools import product, zip_longest
 from os import remove
@@ -33,6 +34,16 @@ class nullcontext:  # see: .compat.contextlib
 
 
 anullcontext = nullcontext()
+
+
+def print_file_diff(fromfile: str, tofile: str, encoding: str) -> None:
+    with open(fromfile, encoding=encoding) as fr:
+        fromlines = fr.readlines()
+    with open(tofile, encoding=encoding) as fr:
+        tolines = fr.readlines()
+
+    for line in unified_diff(fromlines, tolines, fromfile, tofile):
+        print(line, end="")
 
 
 class MyTestResult(TestResult):
