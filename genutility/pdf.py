@@ -23,7 +23,7 @@ def join_pdfs_in_folder(path_in: Path, file_out: PathType, overwrite: bool = Fal
         paths = sorted(path_in.glob("*.pdf"))
         for path in paths:
             if path.is_file():
-                fr = stack.enter_context(path.open("rb"))  # open does not support Path in <3.6
+                fr = stack.enter_context(path.open("rb"))
                 merger.append(fr)
 
         if overwrite:
@@ -43,13 +43,13 @@ def iter_pdf_text(path: str) -> Iterator[str]:
             yield page.extract_text()
 
 
-def _read_pdf_pdfminer(path):
+def _read_pdf_pdfminer(path: str) -> str:
     from pdfminer.high_level import extract_text
 
     return extract_text(path)
 
 
-def _read_pdf_tika(path):
+def _read_pdf_tika(path: str) -> str:
     from tika import parser
 
     raw = parser.from_file(path)
@@ -58,8 +58,7 @@ def _read_pdf_tika(path):
     return raw["content"]
 
 
-def read_pdf(path, engine="pdfminer"):
-    # type: (str, str) -> str
+def read_pdf(path: str, engine: str = "pdfminer") -> str:
 
     try:
         func = {

@@ -8,12 +8,13 @@ from collections import deque
 from concurrent.futures._base import FINISHED
 from multiprocessing import Pool
 from queue import Empty, Full, Queue
-from typing import Any, Callable, Deque, Generic, Iterable, Iterator, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Deque, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 from .exceptions import NoResult, assert_choice
 
 T = TypeVar("T")
 U = TypeVar("U")
+TaskT = Tuple[Callable, tuple, Dict[str, Any]]
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,8 @@ class Worker(threading.Thread):
     TASK_IDLE = 0
     TASK_COMPLETE = 1
     TASK_EXCEPTION = 2
+
+    running: bool
 
     def __init__(
         self,
@@ -71,11 +74,16 @@ class Worker(threading.Thread):
 
 
 class ThreadPool:
+
+    tasks: "Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]"
+    returns: "Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]"
+    state: int
+
     def __init__(self, num_threads: int) -> None:
 
         self.num_threads = num_threads
-        self.tasks: "Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]" = Queue()
-        self.returns: "Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]" = Queue()
+        self.tasks = Queue()
+        self.returns = Queue()
         self.my_worker = [Worker(self.tasks, self.returns) for _ in range(num_threads)]
         self.state = 0  # this is used to be able to cancel (or ignore the results of ongoing) tasks
 
@@ -181,8 +189,7 @@ def NotThreadSafe(verify: bool = False) -> Callable[[type], type]:
     `verify=True` prohibits write access to attributes.
     """
 
-    def OnClass(TheClass):
-        # type: (type, ) -> type
+    def OnClass(TheClass: type) -> type:
 
         if verify:
             orig_init = TheClass.__init__
@@ -220,7 +227,7 @@ class IterWorker(threading.Thread):
     CMD_RESUME = 0
     CMD_ABORT = 1
 
-    def __init__(self, taskqueue: Queue, onstatechange: Optional[Callable] = None):
+    def __init__(self, taskqueue: "Queue[Optional[Iterable]]", onstatechange: Optional[Callable] = None):
 
         threading.Thread.__init__(self)
         self.queue = taskqueue
@@ -299,13 +306,19 @@ class IterWorker(threading.Thread):
 
 # was: DownloadWorker
 class ProgressWorker(threading.Thread):
-    def __init__(self, manager, tasks):
+
+    running: bool
+    task: Optional[TaskT]
+
+    def __init__(self, manager: "ProgressThreadPool", tasks: "Queue[Optional[TaskT]]"):
         threading.Thread.__init__(self)
         self.manager = manager
         self.tasks = tasks
 
         self.running = True
-        self.task, self.done, self.total = None, None, None
+        self.task = None
+        self.done = None
+        self.total = None
 
     def run(self):
         while self.running:
@@ -323,14 +336,14 @@ class ProgressWorker(threading.Thread):
             self.task, self.done, self.total = None, None, None
             self.manager.finalize(result)
 
-    def quit(self):
+    def quit(self) -> None:
         self.running = False
 
-    def report(self, done, total):
+    def report(self, done, total) -> None:
         self.done = done
         self.total = total
 
-    def get(self):  # not using locks atm, can return inconsistent data
+    def get(self) -> Optional[Tuple[TaskT, Any, Any]]:  # not using locks atm, can return inconsistent data
         if self.task and self.done and self.total:
             return (self.task, self.done, self.total)
         else:
@@ -339,52 +352,53 @@ class ProgressWorker(threading.Thread):
 
 # was: ThreadedDownloader
 class ProgressThreadPool:
-    def __init__(self, concurrent=1):
-        # from config
-        self.concurrent = concurrent
 
+    completed: List[Any]
+    failed: List[Tuple[Exception, Any]]
+
+    def __init__(self, concurrent: int = 1) -> None:
         self.waiting_queue = Queue()
         self.completed = []
         self.failed = []
         self.lock = threading.Lock()
 
-        self.workers = list(ProgressWorker(self, self.waiting_queue) for i in range(self.concurrent))
+        self.workers = list(ProgressWorker(self, self.waiting_queue) for i in range(concurrent))
         for w in self.workers:
             w.daemon = True  # program will end even if threads are still running
             w.start()
 
-    def start(self, callable, *args, **kwargs):  # todo: add optional task id here.
+    def start(self, callable: Callable, *args, **kwargs) -> None:  # todo: add optional task id here.
         self.waiting_queue.put((callable, args, kwargs))
 
-    def finalize(self, result):
-        if result:
-            setter, status, localname, length = result
+    def finalize(self, result: Optional[Tuple[Callable, Optional[Exception], Any]]) -> None:
+        if result is not None:
+            setter, status, ret = result
             with self.lock:
                 if status:
-                    self.failed.append((status, localname, length))
+                    self.failed.append((status, ret))
                 else:
-                    self.completed.append((localname, length))
-                    setter(localname)
+                    self.completed.append(ret)
+                    setter(ret)
         else:  # task failed
             pass
 
-    def clear_completed(self):
+    def clear_completed(self) -> None:
         self.completed = []  # assignment is atomic right?
 
-    def cancel_pending(self):
+    def cancel_pending(self) -> None:
         # copied from https://stackoverflow.com/a/18873213
         with self.waiting_queue.mutex:
             self.waiting_queue.queue.clear()
             self.waiting_queue.all_tasks_done.notify_all()
             self.waiting_queue.unfinished_tasks = 0
 
-    def get_waiting(self):
+    def get_waiting(self) -> List[TaskT]:
         return list(task for task in self.waiting_queue.queue if task)
 
-    def get_completed(self):
+    def get_completed(self) -> List[Any]:
         return self.completed
 
-    def get_failed(self):
+    def get_failed(self) -> List[Tuple[Exception, Any]]:
         return self.failed
 
     def get_running(self):  # no locks, inconsistent data
