@@ -1,8 +1,12 @@
 from __future__ import generator_stop
 
 from collections import UserDict, defaultdict
+from collections.abc import Mapping, MutableMapping
 from copy import deepcopy
-from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List, Mapping, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List
+from typing import Mapping as MappingT
+from typing import MutableMapping as MutableMappingT
+from typing import Tuple, TypeVar, Union
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -20,6 +24,33 @@ def flatten(d: Union[Dict[T, U], List[U], Tuple[U, ...]]) -> Iterator[U]:
             yield from flatten(val)
     else:
         raise TypeError(f"Unsupported type: {type(d)}")
+
+
+def _flatten_keys(d: Dict[Any, Any], out: Dict[tuple, Any], path: tuple) -> None:
+
+    for k, v in d.items():
+        if isinstance(v, dict):
+            _flatten_keys(v, out, path + (k,))
+        else:
+            out[path + (k,)] = v
+
+
+def flatten_keys(d: Dict[Any, Any]) -> Dict[tuple, Any]:
+    out: Dict[tuple, Any] = {}
+    _flatten_keys(d, out, ())
+    return out
+
+
+def rec_update(d: MutableMappingT, u: MappingT) -> None:
+
+    if not isinstance(d, MutableMapping) or not isinstance(u, Mapping):
+        raise TypeError("All arguments must be mappings")
+
+    for k, v in u.items():
+        if isinstance(v, Mapping):
+            rec_update(d.setdefault(k, {}), v)
+        else:
+            d[k] = v
 
 
 def get_one_of(d: Dict[T, U], keys: Iterable[T]) -> Tuple[T, U]:
@@ -49,7 +80,7 @@ def get_available(d: Dict[T, U], keys: Iterable[T]) -> Iterator[Tuple[T, U]]:
             pass
 
 
-def subdict(d: Mapping[T, U], it: Iterable[T]) -> Dict[T, U]:
+def subdict(d: MappingT[T, U], it: Iterable[T]) -> Dict[T, U]:
 
     """Uses the elements of `it` as keys to extract a new sub-dictionary.
     Raises if not all keys in `it` are available.
@@ -59,7 +90,7 @@ def subdict(d: Mapping[T, U], it: Iterable[T]) -> Dict[T, U]:
 
 
 # was: mapdict, mapget
-def mapmap(d: Mapping[T, U], it: Iterable[T]) -> Iterator[U]:
+def mapmap(d: MappingT[T, U], it: Iterable[T]) -> Iterator[U]:
     """Returns all the values of `d` for the keys in `it`.
     Raises for missing keys.
     """
@@ -81,7 +112,7 @@ def valuemap(func: Callable[[U], V], d: Dict[T, U]) -> Dict[T, V]:
     return {k: func(v) for k, v in d.items()}
 
 
-def itemgetter(it: Iterable[T]) -> Callable[[Mapping[T, U]], Iterator[U]]:
+def itemgetter(it: Iterable[T]) -> Callable[[MappingT[T, U]], Iterator[U]]:
 
     """Similar to `operator.itemgetter` except that it always expects and returns iterables.
     Compare `mapmap`
@@ -90,7 +121,7 @@ def itemgetter(it: Iterable[T]) -> Callable[[Mapping[T, U]], Iterator[U]]:
     return lambda d: (d[i] for i in it)
 
 
-def subdictdefault(d: Mapping[T, U], it: Iterable[T], default: V = None) -> Dict[T, Union[U, V]]:
+def subdictdefault(d: MappingT[T, U], it: Iterable[T], default: V = None) -> Dict[T, Union[U, V]]:
 
     """Uses the elements of `it` as keys to extract a new sub-dictionary."""
 
@@ -218,7 +249,7 @@ def get_schema_simple(d: Iterable[dict]) -> dict:
 
 
 # was: zipmap
-def zipget(objs: Iterable[Mapping[T, U]], keys: Iterable[T]) -> Iterator[U]:
+def zipget(objs: Iterable[MappingT[T, U]], keys: Iterable[T]) -> Iterator[U]:
 
     """Gets a list of keys from a list of mappings.
         zipget([[1, 2], [3, 4]], [0, 1]) -> (1, 4)

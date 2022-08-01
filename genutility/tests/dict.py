@@ -3,9 +3,11 @@ from __future__ import generator_stop
 from genutility.dict import (
     KeyExistsError,
     NoOverwriteDict,
+    flatten_keys,
     get_schema_simple,
     keydefaultdict,
     mapmap,
+    rec_update,
     subdict,
     subdictdefault,
     zipget,
@@ -90,6 +92,29 @@ class DictTest(MyTestCase):
     def test_zipget(self, objs, keys, truth):
         result = zipget(objs, keys)
         self.assertIterEqual(truth, result)
+
+    @parametrize(
+        ({}, {}),
+        ({1: 2}, {(1,): 2}),
+        ({1: {2: 3}}, {(1, 2): 3}),
+        ({1: {2: 3}, 4: 5}, {(1, 2): 3, (4,): 5}),
+        ({1: {2: 3, 4: 5}}, {(1, 2): 3, (1, 4): 5}),
+    )
+    def test_flatten_keys(self, d, truth):
+        result = flatten_keys(d)
+        self.assertEqual(truth, result)
+
+    @parametrize(
+        ({}, {}, {}),
+        ({}, {1: 2}, {1: 2}),
+        ({1: 2}, {}, {1: 2}),
+        ({1: 2}, {3: 4}, {1: 2, 3: 4}),
+        ({1: {2: 3}}, {1: {4: 5}}, {1: {2: 3, 4: 5}}),
+        ({1: {2: 3, 4: 5}}, {1: {4: 6}}, {1: {2: 3, 4: 6}}),
+    )
+    def test_rec_update(self, d, u, truth):
+        rec_update(d, u)
+        self.assertEqual(truth, d)
 
 
 if __name__ == "__main__":
