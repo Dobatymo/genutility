@@ -101,11 +101,19 @@ def _lstr(it: Iterable, length: Optional[int] = None) -> Tuple[Optional[int], st
     return length, lstr
 
 
-def progress(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=None, delta=1):
-    # type: (Union[Iterable, Collection], Optional[int], float, str, TextIO, Optional[Callable[[int, Optional[int]], str]], Optional[bool], Optional[int]) -> Iterator
+def progress(
+    it: Union[Iterable, Collection],
+    length: Optional[int] = None,
+    refresh: float = 1,
+    end: str = "\r",
+    file: TextIO = sys.stdout,
+    extra_info_callback: Optional[Callable[[int, Optional[int]], str]] = None,
+    disable: Optional[bool] = None,
+    delta: Optional[int] = 1,
+) -> Iterator:
 
     """Wraps an iterable `it` to periodically print the progress every `refresh` seconds.
-    `lengths` is the total size of `it`. `len(it)` is used to get the size if set to `None`.
+    `length` is the total size of `it`. `len(it)` is used to get the size if set to `None`.
     `refresh` updates the printed output every `refresh` seconds.
     `delta` specifies the value which is added to the counter every iteration.
             `None` uses `len(elm)` to determine the value. Defaults to 1.

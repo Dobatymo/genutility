@@ -233,6 +233,8 @@ _backslashcontrol_escape = build_multiple_replace(
 
 def backslashcontrol_escape(s: str) -> str:
 
+    """Escapes \\ and \\t \\n \\r in `s`."""
+
     return _backslashcontrol_escape(s)
 
 
@@ -242,6 +244,7 @@ _backslashcontrol_unescape = build_multiple_replace(
 
 
 def backslashcontrol_unescape(s: str) -> str:
+    """Unescapes \\\\ and \\\\t \\\\n \\\\r in `s`."""
 
     return _backslashcontrol_unescape(s)
 
@@ -273,8 +276,7 @@ def filter_join(s: str, it: Iterable[str], func: Optional[Callable[[str], bool]]
         return s.join(i for i in it if func(i))
 
 
-def surrounding_join(j, it, left="", right=""):
-    # type: (str, Iterable[str], str, str) -> str
+def surrounding_join(j: str, it: Iterable[str], left: str = "", right: str = "") -> str:
 
     """Example: surrounding_join(", ", ("a", "b", "c"), left="[", right="]") -> "[a], [b], [c]" """
 
@@ -307,8 +309,7 @@ def replace_pairs_chars(s, items):
 _contains_digit = re.compile(r"\d")
 
 
-def contains_digit(s):
-    # type: (str, ) -> bool
+def contains_digit(s: str) -> bool:
 
     """Tests if a digit is contained in string `s`."""
 

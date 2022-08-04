@@ -1,7 +1,7 @@
 from __future__ import generator_stop
 
 from collections import UserDict, defaultdict
-from collections.abc import Mapping, MutableMapping
+from collections.abc import Mapping, MutableMapping  # noqa: F401
 from copy import deepcopy
 from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List
 from typing import Mapping as MappingT
@@ -43,12 +43,17 @@ def flatten_keys(d: Dict[Any, Any]) -> Dict[tuple, Any]:
 
 def rec_update(d: MutableMappingT, u: MappingT) -> None:
 
-    if not isinstance(d, MutableMapping) or not isinstance(u, Mapping):
-        raise TypeError("All arguments must be mappings")
+    # if not isinstance(d, MutableMapping) or not isinstance(u, Mapping):
+    #    raise TypeError("All arguments must be mappings")
 
     for k, v in u.items():
         if isinstance(v, Mapping):
-            rec_update(d.setdefault(k, {}), v)
+            try:
+                sub = d[k]
+            except KeyError:
+                sub = d[k] = {}
+            rec_update(sub, v)
+            # rec_update(d.setdefault(k, {}), v)
         else:
             d[k] = v
 
