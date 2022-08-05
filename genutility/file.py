@@ -20,7 +20,7 @@ from typing import (
     overload,
 )
 
-from ._files import entrysuffix
+from ._files import PathType, entrysuffix
 from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
 from .ops import logical_implication, logical_xor
@@ -29,8 +29,6 @@ if TYPE_CHECKING:
     from mmap import mmap
 
     Data = TypeVar("Data", str, bytes)
-
-PathType = Union[str, PathLike]
 
 FILE_IO_BUFFER_SIZE = 8 * 1024 * 1024
 

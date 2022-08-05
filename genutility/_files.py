@@ -1,8 +1,11 @@
 from __future__ import generator_stop
 
 import os.path
-from os import DirEntry
+from os import DirEntry, PathLike
 from typing import Union
+
+PathType = Union[str, PathLike]
+
 
 """ This module is to avoid circular imports.
     It should avoid any dependencies apart from the standard library.

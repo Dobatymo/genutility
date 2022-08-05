@@ -43,17 +43,33 @@ def flatten_keys(d: Dict[Any, Any]) -> Dict[tuple, Any]:
 
 def rec_update(d: MutableMappingT, u: MappingT) -> None:
 
-    # if not isinstance(d, MutableMapping) or not isinstance(u, Mapping):
-    #    raise TypeError("All arguments must be mappings")
+    """Updates dict `d` recursively with values from `u`.
+    Requires `setdefault` method.
+    """
+
+    if not isinstance(d, MutableMapping) or not isinstance(u, Mapping):
+        raise TypeError("All arguments must be mappings")
+
+    for k, v in u.items():
+        if isinstance(v, Mapping):
+            rec_update(d.setdefault(k, {}), v)
+        else:
+            d[k] = v
+
+
+def rec_update_mod(d: Any, u: MappingT) -> None:
+
+    """Similar to `rec_update`, except that `d` doesn't require the `setdefault` method."""
 
     for k, v in u.items():
         if isinstance(v, Mapping):
             try:
                 sub = d[k]
             except KeyError:
-                sub = d[k] = {}
-            rec_update(sub, v)
-            # rec_update(d.setdefault(k, {}), v)
+                # d might not store a reference to the original object, thus don't do `sub = d[k] = {}`
+                d[k] = {}
+                sub = d[k]
+            rec_update_mod(sub, v)
         else:
             d[k] = v
 
