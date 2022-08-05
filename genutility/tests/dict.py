@@ -8,6 +8,7 @@ from genutility.dict import (
     keydefaultdict,
     mapmap,
     rec_update,
+    rec_update_mod,
     subdict,
     subdictdefault,
     zipget,
@@ -114,6 +115,18 @@ class DictTest(MyTestCase):
     )
     def test_rec_update(self, d, u, truth):
         rec_update(d, u)
+        self.assertEqual(truth, d)
+
+    @parametrize(
+        ({}, {}, {}),
+        ({}, {1: 2}, {1: 2}),
+        ({1: 2}, {}, {1: 2}),
+        ({1: 2}, {3: 4}, {1: 2, 3: 4}),
+        ({1: {2: 3}}, {1: {4: 5}}, {1: {2: 3, 4: 5}}),
+        ({1: {2: 3, 4: 5}}, {1: {4: 6}}, {1: {2: 3, 4: 6}}),
+    )
+    def test_rec_update_mod(self, d, u, truth):
+        rec_update_mod(d, u)
         self.assertEqual(truth, d)
 
 
