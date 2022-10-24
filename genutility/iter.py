@@ -12,7 +12,6 @@ from random import randrange
 from time import sleep, time
 from types import GeneratorType
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Collection,
@@ -34,12 +33,10 @@ from typing import (
 
 from .exceptions import EmptyIterable, IteratorExhausted
 from .ops import operator_in
+from .typing import Orderable
 
-if TYPE_CHECKING:
-    from .typing import Orderable, SizedIterable
-
-    OrderableT = TypeVar("OrderableT", bound=Orderable)
-    ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
+OrderableT = TypeVar("OrderableT", bound=Orderable)
+ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -72,8 +69,7 @@ def iterrandrange(a: int, b: int) -> Iterator[int]:
         yield randrange(a, b)  # nosec
 
 
-def repeatfunc(func, times=None, *args):
-    # type: (Callable[..., T], Optional[int], *Any) -> Iterator[T]
+def repeatfunc(func: Callable[..., T], times: Optional[int] = None, *args: Any) -> Iterator[T]:
 
     """Repeat calls to func with specified arguments.
     Example:  repeatfunc(random.random)
@@ -177,8 +173,15 @@ def progress(
             print(f"Finished {total} in {int(duration)} seconds.", end=end, file=file)
 
 
-def progressdata(it, length=None, refresh=1, end="\r", file=sys.stdout, extra_info_callback=None, disable=None):
-    # type: (Union[Iterable, Collection], Optional[int], float, str, Optional[TextIO], Optional[Callable[[int, Optional[int]], str]], Optional[bool]) -> Iterable
+def progressdata(
+    it: Union[Iterable, Collection],
+    length: Optional[int] = None,
+    refresh: float = 1,
+    end: str = "\r",
+    file: Optional[TextIO] = sys.stdout,
+    extra_info_callback: Optional[Callable[[int, Optional[int]], str]] = None,
+    disable: Optional[bool] = None,
+) -> Iterable:
 
     return progress(it, length, refresh, end, file, extra_info_callback, disable, None)
 
@@ -189,27 +192,23 @@ class Progress:
     because attributes cannot be set on generator objects.
     """
 
-    def __init__(self, obj, refresh=1):
-        # type: (Collection, float) -> None
+    def __init__(self, obj: Collection, refresh: float = 1) -> None:
 
         self.obj = obj
         self.refresh = refresh
 
-    def __iter__(self):
-        # type: () -> Iterator
+    def __iter__(self) -> Iterator:
 
         return progress(self.obj, len(self.obj), self.refresh)
 
-    def __len__(self):
-        # type: () -> int
+    def __len__(self) -> int:
 
         """Can raise a TypeError if underlying object does not support `len()`."""
 
         return len(self.obj)
 
 
-def count_distinct(it):
-    # type: (Iterable[Any], ) -> int
+def count_distinct(it: Iterable[Any]) -> int:
 
     return len(set(it))
 
@@ -218,8 +217,7 @@ def reversedzip(*its):
     return zip(*map(reversed, its))
 
 
-def flatten(it):
-    # type: (Union[tuple, list], ) -> Iterator
+def flatten(it: Union[tuple, list]) -> Iterator:
 
     for elm in it:
         if isinstance(elm, (tuple, list)):
@@ -228,8 +226,7 @@ def flatten(it):
             yield elm
 
 
-def diffsgn(a, b):
-    # type: (OrderableT, OrderableT) -> int
+def diffsgn(a: OrderableT, b: OrderableT) -> int:
 
     """Sign of the finite derivative.
     Equal to `-cmp(a, b)` or `cmp(b, a).
@@ -238,8 +235,7 @@ def diffsgn(a, b):
     return (a < b) - (a > b)
 
 
-def asc_peaks(iterable):
-    # type: (Iterable[OrderableT], ) -> Iterator[OrderableT]
+def asc_peaks(iterable: Iterable[OrderableT]) -> Iterator[OrderableT]:
 
     """Yields ascending peaks from `iterable`."""
 
@@ -256,8 +252,9 @@ def asc_peaks(iterable):
     yield cur
 
 
-def extrema(iterable, first={1, -1}, last={1, -1}, derivatives={1, -1}):
-    # type: (Iterable[OrderableT], Set[int], Set[int], Set[int]) -> Iterator[OrderableT]
+def extrema(
+    iterable: Iterable[OrderableT], first: Set[int] = {1, -1}, last: Set[int] = {1, -1}, derivatives: Set[int] = {1, -1}
+) -> Iterator[OrderableT]:
 
     it = iter(iterable)
     try:
@@ -287,24 +284,21 @@ def extrema(iterable, first={1, -1}, last={1, -1}, derivatives={1, -1}):
         yield old
 
 
-def peaks(it):
-    # type: (Iterable[OrderableT], ) -> Iterator[OrderableT]
+def peaks(it: Iterable[OrderableT]) -> Iterator[OrderableT]:
 
     """Yields peaks of `it`."""
 
     return extrema(it, {-1}, {1}, {1})
 
 
-def valleys(it):
-    # type: (Iterable[OrderableT], ) -> Iterator[OrderableT]
+def valleys(it: Iterable[OrderableT]) -> Iterator[OrderableT]:
 
     """Yields valleys of `it`."""
 
     return extrema(it, {1}, {-1}, {-1})
 
 
-def empty():
-    # type: () -> Iterator
+def empty() -> Iterator:
 
     """An empty iterator. Other methods include:
     iter(())
@@ -315,8 +309,7 @@ def empty():
     yield  # type: ignore # pylint: disable=unreachable
 
 
-def lastdefault(it, default=None):
-    # type: (Iterable[T], Optional[T]) -> Optional[T]
+def lastdefault(it: Iterable[T], default: Optional[T] = None) -> Optional[T]:
 
     """Returns the last element of iterable `it`. It discards all other values.
     This method is about 1/2 times as fast as `last()` for large iterables.
@@ -328,8 +321,7 @@ def lastdefault(it, default=None):
     return ret
 
 
-def last(it):
-    # type: (Iterable[T], ) -> T
+def last(it: Iterable[T]) -> T:
 
     """Returns the last element of iterable `it`. It discards all other values.
     This method is about 2 times as fast as `lastdefault()` for large iterables.
@@ -341,8 +333,8 @@ def last(it):
         raise EmptyIterable("Empty iterable") from None
 
 
-def batch(it, n, func=None):
-    # type: (Iterable[Any], int, Optional[Callable]) -> Iterator[Any] # return type cannot be more specific because of filter()
+def batch(it: Iterable[Any], n: int, func: Optional[Callable] = None) -> Iterator[Any]:
+    # return type cannot be more specific because of filter()
 
     """Batches iterable `it` into batches of size `n`.
     Optionally post-processes batch with `func`.
@@ -364,8 +356,7 @@ def batch(it, n, func=None):
         yield batch_iter
 
 
-def advance(it, n):
-    # type: (Iterable[T], int) -> None
+def advance(it: Iterable[T], n: int) -> None:
 
     """Advances the iterable `it` n steps."""
 
@@ -376,16 +367,14 @@ def advance(it, n):
     next(islice(it, n, n), None)
 
 
-def filternone(it):
-    # type: (Iterable, ) -> Iterator
+def filternone(it: Iterable) -> Iterator:
 
     """Removes all `None` values from `it`."""
 
     return (i for i in it if i is not None)
 
 
-def all_equal(it):
-    # type: (Iterable, ) -> bool
+def all_equal(it: Iterable) -> bool:
 
     """Returns `True` if all elements of `it` are equal to each other.
 
@@ -404,8 +393,7 @@ def all_equal(it):
     return next(g, True) and not next(g, False)  # type: ignore
 
 
-def pairwise(it):
-    # type: (Iterable[T], ) -> Iterator[Tuple[T, T]]
+def pairwise(it: Iterable[T]) -> Iterator[Tuple[T, T]]:
 
     """Return two elements of iterable `it` at a time,
     but only advances the iterable by 1 each time.
@@ -417,8 +405,7 @@ def pairwise(it):
     return zip(a, b)
 
 
-def x_wise(it, size):
-    # type: (Iterable, int) -> Iterator
+def x_wise(it: Iterable, size: int) -> Iterator:
 
     """Returns `size` elements of iterable `it`, but only advances the iterable by 1 each time.
     ([1,2,3,4,5], 2) -> [1,2], [2,3], [3,4], [4,5]
@@ -436,8 +423,9 @@ def x_wise(it, size):
 triples = partial(x_wise, size=3)
 
 
-def findfirst(func, it, default=(None, None)):
-    # type: (Callable[[T], bool], Iterable[T], Tuple[Optional[int], Optional[T]]) -> Tuple[Optional[int], Optional[T]]
+def findfirst(
+    func: Callable[[T], bool], it: Iterable[T], default: Tuple[Optional[int], Optional[T]] = (None, None)
+) -> Tuple[Optional[int], Optional[T]]:
 
     """Find the first element of iterable `it` where `func(elm)` evaluates to True.
     Return `default` if not such element was found.
@@ -450,8 +438,7 @@ def findfirst(func, it, default=(None, None)):
     return default
 
 
-def is_empty(it):
-    # type: (Iterator, ) -> bool
+def is_empty(it: Iterator) -> bool:
 
     """Returns True if the iterator `it` is already fully consumed.
     If not, it will be advanced.
@@ -464,16 +451,16 @@ def is_empty(it):
         return True
 
 
-def consume(it):
-    # type: (Iterable, ) -> None
+def consume(it: Iterable) -> None:
 
     """Consumes the iterable `it` completely."""
 
     deque(it, maxlen=0)
 
 
-def resizer(it, size, pad=False, pad_elm=None):
-    # type: (Iterable[Sequence[T]], int, bool, Optional[T]) -> Iterable[List[Optional[T]]]
+def resizer(
+    it: Iterable[Sequence[T]], size: int, pad: bool = False, pad_elm: Optional[T] = None
+) -> Iterable[List[Optional[T]]]:
 
     """Cuts the input iterable `it` consisting of variable length slices
     into slices of length `size`. If pad is True, the last slice
@@ -487,12 +474,12 @@ def resizer(it, size, pad=False, pad_elm=None):
         raise ValueError("size must be larger than 0")
 
     it = iter(it)
-    buf = []  # type: Sequence[T]
+    buf: Sequence[T] = []
     pos = 0
     try:
         while True:
             to_read = size
-            out = []  # type: List[Optional[T]]
+            out: List[Optional[T]] = []
             while to_read > 0:
                 if len(buf) == pos:
                     buf = next(it)
@@ -516,8 +503,7 @@ def resizer(it, size, pad=False, pad_elm=None):
                 yield out
 
 
-def switch(it):
-    # type: (Iterable[Tuple[T, U]], ) -> Iterator[Tuple[U, T]]
+def switch(it: Iterable[Tuple[T, U]]) -> Iterator[Tuple[U, T]]:
 
     """Swaps the elements in iterable of pairs `it`.
     ((3, 6), (7, 4), (1, 9)) -> (6, 3), (4, 7), (9, 1)
@@ -526,16 +512,14 @@ def switch(it):
     return ((j, i) for i, j in it)
 
 
-def switched_enumerate(it):
-    # type: (Iterable[T], ) -> Iterator[Tuple[T, int]]
+def switched_enumerate(it: Iterable[T]) -> Iterator[Tuple[T, int]]:
 
     """Same as `enumerate()` except that order of the output pair is switched."""
 
     return switch(enumerate(it))
 
 
-def multi_join(it_a, it_b, join_func=add):
-    # type: (Iterable[T], Iterable[U], Callable[[T, U], V]) -> Iterator[V]
+def multi_join(it_a: Iterable[T], it_b: Iterable[U], join_func: Callable[[T, U], V] = add) -> Iterator[V]:
 
     """Calls `join_func` on the cross product of `it_a` and `it_b`.
     multi_join((1, 2), (3, 4), lambda x, y: str(x)+str(y)) -> ('13', '23', '14', '24')
@@ -544,8 +528,11 @@ def multi_join(it_a, it_b, join_func=add):
     return (join_func(a, b) for b in it_b for a in it_a)
 
 
-def iter_except(iterator, exception_callbacks, return_on_exception=False):
-    # type: (Iterator[T], Dict[Type, Callable[[Iterator[T], Exception], bool]], bool) -> Iterator[T]
+def iter_except(
+    iterator: Iterator[T],
+    exception_callbacks: Dict[Type, Callable[[Iterator[T], Exception], bool]],
+    return_on_exception: bool = False,
+) -> Iterator[T]:
 
     """Calls callbacks when exceptions are raised in `iterator`. Does not work for Generators.
     The type key in the `exception_callbacks` dict must be the same type as the exception which
@@ -572,8 +559,7 @@ def iter_except(iterator, exception_callbacks, return_on_exception=False):
                 return
 
 
-def list_except(it, catch=Exception):
-    # type: (Iterable[T], ExceptionsType) -> Tuple[Optional[Exception], List[T]]
+def list_except(it: Iterable[T], catch: ExceptionsType = Exception) -> Tuple[Optional[Exception], List[T]]:
 
     """Same as `list()` except in the case of an exception, the partial list which was collected
     so far is returned. `catch` specifies which exceptions are caught. It can be an exception
@@ -581,7 +567,7 @@ def list_except(it, catch=Exception):
     """
 
     ret = []  # List[T]
-    exc = None  # type: Optional[Exception]
+    exc: Optional[Exception] = None
 
     try:
         for i in it:
@@ -592,8 +578,9 @@ def list_except(it, catch=Exception):
     return exc, ret
 
 
-def iter_except_ignore(iterator, exceptions, logger=logger):
-    # type: (Iterator[T], ExceptionsType, logging.Logger) -> Iterator[T]
+def iter_except_ignore(
+    iterator: Iterator[T], exceptions: ExceptionsType, logger: logging.Logger = logger
+) -> Iterator[T]:
 
     """Ignores `exceptions` raised in `iterator`. Does not work for Generators."""
 
@@ -609,8 +596,7 @@ def iter_except_ignore(iterator, exceptions, logger=logger):
             logger.warning("Error in iterable: %s", str(e))
 
 
-def decompress(selectors, data, default=None):
-    # type: (Iterable[bool], Iterator[T], Optional[T]) -> Iterator[Optional[T]]
+def decompress(selectors: Iterable[bool], data: Iterator[T], default: Optional[T] = None) -> Iterator[Optional[T]]:
 
     """Basically the opposite of `itertools.compress`.
     decompress([True, False, True], iter(["A", "B"])) -> ("A", None, "B")
@@ -626,16 +612,14 @@ def decompress(selectors, data, default=None):
         raise IteratorExhausted
 
 
-def first_not_none(it, default=None):
-    # type: (Iterable[T], Optional[T]) -> Optional[T]
+def first_not_none(it: Iterable[T], default: Optional[T] = None) -> Optional[T]:
 
     """Returns the first element of `it` which is not None."""
 
     return next(filternone(it), default)
 
 
-def range_count(start=0, stop=None, step=1):
-    # type: (int, Optional[int], int) -> Iterable[int]
+def range_count(start: int = 0, stop: Optional[int] = None, step: int = 1) -> Iterable[int]:
 
     """Similar to `range`, except it optionally allows for an infinite range."""
 
@@ -645,8 +629,7 @@ def range_count(start=0, stop=None, step=1):
         return count(start, step)
 
 
-def product_range_repeat(depth, args):
-    # type: (int, Tuple) -> Iterator
+def product_range_repeat(depth: int, args: Tuple) -> Iterator:
 
     """Returns coordinate or coordinate slices useful for iteration over space.
     Can replace higher dimensional for-in-range loops.
@@ -655,8 +638,7 @@ def product_range_repeat(depth, args):
     return product(tuple(range(*args)), repeat=depth)
 
 
-def powerset(sit):
-    # type: (SizedIterable[T], ) -> Iterator[Tuple[T, ...]]
+def powerset(sit: Collection[T]) -> Iterator[Tuple[T, ...]]:
 
     """Returns the powerset of a sized iterable.
     The powerset of an empty set is a set including the empty set.
@@ -668,32 +650,28 @@ def powerset(sit):
 
 
 # had cmp=b"\0" default before
-def all_equal_to(it, cmp):
-    # type: (Iterable[T], T) -> bool
+def all_equal_to(it: Iterable[T], cmp: T) -> bool:
 
     """Test if every item of iterable `it` is equal to `cmp`."""
 
     return all(elm == cmp for elm in it)
 
 
-def iter_equal(*its):
-    # type: (*Iterable) -> bool
+def iter_equal(*its: Iterable) -> bool:
 
     """Test if the contents of all iterables `its` is the same."""
 
     return all(all_equal(it_elements) for it_elements in zip_longest(*its))
 
 
-def iter_different(it_a, it_b):
-    # type: (Iterable, Iterable) -> bool
+def iter_different(it_a: Iterable, it_b: Iterable) -> bool:
 
     """Test if `it_a` and `it_b` yield different elements."""
 
     return any(a != b for a, b in zip_longest(it_a, it_b))
 
 
-def every_n(it, n, pos=0):
-    # type: (Iterable[T], int, int) -> Iterator[T]
+def every_n(it: Iterable[T], n: int, pos: int = 0) -> Iterator[T]:
 
     """Yields every `n`-th element from iterable `it` and starts at `pos`."""
 
@@ -705,8 +683,7 @@ def every_n(it, n, pos=0):
             yield val
 
 
-def split(it, size):
-    # type: (Iterable[T], int) -> Sequence[Iterable[T]]
+def split(it: Iterable[T], size: int) -> Sequence[Iterable[T]]:
 
     """memory consumption should be proportional to `size` when output iterators
     are used in parallel loops (like `zip`), else might be higher
@@ -716,12 +693,11 @@ def split(it, size):
     return tuple(every_n(it, size, pos) for it, pos in zip(copies, range(size)))
 
 
-def no_dupes(*its):
-    # type: (*Iterable[T]) -> Iterator[T]
+def no_dupes(*its: Iterable[T]) -> Iterator[T]:
 
     """Merge `its` and removes all duplicates while preserving order."""
 
-    seen = set()  # type: Set[T]
+    seen: Set[T] = set()
 
     for it in its:
         for x in it:
@@ -730,8 +706,15 @@ def no_dupes(*its):
                 seen.add(x)
 
 
-def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter_dist="uniform", waitfunc=sleep):
-    # type: (float, int, float, float, Optional[float], str, Callable[[float], Any]) -> Iterator[int]
+def retrier(
+    waittime: float,
+    attempts: int = -1,
+    multiplier: float = 1,
+    jitter: float = 0,
+    max_wait: Optional[float] = None,
+    jitter_dist: str = "uniform",
+    waitfunc: Callable[[float], Any] = sleep,
+) -> Iterator[int]:
 
     """Iterator which yields after predefined amounts of time.
     Supports `multiplier` to implements linear or exponential backoff.
@@ -775,8 +758,7 @@ def retrier(waittime, attempts=-1, multiplier=1, jitter=0, max_wait=None, jitter
         jitter *= multiplier
 
 
-def collapse_any(it, col_set):
-    # type: (Iterable[T], Set[T]) -> Iterator[T]
+def collapse_any(it: Iterable[T], col_set: Set[T]) -> Iterator[T]:
 
     """Removes consecutive elements from iterable `it` if element is in `col_set`.
     ([1,1,2,2,3,3,4,4], {1,2}) -> 1, 2, 3, 3, 4, 4
@@ -791,8 +773,7 @@ def collapse_any(it, col_set):
             yield from g
 
 
-def collapse_all(it, col_set, replacement):
-    # type: (Iterable[T], Set[T], T) -> Iterator[T]
+def collapse_all(it: Iterable[T], col_set: Set[T], replacement: T) -> Iterator[T]:
 
     """Removes consecutive elements from iterable `it` if element is in `col_set`
     and replace `replacement`.
@@ -808,8 +789,7 @@ def collapse_all(it, col_set, replacement):
             yield from g
 
 
-def any_in_common(a, b):
-    # type: (Iterable[T], Iterable[T]) -> bool
+def any_in_common(a: Iterable[T], b: Iterable[T]) -> bool:
 
     """Tests if iterables `a` and `b` have any elements in common.
     See also: `any_in`.
@@ -818,8 +798,7 @@ def any_in_common(a, b):
     return any(i == j for i, j in product(a, b))
 
 
-def any_in(it, container):
-    # type: (Iterable[T], Container[T]) -> bool
+def any_in(it: Iterable[T], container: Container[T]) -> bool:
 
     """Tests if any elements of `it` are in `container`.
     For best performance, `container` should be a set.
@@ -854,8 +833,7 @@ class CountIter:
         return self.i
 
 
-def select_by_indices(it, indices):
-    # type: (Iterable[T], Iterator[int]) -> Iterator[T]
+def select_by_indices(it: Iterable[T], indices: Iterator[int]) -> Iterator[T]:
 
     try:
         sel_ind = next(indices)
@@ -867,8 +845,7 @@ def select_by_indices(it, indices):
         pass
 
 
-def skip_by_indices(it, indices):
-    # type: (Iterator[T], Iterator[int]) -> Iterator[Tuple[int, T]]
+def skip_by_indices(it: Iterator[T], indices: Iterator[int]) -> Iterator[Tuple[int, T]]:
 
     i = 0
     try:
@@ -887,8 +864,7 @@ def skip_by_indices(it, indices):
         yield ii, elem
 
 
-def remove_consecutive_dupes(it):
-    # type: (Iterable, ) -> Iterator
+def remove_consecutive_dupes(it: Iterable) -> Iterator:
 
     """Removes consecutive duplicates from iterable `it`.
     (a, a, b, b, a, b) -> a, b, a, b
@@ -897,8 +873,7 @@ def remove_consecutive_dupes(it):
     return map(itemgetter(0), groupby(it))
 
 
-def nonstriter(iterable):
-    # type: (Iterable, ) -> Iterator
+def nonstriter(iterable: Iterable) -> Iterator:
 
     if isinstance(iterable, (str, bytes)):
         raise TypeError("str or bytes")
@@ -909,22 +884,19 @@ def nonstriter(iterable):
 class CachedIterable(Generic[T]):
     # https://stackoverflow.com/a/19504173
 
-    def __init__(self, iterable):
-        # type: (Iterable[T], ) -> None
+    def __init__(self, iterable: Iterable[T]) -> None:
 
         self.iterable = iterable
         self.done = False
-        self.vals = []  # type: List[T]
+        self.vals: List[T] = []
 
-    def __iter__(self):
-        # type: () -> Iterator[T]
+    def __iter__(self) -> Iterator[T]:
 
         if self.done:
             return iter(self.vals)
         return chain(self.vals, self._gen_iter())
 
-    def _gen_iter(self):
-        # type: () -> Iterator[T]
+    def _gen_iter(self) -> Iterator[T]:
 
         for val in self.iterable:
             self.vals.append(val)

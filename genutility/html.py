@@ -3,9 +3,7 @@ from __future__ import generator_stop
 import bs4
 
 
-def simple_microdata_parser(bstree):  # schema.org Microdata, replace with `extruct` module?
-    # type: (bs4.BeautifulSoup, ) -> dict
-
+def simple_microdata_parser(bstree: bs4.BeautifulSoup) -> dict:  # schema.org Microdata, replace with `extruct` module?
     def is_item_scope(elem):
         return elem.has_attr("itemscope") and elem.has_attr("itemtype") and not elem.has_attr("itemprop")
 

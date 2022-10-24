@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 120.0
 
 
-def install_ceritfi_opener():
+def install_ceritfi_opener() -> None:
     import certifi
 
     logger.warning("Using certifi store: %s", certifi.where())

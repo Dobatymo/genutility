@@ -60,8 +60,7 @@ md5_hash_data = partial(hash_data, hashcls=hashlib.md5)
 sha1_hash_data = partial(hash_data, hashcls=hashlib.sha1)
 
 
-def crc32_hash_iter(it):
-    # type: (Iterable[bytes], ) -> int
+def crc32_hash_iter(it: Iterable[bytes]) -> int:
 
     """Create CRC32 hash from bytes takes from `it`."""
 
@@ -72,8 +71,9 @@ def crc32_hash_iter(it):
     return prev & 0xFFFFFFFF  # see https://docs.python.org/3/library/zlib.html#zlib.crc32
 
 
-def crc32_hash_file(path, chunk_size=FILE_IO_BUFFER_SIZE, mode="rb", encoding=None):
-    # type: (str, int, str, Optional[str]) -> str
+def crc32_hash_file(
+    path: str, chunk_size: int = FILE_IO_BUFFER_SIZE, mode: str = "rb", encoding: Optional[str] = None
+) -> str:
 
     """Return crc32 hash of file at `path`."""
 
@@ -85,8 +85,7 @@ md5_hash_file = partial(hash_file, hashcls=hashlib.md5)
 sha1_hash_file = partial(hash_file, hashcls=hashlib.sha1)
 
 
-def hashsum_file_format(hashobj, path):
-    # type: (Hashobj, str) -> str
+def hashsum_file_format(hashobj: Hashobj, path: str) -> str:
 
     return f"{hashobj.hexdigest()} *{path}"
 
@@ -94,8 +93,7 @@ def hashsum_file_format(hashobj, path):
 ed2k_chunksize = 9728000
 
 
-def ed2k_hash_file_v1(path):
-    # type: (Path, ) -> str
+def ed2k_hash_file_v1(path: Path) -> str:
 
     """Returns ed2k hash.
     This hashing method is used by
@@ -114,8 +112,7 @@ def ed2k_hash_file_v1(path):
     return md4_hash_data(b"".join(ed2k_hashes)).hexdigest()
 
 
-def ed2k_hash_file_v2(path):
-    # type: (Path, ) -> str
+def ed2k_hash_file_v2(path: Path) -> str:
 
     """Returns ed2k hash.
     This hashing method is used by
