@@ -1,8 +1,17 @@
 from __future__ import generator_stop
 
 import numpy as np
+from PIL import Image, ImageOps
 
-from genutility.image import block_histogram_2d, grayscale, histogram_1d, histogram_2d, resize_oar
+from genutility.image import (
+    block_histogram_2d,
+    center_of_mass_quadrant,
+    grayscale,
+    histogram_1d,
+    histogram_2d,
+    normalize_image_rotation,
+    resize_oar,
+)
 from genutility.test import MyTestCase, parametrize
 
 
@@ -69,6 +78,29 @@ class ImageTest(MyTestCase):
         result = block_histogram_2d(img, bx, by, levels)
         truth = np.array(truth)
         self.assertTrue(np.array_equal(truth, result))
+
+    def test_center_of_mass_quadrant(self):
+        for truth in range(4):
+            path = f"testfiles/quadrant-{truth}.png"
+            img = Image.open(path)
+            img = ImageOps.grayscale(img)
+            arr = np.asarray(img)
+            result = center_of_mass_quadrant(arr)
+            self.assertEqual(truth, result)
+
+    def test_normalize_image_rotation(self):
+
+        path = "testfiles/quadrant-0.png"
+        with Image.open(path) as img:
+            truth = np.asarray(img)
+
+        for i in range(4):
+            path = f"testfiles/quadrant-{i}.png"
+            with self.subTest(i=i):
+                with Image.open(path) as img:
+                    img_gray = ImageOps.grayscale(img)
+                    result = normalize_image_rotation(np.asarray(img), np.asarray(img_gray))
+                np.testing.assert_array_equal(truth, result)
 
 
 if __name__ == "__main__":

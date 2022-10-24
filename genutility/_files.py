@@ -54,7 +54,6 @@ class BaseDirEntry:
 MyDirEntryT = Union[DirEntry, BaseDirEntry]
 
 
-def entrysuffix(entry):
-    # type: (MyDirEntryT, ) -> str
+def entrysuffix(entry: MyDirEntryT) -> str:
 
     return os.path.splitext(entry.name)[1]

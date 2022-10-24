@@ -13,8 +13,7 @@ RGB_YELLOW = (255, 255, 0)
 RGB_WHITE = (255, 255, 255)
 
 
-def assert_square(name, value):
-    # type: (str, np.ndarray) -> None
+def assert_square(name: str, value: np.ndarray) -> None:
 
     """Raises a ValueError if matrix `value` is not square.
     value: [A, A]
@@ -45,8 +44,7 @@ def is_rgb(img):
 
 
 # @opjit() # np.errstate doesn't work in numba...
-def rgb_to_hsi(image):
-    # type: (np.ndarray, ) -> np.ndarray
+def rgb_to_hsi(image: np.ndarray) -> np.ndarray:
 
     """Converts an array [..., channels] of RGB values to HSI color values (H in rad).
     RGB values are assumed to be normalized to (0, 1).
@@ -78,8 +76,7 @@ def rgb_to_hsi(image):
 
 
 # @opjit() # np.dot with more than 2 dimensions is not supported...
-def rgb_to_ycbcr(image):
-    # type: (np.ndarray, ) -> np.ndarray
+def rgb_to_ycbcr(image: np.ndarray) -> np.ndarray:
 
     """Converts an array [..., channels] of RGB values to Digital Y'CbCr (0-255).
     RGB values are assumed to be normalized to (0, 1).
@@ -104,8 +101,7 @@ def rgb_to_ycbcr(image):
     return np.dot(image, m.T) + a
 
 
-def random_triangular_matrix(size, lower=True):
-    # type: (int, bool) -> np.ndarray
+def random_triangular_matrix(size: int, lower: bool = True) -> np.ndarray:
 
     """Returns a triangular matrix with random value between 0 and 1 uniformly."""
 
@@ -119,8 +115,7 @@ def random_triangular_matrix(size, lower=True):
     return a
 
 
-def is_square(A):
-    # type: (np.ndarray, ) -> bool
+def is_square(A: np.ndarray) -> bool:
 
     if len(A.shape) != 2:
         return False
@@ -131,8 +126,7 @@ def is_square(A):
     return True
 
 
-def batch_vTAv(A, v):
-    # type: (np.ndarray, np.ndarray) -> np.ndarray
+def batch_vTAv(A: np.ndarray, v: np.ndarray) -> np.ndarray:
 
     """Performs batched calculation of `v^T A v` transform.
     Special case of bilinear form `x^T A y`
@@ -210,7 +204,7 @@ def batchtopk(
 
 
 # @opjit() # np.diagonal not supported by numba as of version 0.52.0
-def logtrace(m):
+def logtrace(m: np.ndarray) -> np.ndarray:
     """Calcuates the sum of the logs of the diagonal elements (batchwise if necessary)
     m: [..., x, x]
     """
@@ -222,8 +216,7 @@ def logtrace(m):
     return np.sum(np.log(np.diagonal(m, axis1=-2, axis2=-1)), axis=-1)
 
 
-def shiftedexp(pvals):
-    # type: (np.ndarray, ) -> np.ndarray
+def shiftedexp(pvals: np.ndarray) -> np.ndarray:
 
     """Shifts `pvals` by the largest value in the last dimension
     before the exp is calculated to prevent overflow (batchwise if necessary).
@@ -240,35 +233,31 @@ class Sampler:
 
     """Sample from discrete CDF."""
 
-    def __init__(self, cdf):
+    def __init__(self, cdf: np.ndarray) -> None:
         self.cdf = cdf
         self.psum = cdf[-1]
 
-    def __call__(self):
-        # type: () -> int
+    def __call__(self) -> int:
 
         """Sample one."""
 
         rand = np.random.uniform(0, self.psum)
         return np.searchsorted(self.cdf, rand, side="right")
 
-    def sample(self, n):
-        # type: (int, ) -> np.ndarray
+    def sample(self, n: int) -> np.ndarray:
 
         """Sample `n`."""
 
         rands = np.random.uniform(0, self.psum, n)
         return np.searchsorted(self.cdf, rands, side="right")
 
-    def pdf(self, n, minlength=None):
-        # type: (int, Optional[int]) -> np.ndarray
+    def pdf(self, n: int, minlength: Optional[int] = None) -> np.ndarray:
 
         out = np.bincount(self.sample(n), minlength=minlength)
         return out / n
 
 
-def sample_probabilities(pvals):
-    # type: (np.ndarray, ) -> Callable[[], int]
+def sample_probabilities(pvals: np.ndarray) -> Callable[[], int]:
 
     """Sample from list of probabilities `pvals` with replacement.
     The probabilities don't need to be normalized.
@@ -310,14 +299,12 @@ class UnboundedSparseMatrix(Generic[T]):
         return ret
 
 
-def normalize(pvals):
-    # type: (np.ndarray, ) -> np.ndarray
+def normalize(pvals: np.ndarray) -> np.ndarray:
 
     return pvals / np.sum(pvals)
 
 
-def categorical(pvals):
-    # type: (np.ndarray, ) -> int
+def categorical(pvals: np.ndarray) -> int:
 
     """Sample from the categorical distribution using `pvals`.
     See: https://en.wikipedia.org/wiki/Categorical_distribution
@@ -326,8 +313,7 @@ def categorical(pvals):
     return sample_probabilities(pvals)()  # faster than: np.argmax(np.random.multinomial(1, normalize(pvals)))
 
 
-def population2cdf(population):
-    # type: (np.ndarray, ) -> np.ndarray
+def population2cdf(population: np.ndarray) -> np.ndarray:
 
     """Convert a population (list of observations) to a CDF."""
 
@@ -335,8 +321,7 @@ def population2cdf(population):
     return np.searchsorted(population, population, side="right") / len(population)
 
 
-def pmf2cdf(pdf):
-    # type: (np.ndarray, ) -> np.ndarray
+def pmf2cdf(pdf: np.ndarray) -> np.ndarray:
 
     """Convert a discrete PDF into a discrete CDF."""
 
@@ -344,8 +329,9 @@ def pmf2cdf(pdf):
     return cdf / cdf[-1]
 
 
-def _two_sample_kolmogorov_smirnov_same_length(cdf1, cdf2, n1, n2):
-    # type: (np.ndarray, np.ndarray, int, int) -> Tuple[float, float]
+def _two_sample_kolmogorov_smirnov_same_length(
+    cdf1: np.ndarray, cdf2: np.ndarray, n1: int, n2: int
+) -> Tuple[float, float]:
 
     # note: yields different results as `scipy.stats.ks_2samp`
 
@@ -357,8 +343,9 @@ def _two_sample_kolmogorov_smirnov_same_length(cdf1, cdf2, n1, n2):
     return D, level
 
 
-def _two_sample_kolmogorov_smirnov_population(p1, p2, alpha=0.05):
-    # type: (np.ndarray, np.ndarray, float) -> Tuple[float, float, bool]
+def _two_sample_kolmogorov_smirnov_population(
+    p1: np.ndarray, p2: np.ndarray, alpha: float = 0.05
+) -> Tuple[float, float, bool]:
 
     # note: yields different results as `scipy.stats.ks_2samp`
 
@@ -370,7 +357,8 @@ def _two_sample_kolmogorov_smirnov_population(p1, p2, alpha=0.05):
     return statistic, pvalue, reject
 
 
-def _two_sample_kolmogorov_smirnov_pmf(pmf1, pmf2, alpha=0.05):
+def _two_sample_kolmogorov_smirnov_pmf(pmf1: np.ndarray, pmf2: np.ndarray, alpha=0.05):
+
     # note: yields different results as `scipy.stats.ks_2samp`
     """Tests the null hypothesis that both samples belong to the same distribution.
     See: https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test#Two-sample_Kolmogorov%E2%80%93Smirnov_test
@@ -424,7 +412,7 @@ def decompress(selectors: np.ndarray, data: np.ndarray, default) -> np.ndarray:
     return out
 
 
-def unblock(arr, n1, n2, axis1=-1, axis2=-2, blocksize=False):
+def unblock(arr: np.ndarray, n1: int, n2: int, axis1: int = -1, axis2: int = -2, blocksize: bool = False) -> np.ndarray:
 
     """Inverse of np.block.
     Set axis to (-2, -1) to modify the order of the result.
@@ -441,8 +429,15 @@ def unblock(arr, n1, n2, axis1=-1, axis2=-2, blocksize=False):
         n1 = s[axis1] // n1
         n2 = s[axis2] // n2
 
+    # this first .split adds a new dimensions on the outside, so if a absolute index
+    # is given for the second axis it must be moved one to the right
+    if axis2 >= 0:
+        _axis2 = axis2 + 1
+    else:
+        _axis2 = axis2
+
     arr = np.array(np.split(arr, n1, axis1))
-    arr = np.array(np.split(arr, n2, axis2))
+    arr = np.array(np.split(arr, n2, _axis2))
 
     inv_blocksize = n1 * n2
     total = s[axis1] * s[axis2]
@@ -454,7 +449,7 @@ def unblock(arr, n1, n2, axis1=-1, axis2=-2, blocksize=False):
 
 def unblock2d(arr: np.ndarray, n1: int, n2: int, blocksize: bool = False) -> np.ndarray:
     """
-    arr: (width, height)
+    arr: [width, height, ...]
 
     returns: (block_num, block_size)
     """
@@ -471,7 +466,10 @@ def unblock2d(arr: np.ndarray, n1: int, n2: int, blocksize: bool = False) -> np.
         bs1 = s[0] // n1
         bs2 = s[1] // n2
 
-    return arr.reshape(bn1, bs1, bn2, bs2).swapaxes(1, 2).reshape(bn1 * bn2, bs1 * bs2)
+    if len(arr.shape) > 2:
+        return arr.reshape(bn1, bs1, bn2, bs2, -1).swapaxes(1, 2).reshape(bn1 * bn2, bs1 * bs2, -1)
+    else:
+        return arr.reshape(bn1, bs1, bn2, bs2).swapaxes(1, 2).reshape(bn1 * bn2, bs1 * bs2)
 
 
 def block2d(arr: np.ndarray, bn1: int, bn2: int, bs1: int, bs2: int) -> np.ndarray:
@@ -506,8 +504,9 @@ def remove_color(img: np.ndarray, ratio: float, neutral_color: Tuple[int, int, i
 
 
 # @opjit(cache=False) doesn't help a lot, because it's a generator
-def sliding_window_2d(image, window_size, step_size=(1, 1)):
-    # type: (np.ndarray, Tuple[int, int], Tuple[int, int]) -> Iterator[np.ndarray]
+def sliding_window_2d(
+    image: np.ndarray, window_size: Tuple[int, int], step_size: Tuple[int, int] = (1, 1)
+) -> Iterator[np.ndarray]:
 
     win_x, win_y = window_size
     step_x, step_y = step_size
@@ -534,8 +533,7 @@ def histogram_correlation(hist1: np.ndarray, hist2: np.ndarray) -> np.ndarray:
     return num / denom
 
 
-def bincount_batch(x, axis=-1, minlength=0):
-    # type: (np.ndarray, int, int) -> np.ndarray
+def bincount_batch(x: np.ndarray, axis: int = -1, minlength: int = 0) -> np.ndarray:
 
     if x.shape[axis] == 0:
         raise ValueError("Specified axis of x cannot be 0")
@@ -684,3 +682,14 @@ def viterbi_sparse(p_emit: Sequence[np.ndarray], p_trans: Sequence[np.ndarray]) 
         tokens[t - 1] = states[t][tokens[t]]  # []
 
     return tokens
+
+
+_bit_counts = np.array([int(bin(x).count("1")) for x in range(256)]).astype(np.uint8)
+
+
+def hamming_dist_packed(a: np.ndarray, b: np.ndarray, axis: Optional[int] = -1) -> np.ndarray:
+    return np.sum(_bit_counts[np.bitwise_xor(a, b)], axis=axis)
+
+
+def hamming_dist(a: np.ndarray, b: np.ndarray, axis: Optional[int] = -1) -> np.ndarray:
+    return np.count_nonzero(a != b, axis=axis)

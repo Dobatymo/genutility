@@ -16,8 +16,7 @@ def compile_options() -> List[str]:
     return [i[0] for i in ret]
 
 
-def quote_identifier(s, errors="strict"):
-    # type: (str, str) -> str
+def quote_identifier(s: str, errors: str = "strict") -> str:
 
     """Escapes sqlite identifiers (like table or column names).
     Copied from: https://stackoverflow.com/a/6701665
@@ -35,8 +34,7 @@ def quote_identifier(s, errors="strict"):
     return '"' + encodable.replace('"', '""') + '"'
 
 
-def vacuum(db_path):
-    # type: (str, ) -> None
+def vacuum(db_path: str) -> None:
 
     """Vacuums a sqlite database."""
 
@@ -44,8 +42,9 @@ def vacuum(db_path):
         conn.execute("VACUUM")
 
 
-def batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True):
-    # type: (sqlite3.Cursor, str, Iterable[tuple], int, bool) -> int
+def batch_executer(
+    cursor: sqlite3.Cursor, query_str: str, it: Iterable[tuple], batch_size: int = 10000, exclusive: bool = True
+) -> int:
 
     """Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
     If `exclusive` is True the database will be locked in exclusive mode.
@@ -70,8 +69,9 @@ def batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True):
     return entries
 
 
-def safe_batch_executer(cursor, query_str, it, batch_size=10000, exclusive=True):
-    # type: (sqlite3.Cursor, str, Iterable[tuple], int, bool) -> None
+def safe_batch_executer(
+    cursor: sqlite3.Cursor, query_str: str, it: Iterable[tuple], batch_size: int = 10000, exclusive: bool = True
+) -> None:
 
     """Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
     If `exclusive` is True the database will be locked in exclusive mode.

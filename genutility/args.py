@@ -127,6 +127,10 @@ def lowercase(s: str) -> str:
     return s.lower()
 
 
+def suffix_lower(s: str) -> str:
+    return lowercase(suffix(s))
+
+
 @arg_to_path
 def existing_path(path: Path) -> Path:
 

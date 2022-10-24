@@ -5,7 +5,7 @@ import os.path
 import sqlite3
 from itertools import chain
 from os import fspath
-from typing import Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optional, Tuple, TypeVar
+from typing import Any, Callable, Dict, FrozenSet, Iterable, Iterator, List, Optional, Tuple, TypeVar
 
 from tls_property import tls_property
 
@@ -51,7 +51,7 @@ class GenericFileDb:
         return "entry_date DESC"
 
     @classmethod
-    def primary(cls):
+    def primary(cls) -> List[Tuple[str, str, str]]:
         """Never explicitly specified.
         Not needed if there is a PRIMARY KEY in one of the other fields.
         """
@@ -59,7 +59,7 @@ class GenericFileDb:
         raise NotImplementedError
 
     @classmethod
-    def auto(cls):
+    def auto(cls) -> List[Tuple[str, str, str]]:
         """Explicitly specified value.
         Can never be a ? placeholder, but must be a SQL value like `datetime('now')`.
         """
@@ -67,7 +67,7 @@ class GenericFileDb:
         raise NotImplementedError
 
     @classmethod
-    def mandatory(cls):
+    def mandatory(cls) -> List[Tuple[str, str, str]]:
         """Mandatory fields used to retrieve rows.
         Used for all search queries.
         """
@@ -75,7 +75,7 @@ class GenericFileDb:
         raise NotImplementedError
 
     @classmethod
-    def derived(cls):
+    def derived(cls) -> List[Tuple[str, str, str]]:
         """Optional fields used to retrieve rows.
         Used for search queries when given.
         """
@@ -135,8 +135,7 @@ class GenericFileDb:
                 chain((self.normalize_path(path), filesize, mod_date), (derived.get(n) for n, t, v in self._derived))
             )
 
-    def iter(self, only=frozenset(), no=frozenset()):
-        # type: (FrozenSet[str], FrozenSet[str]) -> Iterator[tuple]
+    def iter(self, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> Iterator[tuple]:
 
         if only and no:
             raise ValueError("Only `only` or `no` can be specified")
@@ -207,8 +206,7 @@ class GenericFileDb:
 
         return fetchone(self.cursor)
 
-    def get(self, path, only=frozenset(), no=frozenset()):
-        # type: (EntryType, FrozenSet[str], FrozenSet[str]) -> tuple
+    def get(self, path: EntryType, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
 
         """Retrieves latest row based on mandatory information
         which is solely based on the `path`.
@@ -218,8 +216,7 @@ class GenericFileDb:
         stats = path.stat()
         return self.get_latest(fspath(path), stats.st_size, stats.st_mtime_ns, ignore_null=True, only=only, no=no)
 
-    def _add_file(self, path, filesize, mod_date, derived=None):
-        # type: (str, int, int, Optional[Dict[str, Any]]) -> None
+    def _add_file(self, path: str, filesize: int, mod_date: int, derived: Optional[Dict[str, Any]] = None) -> None:
 
         """Adds a new entry to the database and doesn't check if file
         with the same mandatory fields already exists.
@@ -233,8 +230,14 @@ class GenericFileDb:
         sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"
         self.cursor.execute(sql, args)
 
-    def _add_file_no_dup(self, path, filesize, mod_date, derived=None, ignore_null=True):
-        # type: (str, int, int, Optional[Dict[str, Any]], bool) -> bool
+    def _add_file_no_dup(
+        self,
+        path: str,
+        filesize: int,
+        mod_date: int,
+        derived: Optional[Dict[str, Any]] = None,
+        ignore_null: bool = True,
+    ) -> bool:
 
         """Only adds a new entry to the db if the provided information
         does not exist in the db yet.
@@ -248,23 +251,33 @@ class GenericFileDb:
             self._add_file(path, filesize, mod_date, derived)
             return True
 
-    def add(self, path, derived=None, commit=True):
-        # type: (EntryType, Optional[Dict[str, Any]], bool) -> None
+    def add(self, path: EntryType, derived: Optional[Dict[str, Any]] = None, commit: bool = True) -> None:
+
+        """Adds a new entry to the database and doesn't check if file
+        with the same mandatory fields already exists.
+        However it will replace entries based on PRIMARY KEYs or UNIQUE indices
+        """
 
         stats = path.stat()
         self._add_file(fspath(path), stats.st_size, stats.st_mtime_ns, derived)
         if commit:
             self.commit()
 
-    def add_file(self, path, filesize, mod_date, derived=None):
-        # type: (str, int, int, Optional[Dict[str, Any]]) -> bool
+    def add_file(self, path: str, filesize: int, mod_date: int, derived: Optional[Dict[str, Any]] = None) -> bool:
+
+        """Only adds a new entry to the db if the provided information
+        does not exist in the db yet.
+        """
 
         result = self._add_file_no_dup(path, filesize, mod_date, derived)
         self.commit()
         return result
 
-    def add_files(self, batch):
-        # type: (Iterable[Tuple[str, int, int, Optional[Dict[str, Any]]]], ) -> Iterator[bool]
+    def add_files(self, batch: Iterable[Tuple[str, int, int, Optional[Dict[str, Any]]]]) -> Iterator[bool]:
+
+        """Adds multiple new entries to the db while ignoring already existing entries with the same information.
+        Yields True for new entries, False otherwise.
+        """
 
         for path, filesize, mod_date, derived in batch:
             yield self._add_file_no_dup(path, filesize, mod_date, derived)

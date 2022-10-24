@@ -14,7 +14,7 @@ def sort_config(inpath: str, outpath: str) -> None:
 
     config = ConfigParser(dict_type=SortedDict)
     config.read(inpath, encoding="utf-8")
-    with open(outpath, "wt", encoding="utf-8") as fw:
+    with open(outpath, "w", encoding="utf-8") as fw:
         config.write(fw)
 
 

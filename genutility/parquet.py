@@ -12,6 +12,11 @@ def table_dumps(table: pa.Table) -> bytes:
     return bytes(writer.getvalue())
 
 
+def table_loads(table: bytes) -> pa.Table:
+    reader = pa.BufferReader(table)
+    return pq.read_table(reader)
+
+
 def schema_dumps(schema: pa.schema) -> bytes:
     writer = pa.BufferOutputStream()
     pq.write_metadata(schema, writer)

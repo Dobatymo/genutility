@@ -299,19 +299,19 @@ def append_to_filename(path: PathType, s: str) -> str:
     return root + s + ext
 
 
-def scandir_error_log(entry: DirEntry, exception):
+def scandir_error_log(entry: DirEntry, exception) -> None:
     logger.exception("Error in %s", entry.path, exc_info=exception)
 
 
-def scandir_error_log_warning(entry: DirEntry, exception):
+def scandir_error_log_warning(entry: DirEntry, exception) -> None:
     logger.warning("Error in %s", entry.path, exc_info=exception)
 
 
-def scandir_error_raise(entry: DirEntry, exception):
+def scandir_error_raise(entry: DirEntry, exception) -> None:
     raise exception
 
 
-def scandir_error_ignore(entry: DirEntry, exception):
+def scandir_error_ignore(entry: DirEntry, exception) -> None:
     pass
 
 
@@ -685,7 +685,7 @@ def reldirname(path: PathType) -> str:
     return ret
 
 
-def equal_dirs_iter(dir1, dir2, follow_symlinks=False):
+def equal_dirs_iter(dir1: PathType, dir2: PathType, follow_symlinks: bool = False) -> Iterator[Tuple[str, str, str]]:
 
     """Tests if two directories are equal. Doesn't handle links."""
 
@@ -707,7 +707,7 @@ def equal_dirs_iter(dir1, dir2, follow_symlinks=False):
             yield ("data", path1, path2)
 
 
-def equal_dirs(dir1, dir2):
+def equal_dirs(dir1: PathType, dir2: PathType) -> bool:
     return is_empty(equal_dirs_iter(dir1, dir2))
 
 
@@ -810,7 +810,7 @@ def normalize_seps(path: str) -> str:
 class Counts:
     __slots__ = ("dirs", "files", "others")
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.dirs = 0
         self.files = 0
         self.others = 0
@@ -902,3 +902,51 @@ def shutil_onerror_remove_readonly(func, path, exc_info):
         func(path)
     else:
         raise
+
+
+def _rmtree(path: str, ignore_errors: bool = False, onerror: Optional[Callable[[Callable, str, Any], None]] = None):
+
+    """Compared to `shutil.rmtree`, this removes files instantly,
+    instead of collecting the whole directory contents first.
+    """
+
+    import sys
+    from shutil import _rmtree_isdir
+
+    if ignore_errors:
+
+        def onerror(*args):
+            pass
+
+    elif onerror is None:
+
+        def onerror(*args):
+            raise
+
+    try:
+        with os.scandir(path) as scandir_it:
+            for entry in scandir_it:
+                fullname = entry.path
+                if _rmtree_isdir(entry):
+                    try:
+                        if entry.is_symlink():
+                            raise OSError("Cannot call _rmtree on a symbolic link")
+                    except OSError:
+                        onerror(os.path.islink, fullname, sys.exc_info())
+                        continue
+                    yield from _rmtree(fullname, onerror)
+                else:
+                    try:
+                        os.unlink(fullname)
+                        yield None
+                    except OSError:
+                        onerror(os.unlink, fullname, sys.exc_info())
+
+    except OSError:
+        onerror(os.scandir, path, sys.exc_info())
+
+    try:
+        os.rmdir(path)
+        yield None
+    except OSError:
+        onerror(os.rmdir, path, sys.exc_info())

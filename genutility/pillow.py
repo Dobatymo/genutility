@@ -124,8 +124,7 @@ def write_text(
     text_with_outline(d, pos, text, font, fillcolor, outlinecolor, 2)
 
 
-def _fix_orientation(img, orientation):
-    # type (Image, int) -> Image
+def _fix_orientation(img: Image, orientation: int) -> Image:
 
     if orientation == 1:
         raise NoActionNeeded("File already properly rotated")

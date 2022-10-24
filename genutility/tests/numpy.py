@@ -11,6 +11,8 @@ from genutility.numpy import (
     batchtopk,
     bincount_batch,
     decompress,
+    hamming_dist,
+    hamming_dist_packed,
     is_rgb,
     is_square,
     logtrace,
@@ -22,6 +24,7 @@ from genutility.numpy import (
     sliding_window_2d,
     stochastic,
     unblock,
+    unblock2d,
     viterbi_dense,
     viterbi_sparse,
 )
@@ -341,17 +344,71 @@ class NumpyTest(MyTestCase):
         np.testing.assert_equal(truth, probs)
 
     @parametrize(
-        ([[1, 2], [3, 4]], 1, 1, [[1, 2, 3, 4]]),
+        ([[1, 2], [3, 4]], 1, 1, {"blocksize": False}, [[1, 2, 3, 4]]),
+        ([[1, 2], [3, 4]], 1, 1, {"blocksize": True}, [[1], [2], [3], [4]]),
         (
             [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
             2,
             2,
+            {"blocksize": False},
             [[1, 2, 5, 6], [3, 4, 7, 8], [9, 10, 13, 14], [11, 12, 15, 16]],
         ),
+        (
+            [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
+            2,
+            2,
+            {"blocksize": True},
+            [[1, 2, 5, 6], [3, 4, 7, 8], [9, 10, 13, 14], [11, 12, 15, 16]],
+        ),
+        (
+            [[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]],
+            1,
+            1,
+            {"axis1": 1, "axis2": 0, "blocksize": False},
+            [[[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6]]],
+        ),
+        (
+            [[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]],
+            1,
+            1,
+            {"axis1": 1, "axis2": 0, "blocksize": True},
+            [[[1, 2, 3]], [[2, 3, 4]], [[3, 4, 5]], [[4, 5, 6]]],
+        ),
     )
-    def test_unblock(self, arr, a, b, truth):
+    def test_unblock(self, arr, a, b, kwargs, truth):
         arr, truth = np.array(arr), np.array(truth)
-        result = unblock(arr, a, b)
+        result = unblock(arr, a, b, **kwargs)
+        np.testing.assert_equal(truth, result)
+
+    @parametrize(
+        ([[1, 2], [3, 4]], 1, 1, False, [[1, 2, 3, 4]]),
+        ([[1, 2], [3, 4]], 1, 1, True, [[1], [2], [3], [4]]),
+        (
+            [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
+            2,
+            2,
+            False,
+            [[1, 2, 5, 6], [3, 4, 7, 8], [9, 10, 13, 14], [11, 12, 15, 16]],
+        ),
+        (
+            [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
+            2,
+            2,
+            True,
+            [[1, 2, 5, 6], [3, 4, 7, 8], [9, 10, 13, 14], [11, 12, 15, 16]],
+        ),
+        ([[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]], 1, 1, False, [[[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6]]]),
+        (
+            [[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]],
+            1,
+            1,
+            True,
+            [[[1, 2, 3]], [[2, 3, 4]], [[3, 4, 5]], [[4, 5, 6]]],
+        ),
+    )
+    def test_unblock2d(self, arr, a, b, blocksize, truth):
+        arr, truth = np.array(arr), np.array(truth)
+        result = unblock2d(arr, a, b, blocksize)
         np.testing.assert_equal(truth, result)
 
     @parametrize(
@@ -405,6 +462,30 @@ class NumpyTest(MyTestCase):
         result = sequence_mask(x)
         np.testing.assert_equal(truth, result)
         self.assertEqual(truth.dtype, result.dtype)
+
+    def test_hamming_dist(self):
+        a = np.unpackbits(np.array([0, 0, 0, 255, 255, 255], dtype=np.uint8)).reshape(3, 16)
+        b = np.unpackbits(np.array([0, 1, 0, 2, 2, 3], dtype=np.uint8)).reshape(3, 16)
+
+        truth = np.array([1, 7, 13])
+        result = hamming_dist(a, b)
+        np.testing.assert_equal(truth, result)
+
+        truth = np.array([[1, 7, 15], [1, 7, 15], [3, 7, 13]])
+        result = hamming_dist(a[None, :], b[:, None])
+        np.testing.assert_equal(truth, result)
+
+    def test_hamming_dist_packed(self):
+        a = np.array([[0, 0], [0, 255], [255, 255]])
+        b = np.array([[0, 1], [0, 2], [2, 3]])
+
+        truth = np.array([1, 7, 13])
+        result = hamming_dist_packed(a, b)
+        np.testing.assert_equal(truth, result)
+
+        truth = np.array([[1, 7, 15], [1, 7, 15], [3, 7, 13]])
+        result = hamming_dist_packed(a[None, :], b[:, None])
+        np.testing.assert_equal(truth, result)
 
 
 if __name__ == "__main__":

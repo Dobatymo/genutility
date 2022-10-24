@@ -3,6 +3,7 @@ from __future__ import generator_stop
 from typing import TYPE_CHECKING
 
 import numpy as np
+from scipy.ndimage import center_of_mass
 
 from .numpy import bincount_batch, unblock
 
@@ -108,3 +109,39 @@ def image_block_histogram(arr, bx, by, levels=256):
 
     gray = grayscale(arr)
     return block_histogram_2d(gray, bx, by, levels)
+
+
+def center_of_mass_quadrant(img: np.ndarray) -> int:
+    """Returns the image quadrant of the center of mass of the grayscale image `img`:
+    +---+---+
+    | 0 | 1 |
+    +---+---+
+    | 3 | 2 |
+    +---+---+
+    """
+
+    if len(img.shape) != 2:
+        raise ValueError("Grayscale image expected")
+
+    cm_y, cm_x = center_of_mass(img)
+    d_y, d_x = img.shape
+    c_y = (d_y - 1) / 2
+    c_x = (d_x - 1) / 2
+
+    if cm_y < c_y:
+        if cm_x < c_x:
+            quadrant = 0
+        else:
+            quadrant = 1
+    else:
+        if cm_x < c_x:
+            quadrant = 3
+        else:
+            quadrant = 2
+
+    return quadrant
+
+
+def normalize_image_rotation(img: np.ndarray, img_gray: np.ndarray) -> np.ndarray:
+    quadrant = center_of_mass_quadrant(img_gray)
+    return np.rot90(img, k=quadrant, axes=(0, 1))
