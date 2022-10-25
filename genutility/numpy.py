@@ -29,16 +29,15 @@ def normalized_choice(
     return np.random.choice(p_ind, p=p_prob / np.sum(p_prob))
 
 
-def shannon_entropy(ps, base=2):
-    # type: (np.ndarray, int) -> float
+def shannon_entropy(ps: np.ndarray, base: int = 2) -> float:
 
     """Calculates the Shannon entropy for probabilities `ps` with `base`."""
 
     return -np.sum(ps * np.log(ps) / np.log(base))
 
 
-def is_rgb(img):
-    # type: (np.ndarray, ) -> bool
+def is_rgb(img: np.ndarray) -> bool:
+    """Simply tests if `img` has 3 channels."""
 
     return len(img.shape) >= 1 and img.shape[-1] == 3
 
@@ -267,22 +266,19 @@ def sample_probabilities(pvals: np.ndarray) -> Callable[[], int]:
 
 
 class UnboundedSparseMatrix(Generic[T]):
-    def __init__(self, dtype=float):
-        # type: (type, ) -> None
+    def __init__(self, dtype: type = float) -> None:
 
         self.dtype = dtype
         self.zero = self.dtype(0)
-        self.m = dict()  # type: Dict[Tuple[int, int], T]
+        self.m: Dict[Tuple[int, int], T] = dict()
         self.cols = 0
         self.rows = 0
 
-    def __getitem__(self, slice):
-        # type: (Tuple[int, int], ) -> T
+    def __getitem__(self, slice: Tuple[int, int]) -> T:
 
         return self.m.get(slice, self.zero)
 
-    def __setitem__(self, slice, value):
-        # type: (Tuple[int, int], T) -> None
+    def __setitem__(self, slice: Tuple[int, int], value: T) -> None:
 
         c, r = slice
         self.cols = max(self.cols, c + 1)
@@ -357,7 +353,9 @@ def _two_sample_kolmogorov_smirnov_population(
     return statistic, pvalue, reject
 
 
-def _two_sample_kolmogorov_smirnov_pmf(pmf1: np.ndarray, pmf2: np.ndarray, alpha=0.05):
+def _two_sample_kolmogorov_smirnov_pmf(
+    pmf1: np.ndarray, pmf2: np.ndarray, alpha: float = 0.05
+) -> Tuple[float, float, bool]:
 
     # note: yields different results as `scipy.stats.ks_2samp`
     """Tests the null hypothesis that both samples belong to the same distribution.
@@ -693,3 +691,15 @@ def hamming_dist_packed(a: np.ndarray, b: np.ndarray, axis: Optional[int] = -1) 
 
 def hamming_dist(a: np.ndarray, b: np.ndarray, axis: Optional[int] = -1) -> np.ndarray:
     return np.count_nonzero(a != b, axis=axis)
+
+
+def center_of_mass_2d(arr: np.ndarray, dtype=np.float32) -> np.ndarray:
+    """Batched center of mass calculation of 2d arrays
+    `arr`: [..., x, y]
+    """
+
+    total = np.sum(arr, axis=(-1, -2))
+    grids = np.ogrid[[slice(0, i) for i in arr.shape[-2:]]]
+    results = np.array([np.sum(arr * grid.astype(dtype), axis=(-1, -2)) / total for grid in grids], dtype=dtype).T
+
+    return results

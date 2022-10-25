@@ -10,6 +10,7 @@ from genutility.numpy import (
     batch_vTAv,
     batchtopk,
     bincount_batch,
+    center_of_mass_2d,
     decompress,
     hamming_dist,
     hamming_dist_packed,
@@ -486,6 +487,23 @@ class NumpyTest(MyTestCase):
         truth = np.array([[1, 7, 15], [1, 7, 15], [3, 7, 13]])
         result = hamming_dist_packed(a[None, :], b[:, None])
         np.testing.assert_equal(truth, result)
+
+    @parametrize(
+        ([[]], np.float64, [np.nan, np.nan]),
+        ([[0]], np.float64, [np.nan, np.nan]),
+        ([[1]], np.float64, [0, 0]),
+        ([[1, 0], [0, 0]], np.float64, [0, 0]),
+        ([[0, 1], [0, 0]], np.float64, [0, 1]),
+        ([[0, 0], [1, 0]], np.float64, [1, 0]),
+        ([[0, 0], [0, 1]], np.float64, [1, 1]),
+        ([[[0, 0], [0, 1]], [[1, 1], [1, 1]]], np.float32, [[1, 1], [0.5, 0.5]]),
+    )
+    def test_center_of_mass_2d(self, arr, dtype, truth):
+        arr = np.array(arr)
+        truth = np.array(truth, dtype=dtype)
+        result = center_of_mass_2d(arr, dtype=dtype)
+        np.testing.assert_array_equal(truth, result)
+        self.assertEqual(truth.dtype, result.dtype)
 
 
 if __name__ == "__main__":

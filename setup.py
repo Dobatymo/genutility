@@ -70,7 +70,7 @@ extras_require = {
     "html": ["beautifulsoup4"],
     "http": ["requests", "certifi"],
     "http2": ["hyper"],
-    "image": ["numpy", "scipy<1.6.0"],
+    "image": ["numpy"],
     "json": ["jsonschema"],
     "lda": ["numpy", "nltk>=3.6.1"],
     "metrics": ["numpy"],
