@@ -14,6 +14,7 @@ from genutility.numpy import (
     decompress,
     hamming_dist,
     hamming_dist_packed,
+    hamming_dist_packed_chunked,
     is_rgb,
     is_square,
     logtrace,
@@ -40,6 +41,10 @@ YELLOW = [255, 255, 0]
 BLACK = [0, 0, 0]
 GRAY = [128, 128, 128]
 WHITE = [255, 255, 255]
+
+
+def list_mapget(item, it):
+    return [i[item] for i in it]
 
 
 class ViterbiTest(MyTestCase):
@@ -486,6 +491,46 @@ class NumpyTest(MyTestCase):
 
         truth = np.array([[1, 7, 15], [1, 7, 15], [3, 7, 13]])
         result = hamming_dist_packed(a[None, :], b[:, None])
+        np.testing.assert_equal(truth, result)
+
+    def test_hamming_dist_packed_chunked(self):
+        a = np.array([[0, 0], [0, 255], [255, 255]])
+        b = np.array([[0, 1], [0, 2], [2, 3]])
+        c = np.array([[0, 1]])
+
+        # 1d one chunk
+        truth = [np.array([1, 7, 13])]
+        result = list_mapget(1, hamming_dist_packed_chunked(a, b, (10,)))
+        np.testing.assert_equal(truth, result)
+
+        # 1d clean divides
+        truth = [np.array([1]), np.array([7])]
+        result = list_mapget(1, hamming_dist_packed_chunked(a[0:2], b[0:2], (1,)))
+        np.testing.assert_equal(truth, result)
+
+        # 1d unclean divides
+        truth = [np.array([1, 7]), np.array([13])]
+        result = list_mapget(1, hamming_dist_packed_chunked(a, b, (2,)))
+        np.testing.assert_equal(truth, result)
+
+        # 1d broadcasted unclean divides
+        truth = [np.array([1, 7]), np.array([15])]
+        result = list_mapget(1, hamming_dist_packed_chunked(a, c, (2,)))
+        np.testing.assert_equal(truth, result)
+
+        # 2d broadcasted one chunk
+        truth = [np.array([[1, 7, 15], [1, 7, 15], [3, 7, 13]])]
+        result = list_mapget(1, hamming_dist_packed_chunked(a[None, :], b[:, None], (10, 10)))
+        np.testing.assert_equal(truth, result)
+
+        # 2d broadcasted clean divides
+        truth = [np.array([[1]]), np.array([[7]]), np.array([[1]]), np.array([[7]])]
+        result = list_mapget(1, hamming_dist_packed_chunked(a[None, 0:2], b[0:2, None], (1, 1)))
+        np.testing.assert_equal(truth, result)
+
+        # 2d broadcasted unclean divides
+        truth = [np.array([[1, 7], [1, 7]]), np.array([[15], [15]]), np.array([[3, 7]]), np.array([[13]])]
+        result = list_mapget(1, hamming_dist_packed_chunked(a[None, :], b[:, None], (2, 2)))
         np.testing.assert_equal(truth, result)
 
     @parametrize(

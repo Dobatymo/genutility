@@ -689,6 +689,73 @@ def hamming_dist_packed(a: np.ndarray, b: np.ndarray, axis: Optional[int] = -1) 
     return np.sum(_bit_counts[np.bitwise_xor(a, b)], axis=axis)
 
 
+def get_num_chunks(shape: np.ndarray, chunksize: np.ndarray) -> int:
+    return np.prod(np.ceil(shape / chunksize).astype(np.int_))
+
+
+def broadcast_shapes(*shapes: Tuple[int, ...]) -> Tuple[int, ...]:
+    """np.broadcast_shapes requires `numpy==1.20.0`,
+    which is not available for `python < 3.7`.
+    """
+
+    arrays = [np.empty(shape) for shape in shapes]
+    return np.broadcast(*arrays).shape
+
+
+def hamming_dist_packed_chunked(
+    a: np.ndarray, b: np.ndarray, chunksize: Tuple[int, ...], axis: Optional[int] = -1
+) -> Iterator[Tuple[Tuple[int, ...], np.ndarray]]:
+
+    outshape = broadcast_shapes(a.shape, b.shape)
+    select_broadcasted_axis = slice(0, 1)
+
+    if len(outshape) - len(chunksize) != 1:
+        raise ValueError("Length of `chunksize` must be one less the number of input dimensions")
+
+    if len(outshape) == 2:
+        for x in range(0, outshape[0], chunksize[0]):
+            if a.shape[0] != outshape[0]:
+                aix = select_broadcasted_axis
+            else:
+                aix = slice(x, x + chunksize[0])
+
+            if b.shape[0] != outshape[0]:
+                bix = select_broadcasted_axis
+            else:
+                bix = slice(x, x + chunksize[0])
+
+            yield (x,), hamming_dist_packed(a[aix, :], b[bix, :], axis=axis)
+
+    elif len(outshape) == 3:
+        for x in range(0, outshape[0], chunksize[0]):
+            for y in range(0, outshape[1], chunksize[1]):
+
+                if a.shape[0] != outshape[0]:
+                    aix = select_broadcasted_axis
+                else:
+                    aix = slice(x, x + chunksize[0])
+
+                if b.shape[0] != outshape[0]:
+                    bix = select_broadcasted_axis
+                else:
+                    bix = slice(x, x + chunksize[0])
+
+                if a.shape[1] != outshape[1]:
+                    aiy = select_broadcasted_axis
+                else:
+                    aiy = slice(y, y + chunksize[1])
+
+                if b.shape[1] != outshape[1]:
+                    biy = select_broadcasted_axis
+                else:
+                    biy = slice(y, y + chunksize[1])
+
+                yield (x, y), hamming_dist_packed(a[aix, aiy, :], b[bix, biy, :], axis=axis)
+
+    else:
+        raise ValueError("Input must either be 2 or 3 dimensional")
+
+
 def hamming_dist(a: np.ndarray, b: np.ndarray, axis: Optional[int] = -1) -> np.ndarray:
     return np.count_nonzero(a != b, axis=axis)
 
