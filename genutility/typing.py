@@ -1,8 +1,8 @@
 from __future__ import generator_stop
 
-from typing import Any, Optional, Sequence, TypeVar, Union
+from typing import Any, Iterable, Optional, Sequence, TypeVar, Union
 
-from typing_extensions import Protocol
+from typing_extensions import Protocol  # typing.Protocol is availalble in Python 3.8+
 
 Number = Union[int, float]
 T = TypeVar("T")
@@ -137,4 +137,12 @@ class Connection(Protocol):
         ...
 
     def cursor(self) -> Cursor:
+        ...
+
+
+class CsvWriter(Protocol):
+    def writerow(self, row: Iterable[Any]) -> Any:
+        ...
+
+    def writerows(self, rows: Iterable[Iterable[Any]]) -> None:
         ...

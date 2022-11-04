@@ -1,5 +1,6 @@
 from __future__ import generator_stop
 
+import unittest
 from time import sleep
 
 from genutility.exceptions import NoResult
@@ -60,6 +61,122 @@ class SimpleDBTest(MyTestCase):
 
         row = db.get_latest("path/pathB", 124, "2013-01-01 12:00:00", no={"entry_date"})
         assert row == ("path/pathB", 124, "2013-01-01 12:00:00", "qwe")
+
+    def test_add_file(self):
+        db = Simple(":memory:", "tests")
+
+        result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd1"})
+        assert result
+        assert len(db) == 1
+        assert list(db.iter(no={"entry_date"})) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd1")]
+        result = db.get_latest("path/pathB", 123, "2013-01-01 12:00:00", no={"entry_date"})
+        assert result == ("path/pathB", 123, "2013-01-01 12:00:00", "asd1")
+        result = db.get_latest(
+            "path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd1"}, no={"entry_date"}, ignore_null=False
+        )
+        assert result == ("path/pathB", 123, "2013-01-01 12:00:00", "asd1")
+        with self.assertRaises(NoResult):
+            db.get_latest("path/pathB", 123, "2013-01-01 12:00:00", ignore_null=False)
+
+        result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd1"})
+        assert not result
+        assert len(db) == 1
+        assert list(db.iter(no={"entry_date"})) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd1")]
+
+        result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00", derived={"data": "asd2"})
+        assert result
+        assert len(db) == 1
+        assert list(db.iter(no={"entry_date"})) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd2")]
+
+        result = db.add_file("path/pathB", 123, "2013-01-01 12:00:00")
+        assert not result
+        assert len(db) == 1
+        assert list(db.iter(no={"entry_date"})) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd2")]
+
+    def test_add_file_replace(self):
+        db = Simple(":memory:", "tests")
+
+        db._add_file("path", 100, "2013-01-01 12:00:00", derived={"data": "asd"})
+        assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
+
+        db._add_file("path", 100, "2013-01-01 12:00:00", derived={"data": "asd"})
+        assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
+
+        db._add_file("path", 100, "2013-01-01 12:00:00", derived={"data": "qwe"})
+        assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "qwe")]
+
+        db._add_file("path", 200, "2013-01-01 12:00:00", derived={"data": "asd"})
+        assert list(db.iter(no={"entry_date"})) == [("path", 200, "2013-01-01 12:00:00", "asd")]
+
+        db._add_file("path2", 100, "2013-01-01 12:00:00", derived={"data": "asd"})
+        assert list(db.iter(no={"entry_date"})) == [
+            ("path", 200, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", "asd"),
+        ]
+
+        db._add_file("path2", 100, "2013-01-01 12:00:00", derived={})
+        assert list(db.iter(no={"entry_date"})) == [
+            ("path", 200, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", None),
+        ]
+
+    def test_add_file_upsert(self):
+        db = Simple(":memory:", "tests")
+
+        db._add_file("path", 100, "2013-01-01 12:00:00", derived={"data": "asd"}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
+
+        db._add_file("path", 100, "2013-01-01 12:00:00", derived={"data": "asd"}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
+
+        db._add_file("path", 100, "2013-01-01 12:00:00", derived={"data": "qwe"}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "qwe")]
+
+        db._add_file("path", 200, "2013-01-01 12:00:00", derived={"data": "asd"}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [("path", 200, "2013-01-01 12:00:00", "asd")]
+
+        db._add_file("path2", 100, "2013-01-01 12:00:00", derived={"data": "asd"}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [
+            ("path", 200, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", "asd"),
+        ]
+
+        db._add_file("path2", 100, "2013-01-01 12:00:00", derived={}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [
+            ("path", 200, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", "asd"),
+        ]
+
+    @unittest.skip("`GenericFileDb._add_file(..., replace=False)` still buggy")
+    def test_add_file_upsert_2(self):
+        db = Simple(":memory:", "tests")
+
+        db._add_file("path", 100, "2013-01-01 12:00:00", derived={"data": "asd"}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
+
+        db._add_file("path", 200, "2013-01-01 12:00:00", derived={}, replace=False)
+        assert list(db.iter(no={"entry_date"})) == [("path", 200, "2013-01-01 12:00:00", None)]
+
+    def test_get_latest_many(self):
+        db = Simple(":memory:", "tests")
+
+        db._add_file("path1", 100, "2013-01-01 12:00:00", derived={"data": "asd"})
+        db._add_file("path2", 100, "2013-01-01 12:00:00", derived={"data": "qwe"})
+        db._add_file("path3", 100, "2013-01-01 12:00:00", derived={"data": "zxc"})
+
+        result = list(
+            db.get_latest_many(
+                [("path1", 100, "2013-01-01 12:00:00"), ("path2", 100, "2013-01-01 12:00:00")], 2, no={"entry_date"}
+            )
+        )
+        assert result == [("path1", 100, "2013-01-01 12:00:00", "asd"), ("path2", 100, "2013-01-01 12:00:00", "qwe")]
+
+        result = list(
+            db.get_latest_many(
+                [("path2", 100, "2013-01-01 12:00:00"), ("path1", 100, "2013-01-01 12:00:00")], 2, no={"entry_date"}
+            )
+        )
+        assert result == [("path2", 100, "2013-01-01 12:00:00", "qwe"), ("path1", 100, "2013-01-01 12:00:00", "asd")]
 
 
 class HistoryDBTest(MyTestCase):
@@ -135,8 +252,46 @@ class HistoryDBTest(MyTestCase):
         row = db.get_latest("path/pathB", 124, "2013-01-01 12:00:00", no=no)
         assert row == ("path/pathB", 124, "2013-01-01 12:00:00", "qwe", None)
 
+    def test_get_latest_many(self):
+        db = History(":memory:", "tests")
+
+        db._add_file("path1", 100, "2013-01-01 12:00:00", derived={"data": "asd"})
+        db._add_file("path2", 100, "2013-01-01 12:00:00", derived={"data": "qwe"})
+        db._add_file("path3", 100, "2013-01-01 12:00:00", derived={"data": "zxc"})
+
+        result = list(
+            db.get_latest_many(
+                [("path1", 100, "2013-01-01 12:00:00"), ("path2", 100, "2013-01-01 12:00:00")], 2, no={"entry_date"}
+            )
+        )
+        assert result == [
+            (1, "path1", 100, "2013-01-01 12:00:00", "asd"),
+            (2, "path2", 100, "2013-01-01 12:00:00", "qwe"),
+        ]
+
+        result = list(
+            db.get_latest_many(
+                [("path2", 100, "2013-01-01 12:00:00"), ("path1", 100, "2013-01-01 12:00:00")], 2, no={"entry_date"}
+            )
+        )
+        assert result == [
+            (2, "path2", 100, "2013-01-01 12:00:00", "qwe"),
+            (1, "path1", 100, "2013-01-01 12:00:00", "asd"),
+        ]
+
+        sleep(2)
+        db._add_file("path3", 100, "2013-01-01 12:00:00", derived={"data": "new"})
+
+        result = list(
+            db.get_latest_many(
+                [("path1", 100, "2013-01-01 12:00:00"), ("path3", 100, "2013-01-01 12:00:00")], 2, no={"entry_date"}
+            )
+        )
+        assert result == [
+            (1, "path1", 100, "2013-01-01 12:00:00", "asd"),
+            (4, "path3", 100, "2013-01-01 12:00:00", "new"),
+        ]
+
 
 if __name__ == "__main__":
-    import unittest
-
     unittest.main()
