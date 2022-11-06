@@ -14,7 +14,7 @@ class SparqlTest(MyTestCase):
         """
         df = wikidata_to_dataframe(query_wikidata(q))
         result = set(df.businessLabel[:5])
-        truth = {"GitHub", "Apple Inc.", "Boeing", "Intel", "Airbus"}
+        truth = {"GitHub", "Apple", "Boeing", "Intel", "Airbus"}
         self.assertEqual(truth, result)
 
 
