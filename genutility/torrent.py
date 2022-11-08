@@ -14,8 +14,7 @@ import requests
 
 from .exceptions import ParseError, assert_choice
 from .file import blockfileiter, blockfilesiter
-from .filesystem import FileProperties
-from .os import uncabspath
+from .filesystem import FileProperties, long_path_support
 
 logger = logging.getLogger(__name__)
 
@@ -141,9 +140,9 @@ def iter_fastresume(path: str) -> Iterator[FileProperties]:
     it = compress(zip_longest(files, mapped_files), file_priority)
     for file, mapped_file in it:
         if not mapped_file:  # either None from zip_longest, or "" as placeholder in fastresume file
-            file.abspath = uncabspath(fspath(save_path / file.relpath))
+            file.abspath = long_path_support(fspath(save_path / file.relpath))
         else:
-            file.abspath = uncabspath(fspath(save_path / mapped_file))
+            file.abspath = long_path_support(fspath(save_path / mapped_file))
         file.relpath = None
         yield file
 

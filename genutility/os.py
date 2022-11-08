@@ -53,7 +53,6 @@ if system == "Windows":
     from .os_win import _interrupt_windows as interrupt
     from .os_win import _islink as islink
     from .os_win import _lock as lock
-    from .os_win import _uncabspath as uncabspath
     from .os_win import _unlock as unlock
     from .os_win import _volume_info_windows as volume_info
 
@@ -65,7 +64,6 @@ elif system == "Linux":
     from .os_posix import _unlock as unlock
 
     volume_info = _not_available("volume_info")
-    from os.path import abspath as uncabspath
     from os.path import islink
 
     from .os_posix import _filemanager_cmd_posix as filemanager_cmd
@@ -81,7 +79,6 @@ elif system == "Darwin":
     from .os_mac import _filemanager_cmd_mac as filemanager_cmd
 
     get_appdata_dir = _not_available("get_appdata_dir")
-    from os.path import abspath as uncabspath
     from os.path import islink
 
     from .os_posix import _interrupt_posix as interrupt
@@ -94,7 +91,6 @@ else:
     filemanager_cmd = _not_available("filemanager_cmd")
     get_appdata_dir = _not_available("get_appdata_dir")
     islink = _not_available("islink")
-    uncabspath = _not_available("uncabspath")
     interrupt = _not_available("interrupt")
 
 lock.__doc__ = """ Locks access to the file (on Posix) or its contents (Windows). """
@@ -104,7 +100,6 @@ volume_info.__doc__ = """ filesystem and name of the volume """
 filemanager_cmd.__doc__ = """ Returns a shell command that when executed starts the file manager of the OS. """
 get_appdata_dir.__doc__ = """ Returns the roaming appdata directory of the current user. """
 islink.__doc__ = """ islink """
-uncabspath.__doc__ = """ uncabspath """
 interrupt.__doc__ = """ interrupt """
 
 from shutil import disk_usage

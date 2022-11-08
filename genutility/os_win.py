@@ -37,8 +37,6 @@ if TYPE_CHECKING:
 
     PathType = Union[str, PathLike]
 
-unc_prefix = "\\\\?\\"
-
 
 def get_stdout_handle():
     # type: () -> HANDLE
@@ -86,14 +84,6 @@ def _islink(path):
     if FileAttributes == INVALID_FILE_ATTRIBUTES:
         raise WinError()
     return FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT == FILE_ATTRIBUTE_REPARSE_POINT
-
-
-def _uncabspath(path: str) -> str:
-
-    if path.startswith(unc_prefix):
-        return os.path.abspath(path)
-    else:
-        return unc_prefix + os.path.abspath(path)
 
 
 def _lock(fp, exclusive=True, block=False):

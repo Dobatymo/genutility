@@ -17,12 +17,12 @@ from os import DirEntry, PathLike, fspath
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
-from ._files import BaseDirEntry, MyDirEntryT, entrysuffix
+from ._files import BaseDirEntry, MyDirEntryT, entrysuffix, to_dos_device_path
 from .datetime import datetime_from_utc_timestamp
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
 from .iter import is_empty
 from .ops import logical_implication
-from .os import _not_available, islink, uncabspath
+from .os import _not_available, islink
 
 PathType = Union[str, PathLike]
 EntryType = Union[Path, DirEntry]
@@ -211,6 +211,17 @@ class MyDirEntry(BaseDirEntry):
         self._relpath = path
 
 
+if platform.system() == "Windows":
+
+    def long_path_support(path: str) -> str:
+        return to_dos_device_path(os.path.abspath(path))
+
+else:
+
+    def long_path_support(path: str) -> str:
+        return path
+
+
 def mdatetime(path: PathType, aslocal: bool = False) -> datetime:
 
     """Returns the last modified date of `path`
@@ -393,7 +404,9 @@ def scandir_rec(
     if isinstance(path, PathLike):
         path = fspath(path)
 
-    entry = DirEntryStub(os.path.basename(path), uncabspath(path))  # for python 2 compat. and long filename support
+    entry = DirEntryStub(
+        os.path.basename(path), long_path_support(path)
+    )  # for python 2 compat. and long filename support
 
     if not allow_skip:
         it = _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, errorfunc)
@@ -403,7 +416,7 @@ def scandir_rec(
     if not relative:
         return it
     else:
-        basepath = uncabspath(path)
+        basepath = long_path_support(path)
         if not allow_skip:
             # entry is a `os.DirEntry`
             def modpathrelative(entry):
@@ -454,9 +467,9 @@ def scandir_ext(
 def scandir_ext_2(path: str, extensions: Set[str], rec: bool = True) -> Iterator[Path]:
 
     if rec:
-        paths = Path(uncabspath(path)).rglob("*")
+        paths = Path(long_path_support(path)).rglob("*")
     else:
-        paths = Path(uncabspath(path)).glob("*")
+        paths = Path(long_path_support(path)).glob("*")
 
     for p in paths:
         if p.suffix.lower() in extensions:
@@ -489,7 +502,9 @@ def scandir_depth(path: str, depth: int = 0, onerror: Callable = scandir_error_l
     The order is arbitrary otherwise.
     """
 
-    entry = DirEntryStub(os.path.basename(path), uncabspath(path))  # for python 2 compat. and long filename support
+    entry = DirEntryStub(
+        os.path.basename(path), long_path_support(path)
+    )  # for python 2 compat. and long filename support
     return _scandir_depth(entry, depth, onerror)
 
 
@@ -886,7 +901,7 @@ def scandir_counts(
     if isinstance(path, PathLike):
         path = fspath(path)
 
-    entry = DirEntryStub(os.path.basename(path), uncabspath(path))
+    entry = DirEntryStub(os.path.basename(path), long_path_support(path))
     return _scandir_counts(entry, files, others, rec, total, onerror)
 
 
