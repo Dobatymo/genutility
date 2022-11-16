@@ -23,7 +23,7 @@ class MyTestCaseTest(MyTestCase):
         (False, True),
         (False, False),
     )
-    def test_assertAnd_failes(self, a, b):
+    def test_assertAnd_fails(self, a, b):
         with self.assertRaises(AssertionError):
             self.assertAnd(a, b)
 
@@ -38,7 +38,7 @@ class MyTestCaseTest(MyTestCase):
         ([1], [2]),
         ([1], [1, 1]),
     )
-    def test_assertIterEqual_failes(self, a, b):
+    def test_assertIterEqual_fails(self, a, b):
         with self.assertRaises(AssertionError):
             self.assertIterEqual(a, b)
 
@@ -55,7 +55,7 @@ class MyTestCaseTest(MyTestCase):
         ([1.0], [2.0]),
         ([1.0], [1.0, 1.0]),
     )
-    def test_assertIterAlmostEqual_failes(self, a, b):
+    def test_assertIterAlmostEqual_fails(self, a, b):
         with self.assertRaises(AssertionError):
             self.assertIterAlmostEqual(a, b)
 
@@ -74,9 +74,29 @@ class MyTestCaseTest(MyTestCase):
         ([], [(1, 1)]),
         ([(1, 1)], [(1, 0)]),
     )
-    def test_assertPriorityEqual_failes(self, a, b):
+    def test_assertPriorityEqual_fails(self, a, b):
         with self.assertRaises(AssertionError):
             self.assertPriorityEqual(a, b)
+
+    @parametrize(
+        ([], []),
+        ([1], [1]),
+        ([1, 2], [2, 1]),
+        ([1, 1], [1, 1]),
+    )
+    def test_assertUnorderedSeqEqual(self, a, b):
+        self.assertUnorderedSeqEqual(a, b)
+
+    @parametrize(
+        ([], [1]),
+        ([1], [2]),
+        ([1], [1, 1]),
+        ([1, 2], [1, 1]),
+        ([1, 1], [2, 2]),
+    )
+    def test_assertUnorderedSeqEqual_fails(self, a, b):
+        with self.assertRaises(AssertionError):
+            self.assertUnorderedSeqEqual(a, b)
 
 
 class TestTest(MyTestCase):

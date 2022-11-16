@@ -326,11 +326,31 @@ def scandir_error_ignore(entry: DirEntry, exception) -> None:
     pass
 
 
+def _is_loop(rootentry: DirEntry, entry: DirEntry, is_link: bool, loops: Optional[Set[str]]) -> bool:
+
+    if loops is not None:
+        if is_link:
+            _path = os.readlink(entry)
+
+            if not os.path.isabs(_path):  # symlinks might be relative
+                _path = os.path.join(rootentry.path, _path)
+        else:
+            _path = entry.path
+
+        if _path in loops:
+            return True
+        else:
+            loops.add(_path)
+
+    return False
+
+
 def _scandir_rec_skippable(
     rootentry: DirEntry,
     files: bool = True,
     others: bool = False,
     follow_symlinks: bool = True,
+    prevent_loops_set: Optional[Set[str]] = None,
     errorfunc: Callable[[DirEntry, Exception], None] = scandir_error_raise,
 ) -> Iterator[MyDirEntry]:
 
@@ -340,12 +360,20 @@ def _scandir_rec_skippable(
                 if files and entry.is_file(follow_symlinks=follow_symlinks):
                     yield MyDirEntry(entry)
                 elif entry.is_dir(follow_symlinks=follow_symlinks):
-                    if not follow_symlinks and islink(entry):  # must be a windows junction
+
+                    if not follow_symlinks or prevent_loops_set is not None:
+                        is_link = islink(entry)
+                    if (
+                        not follow_symlinks and is_link
+                    ):  # must be a windows junction since `entry.is_symlink()` returns `False` for junctions
                         continue
+
                     se = MyDirEntry(entry)
                     yield se
-                    if se.follow:
-                        for e in _scandir_rec_skippable(entry, files, others, follow_symlinks, errorfunc):
+                    if se.follow and not _is_loop(rootentry, entry, is_link, prevent_loops_set):
+                        for e in _scandir_rec_skippable(
+                            entry, files, others, follow_symlinks, prevent_loops_set, errorfunc
+                        ):
                             yield e
                 else:
                     if others:
@@ -361,8 +389,11 @@ def _scandir_rec(
     others: bool = False,
     rec: bool = True,
     follow_symlinks: bool = True,
+    prevent_loops_set: Optional[Set[str]] = None,
     errorfunc: Callable[[DirEntry, Exception], None] = scandir_error_raise,
 ) -> Iterator[DirEntry]:
+
+    is_link: Optional[bool] = None
 
     try:
         with os.scandir(rootentry.path) as it:
@@ -370,20 +401,31 @@ def _scandir_rec(
                 if files and entry.is_file(follow_symlinks=follow_symlinks):
                     yield entry
                 elif entry.is_dir(follow_symlinks=follow_symlinks):
-                    if not follow_symlinks and islink(
-                        entry
-                    ):  # must be a windows junction. entry.is_symlink() doesn't support junctions
+
+                    if not follow_symlinks or prevent_loops_set is not None:
+                        is_link = islink(entry)
+                    if (
+                        not follow_symlinks and is_link
+                    ):  # must be a windows junction since `entry.is_symlink()` returns `False` for junctions
                         continue
+
                     if dirs:
                         yield entry
-                    if rec:
-                        for e in _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, errorfunc):
+
+                    if rec and not _is_loop(rootentry, entry, is_link, prevent_loops_set):
+                        for e in _scandir_rec(
+                            entry, files, dirs, others, rec, follow_symlinks, prevent_loops_set, errorfunc
+                        ):
                             yield e
                 else:
                     if others:
                         yield entry
     except OSError as e:
         errorfunc(rootentry, e)
+
+
+def _get_entry_stub(path: str) -> DirEntry:
+    return DirEntryStub(os.path.basename(path), long_path_support(path))
 
 
 def scandir_rec(
@@ -393,10 +435,29 @@ def scandir_rec(
     others: bool = False,
     rec: bool = True,
     follow_symlinks: bool = True,
+    prevent_loops: bool = True,
     relative: bool = False,
     allow_skip: bool = False,
     errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log,
 ) -> Iterator[MyDirEntryT]:
+
+    r"""Variant of `os.scandir()` which recurses into subfolders.
+    `path`: Relative or absolute filesystem path. On Windows this path is converted to a absolute device path <\\?\X:\path\file.exe> to support long paths.
+    `files`: Yield files.
+    `dirs`: Yield directories.
+    `others`: Yield other entries which are neither files nor directories.
+    `rec`: Recurse into subfolders.
+    `follow_symlinks`: Follow symbolic links or directory junctions.
+    `prevent_loops`: Directory links can lead to infinite recursion.
+        If this is True, visited paths will be remembered and only followed once.
+        Directories which are links will always be returned, but their contents only when they are encountered first.
+        Symbolic links to files are always returned, which may lead to file duplicates, but not to loops.
+        If `follow_symlinks` is False, this argument has no effect.
+    `relative`: Yield `MyDirEntry` objects which expose a `relpath` attribute which contains the path as relativ to `path`
+    `allow_skip`: Yield `MyDirEntry` objects which expose a `follow` attribute. If this is set to False for directories,
+        they will not be followed.
+    `errorfunc`: A callback function to handle errors. By default errors are logged as exceptions and ignored.
+    """
 
     if not logical_implication(allow_skip, dirs and rec):
         raise ValueError("allow_skip implies dirs and rec")
@@ -404,14 +465,16 @@ def scandir_rec(
     if isinstance(path, PathLike):
         path = fspath(path)
 
-    entry = DirEntryStub(
-        os.path.basename(path), long_path_support(path)
-    )  # for python 2 compat. and long filename support
+    if not follow_symlinks or not rec:
+        prevent_loops = False
+
+    entry = _get_entry_stub(path)
+    prevent_loops_set: Optional[Set[str]] = set() if prevent_loops else None
 
     if not allow_skip:
-        it = _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, errorfunc)
+        it = _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, prevent_loops_set, errorfunc)
     else:
-        it = _scandir_rec_skippable(entry, files, others, follow_symlinks, errorfunc)
+        it = _scandir_rec_skippable(entry, files, others, follow_symlinks, prevent_loops_set, errorfunc)
 
     if not relative:
         return it
@@ -440,11 +503,14 @@ def scandir_rec_simple(
     others: bool = False,
     rec: bool = True,
     follow_symlinks: bool = True,
+    prevent_loops: bool = True,
     errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log_warning,
 ) -> Iterator[DirEntry]:
 
     entry = DirEntryStub(os.path.basename(path), path)
-    return _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, errorfunc)
+    prevent_loops_set: Optional[Set[str]] = set() if prevent_loops else None
+
+    return _scandir_rec(entry, files, dirs, others, rec, follow_symlinks, prevent_loops_set, errorfunc)
 
 
 def scandir_ext(

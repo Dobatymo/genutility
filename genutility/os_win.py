@@ -4,42 +4,27 @@ import logging
 import os
 import signal
 from ctypes import WinError, byref, c_wchar_p, cast, create_unicode_buffer, memset, sizeof
-from ctypes.wintypes import DWORD, LPCWSTR, ULARGE_INTEGER
+from ctypes.wintypes import DWORD, HANDLE, LPCWSTR, ULARGE_INTEGER
 from msvcrt import get_osfhandle
-from os import fspath
-from typing import TYPE_CHECKING
+from typing import IO, Union
 
 from cwinsdk.shared.ehstorioctl import MAX_PATH
 from cwinsdk.shared.ntdef import PWSTR
+from cwinsdk.um import fileapi, winnt
 from cwinsdk.um.combaseapi import CoTaskMemFree
 from cwinsdk.um.consoleapi import ENABLE_VIRTUAL_TERMINAL_PROCESSING, GetConsoleMode, SetConsoleMode
-from cwinsdk.um.fileapi import (
-    INVALID_FILE_ATTRIBUTES,
-    GetDiskFreeSpaceExW,
-    GetFileAttributesW,
-    GetVolumeInformationW,
-    LockFileEx,
-    UnlockFileEx,
-)
 from cwinsdk.um.KnownFolders import FOLDERID_LocalAppData, FOLDERID_RoamingAppData
 from cwinsdk.um.minwinbase import LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY, OVERLAPPED
 from cwinsdk.um.processenv import GetStdHandle
 from cwinsdk.um.ShlObj_core import SHGetKnownFolderPath
 from cwinsdk.um.WinBase import STD_OUTPUT_HANDLE
-from cwinsdk.um.winnt import FILE_ATTRIBUTE_REPARSE_POINT
 
 from .os_shared import _usagetuple, _volumeinfotuple
 
-if TYPE_CHECKING:
-    from ctypes.wintypes import HANDLE
-    from os import PathLike
-    from typing import IO, Union
-
-    PathType = Union[str, PathLike]
+PathType = Union[str, os.PathLike]
 
 
-def get_stdout_handle():
-    # type: () -> HANDLE
+def get_stdout_handle() -> HANDLE:
 
     """Might return a redirect handle. For the real handle, use CreateFile("CONOUT$")"""
 
@@ -47,8 +32,7 @@ def get_stdout_handle():
 
 
 class EnableAnsi:  # doesn't work for some reason...
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
 
         # os.system("") # calls cmd, which sets ANSI mode, but doesn't disable it when exiting (it's a bug probably)
         self.handle = get_stdout_handle()
@@ -57,20 +41,18 @@ class EnableAnsi:  # doesn't work for some reason...
         GetConsoleMode(self.handle, byref(self.oldmode))
         SetConsoleMode(self.handle, self.oldmode.value | ENABLE_VIRTUAL_TERMINAL_PROCESSING)
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
 
         SetConsoleMode(self.handle, self.oldmode.value)
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         return None
 
     def __exit__(self, *args):
         self.close()
 
 
-def _islink(path):
-    # type: (PathType, ) -> bool
+def _islink(path: PathType) -> bool:
 
     """Tests if `path` refers to a symlink or a junction.
     - Python >= 3.2 `os.path.islink()` only supports symlinks, not junctions.
@@ -78,16 +60,24 @@ def _islink(path):
     This function works in all cases.
     """
 
-    FileName = fspath(path)
-    FileAttributes = GetFileAttributesW(FileName)
+    FileName = os.fspath(path)
+    FileAttributes = fileapi.GetFileAttributesW(FileName)
 
-    if FileAttributes == INVALID_FILE_ATTRIBUTES:
+    if FileAttributes == fileapi.INVALID_FILE_ATTRIBUTES:
         raise WinError()
-    return FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT == FILE_ATTRIBUTE_REPARSE_POINT
+    return FileAttributes & winnt.FILE_ATTRIBUTE_REPARSE_POINT == winnt.FILE_ATTRIBUTE_REPARSE_POINT
 
 
-def _lock(fp, exclusive=True, block=False):
-    # type: (IO, bool, bool) -> None
+def _get_mount_path(path: str) -> str:
+
+    FileName = LPCWSTR(path)
+    BufferLength = 50  # MSDN suggestion
+    VolumeName = create_unicode_buffer(BufferLength)
+    fileapi.GetVolumeNameForVolumeMountPointW(FileName, VolumeName, BufferLength)
+    return VolumeName.value
+
+
+def _lock(fp: IO, exclusive: bool = True, block: bool = False) -> None:
 
     fd = fp.fileno()
     handle = get_osfhandle(fd)
@@ -101,11 +91,10 @@ def _lock(fp, exclusive=True, block=False):
     overlapped = OVERLAPPED()
     memset(byref(overlapped), 0, sizeof(overlapped))
 
-    LockFileEx(handle, flags, 0, 0xFFFFFFFF, 0xFFFFFFFF, overlapped)
+    fileapi.LockFileEx(handle, flags, 0, 0xFFFFFFFF, 0xFFFFFFFF, overlapped)
 
 
-def _unlock(fp):
-    # type: (IO) -> None
+def _unlock(fp: IO) -> None:
 
     fd = fp.fileno()
     handle = get_osfhandle(fd)
@@ -113,7 +102,7 @@ def _unlock(fp):
     overlapped = OVERLAPPED()
     memset(byref(overlapped), 0, sizeof(overlapped))
 
-    UnlockFileEx(handle, 0, 0xFFFFFFFF, 0xFFFFFFFF, overlapped)
+    fileapi.UnlockFileEx(handle, 0, 0xFFFFFFFF, 0xFFFFFFFF, overlapped)
 
 
 def _get_appdata_dir(roaming: bool = False) -> str:
@@ -142,15 +131,14 @@ def _get_appdata_dir(roaming: bool = False) -> str:
     return ret
 
 
-def _disk_usage_windows(path):
-    # type: (str, ) -> _usagetuple
+def _disk_usage_windows(path: str) -> _usagetuple:
 
     DirectoryName = LPCWSTR(path)
     FreeBytesAvailableToCaller = ULARGE_INTEGER(0)  # user free
     TotalNumberOfBytes = ULARGE_INTEGER(0)  # user total
     TotalNumberOfFreeBytes = None  # total free
 
-    GetDiskFreeSpaceExW(
+    fileapi.GetDiskFreeSpaceExW(
         DirectoryName, byref(FreeBytesAvailableToCaller), byref(TotalNumberOfBytes), TotalNumberOfFreeBytes
     )
     return _usagetuple(
@@ -160,8 +148,7 @@ def _disk_usage_windows(path):
     )
 
 
-def _volume_info_windows(path):
-    # type: (str, ) -> _volumeinfotuple
+def _volume_info_windows(path: str) -> _volumeinfotuple:
 
     if not path.endswith("\\"):
         raise ValueError("X: usually doesn't work. X:\\ does.")
@@ -175,7 +162,7 @@ def _volume_info_windows(path):
     FileSystemNameBuffer = create_unicode_buffer(MAX_PATH + 1)
     FileSystemNameSize = MAX_PATH + 1
 
-    GetVolumeInformationW(
+    fileapi.GetVolumeInformationW(
         RootPathName,
         VolumeNameBuffer,
         VolumeNameSize,
@@ -195,14 +182,12 @@ def _volume_info_windows(path):
     )
 
 
-def _interrupt_windows():
-    # type: () -> None
+def _interrupt_windows() -> None:
 
     os.kill(os.getpid(), signal.CTRL_C_EVENT)  # fixme: verify: works on win 10 but not on win 7
 
 
-def _filemanager_cmd_windows(path):
-    # type: (str, ) -> str
+def _filemanager_cmd_windows(path: str) -> str:
 
     return f'explorer.exe /select,"{path}"'
 

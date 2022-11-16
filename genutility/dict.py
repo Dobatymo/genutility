@@ -200,12 +200,12 @@ def _merge_schema(d1: dict, d2: dict) -> None:
 
     for k in a & b:
         if type(d1[k]) != type(d2[k]):  # noqa: E721
-            raise TypeError(f"Type of {k} changed from {type(d1[k])} to {type(d2[k])}")
+            raise TypeError(f"Type of `{k}` changed from {type(d1[k])} to {type(d2[k])}")
 
         if isinstance(d1[k], list):
             if d1[k] and d2[k]:
                 if type(d1[k][0]) != type(d2[k][0]):  # noqa: E721
-                    raise TypeError(f"Type of list {k} changed from {type(d1[k][0])} to {type(d2[k][0])}")
+                    raise TypeError(f"Type of list `{k}` changed from {type(d1[k][0])} to {type(d2[k][0])}")
                 if isinstance(d1[k][0], dict):
                     _merge_schema(d1[k][0], d2[k][0])
 
