@@ -60,6 +60,8 @@ def _islink(path: PathType) -> bool:
     This function works in all cases.
     """
 
+    # this can be replaced with a os.stat() based implementation for Python 3.8+
+
     FileName = os.fspath(path)
     FileAttributes = fileapi.GetFileAttributesW(FileName)
 

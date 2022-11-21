@@ -54,16 +54,16 @@ class JsonTest(MyTestCase):
 
     def test_BuiltinRoundtripDecoder(self):
         dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
-        raw = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
+        raw = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}, "set": {"$set": [1, 2, 3]}}'
 
-        truth = {"dt": dt}
+        truth = {"dt": dt, "set": {1, 2, 3}}
         result = json.loads(raw, cls=BuiltinRoundtripDecoder)
         self.assertEqual(truth, result)
 
     def test_BuiltinRoundtripEncoder(self):
         dt = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
-        truth = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}}'
-        result = json.dumps({"dt": dt}, cls=BuiltinRoundtripEncoder)
+        truth = '{"dt": {"$datetime": "2000-01-01T00:00:00+00:00"}, "set": {"$set": [1, 2, 3]}}'
+        result = json.dumps({"dt": dt, "set": {1, 2, 3}}, cls=BuiltinRoundtripEncoder)
         self.assertEqual(truth, result)
 
 

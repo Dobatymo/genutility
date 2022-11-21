@@ -985,7 +985,12 @@ def shutil_onerror_remove_readonly(func, path, exc_info):
         raise
 
 
-def _rmtree(path: str, ignore_errors: bool = False, onerror: Optional[Callable[[Callable, str, Any], None]] = None):
+def _rmtree(
+    path: str,
+    ignore_errors: bool = False,
+    onerror: Optional[Callable[[Callable, str, Any], None]] = None,
+    follow_junctions: bool = False,
+) -> Iterator[None]:
 
     """Compared to `shutil.rmtree`, this removes files instantly,
     instead of collecting the whole directory contents first.
@@ -993,6 +998,12 @@ def _rmtree(path: str, ignore_errors: bool = False, onerror: Optional[Callable[[
 
     import sys
     from shutil import _rmtree_isdir
+
+    if not follow_junctions and sys.version_info < (3, 8):
+        raise ValueError("`follow_junctions=False` is unsupported for Python<3.8.")
+
+    if follow_junctions and sys.version_info >= (3, 8):
+        raise ValueError("`follow_junctions=True` is unsupported for Python>=3.8.")
 
     if ignore_errors:
 
@@ -1010,7 +1021,7 @@ def _rmtree(path: str, ignore_errors: bool = False, onerror: Optional[Callable[[
                 fullname = entry.path
                 if _rmtree_isdir(entry):
                     try:
-                        if entry.is_symlink():
+                        if entry.is_symlink():  # not sure why this is necessary, copied from shutil._rmtree_unsafe
                             raise OSError("Cannot call _rmtree on a symbolic link")
                     except OSError:
                         onerror(os.path.islink, fullname, sys.exc_info())

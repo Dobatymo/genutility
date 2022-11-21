@@ -4,7 +4,7 @@ import logging
 import os
 import subprocess  # nosec
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class RarError(Exception):
-    def __init__(self, msg, returncode=None, cmd=None, output=""):
+    def __init__(self, msg: str, returncode: Optional[int] = None, cmd: Optional[str] = None, output: str = ""):
         Exception.__init__(self, msg)
         self.returncode = returncode
         self.cmd = cmd
@@ -49,15 +49,15 @@ class Rar:
             raise ValueError("Invalid executable")
 
         self.archive = archive
-        self.filelist = []  # type: List[str]
+        self.filelist: List[str] = []
         self.cmd = ""
-        self.flags = {}  # type: Dict[str, Tuple[bool, str]]
+        self.flags: Dict[str, Tuple[bool, str]] = {}
         self.flags["lock"] = (False, "k")
         self.flags["delete"] = (False, "df")
         self.flags["test"] = (False, "t")
         self.flags["filetime"] = (False, "tl")
         self.flags["append_archive_name"] = (False, "ad")
-        self.options = {}  # type: Dict[str, Tuple[bool, str]]
+        self.options: Dict[str, Tuple[bool, str]] = {}
         self.options["split"] = (False, "v%s")
         self.options["compression"] = (False, "m%u")
         self.options["password"] = (False, "p%s")
@@ -65,24 +65,22 @@ class Rar:
         self.options["recovery"] = (False, "rr%up")
         self.options["recovery_volumes"] = (False, "rr%u%%")
 
-    def add_file(self, pathname):
-        # type: (str, ) -> None
+    def add_file(self, pathname: str) -> None:
 
         self.filelist.append(pathname)
 
-    def add_files(self, filelist):
-        # type: (Iterable[str], ) -> None
+    def add_files(self, filelist: Iterable[str]) -> None:
 
         self.filelist.extend(filelist)
 
-    def set_compression(self, level):
+    def set_compression(self, level: Union[int, bool]) -> None:
         """level: 0 store, 1 fastest, 2 fast, 3 normal, 4 good, 5 best (default: 3)"""
 
         if level not in range(0, 6) and level is not False:
             raise RarError("Invalid parameter: Set compression level (0-store...3-default...5-best)")
         self.options["compression"][0] = level
 
-    def set_password(self, password, encrypt_filenames=False):
+    def set_password(self, password, encrypt_filenames: bool = False) -> None:
         if encrypt_filenames:
             self.options["password_header"][0] = password
             self.options["password"][0] = False
@@ -90,14 +88,14 @@ class Rar:
             self.options["password"][0] = password
             self.options["password_header"][0] = False
 
-    def add_recovery_info(self, rr):
+    def add_recovery_info(self, rr: int) -> None:
         """rr: recovery record in percent, only 1-10 is valid"""
 
         if rr < 1 or rr > 10:
             raise RarError("Only 1%-10% valid")
         self.options["recovery"][0] = rr
 
-    def add_recovery_volumes(self, rv):
+    def add_recovery_volumes(self, rv: int) -> None:
         """rv: number of recovery volumes"""
 
         self.options["recovery_volumes"][0] = rv
@@ -105,26 +103,26 @@ class Rar:
     def split(self, split):
         self.options["split"][0] = split
 
-    def lock(self, flag=True):
+    def lock(self, flag: bool = True) -> None:
         self.flags["lock"][0] = flag
 
-    def delete_after_archiving(self, flag=True):
+    def delete_after_archiving(self, flag: bool = True) -> None:
         """flag (bool): delete files after archiving"""
 
         self.flags["delete"][0] = flag
 
-    def test_after_archiving(self, flag=True):
+    def test_after_archiving(self, flag: bool = True) -> None:
         """flag (bool): test archive after archiving"""
 
         self.flags["test"][0] = flag
 
-    def set_archive_to_filetime(self, flag=True):
+    def set_archive_to_filetime(self, flag: bool = True) -> None:
         self.flags["filetime"][0] = flag
 
-    def commandline(self, cmd):
+    def commandline(self, cmd: str) -> None:
         self.cmd = cmd.strip()
 
-    def _execute(self, args):
+    def _execute(self, args: str):
         cmd = f"{self.exe} {args}"
         logger.debug("CMD: " + cmd)
         try:
@@ -137,33 +135,33 @@ class Rar:
 
         return ret
 
-    def test(self, password="-"):  # nosec
+    def test(self, password: str = "-") -> None:  # nosec
         self._execute(f't -p{password} "{self.archive}"')
 
-    def get_files_str(self):
+    def get_files_str(self) -> str:
         return surrounding_join(" ", self.filelist, '"', '"')
 
-    def get_flag_str(self):
+    def get_flag_str(self) -> str:
         return surrounding_join(" ", [value[1] for value in self.flags.itervalues() if value[0] is True], "-", "")
 
-    def get_options_str(self):
+    def get_options_str(self) -> str:
         return surrounding_join(
             " ", [value[1] % value[0] for value in self.options.itervalues() if value[0] is not False], "-", ""
         )
 
-    def _get_args(self, command):
+    def _get_args(self, command: str) -> str:
         return f'{command} {self.get_flag_str()} {self.get_options_str()} {self.cmd} "{self.archive}" {self.get_files_str()}'
 
-    def create(self):
+    def create(self) -> None:
         self._execute(self._get_args("a"))
 
-    def extract(self, dir, mode=0):
-        self.filelist = [dir]
+    def extract(self, directory: str, mode: int = 0) -> None:
+        self.filelist = [directory]
         if mode == 1:
             self.flags["append_archive_name"][0] = True
         self._execute(self._get_args("x"))
 
-    def close(self):
+    def close(self) -> None:
         pass
 
 

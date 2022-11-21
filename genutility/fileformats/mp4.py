@@ -63,7 +63,7 @@ class BoxParser:
                 return ret
 
 
-def named_batch(entries: Iterable, length: int, named_tuple_cls: object) -> List[namedtuple]:
+def named_batch(entries: Iterable, length: int, named_tuple_cls: object) -> List[tuple]:
     assert len(named_tuple_cls._fields) == length, "length parameter doesn't match named tuple size"
     return list(batch(entries, length, named_tuple_cls._make))
 

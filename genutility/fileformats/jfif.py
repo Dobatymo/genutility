@@ -102,8 +102,7 @@ metadata_segments = {
 } | {f"APP{i}" for i in range(16)}
 
 
-def iter_jpeg_fp(fr, translate=True):
-    # type: (BinaryIO, bool) -> Iterator[Segment]
+def iter_jpeg_fp(fr: BinaryIO, translate: bool = True) -> Iterator[Segment]:
 
     """Iterate over JPEG file given in binary stream `fr` and yield the segments.
     `translate=False` can be used to reconstruct the file in a bit-identical way.
@@ -189,8 +188,7 @@ def iter_jpeg_fp(fr, translate=True):
                     yield name, marker, size, data
 
 
-def iter_jpeg(path, translate=True):
-    # type: (str, bool) -> Iterator[Segment]
+def iter_jpeg(path: str, translate: bool = True) -> Iterator[Segment]:
 
     """Same as `iter_jpeg_fp()` except that it accepts a path."""
 
@@ -198,8 +196,7 @@ def iter_jpeg(path, translate=True):
         yield from iter_jpeg_fp(fr, translate=translate)
 
 
-def copy_jpeg_fp(fin, fout, ignore_segments=None):
-    # type: (BinaryIO, BinaryIO, Optional[Set[str]]) -> None
+def copy_jpeg_fp(fin: BinaryIO, fout: BinaryIO, ignore_segments: Optional[Set[str]] = None) -> None:
 
     """Same as `copy_jpeg()` except that it accepts file-like objects."""
 
@@ -212,8 +209,7 @@ def copy_jpeg_fp(fin, fout, ignore_segments=None):
             fout.write(data)
 
 
-def copy_jpeg(inpath, outpath, ignore_segments=None):
-    # type: (str, str, Set[str]) -> None
+def copy_jpeg(inpath: str, outpath: str, ignore_segments: Optional[Set[str]] = None) -> None:
 
     """Copy JPEG file `inpath` to `outpath` while ignoring the JPEG segments
     given in `ignore_segments`.
@@ -226,8 +222,7 @@ def copy_jpeg(inpath, outpath, ignore_segments=None):
         copy_jpeg_fp(fr, fw, ignore_segments=ignore_segments)
 
 
-def hash_raw_jpeg(path, hashobj):
-    # type: (str, Hashobj) -> None
+def hash_raw_jpeg(path: str, hashobj: Hashobj) -> None:
 
     """Create a hash of the JPEG at `path` skipping over meta data sections."""
 
