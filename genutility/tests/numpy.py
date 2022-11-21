@@ -15,6 +15,7 @@ from genutility.numpy import (
     hamming_dist,
     hamming_dist_packed,
     hamming_dist_packed_chunked,
+    image_grid,
     is_rgb,
     is_square,
     logtrace,
@@ -549,6 +550,29 @@ class NumpyTest(MyTestCase):
         result = center_of_mass_2d(arr, dtype=dtype)
         np.testing.assert_array_equal(truth, result)
         self.assertEqual(truth.dtype, result.dtype)
+
+    def test_image_grid(self):
+        arr = np.array([1]).reshape(1, 1, 1, 1)
+
+        result = image_grid(arr, 2, fill_value=[0])
+        truth = np.array([1]).reshape(1, 1, 1)
+        np.testing.assert_array_equal(truth, result)
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]]).reshape(2, 2, 2, 1)
+
+        result = image_grid(arr, 1, fill_value=[0])
+        truth = np.array([[1, 2], [3, 4], [5, 6], [7, 8]]).reshape(4, 2, 1)
+        np.testing.assert_array_equal(truth, result)
+
+        result = image_grid(arr, 2, fill_value=[0])
+        truth = np.array([[1, 2, 5, 6], [3, 4, 7, 8]]).reshape(2, 4, 1)
+        np.testing.assert_array_equal(truth, result)
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]]).reshape(3, 2, 2, 1)
+
+        result = image_grid(arr, 2, fill_value=[0])
+        truth = np.array([[1, 2, 5, 6], [3, 4, 7, 8], [9, 10, 0, 0], [11, 12, 0, 0]]).reshape(4, 4, 1)
+        np.testing.assert_array_equal(truth, result)
 
 
 if __name__ == "__main__":

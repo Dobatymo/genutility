@@ -770,3 +770,36 @@ def center_of_mass_2d(arr: np.ndarray, dtype=np.float32) -> np.ndarray:
     results = np.array([np.sum(arr * grid.astype(dtype), axis=(-1, -2)) / total for grid in grids], dtype=dtype).T
 
     return results
+
+
+def ceildiv(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return -(a // -b)
+
+
+def image_grid(images: np.ndarray, nrow: int = 8, fill_value=(0, 0, 0)) -> np.ndarray:
+    """Creates a picture grid (left to right, top to bottom).
+    `images`: Input array of shape [n, height, widght, channel]
+    `nrow`: Number of images per row
+    `fill_value`: Pad empty space with pixels of shape [channel]
+    """
+
+    if not images.ndim == 4:
+        raise ValueError("Input shape must be [n, height, width, channel]")
+
+    h, w = images.shape[1:3]
+    nbatch = images.shape[0]
+    channels = images.shape[3]
+    rows = ceildiv(nbatch, nrow)
+    cols = min(nbatch, nrow)
+
+    if channels != len(fill_value):
+        raise ValueError("fill_value must match number of channels")
+
+    out = np.full((h * rows, w * cols, channels), fill_value, dtype=images.dtype)
+
+    for i in range(images.shape[0]):
+        row = i // cols
+        col = i % cols
+        out[h * row : h * (row + 1), w * col : w * (col + 1), :] = images[i]
+
+    return out

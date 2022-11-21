@@ -7,14 +7,16 @@ from genutility.test import MyTestCase
 class SparqlTest(MyTestCase):
     def test_pipeline(self):
         q = """
-        SELECT ?businessLabel WHERE {
-            ?business wdt:P31 wd:Q6881511.
-            SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-        } LIMIT 20
+        SELECT ?businessLabel ?ticker WHERE {
+          ?business wdt:P31 wd:Q6881511.
+          ?business wdt:P414 wd:Q82059.
+          ?business wdt:P249 ?ticker.
+          SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+        } ORDER BY ?ticker LIMIT 5
         """
         df = wikidata_to_dataframe(query_wikidata(q))
-        result = set(df.businessLabel[:5])
-        truth = {"Meta Platforms", "Apple", "Boeing", "Intel", "Airbus"}
+        result = df.ticker.tolist()
+        truth = ["TSLA"]
         self.assertEqual(truth, result)
 
 
