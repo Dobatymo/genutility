@@ -1,14 +1,23 @@
 from __future__ import generator_stop
 
-import time
-from datetime import datetime, timedelta, timezone, tzinfo
-from typing import TYPE_CHECKING, Optional, overload
-
-if TYPE_CHECKING:
-    from datetime import time as dtime
+from datetime import datetime
+from datetime import time as dtime
+from datetime import timedelta, timezone
+from typing import Optional, overload
 
 utcmin = datetime.min.replace(tzinfo=timezone.utc)
 utcmax = datetime.max.replace(tzinfo=timezone.utc)
+
+
+def current_local_timezone() -> timezone:
+    """Returns a local fixed offset timezone.
+    Warning: This timezone is only valid at the time of creation.
+    Ie. if called in the summer for a local timezone which follows DST,
+    and applied on a winter datetime, the result will be wrong.
+    For a correct implementation use something like `dateutil.tz.tzlocal()`.
+    """
+
+    return datetime.now(timezone.utc).astimezone().tzinfo
 
 
 def is_aware(dt: datetime) -> bool:
@@ -91,16 +100,12 @@ def datetime_from_utc_timestamp_ns(epoch: int, aslocal: bool = False) -> datetim
 
 
 @overload
-def between(dt, start, end):
-    # type: (datetime, Optional[datetime], Optional[datetime]) -> bool
-
+def between(dt: datetime, start: Optional[datetime], end: Optional[datetime]) -> bool:
     pass
 
 
 @overload
-def between(dt, start, end):
-    # type: (dtime, Optional[dtime], Optional[dtime]) -> bool
-
+def between(dt: dtime, start: Optional[dtime], end: Optional[dtime]) -> bool:
     pass
 
 
@@ -126,38 +131,3 @@ def between(dt, start=None, end=None):
     if end and dt > end:
         return False
     return True
-
-
-class LocalTimezone(tzinfo):
-    def __init__(self):
-        if time.daylight:
-            self.daylight = timedelta(seconds=-time.altzone) - timedelta(seconds=-time.timezone)
-            self.offset = timedelta(seconds=-time.altzone)
-            self.name = time.tzname[1]
-        else:
-            self.daylight = timedelta(0)
-            self.offset = timedelta(seconds=-time.timezone)
-            self.name = time.tzname[0]
-
-    def dst(self, dt):
-        return self.daylight
-
-    def utcoffset(self, dt):
-        return self.offset
-
-    def tzname(self):
-        return self.name
-
-    def __repr__(self):
-        return "genutility.datetime.localtimezone"
-
-
-localtimezone = LocalTimezone()
-
-# deprecated
-def localnow():
-    # type: () -> datetime
-
-    """Returns the current datetime as timezone aware object in local timezone."""
-
-    return datetime.now(localtimezone)

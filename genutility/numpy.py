@@ -519,12 +519,17 @@ def histogram_correlation(hist1: np.ndarray, hist2: np.ndarray) -> np.ndarray:
 
     """Input shape of `hist1` and `hist2`: [batch..., levels]. The correlation is calculated over `levels`
     and then batched over the remaining dimensions.
+    Similar to `cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)`.
     """
 
-    assert len(hist1.shape) >= 1 and hist1.shape == hist2.shape
+    if hist1.ndim < 1 or hist1.shape[-1] < 1 or hist1.shape != hist2.shape:
+        raise ValueError(f"Histogram shapes unsupported: {hist1.shape}, {hist2.shape}")
 
     h1norm = (hist1.T - np.mean(hist1, axis=-1)).T
     h2norm = (hist2.T - np.mean(hist2, axis=-1)).T
+
+    if np.count_nonzero(h1norm) == 0 or np.count_nonzero(h2norm) == 0:
+        raise ValueError("Both histograms are completely flat")
 
     num = np.sum(h1norm * h2norm, axis=-1)
     denom = np.sqrt(np.sum(h1norm**2, axis=-1) * np.sum(h2norm**2, axis=-1))

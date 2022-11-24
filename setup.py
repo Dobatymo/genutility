@@ -121,7 +121,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
     author="Dobatymo",
     name="genutility",
-    version="0.0.95",
+    version="0.0.96",
     url="https://github.com/Dobatymo/genutility",
     description="A collection of various Python utilities",
     long_description=long_description,

@@ -1,5 +1,6 @@
 from __future__ import generator_stop
 
+import cv2
 import numpy as np
 
 from genutility.benchmarks.numpy import bincount_batch_2
@@ -15,6 +16,7 @@ from genutility.numpy import (
     hamming_dist,
     hamming_dist_packed,
     hamming_dist_packed_chunked,
+    histogram_correlation,
     image_grid,
     is_rgb,
     is_square,
@@ -573,6 +575,37 @@ class NumpyTest(MyTestCase):
         result = image_grid(arr, 2, fill_value=[0])
         truth = np.array([[1, 2, 5, 6], [3, 4, 7, 8], [9, 10, 0, 0], [11, 12, 0, 0]]).reshape(4, 4, 1)
         np.testing.assert_array_equal(truth, result)
+
+    @parametrize(
+        ([1, 2], [1, 2], 1.0),
+        ([[1, 2], [0, 3]], [[1, 2], [0, 3]], [1.0, 1.0]),
+        ([1, 2], [3, 4], 1.0),
+        ([1, 2], [2, 1], -1.0),
+        ([9, 7, 3, 4, 6, 3, 4, 8, 4, 6], [5, 5, 0, 3, 0, 8, 2, 6, 0, 6], 0.3417686325965),
+    )
+    def test_histogram_correlation(self, hist1, hist2, truth):
+        truth = np.array(truth)
+        hist1 = np.array(hist1)
+        hist2 = np.array(hist2)
+
+        result = histogram_correlation(hist1, hist2)
+        np.testing.assert_allclose(truth, result)
+
+        result = cv2.compareHist(hist1.astype(np.float32), hist2.astype(np.float32), cv2.HISTCMP_CORREL)
+        np.testing.assert_allclose(truth, result)
+
+    def test_histogram_correlation_fail(self):
+        with self.assertRaises(ValueError):
+            histogram_correlation(np.array([]), np.array([]))
+
+        with self.assertRaises(ValueError):
+            histogram_correlation(np.array([1]), np.array([1, 2]))
+
+        with self.assertRaises(ValueError):
+            histogram_correlation(np.array([1]), np.array([[1]]))
+
+        with self.assertRaises(ValueError):
+            histogram_correlation(np.array([1]), np.array([1]))
 
 
 if __name__ == "__main__":
