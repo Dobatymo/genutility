@@ -3,16 +3,12 @@ from __future__ import generator_stop
 import fcntl
 import os
 import signal
-from typing import TYPE_CHECKING
+from typing import IO
 
 from .os_shared import _usagetuple
 
-if TYPE_CHECKING:
-    from typing import IO
 
-
-def _lock(fp, exclusive=True, block=False):
-    # type: (IO, bool, bool) -> None
+def _lock(fp: IO, exclusive: bool = True, block: bool = False) -> None:
 
     if exclusive:
         operation = fcntl.LOCK_EX
@@ -25,13 +21,11 @@ def _lock(fp, exclusive=True, block=False):
     fcntl.flock(fp, operation)
 
 
-def _unlock(fp):
-    # type: (IO, ) -> None
+def _unlock(fp: IO) -> None:
     fcntl.flock(fp, fcntl.LOCK_UN)
 
 
-def _disk_usage_posix(path):
-    # type: (str, ) -> _usagetuple
+def _disk_usage_posix(path: str) -> _usagetuple:
 
     st = os.statvfs(path)
 
@@ -41,12 +35,11 @@ def _disk_usage_posix(path):
     return _usagetuple(total, total - free, free)
 
 
-def _interrupt_posix():
+def _interrupt_posix() -> None:
     os.kill(os.getpid(), signal.SIGINT)
 
 
-def _filemanager_cmd_posix(path):
-    # type: (str, ) -> str
+def _filemanager_cmd_posix(path: str) -> str:
 
     return f'nautilus "{path}"'  # gnome only. xdg-open for the rest?
 

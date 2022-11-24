@@ -1,6 +1,6 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Any, Dict, Tuple, Union
 
 import piexif
 from PIL import Image, ImageDraw, ImageFont
@@ -8,14 +8,10 @@ from PIL.ExifTags import GPSTAGS, TAGS
 
 from .exceptions import NoActionNeeded
 
-if TYPE_CHECKING:
-    from typing import Any, Dict, Tuple, Union
-
-    Color = Union[str, Tuple[int, int, int]]
+Color = Union[str, Tuple[int, int, int]]
 
 
-def multiline_textsize(text, ttf, spacing=4):
-    # type: (str, ImageFont, int) -> Tuple[int, int]
+def multiline_textsize(text: str, ttf: ImageFont, spacing: int = 4) -> Tuple[int, int]:
 
     lines = text.splitlines()
 
@@ -30,15 +26,14 @@ def multiline_textsize(text, ttf, spacing=4):
     return width, height
 
 
-def exifinfo(image):
-    # type: (Image, ) -> Dict[str, Any]
+def exifinfo(image: Image.Image) -> Dict[str, Any]:
 
-    ret = dict()  # type: Dict[str, Any]
+    ret: Dict[str, Any] = {}
 
     exifd = image._getexif()
 
     if exifd is None:
-        return dict()
+        return {}
 
     for k, v in exifd.items():
         try:
@@ -59,8 +54,15 @@ def exifinfo(image):
     return ret
 
 
-def text_with_outline(draw, pos, text, font, fillcolor, outlinecolor, outlinesize=1):
-    # type: (ImageDraw, Tuple[int, int], str, ImageFont, Color, Color, int) -> None
+def text_with_outline(
+    draw: ImageDraw,
+    pos: Tuple[int, int],
+    text: str,
+    font: ImageFont,
+    fillcolor: Color,
+    outlinecolor: Color,
+    outlinesize: int = 1,
+) -> None:
 
     x, y = pos
     delta = outlinesize
@@ -82,9 +84,14 @@ def text_with_outline(draw, pos, text, font, fillcolor, outlinecolor, outlinesiz
 
 
 def write_text(
-    img, text, alignment="TL", fillcolor=(255, 255, 255), outlinecolor=(0, 0, 0), fontsize=0.03, padding=(5, 5)
-):
-    # (Image, str, str, Color, Color, Union[float, int], Union[float, Tuple[int, int]]) -> None
+    img: Image.Image,
+    text: str,
+    alignment: str = "TL",
+    fillcolor: Color = (255, 255, 255),
+    outlinecolor: Color = (0, 0, 0),
+    fontsize: Union[float, int] = 0.03,
+    padding: Union[float, Tuple[int, int]] = (5, 5),
+) -> None:
 
     if alignment not in {"TL", "TC", "TR", "BL", "BC", "BR"}:
         raise ValueError(f"Invalid alignment: {alignment}")
@@ -124,7 +131,7 @@ def write_text(
     text_with_outline(d, pos, text, font, fillcolor, outlinecolor, 2)
 
 
-def _fix_orientation(img: Image, orientation: int) -> Image:
+def _fix_orientation(img: Image.Image, orientation: int) -> Image.Image:
 
     if orientation == 1:
         raise NoActionNeeded("File already properly rotated")
@@ -148,8 +155,7 @@ def _fix_orientation(img: Image, orientation: int) -> Image:
     return img
 
 
-def fix_orientation(img, exif):
-    # type (Image, dict) -> Image
+def fix_orientation(img: Image.Image, exif: dict) -> Image.Image:
 
     orientation = exif["0th"][piexif.ImageIFD.Orientation]
     img = _fix_orientation(img, orientation)

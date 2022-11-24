@@ -7,7 +7,7 @@ from itertools import product, zip_longest
 from os import remove
 from tempfile import NamedTemporaryFile
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import IO, Any, Callable, Collection, DefaultDict, Hashable, Iterable, Mapping, Optional, Tuple, TypeVar
 from unittest import TestCase
 from unittest.result import TestResult
 from unittest.runner import TextTestRunner
@@ -15,11 +15,8 @@ from unittest.runner import TextTestRunner
 from .file import _check_arguments, equal_files
 from .signal import HandleKeyboardInterrupt  # problem here
 
-if TYPE_CHECKING:
-    from typing import Any, Callable, Collection, DefaultDict, Hashable, Iterable, Mapping, Optional, Tuple, TypeVar
-
-    T = TypeVar("T")
-    U = TypeVar("U")
+T = TypeVar("T")
+U = TypeVar("U")
 
 
 class nullcontext:  # see: .compat.contextlib
@@ -49,29 +46,29 @@ def print_file_diff(fromfile: str, tofile: str, encoding: str) -> None:
 class MyTestResult(TestResult):
     """Extension of TestResult to support numbering test cases"""
 
-    def __init__(self, stream, descriptions, verbosity):
+    def __init__(self, stream: IO[str], descriptions, verbosity):
         """Initializes the test number generator, then calls super impl"""
         self.stream = stream
         self.current_test = 0
         self.current_subtest = 0
         return TestResult.__init__(self, stream, descriptions, verbosity)
 
-    def progress(self):
+    def progress(self) -> None:
         self.stream.write(f"Running test #{self.current_test}, subtest #{self.current_subtest}\r")
 
-    def startTest(self, test):
+    def startTest(self, test) -> None:
         self.current_test += 1
         TestResult.startTest(self, test)
         self.progress()
 
-    def stopTest(self, test):
+    def stopTest(self, test) -> None:
         TestResult.stopTest(self, test)
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         self.stream.write("\n")
         TestResult.stopTestRun(self)
 
-    def addSubTest(self, test, subtest, outcome):
+    def addSubTest(self, test, subtest, outcome) -> None:
         """Called when a subtest finishes."""
 
         TestResult.addSubTest(self, test, subtest, outcome)
@@ -96,8 +93,7 @@ class MyTestRunner(TextTestRunner):
 
 
 class NoRaise:
-    def __init__(self, testcase, message=None):
-        # type: (TestCase, Optional[str]) -> None
+    def __init__(self, testcase: TestCase, message: Optional[str] = None) -> None:
 
         self.testcase = testcase
         self.message = message
@@ -113,8 +109,7 @@ class NoRaise:
                 self.testcase.fail(exc_value)
 
 
-def make_comparable(d):
-    # type: (Any, ) -> Any
+def make_comparable(d: Any) -> Any:
 
     if isinstance(d, (str, int, type(None))):
         return d
@@ -128,8 +123,7 @@ def make_comparable(d):
         raise ValueError(f"must be list, tuple or dict, not {type(d)}")
 
 
-def is_equal_unordered(seq_a, seq_b):
-    # type: (Collection, Collection) -> bool
+def is_equal_unordered(seq_a: Collection, seq_b: Collection) -> bool:
 
     if isinstance(seq_a, set) and isinstance(seq_b, set):
         return seq_a == seq_b
@@ -148,31 +142,26 @@ class MyTestCase(TestCase):
         else:
             return func(self, msg, **params)
 
-    def assertAnd(self, first, second, msg=None):
-        # type: (Any, Any, Optional[str]) -> None
+    def assertAnd(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
 
         self.assertTrue(first and second, msg)
 
-    def assertTypeEqual(self, first, second, msg=None):
-        # type: (Any, Any, Optional[str]) -> None
+    def assertTypeEqual(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
 
         self.assertEqual(type(first), type(second), msg)
 
-    def assertFilesEqual(self, first_path, second_path, msg=None):
-        # type: (Any, Any, Optional[str]) -> None
+    def assertFilesEqual(self, first_path: Any, second_path: Any, msg: Optional[str] = None) -> None:
 
         self.assertTrue(equal_files(first_path, second_path), msg)
 
-    def assertIterEqual(self, first, second, msg=None):
-        # type: (Iterable, Iterable, Optional[str]) -> None
+    def assertIterEqual(self, first: Iterable, second: Iterable, msg: Optional[str] = None) -> None:
 
         for i, (a, b) in enumerate(zip_longest(first, second)):
             if msg:
                 msg = " : " + str(msg)
             self.assertEqual(a, b, msg=f"in iteration index {i}: {msg}")
 
-    def assertIterAlmostEqual(self, first, second, msg=None):
-        # type: (Iterable, Iterable, Optional[str]) -> None
+    def assertIterAlmostEqual(self, first: Iterable, second: Iterable, msg: Optional[str] = None) -> None:
 
         for i, (a, b) in enumerate(zip_longest(first, second)):
             if msg:
@@ -182,27 +171,31 @@ class MyTestCase(TestCase):
             except TypeError:
                 raise AssertionError("Invalid types (probably different length iters)")  # from None
 
-    def assertAllEqual(self, args, msg=None):  # *args doesn't work in python2!?
-        # type: (Iterable, Optional[str]) -> None
+    def assertAllEqual(self, args: Iterable, msg: Optional[str] = None) -> None:  # *args doesn't work in python2!?
 
         it = iter(args)
         first = next(it)
         for second in it:
             self.assertEqual(first, second, msg)
 
-    def assertIterIterEqual(self, first, second, msg=None):  # UNTESTED
-        # type: (Iterable[Iterable], Iterable[Iterable], Optional[str]) -> None
+    def assertIterIterEqual(
+        self, first: Iterable[Iterable], second: Iterable[Iterable], msg: Optional[str] = None
+    ) -> None:  # UNTESTED
 
         for i, (a, b) in enumerate(zip_longest(first, second)):
             if msg:
                 msg = " : " + str(msg)
             self.assertIterEqual(a, b, msg=f"in iteration index {i}: {msg}")
 
-    def assertPriorityEqual(self, first, second, msg=None):
-        # type: (Iterable[Optional[Tuple[Hashable, Hashable]]], Iterable[Optional[Tuple[Hashable, Hashable]]], Optional[str]) -> None
+    def assertPriorityEqual(
+        self,
+        first: Iterable[Optional[Tuple[Hashable, Hashable]]],
+        second: Iterable[Optional[Tuple[Hashable, Hashable]]],
+        msg: Optional[str] = None,
+    ) -> None:
 
-        d1 = defaultdict(set)  # type: DefaultDict[Hashable, set]
-        d2 = defaultdict(set)  # type: DefaultDict[Hashable, set]
+        d1: DefaultDict[Hashable, set] = defaultdict(set)
+        d2: DefaultDict[Hashable, set] = defaultdict(set)
 
         for a, b in zip_longest(first, second):
             if a is not None:
@@ -224,8 +217,7 @@ class MyTestCase(TestCase):
             d2[p_2].add(val_2)
         self.assertEqual(d1, d2, msg)
 
-    def assertUnorderedSeqEqual(self, first, second, msg=None):
-        # type: (Iterable, Iterable, Optional[str]) -> None
+    def assertUnorderedSeqEqual(self, first: Iterable, second: Iterable, msg: Optional[str] = None) -> None:
 
         # fixme: use is_equal_unordered
 
@@ -233,13 +225,11 @@ class MyTestCase(TestCase):
         second = sorted(second)
         self.assertEqual(first, second, msg)
 
-    def assertNoRaise(self, msg=None):
-        # type: (Optional[str], ) -> NoRaise
+    def assertNoRaise(self, msg: Optional[str] = None) -> NoRaise:
 
         return NoRaise(self, msg)
 
-    def assertEqualsOneOf(self, result, truths):
-        # type: (T, Iterable[T]) -> None
+    def assertEqualsOneOf(self, result: T, truths: Iterable[T]) -> None:
 
         for truth in truths:
             if result == truth:
@@ -247,8 +237,9 @@ class MyTestCase(TestCase):
 
         raise AssertionError("Result does not match one of the provided truths")  # from None
 
-    def assertUnorderedMappingEqual(self, first, second, msg=None):
-        # type: (Mapping[T, U], Mapping[T, U], Optional[str]) -> None
+    def assertUnorderedMappingEqual(
+        self, first: Mapping[T, U], second: Mapping[T, U], msg: Optional[str] = None
+    ) -> None:
 
         self.assertEqual(len(first), len(second), msg)
 
@@ -257,9 +248,7 @@ class MyTestCase(TestCase):
             self.assertEqual(first[a], second[b])
 
 
-def random_arguments(n, *funcs):
-    # type: (int, *Callable[[], Any]) -> Callable[[Callable], Callable]
-
+def random_arguments(n: int, *funcs: Callable[[], Any]) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(self):
@@ -274,9 +263,7 @@ def random_arguments(n, *funcs):
 
 
 # also called: parameterize
-def parametrize(*args_list):
-    # # type: (*tuple, ) -> Callable[[Callable], Callable] # mypy error: syntax error in type comment
-
+def parametrize(*args_list: tuple) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(self):
@@ -290,9 +277,7 @@ def parametrize(*args_list):
     return decorator
 
 
-def parametrize_product(*args_list):
-    # # type: (*tuple, ) -> Callable[[Callable], Callable] # mypy error: syntax error in type comment
-
+def parametrize_product(*args_list: tuple) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(self):
@@ -306,9 +291,7 @@ def parametrize_product(*args_list):
     return decorator
 
 
-def repeat(number):
-    # type: (int, ) -> Callable[[Callable], Callable]
-
+def repeat(number: int) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(self):

@@ -26,14 +26,12 @@ class SharingViolation(OSError):
 
 
 class WindowsFile(WindowsHandle):
-    def __init__(self, handle):
-        # type: (int, ) -> None
+    def __init__(self, handle: int) -> None:
 
         WindowsHandle.__init__(self, handle, doclose=True)
 
     @classmethod
-    def from_path(cls, path, mode="r", shared=False):
-        # type: (str, str, bool) -> WindowsFile
+    def from_path(cls, path: str, mode: str = "r", shared: bool = False) -> "WindowsFile":
 
         """Create a Windows file objects from `path`.
         If shared is False: allow write access from other processes.
@@ -79,7 +77,7 @@ class WindowsFile(WindowsHandle):
         )
         return cls(handle)
 
-    def info(self):
+    def info(self) -> FILE_ID_INFO:
         FileInformation = FILE_ID_INFO()
         GetFileInformationByHandleEx(
             self.handle, FILE_INFO_BY_HANDLE_CLASS.FileIdInfo, byref(FileInformation), sizeof(FileInformation)
@@ -87,8 +85,7 @@ class WindowsFile(WindowsHandle):
         return FileInformation
 
 
-def is_open_for_write(path):
-    # type: (str, ) -> bool
+def is_open_for_write(path: str) -> bool:
 
     """Tests if file is already open for write
     by trying to open it in exclusive read model.

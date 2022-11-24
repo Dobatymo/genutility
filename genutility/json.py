@@ -124,19 +124,18 @@ def read_json(
 
 
 def write_json(
-    obj,
-    path,
-    mode="wt",
-    schema=None,
-    ensure_ascii=False,
-    cls=None,
-    indent=None,
-    sort_keys=False,
-    default=None,
-    safe=False,
-    **kw,
-):
-    # type: (Any, PathStr, str, Optional[Union[str, JsonDict]], bool, Optional[Type[json.JSONEncoder]], Optional[Union[str, int]], bool, Optional[Callable], bool, **Any) -> None
+    obj: Any,
+    path: PathStr,
+    mode: str = "wt",
+    schema: Optional[Union[str, JsonDict]] = None,
+    ensure_ascii: bool = False,
+    cls: Optional[Type[json.JSONEncoder]] = None,
+    indent: Optional[Union[str, int]] = None,
+    sort_keys: bool = False,
+    default: Optional[Callable] = None,
+    safe: bool = False,
+    **kw: Any,
+) -> None:
 
     """Writes python object `obj` to `path` as json files and optionally validates the object
     according to `schema`. The validation requires `jsonschema`.
@@ -173,17 +172,16 @@ class json_lines:
 
     def __init__(
         self,
-        stream,
-        doclose,
-        cls=None,
-        object_hook=None,
-        parse_float=None,
-        parse_int=None,
-        parse_constant=None,
-        object_pairs_hook=None,
-        **kw,
-    ):
-        # type: (IO, bool, Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> None
+        stream: IO,
+        doclose: bool,
+        cls: Optional[Type[json.JSONDecoder]] = None,
+        object_hook: Optional[Callable] = None,
+        parse_float: Optional[Callable] = None,
+        parse_int: Optional[Callable] = None,
+        parse_constant: Optional[Callable] = None,
+        object_pairs_hook: Optional[Callable] = None,
+        **kw: Any,
+    ) -> None:
 
         """Don't use directly. Use `from_path` or `from_stream` classmethods instead."""
 
@@ -196,32 +194,31 @@ class json_lines:
         self.doclose = doclose
         self.newline = "\n"
 
-        self.json_kwargs = {
+        self.json_kwargs: JsonLoadKwargs = {
             "cls": cls,
             "object_hook": object_hook,
             "parse_float": parse_float,
             "parse_int": parse_int,
             "parse_constant": parse_constant,
             "object_pairs_hook": object_pairs_hook,
-        }  # type: JsonLoadKwargs
+        }
         self.json_cls_kw = kw
 
     @staticmethod
     def from_path(
-        file,
-        mode="rt",
-        encoding="utf-8",
-        errors="strict",
-        newline=None,
-        cls=None,
-        object_hook=None,
-        parse_float=None,
-        parse_int=None,
-        parse_constant=None,
-        object_pairs_hook=None,
-        **kw,
-    ):
-        # type: (PathStr, str, str, str, Optional[str], Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
+        file: PathStr,
+        mode: str = "rt",
+        encoding: str = "utf-8",
+        errors: str = "strict",
+        newline: Optional[str] = None,
+        cls: Optional[Type[json.JSONDecoder]] = None,
+        object_hook: Optional[Callable] = None,
+        parse_float: Optional[Callable] = None,
+        parse_int: Optional[Callable] = None,
+        parse_constant: Optional[Callable] = None,
+        object_pairs_hook: Optional[Callable] = None,
+        **kw: Any,
+    ) -> "json_lines":
 
         """Binary writing modes "wb", "ab", "r+b", "w+b" are not supported by the python json module.
         Use text modes instead. Binary read-only is fine.
@@ -249,23 +246,21 @@ with open("{file}", "r") as fr:
 
     @staticmethod
     def from_stream(
-        stream,
-        cls=None,
-        object_hook=None,
-        parse_float=None,
-        parse_int=None,
-        parse_constant=None,
-        object_pairs_hook=None,
-        **kw,
-    ):
-        # type: (IO, Optional[Type[json.JSONDecoder]], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable], **Any) -> json_lines
+        stream: IO,
+        cls: Optional[Type[json.JSONDecoder]] = None,
+        object_hook: Optional[Callable] = None,
+        parse_float: Optional[Callable] = None,
+        parse_int: Optional[Callable] = None,
+        parse_constant: Optional[Callable] = None,
+        object_pairs_hook: Optional[Callable] = None,
+        **kw: Any,
+    ) -> "json_lines":
 
         return json_lines(
             stream, False, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw
         )
 
-    def __enter__(self):
-        # type: () -> json_lines
+    def __enter__(self) -> "json_lines":
 
         return self
 
@@ -344,15 +339,13 @@ with open("{file}", "r") as fr:
         for obj in objs:
             self.write(obj)
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
 
         if self.doclose:
             self.f.close()
 
 
-def read_json_lines(file, object_hook=None):
-    # type: (PathStr, Optional[Callable]) -> Iterator[Any]
+def read_json_lines(file: PathStr, object_hook: Optional[Callable] = None) -> Iterator[Any]:
 
     """Iterate over a JSON Lines `file` object by object.
     `object_hook` is passed through to `json.load`.
@@ -371,8 +364,7 @@ def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Seque
                 fw.writerow(keyfunc(obj))
 
 
-def key_to_hash(key, default=None):
-    # type: (Any, Optional[Callable]) -> str
+def key_to_hash(key: Any, default: Optional[Callable] = None) -> str:
 
     from hashlib import md5
 
@@ -380,8 +372,15 @@ def key_to_hash(key, default=None):
     return md5(binary).hexdigest()  # nosec
 
 
-def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False, default=None, object_hook=None):
-    # type: (Path, Optional[datetime.timedelta], bool, Optional[Union[str, int]], bool, Optional[Callable], Optional[Callable]) -> Callable
+def cache(
+    path: Path,
+    duration: Optional[datetime.timedelta] = None,
+    ensure_ascii: bool = False,
+    indent: Optional[Union[str, int]] = None,
+    sort_keys: bool = False,
+    default: Optional[Callable] = None,
+    object_hook: Optional[Callable] = None,
+) -> Callable:
 
     """Decorator to cache results of function to json files at `path` for `duration`.
     The remaining parameters are passed through to `json.dump`.
@@ -392,9 +391,7 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
     else:
         _duration = duration
 
-    def decorator(func):
-        # type: (Callable, ) -> Callable
-
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
         def inner(*args, **kwargs):
 
@@ -427,8 +424,14 @@ def cache(path, duration=None, ensure_ascii=False, indent=None, sort_keys=False,
     return decorator
 
 
-def jsonlines_cache(path, duration=None, ensure_ascii=False, sort_keys=False, default=None, object_hook=None):
-    # type: (Path, Optional[datetime.timedelta], bool, bool, Optional[Callable], Optional[Callable]) -> Callable
+def jsonlines_cache(
+    path: Path,
+    duration: Optional[datetime.timedelta] = None,
+    ensure_ascii: bool = False,
+    sort_keys: bool = False,
+    default: Optional[Callable] = None,
+    object_hook: Optional[Callable] = None,
+) -> Callable:
 
     """Decorator to cache results of function to jsonlines files at `path` for `duration`.
     The remaining parameters are passed through to `json_lines.from_path`.
@@ -436,9 +439,7 @@ def jsonlines_cache(path, duration=None, ensure_ascii=False, sort_keys=False, de
 
     duration = duration or datetime.timedelta.max
 
-    def decorator(func):
-        # type: (Callable, ) -> Callable
-
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
         def inner(*args, **kwargs):
 
@@ -489,8 +490,12 @@ class JsonLinesFormatter(logging.Formatter):
         "datetime-str": lambda: now().isoformat(),
     }
 
-    def __init__(self, include=frozenset(), builtins=frozenset(), default=None):
-        # type: (FrozenSet[str], FrozenSet[str], Optional[Callable]) -> None
+    def __init__(
+        self,
+        include: FrozenSet[str] = frozenset(),
+        builtins: FrozenSet[str] = frozenset(),
+        default: Optional[Callable] = None,
+    ) -> None:
 
         logging.Formatter.__init__(self)
         self.include_b = include & self.myfields.keys()

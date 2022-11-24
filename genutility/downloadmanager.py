@@ -2,51 +2,43 @@ from __future__ import generator_stop
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING
+from datetime import datetime
+from typing import Any, Optional
 
 import aiohttp
 from orderedset import OrderedSet
 
 from .datetime import now
 
-if TYPE_CHECKING:
-    from typing import Any, Optional
-
-    from .datetime import datetime
-
 logger = logging.getLogger(__name__)
 
 
 class DownloadTask:
-    def __init__(self, url, path="."):
-        # type: (str, str) -> None
+    def __init__(self, url: str, path: str = ".") -> None:
 
         self.url = url
         self.path = path
         self.downloaded = 0
         self.resumable = False
-        self.dt_started = None  # type: Optional[datetime]
+        self.dt_started: Optional[datetime] = None
         self.dt_finished = now()
 
     def __hash__(self):
         return hash((self.url, self.path))
 
-    def start(self):
-        # type: () -> None
+    def start(self) -> None:
 
         logger.info("starting download")
         self.dt_started = now()
 
-    def done(self):
-        # type: () -> None
+    def done(self) -> None:
 
         logger.info("finished download")
         self.dt_finished = now()
 
 
 class DownloadManager:
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
 
         self.loop = asyncio.get_event_loop()
         self.timeout = aiohttp.ClientTimeout(total=None, sock_read=60)
@@ -60,8 +52,7 @@ class DownloadManager:
         self.done = OrderedSet()
         self.error = OrderedSet()
 
-    def status(self):
-        # type: () -> str
+    def status(self) -> str:
 
         total_active = sum(t.downloaded for t in self.active)
         total_done = sum(t.downloaded for t in self.done)
@@ -71,20 +62,17 @@ class DownloadManager:
             len(self.queue), len(self.active), len(self.done), len(self.error), total_active, total_done, total_error
         )
 
-    def _enqueue(self, task, priority):
-        # type: (DownloadTask, Any) -> None
+    def _enqueue(self, task: DownloadTask, priority: Any) -> None:
 
         self.queue.add(task)
 
-    def _start(self, task):
-        # type: (DownloadTask, ) -> asyncio.Task
+    def _start(self, task: DownloadTask) -> asyncio.Task:
 
         self.active.add(task)
         atask = asyncio.ensure_future(self._download(task))
         return atask
 
-    def _trystart(self):
-        # type: () -> Optional[asyncio.Task]
+    def _trystart(self) -> Optional[asyncio.Task]:
 
         if len(self.active) < self.concurrent_downloads:
             try:
@@ -98,8 +86,7 @@ class DownloadManager:
 
         return None
 
-    async def _download(self, task):
-        # type: (DownloadTask, ) -> None
+    async def _download(self, task: DownloadTask) -> None:
 
         task.start()
         # await asyncio.sleep(10)
@@ -112,7 +99,7 @@ class DownloadManager:
             async with self.session.get(task.url, headers={}) as response:
                 stream = response.content
                 try:
-                    size = int(response.headers.get("content-length", ""))  # type: Optional[int]
+                    size: Optional[int] = int(response.headers.get("content-length", ""))
                 except (ValueError, TypeError):
                     size = None
 
@@ -143,8 +130,9 @@ class DownloadManager:
         self.active.remove(task)
         self._trystart()
 
-    def download(self, url, path="tmp.txt", priority=0, force=False):
-        # type: (str, str, int, bool) -> Optional[asyncio.Task]
+    def download(
+        self, url: str, path: str = "tmp.txt", priority: int = 0, force: bool = False
+    ) -> Optional[asyncio.Task]:
 
         logger.info("starting download")
         task = DownloadTask(url, path)
@@ -154,7 +142,7 @@ class DownloadManager:
             self._enqueue(task, priority)
             return self._trystart()
 
-    async def _close(self):
+    async def _close(self) -> None:
         await self.session.close()
 
 

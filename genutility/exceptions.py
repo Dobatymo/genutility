@@ -134,8 +134,7 @@ def assert_choice(name: str, value: Optional[T], choices: Set[T], optional: bool
         raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices))))
 
 
-def assert_choices(name, values, choices, optional=False):
-    # type: (str, Optional[Sequence[T]], Set[T], bool) -> None
+def assert_choices(name: str, values: Optional[Sequence[T]], choices: Set[T], optional: bool = False) -> None:
 
     if values is None:
         if optional:
@@ -147,8 +146,7 @@ def assert_choices(name, values, choices, optional=False):
         raise ValueError("{} must be a subset of {}".format(name, ", ".join(map(str, choices))))
 
 
-def assert_choice_map(name, value, choices):
-    # type: (str, T, Dict[T, U]) -> U
+def assert_choice_map(name: str, value: T, choices: Dict[T, U]) -> U:
 
     try:
         return choices[value]
@@ -166,6 +164,6 @@ def assert_type(name: str, value: Any, types: Union[Type[Any], Tuple[Type[Any], 
         )
 
 
-def assert_true(name, value):
+def assert_true(name: str, value) -> None:
     if not value:
         raise ValueError(f"{name} must be set")

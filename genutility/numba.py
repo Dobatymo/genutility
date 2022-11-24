@@ -15,8 +15,7 @@ except ImportError:
     oprange = range
 
 
-def opjit(*args, **kwargs):
-    # type: (*Any, **Any) -> Callable
+def opjit(*args: Any, **kwargs: Any) -> Callable:
 
     """Optional / opportunistic numba jit decorator."""
 

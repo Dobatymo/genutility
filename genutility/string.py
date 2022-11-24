@@ -160,7 +160,7 @@ def build_multiple_replace(d: Mapping[str, str], escape: bool = True) -> Callabl
     """
 
     if escape:
-        it = map(re.escape, d.keys())  # type: Iterable[str]
+        it: Iterable[str] = map(re.escape, d.keys())
     else:
         it = d.keys()
 
@@ -286,8 +286,7 @@ def surrounding_join(j: str, it: Iterable[str], left: str = "", right: str = "")
     return ""
 
 
-def replace_pairs_bytes(s, items):
-    # type: (bytes, Dict[bytes, Optional[bytes]]) -> bytes
+def replace_pairs_bytes(s: bytes, items: Dict[bytes, Optional[bytes]]) -> bytes:
 
     frm = b"".join(k for k, v in items.items() if v)
     to = b"".join(v for k, v in items.items() if v)
@@ -298,8 +297,7 @@ def replace_pairs_bytes(s, items):
     return s.translate(table, delete)
 
 
-def replace_pairs_chars(s, items):
-    # type: (str, Dict[UnicodeOrdinalT, Optional[UnicodeOrdinalT]]) -> str
+def replace_pairs_chars(s: str, items: Dict[UnicodeOrdinalT, Optional[UnicodeOrdinalT]]) -> str:
 
     table = s.maketrans(items)  # type: ignore # mypy issue #4374
 

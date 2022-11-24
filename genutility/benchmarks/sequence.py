@@ -1,15 +1,11 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Callable, Iterator, MutableSequence, TypeVar
 
-if TYPE_CHECKING:
-    from typing import Callable, Iterator, MutableSequence, TypeVar
-
-    T = TypeVar("T")
+T = TypeVar("T")
 
 
-def pop_many_2(seq, func):
-    # type: (MutableSequence[T], Callable) -> Iterator[T]
+def pop_many_2(seq: MutableSequence[T], func: Callable) -> Iterator[T]:
 
     """pop()s a values from `seq` where func(value) is true."""
 

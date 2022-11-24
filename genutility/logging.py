@@ -65,14 +65,12 @@ class OverwriteFormatter(Formatter):
             If the the custom fields are not passed, the original values will be used.
     """
 
-    def __init__(self, map, *args, **kwargs):
-        # type: (Dict[str, str], *Any, **Any) -> None
+    def __init__(self, map: Dict[str, str], *args: Any, **kwargs: Any) -> None:
 
         self.map = map
         Formatter.__init__(self, *args, **kwargs)
 
-    def format(self, record):
-        # type: (LogRecord, ) -> str
+    def format(self, record: LogRecord) -> str:
 
         for k, v in self.map.items():
             try:

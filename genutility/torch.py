@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from torch import tensor
 
 
-def categorical(probs, size=torch.Size()):
-    # type: (tensor, tensor) -> tensor
+def categorical(probs: tensor, size: tensor = torch.Size()) -> tensor:
 
     return Categorical(probs).sample(size)

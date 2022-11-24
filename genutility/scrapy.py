@@ -17,8 +17,9 @@ if TYPE_CHECKING:
     from collections.abc import MutableMapping
 
 
-def read_dbm_httpcache(path, open_func=dbm.open, decompress=True):
-    # type: (str, Callable[[str, str], ContextManager[MutableMapping]], bool) -> Iterator[Tuple[bytes, float, Any]]
+def read_dbm_httpcache(
+    path: str, open_func: Callable[[str, str], ContextManager[MutableMapping]] = dbm.open, decompress: bool = True
+) -> Iterator[Tuple[bytes, float, Any]]:
 
     """Loads scrapy dbm http cache files.
     Uses pickle so only use on trusted file.

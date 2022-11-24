@@ -116,12 +116,9 @@ def cache(
     else:
         _duration = duration
 
-    def decorator(func):
-        # type: (Callable, ) -> Callable
-
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def inner(*args, **kwargs):
-            # type: (*Any, **Any) -> Any
+        def inner(*args: Any, **kwargs: Any) -> Any:
 
             strpath = fspath(path).format(ppv=protocol)
 

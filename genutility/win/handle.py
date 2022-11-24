@@ -11,8 +11,7 @@ _mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "w+": GENERIC_READ
 
 
 class WindowsHandle:
-    def __init__(self, handle, doclose=True):
-        # type: (int, bool) -> None
+    def __init__(self, handle: int, doclose: bool = True) -> None:
 
         if not isinstance(handle, int):
             raise ValueError("handle must be an int")
@@ -34,14 +33,12 @@ class WindowsHandle:
     def get_file(self, flags, mode="r", buffering=-1, encoding=None, errors=None, newline=None, closefd=True):
         return fdopen(self.get_fd(flags), mode, buffering, encoding, errors, newline, closefd)
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
 
         if CloseHandle(self.handle) == 0:
             raise WinError()
 
-    def __enter__(self):
-        # type: () -> WindowsHandle
+    def __enter__(self) -> "WindowsHandle":
 
         return self
 

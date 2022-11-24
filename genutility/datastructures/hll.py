@@ -47,21 +47,18 @@ class HyperLogLog:
         self.registers = [0] * self.m
 
     @property
-    def error(self):
-        # type: () -> float
+    def error(self) -> float:
 
         return 1.04 / (self.m**0.5)
 
-    def _merge_registers(self, other):
-        # type: (HyperLogLog, ) -> List[int]
+    def _merge_registers(self, other: "HyperLogLog") -> List[int]:
 
         if self.b != other.b or self.hash != other.hash or self.width != other.width:
             raise ValueError("HyperLogLog object need to have the same number of registers and same hashes")
 
         return list(map(max, self.registers, other.registers))  # type: ignore[arg-type]
 
-    def add(self, value):
-        # type: (Hashable, ) -> None
+    def add(self, value: Hashable) -> None:
 
         h = self.hash(value)
 
@@ -73,8 +70,7 @@ class HyperLogLog:
 
         self.registers[register] = max(self.registers[register], zeroes)
 
-    def update(self, other):
-        # type: (Union[HyperLogLog, Iterable], ) -> None
+    def update(self, other: Union["HyperLogLog", Iterable]) -> None:
 
         if isinstance(other, HyperLogLog):
             self.registers = self._merge_registers(other)
@@ -82,8 +78,7 @@ class HyperLogLog:
             for value in other:
                 self.add(value)
 
-    def __len__(self):
-        # type: () -> int
+    def __len__(self) -> int:
 
         DV_est = self.alpha * self.m**2 * 1 / sum(2 ** (-r) for r in self.registers)
 
@@ -101,13 +96,11 @@ class HyperLogLog:
 
         return int(DV)
 
-    def clear(self):
-        # type: () -> None
+    def clear(self) -> None:
 
         self.registers = [0] * self.m
 
-    def union(self, other):
-        # type: (HyperLogLog, ) -> HyperLogLog
+    def union(self, other: "HyperLogLog") -> "HyperLogLog":
 
         registers = self._merge_registers(other)
 

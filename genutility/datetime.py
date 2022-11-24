@@ -14,7 +14,7 @@ def current_local_timezone() -> timezone:
     Warning: This timezone is only valid at the time of creation.
     Ie. if called in the summer for a local timezone which follows DST,
     and applied on a winter datetime, the result will be wrong.
-    For a correct implementation use something like `dateutil.tz.tzlocal()`.
+    For a correct implementation use something like `dateutil.tz.tzlocal()` or `tzlocal.get_localzone()`.
     """
 
     return datetime.now(timezone.utc).astimezone().tzinfo

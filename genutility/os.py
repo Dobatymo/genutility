@@ -2,15 +2,13 @@ from __future__ import generator_stop
 
 import os
 import platform
-from typing import TYPE_CHECKING, Callable, Union
+from pathlib import Path
+from typing import Callable, Union
 
 from ._func import rename
 from .os_shared import is_os_64bit  # noqa: F401
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
-    PathStr = Union[Path, str]
+PathStr = Union[Path, str]
 
 system = platform.system()
 
@@ -19,18 +17,16 @@ class CurrentWorkingDirectory:
 
     __slots__ = ("oldcwd",)
 
-    def __init__(self, path):
-        # type: (PathStr, ) -> None
+    def __init__(self, path: PathStr) -> None:
 
         self.oldcwd = os.getcwd()
         os.chdir(path)
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
 
         os.chdir(self.oldcwd)
 
-    def __enter__(self):
+    def __enter__(self) -> "CurrentWorkingDirectory":
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

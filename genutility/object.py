@@ -6,30 +6,29 @@ from json import dumps
 from typing import Any, List
 
 
-def cast(object, class_, instanceof=object, *args, **kwargs):
-    """Changes the class of `object` to `class_` if `object` is an instance of `instanceof`,
+def cast(obj, class_, instanceof=object, *args, **kwargs):
+    """Changes the class of `obj` to `class_` if `obj` is an instance of `instanceof`,
     calls the initializer and returns it.
     """
 
-    object = copy(object)
-    if isinstance(object, instanceof):
-        object.__class__ = class_
-        object.__init__(*args, **kwargs)
+    obj = copy(obj)
+    if isinstance(obj, instanceof):
+        obj.__class__ = class_
+        obj.__init__(*args, **kwargs)
     else:
         raise TypeError(f"Object is not an instance of {instanceof.__name__}")
-    return object
+    return obj
 
 
 class STAR:
     pass
 
 
-def args_to_key(args, kwargs, separator=STAR):
-    # type: (tuple, dict, Any) -> tuple
+def args_to_key(args: tuple, kwargs: dict, separator: Any = STAR) -> tuple:
 
     """Create cache key from function arguments."""
 
-    key = []  # type: List[tuple]
+    key: List[tuple] = []
     if args:
         key.extend(args)
     if kwargs:
@@ -39,8 +38,7 @@ def args_to_key(args, kwargs, separator=STAR):
     return tuple(key)
 
 
-def compress(value):
-    # type: (Any, ) -> Any
+def compress(value: Any) -> Any:
 
     """Creates a copy of the object where some data structures are replaced with equivalent ones
     which take up less space, but are not necessarily mutable anymore.
@@ -62,7 +60,7 @@ def compress(value):
         return value
 
 
-def _sorted(value: List, *, reverse: bool = False) -> Any:
+def _sorted(value: list, *, reverse: bool = False) -> Any:
     def keyfunc(value: Any) -> Any:
         if isinstance(value, dict):
             return dumps(value)

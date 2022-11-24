@@ -8,8 +8,7 @@ if TYPE_CHECKING:
     from pymongo.collection import Collection
 
 
-def findone(db, query):
-    # type: (Collection, dict) -> dict
+def findone(db: Collection, query: dict) -> dict:
 
     docs = list(db.find(query))
 

@@ -1,6 +1,6 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Iterable, Iterator, Union
 
 import numpy as np
 
@@ -8,12 +8,8 @@ from .image import image_block_histogram, image_histogram
 from .iter import pairwise
 from .numpy import histogram_correlation
 
-if TYPE_CHECKING:
-    from typing import Iterable, Iterator
 
-
-def scene_change_detection_histogram_correlation(images):
-    # type: (Iterable[np.ndarray], ) -> Iterator[np.ndarray]
+def scene_change_detection_histogram_correlation(images: Iterable[np.ndarray]) -> Iterator[np.ndarray]:
     """Based on: 'Histogram Correlation for Video Scene Change Detection'. Algorithm described
     in paper is incomplete. It only mentions 'almost constant', 'not constant' and 'change is sharp'
     behaviour of the correlation. A real implementation would need to define a sliding window
@@ -28,10 +24,10 @@ def scene_change_detection_histogram_correlation(images):
         yield histogram_correlation(hist_rf, hist_i)
 
 
-def scene_change_detection_block_histogram(images):
+def scene_change_detection_block_histogram(images: Iterator[np.ndarray]) -> Iterator[np.ndarray]:
     it = iter(images)
 
-    def get_means_of_block_histograms(arr):
+    def get_means_of_block_histograms(arr: np.ndarray) -> np.ndarray:
         hist = image_block_histogram(arr, 16, 16)
         # print(hist.shape)
         # print(hist.tolist())
@@ -45,7 +41,7 @@ def scene_change_detection_block_histogram(images):
         yield diffs
 
 
-def proc(hist, lambda_=200):
+def proc(hist: np.ndarray, lambda_: Union[float, int] = 200):
     delta = 0.5
     DS = np.sqrt(2.0) / 2.0 * np.sum(np.abs(hist - hist.T), axis=(-2, -1))
     B = DS > lambda_

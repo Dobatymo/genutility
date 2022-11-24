@@ -15,8 +15,7 @@ class CaseDict(Generic[T]):
     of the string as well.
     """
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
 
         self.d: Dict[str, T] = dict()
         self.casemap: DefaultDict[str, Set[str]] = defaultdict(set)

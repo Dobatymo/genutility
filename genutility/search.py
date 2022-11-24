@@ -1,15 +1,12 @@
 from __future__ import generator_stop
 
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import Callable, Optional, Sequence, TypeVar
 
 from .func import identity
 
-if TYPE_CHECKING:
-    from typing import Callable, Optional, Sequence, TypeVar
-
-    T = TypeVar("T")
-    U = TypeVar("U")
+T = TypeVar("T")
+U = TypeVar("U")
 
 
 class BisectRetVal(Enum):
@@ -18,9 +15,7 @@ class BisectRetVal(Enum):
     Higher = 1
 
 
-def make_binary_search(target):
-    # type: (int, ) -> Callable[[int], BisectRetVal]
-
+def make_binary_search(target: int) -> Callable[[int], BisectRetVal]:
     def binary_search_func(x):
         if x < target:
             return BisectRetVal.Higher
@@ -32,13 +27,13 @@ def make_binary_search(target):
     return binary_search_func
 
 
-def make_binary_search_sequence(seq, target, key=None):
-    # type: (Sequence[T], U, Optional[Callable[[T], U]]) -> Callable[[int], BisectRetVal]
+def make_binary_search_sequence(
+    seq: Sequence[T], target: U, key: Optional[Callable[[T], U]] = None
+) -> Callable[[int], BisectRetVal]:
 
     _key = key or identity
 
-    def binary_search_func(x):
-        # type: (int, ) -> BisectRetVal
+    def binary_search_func(x: int) -> BisectRetVal:
 
         result = _key(seq[x])
         if result < target:
@@ -51,8 +46,7 @@ def make_binary_search_sequence(seq, target, key=None):
     return binary_search_func
 
 
-def bisect_left_generic(lo, hi, func):
-    # type: (int, int, Callable[[int], BisectRetVal]) -> int
+def bisect_left_generic(lo: int, hi: int, func: Callable[[int], BisectRetVal]) -> int:
 
     """Generic left bisection (binary search). Finds a specific `lo<=x<=hi` where
     `func(x) == BisectRetVal.Equal` or where the return value changes from BisectRetVal.Higher
@@ -69,8 +63,7 @@ def bisect_left_generic(lo, hi, func):
     return lo
 
 
-def bisect_right_generic(lo, hi, func):
-    # type: (int, int, Callable[[int], BisectRetVal]) -> int
+def bisect_right_generic(lo: int, hi: int, func: Callable[[int], BisectRetVal]) -> int:
 
     """Generic right bisection (binary search). Finds a specific `lo<=x<=hi` where
     `func(x) == BisectRetVal.Equal` or where the return value changes from BisectRetVal.Higher
@@ -87,22 +80,21 @@ def bisect_right_generic(lo, hi, func):
     return lo
 
 
-def bisect_left_sequence(seq, target, key=None):
+def bisect_left_sequence(seq: Sequence[T], target, key=None) -> int:
     """see: bisect.bisect_left"""
 
     func = make_binary_search_sequence(seq, target, key)
     return bisect_left_generic(0, len(seq), func)
 
 
-def bisect_right_sequence(seq, target, key=None):
+def bisect_right_sequence(seq: Sequence[T], target, key=None) -> int:
     """see: bisect.bisect_right"""
 
     func = make_binary_search_sequence(seq, target, key)
     return bisect_right_generic(0, len(seq), func)
 
 
-def search_sorted(seq, newitem, key=None):
-    # type: (Sequence[T], U, Optional[Callable[[T], U]]) -> int
+def search_sorted(seq: Sequence[T], newitem: U, key: Optional[Callable[[T], U]] = None) -> int:
 
     _key = key or identity
 

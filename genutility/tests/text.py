@@ -15,8 +15,7 @@ from genutility.text import (
 )
 
 
-def urls_iter():
-    # type: () -> Iterator[str]
+def urls_iter() -> Iterator[str]:
 
     for i in count(0):
         yield f"<URL_{i}>"

@@ -94,13 +94,13 @@ class ThreadPool:
     def get(self) -> Tuple[int, Optional[Any]]:
 
         state: int
-        type: int
+        type_: int
         result: Tuple[int, Union[Any, Exception]]
 
         while True:  # so invalid states can be ignored
-            state, type, result = self.returns.get(True)
+            state, type_, result = self.returns.get(True)
             if state == self.state:
-                if type == Worker.TASK_COMPLETE:
+                if type_ == Worker.TASK_COMPLETE:
                     return result  # (id, ret)
                 else:
                     id, e = result

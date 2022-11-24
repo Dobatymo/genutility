@@ -2,14 +2,10 @@ from __future__ import generator_stop
 
 import logging
 import signal
-from typing import TYPE_CHECKING
+from types import FrameType
+from typing import Any, Callable, Iterable, Optional, TypeVar
 
-if TYPE_CHECKING:
-    from signal import Signals
-    from types import FrameType
-    from typing import Any, Callable, Iterable, Optional, TypeVar
-
-    T = TypeVar("T")
+T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +29,7 @@ class HandleKeyboardInterrupt:
     so be careful with threads
     """
 
-    def __init__(self, raise_after=True, delay=-1):
-        # type: (bool, int) -> None
+    def __init__(self, raise_after: bool = True, delay: int = -1) -> None:
 
         """If `raise_after` is True, the KeyboardInterrupt will be re-raised when leaving the context.
         `delay` specifies the maximum number of times the signal is caught.
@@ -43,16 +38,14 @@ class HandleKeyboardInterrupt:
         self.init_raise_after = raise_after
         self.init_delay = delay
 
-    def __enter__(self):
-        # type: () -> None
+    def __enter__(self) -> None:
 
         self.raise_after = self.init_raise_after  # pylint: disable=attribute-defined-outside-init
         self.delay = self.init_delay  # pylint: disable=attribute-defined-outside-init
-        self.signal_received = None  # type: Optional[tuple]
+        self.signal_received: Optional[tuple] = None
         self.old_handler = signal.signal(signal.SIGINT, self.handler)
 
-    def handler(self, sig, frame):
-        # type: (Signals, FrameType) -> None
+    def handler(self, sig: signal.Signals, frame: FrameType) -> None:
 
         if self.delay == 0:
             self.raise_after = False
@@ -69,8 +62,9 @@ class HandleKeyboardInterrupt:
             self.old_handler(*self.signal_received)
 
 
-def safe_for_loop(it, body_func, else_func=None):
-    # type: (Iterable[T], Callable[[T], bool], Optional[Callable[[], Any]]) -> None
+def safe_for_loop(
+    it: Iterable[T], body_func: Callable[[T], bool], else_func: Optional[Callable[[], Any]] = None
+) -> None:
 
     """This function makes sure that `body_func(element)` is called each time an element is retrieved from the
     iterable `it`, even if a `KeyboardInterrupt` is signaled in-between.

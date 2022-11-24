@@ -8,7 +8,7 @@ if sys.platform != "win32":
 import re
 from ctypes import Structure, WinError, byref, create_unicode_buffer, sizeof
 from ctypes.wintypes import BYTE, DWORD
-from typing import TYPE_CHECKING
+from typing import Any
 
 from cwinsdk import struct2dict
 from cwinsdk.um.fileapi import OPEN_EXISTING, CreateFileW
@@ -42,16 +42,12 @@ from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
 from ..exceptions import assert_true
 from .handle import WindowsHandle, _mode2access
 
-if TYPE_CHECKING:
-    from typing import Any
-
 
 class EMPTY_BUFFER(Structure):
     pass
 
 
-def get_length(path):
-    # type: (str, ) -> int
+def get_length(path: str) -> int:
 
     """Returns for:
     partitions: the full partition size (might be larger than disk_usage().total)
@@ -71,31 +67,28 @@ def get_length(path):
 
 
 class Volume(WindowsHandle):
-    def __init__(self, path):
-        # type: (str, ) -> None
+    def __init__(self, path: str) -> None:
 
         handle = open_logical_volume(path)
         WindowsHandle.__init__(self, handle)
 
-    def lock(self):
+    def lock(self) -> None:
         MyDeviceIoControl(self.handle, FSCTL_LOCK_VOLUME, EMPTY_BUFFER(), EMPTY_BUFFER())
 
-    def unlock(self):
+    def unlock(self) -> None:
         MyDeviceIoControl(self.handle, FSCTL_UNLOCK_VOLUME, EMPTY_BUFFER(), EMPTY_BUFFER())
 
-    def extend(self):
+    def extend(self) -> None:
         MyDeviceIoControl(self.handle, FSCTL_ALLOW_EXTENDED_DASD_IO, EMPTY_BUFFER(), EMPTY_BUFFER())
 
 
 class Drive(WindowsHandle):
-    def __init__(self, DriveIndex):
-        # type: (int, ) -> None
+    def __init__(self, DriveIndex: int) -> None:
 
         handle = open_physical_drive(DriveIndex)
         WindowsHandle.__init__(self, handle)
 
-    def get_alignment(self):
-        # type: () -> dict
+    def get_alignment(self) -> dict:
 
         InBuffer = STORAGE_PROPERTY_QUERY()
         OutBuffer = STORAGE_ACCESS_ALIGNMENT_DESCRIPTOR()
@@ -107,8 +100,7 @@ class Drive(WindowsHandle):
 
         return struct2dict(OutBuffer)
 
-    def get_capacity(self):
-        # type: () -> dict
+    def get_capacity(self) -> dict:
 
         """Accept drive and volume handles, but always returns related drive information.
         The DiskLength returned is the same as if `get_length` is used on the related drive.
@@ -121,8 +113,7 @@ class Drive(WindowsHandle):
         return struct2dict(OutBuffer)
 
     # was: StorageQuery
-    def get_device(self):
-        # type: () -> dict
+    def get_device(self) -> dict:
 
         InBuffer = STORAGE_PROPERTY_QUERY()
         OutBuffer = STORAGE_DEVICE_DESCRIPTOR()
@@ -135,7 +126,7 @@ class Drive(WindowsHandle):
 
         return struct2dict(OutBuffer)
 
-    def get_geometry(self):
+    def get_geometry(self) -> dict:
 
         InBuffer = EMPTY_BUFFER()
         OutBuffer = DISK_GEOMETRY()
@@ -143,8 +134,7 @@ class Drive(WindowsHandle):
 
         return struct2dict(OutBuffer)
 
-    def get_smart_version(self):
-        # type: () -> dict
+    def get_smart_version(self) -> dict:
 
         InBuffer = EMPTY_BUFFER()
         OutBuffer = GETVERSIONINPARAMS()
@@ -153,8 +143,7 @@ class Drive(WindowsHandle):
 
         return struct2dict(OutBuffer)
 
-    def verify_extent(self, start, length):
-        # type: (int, int) -> None
+    def verify_extent(self, start: int, length: int) -> None:
 
         """Can cause issues with some drivers (like TrueCrypt)."""
 
@@ -167,22 +156,23 @@ class Drive(WindowsHandle):
         MyDeviceIoControl(self.handle, IOCTL_DISK_VERIFY, InBuffer, OutBuffer)
 
 
-def get_drive_size(DriveIndex):
+def get_drive_size(DriveIndex: int) -> int:
     with Drive(DriveIndex) as drive:
         geo = drive.get_geometry()
     return geo["Cylinders"] * geo["TracksPerCylinder"] * geo["SectorsPerTrack"] * geo["BytesPerSector"]
 
 
-def partition_style_string(partition_style):
+def partition_style_string(partition_style: int) -> str:
     return {0: "MBR", 1: "GPT"}.get(partition_style, "Unknown")
 
 
-def partition_type_string(partition_type):
+def partition_type_string(partition_type) -> str:
     return {PARTITION_IFS: "NTFS/exFAT", PARTITION_MSFT_RECOVERY: "Recovery"}.get(partition_type, "Unknown")
 
 
-def MyDeviceIoControl(DeviceHandle, IoControlCode, InBuffer, OutBuffer, check_output=True):
-    # type: (Any, Any, Any, Any, bool) -> None
+def MyDeviceIoControl(
+    DeviceHandle: Any, IoControlCode: Any, InBuffer: Any, OutBuffer: Any, check_output: bool = True
+) -> None:
 
     BytesReturned = DWORD()
 
@@ -206,7 +196,7 @@ def MyDeviceIoControl(DeviceHandle, IoControlCode, InBuffer, OutBuffer, check_ou
         raise RuntimeError(f"DeviceIoControl expected {sizeof(OutBuffer)} bytes but got {BytesReturned.value} bytes")
 
 
-def open_device(FileName, mode="r"):
+def open_device(FileName, mode: str = "r"):
 
     DesiredAccess = _mode2access[mode]
 
@@ -224,7 +214,7 @@ volumep = re.compile(r"^\\\\[\.\?]\\[A-Z]:$")
 drivep = re.compile(r"^\\\\[\.\?]\\PHYSICALDRIVE[0-9]$")
 
 
-def is_volume_or_drive(s):
+def is_volume_or_drive(s: str) -> str:
 
     from argparse import ArgumentTypeError
 
@@ -245,8 +235,7 @@ def open_logical_volume(FileName):
     return open_device(FileName)
 
 
-def open_physical_drive(DriveIndex):
-    # type: (int, ) -> Any
+def open_physical_drive(DriveIndex: int) -> Any:
 
     assert isinstance(DriveIndex, int)
     drive = rf"\\.\PHYSICALDRIVE{DriveIndex}"

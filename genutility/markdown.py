@@ -5,12 +5,11 @@ import re
 _markdown_newline_pat = re.compile(r"[^\n]\n[^\n]")
 
 
-def _markdown_newline_func(x):
+def _markdown_newline_func(x) -> str:
     return x.group(0).replace("\n", "  \n")
 
 
-def markdown_newline(s):
-    # type: (str, ) -> str
+def markdown_newline(s: str) -> str:
 
     """Convert newlines to markdown linebreaks."""
 
@@ -22,8 +21,7 @@ _markdown_urls_pat = re.compile(
 )
 
 
-def markdown_urls(s, ignore_trailing_dot=True):
-    # type: (str, bool) -> str
+def markdown_urls(s: str, ignore_trailing_dot: bool = True) -> str:
 
     """Converts text with URLs to text with markdown formatted URLs.
     markdown_urls("Visit https://google.com") -> "Visit <https://google.com>"

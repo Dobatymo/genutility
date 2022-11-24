@@ -7,8 +7,7 @@ class SplitRecursive:
     Python port of: http://www.luschny.de/math/factorial/java/FactorialSplit.java.html
     """
 
-    def factorial(self, n):
-        # type: (int, ) -> int
+    def factorial(self, n: int) -> int:
 
         if n < 0:
             raise ArithmeticError(f"Factorial: n has to be >= 0, but was {n}")
@@ -41,7 +40,7 @@ class SplitRecursive:
                 r *= p
         return r << shift
 
-    def product(self, n):
+    def product(self, n: int) -> int:
         m = n >> 1
         if m == 0:
             self.N += 2

@@ -2,14 +2,11 @@ from __future__ import generator_stop
 
 from functools import reduce
 from operator import mul
-from typing import TYPE_CHECKING
+from typing import Iterable, TypeVar
 
-if TYPE_CHECKING:
-    from typing import Iterable, TypeVar
+from ..typing import Computable
 
-    from ..typing import Computable
-
-    T = TypeVar("T")
+T = TypeVar("T")
 
 
 try:
@@ -17,15 +14,13 @@ try:
 
 except ImportError:
 
-    def prod(it, start=1):  # type: ignore
-        # type: (Iterable[T], T) -> T
+    def prod(it: Iterable[T], start: T = 1) -> T:  # type: ignore
 
         """Counterpart to built-in `sum()`."""
 
         return reduce(mul, it, start)
 
-    def prod_2(it, start=1):
-        # type: (Iterable[Computable], Computable) -> Computable
+    def prod_2(it: Iterable[Computable], start: Computable = 1) -> Computable:
 
         """Counterpart to built-in `sum()`."""
 

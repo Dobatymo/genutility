@@ -1,10 +1,11 @@
 from __future__ import generator_stop
 
 from functools import wraps
+from typing import Callable
 from warnings import warn
 
 
-def deprecated(msg, stacklevel=2):
+def deprecated(msg: str, stacklevel: int = 2) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(*args, **kwargs):

@@ -4,8 +4,7 @@ from argparse import ArgumentParser
 from timeit import repeat
 
 
-def run(benchmarks):
-    # type: (dict, ) -> None
+def run(benchmarks: dict) -> None:
 
     parser = ArgumentParser()
     parser.add_argument("testcases", nargs="*")

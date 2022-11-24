@@ -20,8 +20,7 @@ def randbytes(size: int) -> bytes:
     return bytes(randrange(0, 256) for _ in range(size))  # nosec
 
 
-def rgb_colors():
-    # type: () -> Iterator[Tuple[int, int, int]]
+def rgb_colors() -> Iterator[Tuple[int, int, int]]:
 
     """Yields a stream of (noncryptographic) random RGB color tuples."""
 

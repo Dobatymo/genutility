@@ -9,13 +9,14 @@ from .ops import logical_xor
 
 
 class StreamWatcher:
-    def __init__(self, api):
+    def __init__(self, api: "TwitchAPI") -> None:
         self.api = api
         self.followed_names = api.get_followed()
         self.followed_online = {userid: False for userid in self.followed_names.keys()}
 
-    def watch(self, notify_started, notify_stopped):
-        # type: (Callable[[str, str, Optional[str]], None], Callable[[str, str], None]) -> None
+    def watch(
+        self, notify_started: Callable[[str, str, Optional[str]], None], notify_stopped: Callable[[str, str], None]
+    ) -> None:
 
         user_ids = self.followed_names.keys()
         streams = self.api.get_streams(user_ids)
@@ -60,15 +61,13 @@ class TwitchAPI:
             assert username
             self.userid = self.get_userid(username)
 
-    def req(self, url, params):
-        # type: (str, List[Tuple[str, str]]) -> dict
+    def req(self, url: str, params: List[Tuple[str, str]]) -> dict:
 
         qs = "&".join(k + "=" + v for k, v in params)
         data = URLRequest(url + "?" + qs, headers={"Client-ID": self.client_id}, context=self.ssl_context).load()
         return json.loads(data)
 
-    def get_userid(self, username):
-        # type: (str, ) -> str
+    def get_userid(self, username: str) -> str:
 
         d = self.req(self.base + self.login, [("login", username)])
         return d["data"][0]["id"]
@@ -83,7 +82,6 @@ class TwitchAPI:
         assert len(d["data"]) == len(ret), "More than one stream per user"
         return ret
 
-    def watcher(self):
-        # type: () -> StreamWatcher
+    def watcher(self) -> StreamWatcher:
 
         return StreamWatcher(self)

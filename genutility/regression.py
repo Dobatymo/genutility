@@ -7,8 +7,7 @@ class LinearRegression:
 
     """Linear regression optimized by gradient descent."""
 
-    def __init__(self, X, y, alpha=0.01):
-        # type: (np.ndarray, np.ndarray, float) -> None
+    def __init__(self, X: np.ndarray, y: np.ndarray, alpha: float = 0.01) -> None:
 
         """
         X: float[A, B]
@@ -31,8 +30,7 @@ class LinearRegression:
 
         self.weights = np.random.random_sample(self.K)
 
-    def predict(self, x):
-        # type: (np.ndarray, ) -> float
+    def predict(self, x: np.ndarray) -> float:
 
         """
         x: float[B]
@@ -40,21 +38,18 @@ class LinearRegression:
 
         return np.matmul(x, self.weights)
 
-    def epoch(self):
-        # type: () -> None
+    def epoch(self) -> None:
 
         self.weights -= self.α * np.matmul(self.X.T, self.predict(self.X) - self.y)  # [K]
 
-    def fit(self, n_iter=100, verbose=False):
-        # type: (int, bool) -> None
+    def fit(self, n_iter: int = 100, verbose: bool = False) -> None:
 
         for i in range(n_iter):
             if verbose:
                 print("SGD itertion:", i)
             self.epoch()
 
-    def getParams(self):
-        # type: (np.ndarray, ) -> float
+    def getParams(self: np.ndarray) -> float:
 
         """
         returns: float[B-1]
@@ -62,7 +57,6 @@ class LinearRegression:
 
         return self.weights[1:]
 
-    def getIntercept(self):
-        # type: () -> float
+    def getIntercept(self) -> float:
 
         return self.weights[0]

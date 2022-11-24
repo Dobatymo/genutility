@@ -1,16 +1,13 @@
 from __future__ import generator_stop
 
-from typing import TYPE_CHECKING
+from typing import Optional, TypeVar
 
 try:
     from contextlib import nullcontext  # pylint: disable=no-name-in-module # New in version 3.7
 
 except ImportError:
 
-    if TYPE_CHECKING:
-        from typing import Optional, TypeVar
-
-        T = TypeVar("T")
+    T = TypeVar("T")
 
     try:
         from contextlib import AbstractContextManager
@@ -23,13 +20,11 @@ except ImportError:
         Kind of like an identity function for contexts, useful as default argument.
         """
 
-        def __init__(self, enter_result=None):
-            # type: (Optional[T], ) -> None
+        def __init__(self, enter_result: Optional[T] = None) -> None:
 
             self.enter_result = enter_result
 
-        def __enter__(self):
-            # type: () -> Optional[T]
+        def __enter__(self) -> Optional[T]:
 
             return self.enter_result
 

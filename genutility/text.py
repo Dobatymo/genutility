@@ -2,21 +2,17 @@ from __future__ import generator_stop
 
 import re
 from string import whitespace
-from typing import TYPE_CHECKING
+from typing import Callable, Iterable, Iterator, Optional, Sequence, Union
 
 from .iter import collapse_all, collapse_any
 from .string import replace_multiple
 from .unicode import unicode_categories
 from .url import get_url_pattern, valid_uri_characters
 
-if TYPE_CHECKING:
-    from typing import Callable, Iterable, Iterator, Optional, Sequence, Union
-
 uni_cats = unicode_categories()
 
 
-def extract_urls(text):
-    # type: (str, ) -> Iterator[str]
+def extract_urls(text: str) -> Iterator[str]:
 
     """Yields URLs from `text`."""
 
@@ -26,8 +22,7 @@ def extract_urls(text):
         yield url
 
 
-def replace_typographical_punctuation(s):
-    # type: (str, ) -> str
+def replace_typographical_punctuation(s: str) -> str:
 
     """Replaces typographical punctuation with ASCII punctuation."""
 
@@ -48,8 +43,7 @@ def replace_typographical_punctuation(s):
     return replace_multiple(s, d)
 
 
-def newlines_to_spaces(s):
-    # type: (str, ) -> str
+def newlines_to_spaces(s: str) -> str:
 
     """Replaces newline characters with spaces."""
 
@@ -61,8 +55,7 @@ def newlines_to_spaces(s):
     return replace_multiple(s, d)
 
 
-def collapse_whitespace(s):
-    # type: (str, ) -> str
+def collapse_whitespace(s: str) -> str:
 
     """Collapses repeated whitespace into a single space character."""
 
@@ -72,8 +65,7 @@ def collapse_whitespace(s):
     return "".join(collapse_all(s, set(whitespace), " "))
 
 
-def collapse_space(s, space=" "):
-    # type: (str, str) -> str
+def collapse_space(s: str, space: str = " ") -> str:
 
     """Collapses repeated spaces into a single space character."""
 
@@ -92,8 +84,7 @@ def collapse_space(s, space=" "):
     return beg + space.join(i for i in ss if i) + end
 
 
-def collapse_punctuation_symbols(s):
-    # type: (str, ) -> str
+def collapse_punctuation_symbols(s: str) -> str:
 
     """Collapses any successive Unicode punctuation symbol in `s`."""
 
@@ -106,17 +97,15 @@ def collapse_punctuation_symbols(s):
 
 
 class ReplaceURLs:
-    def __init__(self, replacement, schemes=None):
-        # type: (Union[str, Iterable], Optional[Sequence[str]]) -> None
+    def __init__(self, replacement: Union[str, Iterable], schemes: Optional[Sequence[str]] = None) -> None:
 
         if isinstance(replacement, str):
-            self.repl = replacement  # type: Union[str, Callable[[str], str]]
+            self.repl: Union[str, Callable[[str], str]] = replacement
         else:
             self.repl = lambda match: next(replacement)  # type: ignore
 
         self.pattern = get_url_pattern(schemes)
 
-    def __call__(self, s, count=0):
-        # type: (str, int) -> str
+    def __call__(self, s: str, count: int = 0) -> str:
 
         return self.pattern.sub(self.repl, s, count)

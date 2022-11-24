@@ -2,16 +2,12 @@ from __future__ import generator_stop
 
 import re
 import socket
-from typing import TYPE_CHECKING
+from typing import Optional
 
 import netifaces
 
-if TYPE_CHECKING:
-    from typing import Optional
 
-
-def is_ipv4(s):
-    # type: (str, ) -> bool
+def is_ipv4(s: str) -> bool:
 
     """Tests if `s` is a IPv4 address string.
     It only validates the common `x.x.x.x` format and rejects less common ones like `x.x`.
@@ -27,8 +23,7 @@ def is_ipv4(s):
 simple_email_regex = r"[^@\s]+@[^@\s]+\.[^@\s]+"
 
 
-def is_email(s):
-    # type: (str, ) -> bool
+def is_email(s: str) -> bool:
 
     """Coarse check to test of a string is an email. Will accept some invalid ones like
     "asd@.asd.com" and reject some valid ones like "asd@localhost"
@@ -37,8 +32,7 @@ def is_email(s):
     return re.fullmatch(simple_email_regex, s) is not None
 
 
-def get_standard_gateway(default=None):
-    # type: (Optional[str], ) -> Optional[str]
+def get_standard_gateway(default: Optional[str] = None) -> Optional[str]:
 
     """Returns the standard IPv4 gateway."""
 

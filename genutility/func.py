@@ -46,16 +46,14 @@ def partial_decorator(*args: Any, **kwargs: Any) -> Callable:
     return decorator
 
 
-def compose_two(f, g):
-    # type: (Callable[[Any], Any], Callable[[Any], Any]) -> Callable[[Any], Any]
+def compose_two(f: Callable[[Any], Any], g: Callable[[Any], Any]) -> Callable[[Any], Any]:
 
     """compose_two(f, g) -> lambda x: f(g(x))"""
 
     return lambda x: f(g(x))
 
 
-def compose(*functions):
-    # type: (*Callable[[Any], Any]) -> Callable[[Any], Any]
+def compose(*functions: Callable[[Any], Any]) -> Callable[[Any], Any]:
 
     """compose(f, g, h) -> lambda x: f(g(h(x))).
     see: Function composition
@@ -240,21 +238,15 @@ class CustomCache:
     b = func(2) # cache loaded, b == 1
     """
 
-    def __init__(self, reader, writer):
-        # type: (Callable, Callable) -> None
+    def __init__(self, reader: Callable, writer: Callable) -> None:
 
         self.reader = reader
         self.writer = writer
 
-    def cache(self, path):
-        # type: (str, ) -> Callable
-
-        def dec(func):
-            # type: (Callable, ) -> Callable
-
+    def cache(self, path: str) -> Callable:
+        def dec(func: Callable) -> Callable:
             @wraps(func)
-            def inner(*args, **kwargs):
-                # type: (*Any, **Any) -> Any
+            def inner(*args: Any, **kwargs: Any) -> Any:
 
                 if os.path.exists(path):
                     logger.debug("Loading object from cache %s", path)
@@ -276,15 +268,14 @@ class RunScheduled:
         self.func = func
         self.lastrun: Optional[datetime] = None
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> None:
         now = datetime.now()
         if self.lastrun is None or now - self.lastrun > self.delta:
             self.func(*args, **kwargs)
             self.lastrun = now
 
 
-def applymap(func, it):
-    # type: (Callable[..., T], Iterable[tuple]) -> Iterator[T]
+def applymap(func: Callable[..., T], it: Iterable[tuple]) -> Iterator[T]:
 
     """Maps `func` over the unpacked `it`."""
 

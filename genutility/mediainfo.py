@@ -1,28 +1,21 @@
 from __future__ import generator_stop
 
 from os import PathLike, fspath
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import Any, Dict, Union
 
-from pymediainfo import MediaInfo
-
-if TYPE_CHECKING:
-    from pathlib import Path
-    from typing import Union
-
-    from pymediainfo import Track
+from pymediainfo import MediaInfo, Track
 
 
 class MediaInfoHelper:
-    def __init__(self, path):
-        # type: (Union[str, Path], ) -> None
+    def __init__(self, path: Union[str, Path]) -> None:
 
         if isinstance(path, PathLike):
             path = fspath(path)
 
         self.mi = MediaInfo.parse(path)
 
-    def audio_duration(self):
-        # type: () -> float
+    def audio_duration(self) -> float:
 
         """Returns audio duration in seconds."""
 
@@ -48,8 +41,7 @@ class MediaInfoHelper:
     def text(self):
         return self.first_track("Text")
 
-    def first_track(self, track_type):
-        # type: (str, ) -> Track
+    def first_track(self, track_type: str) -> Track:
 
         for track in self.mi.tracks:
             if track.track_type == track_type:
@@ -57,14 +49,14 @@ class MediaInfoHelper:
 
         raise LookupError("Video track not available")
 
-    def is_vfr(self):
+    def is_vfr(self) -> bool:
         for track in self.mi.tracks:
             if track.track_type == "Video":
                 return track.frame_rate_mode == "VFR"
 
         return False
 
-    def meta_info(self):
+    def meta_info(self) -> Dict[str, Any]:
 
         for track in self.mi.tracks:
             if track.track_type == "General":

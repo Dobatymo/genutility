@@ -1,48 +1,38 @@
 from __future__ import generator_stop
 
 from operator import itemgetter
-from typing import TYPE_CHECKING
+from typing import Callable, Dict, Iterator, MutableSequence, Optional, Sequence, Tuple, TypeVar
 
 from .func import identity
 from .indexing import triangular_indices
+from .typing import Comparable, Orderable
 
-if TYPE_CHECKING:
-    from typing import Callable, Dict, Iterator, MutableSequence, Optional, Sequence, Tuple, TypeVar
-
-    from .typing import Comparable, Orderable
-
-    T = TypeVar("T")
+T = TypeVar("T")
 
 
 class LazyStringList:
-    def __init__(self, length):
-        # type: (int, ) -> None
+    def __init__(self, length: int) -> None:
 
         self.length = length
 
-    def __getitem__(self, idx):
-        # type: (int, ) -> str
+    def __getitem__(self, idx: int) -> str:
 
         return str(idx)
 
-    def __len__(self):
-        # type: () -> int
+    def __len__(self) -> int:
 
         return self.length
 
-    def __iter__(self):
-        # type: () -> Iterator[str]
+    def __iter__(self) -> Iterator[str]:
 
         return map(str, range(self.length))
 
-    def __contains__(self, idx):
-        # type: (int, ) -> bool
+    def __contains__(self, idx: int) -> bool:
 
         return 0 <= idx < self.length
 
 
-def pop_many(seq, func):
-    # type: (MutableSequence[T], Callable) -> Iterator[T]
+def pop_many(seq: MutableSequence[T], func: Callable) -> Iterator[T]:
 
     """`pop()`s values from `seq` where func(value) is true.
     For performance reasons the elements are popped
@@ -55,8 +45,7 @@ def pop_many(seq, func):
         yield seq.pop(i)
 
 
-def triangular(seq):
-    # type: (Sequence[T], ) -> Iterator[Tuple[T, T]]
+def triangular(seq: Sequence[T]) -> Iterator[Tuple[T, T]]:
 
     """Returns all combinations of items of `seq` with duplicates and self-combinations.
     triangular([1, 2, 3, 4]) -> (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)
@@ -66,8 +55,7 @@ def triangular(seq):
         yield seq[i], seq[j]
 
 
-def sliding_window(seq, size, step=1):
-    # type: (Sequence[T], int, int) -> Iterator[Sequence[T]]
+def sliding_window(seq: Sequence[T], size: int, step: int = 1) -> Iterator[Sequence[T]]:
 
     """Similar to `iter.x_wise()` except that it returns slices of a sequence.
     sliding_window([1, 2, 3], 2) -> [1, 2], [2, 3]
@@ -82,8 +70,7 @@ def sliding_window(seq, size, step=1):
         yield seq[i : i + size]
 
 
-def batch(seq, size):
-    # type: (Sequence[T], int) -> Iterator[Sequence[T]]
+def batch(seq: Sequence[T], size: int) -> Iterator[Sequence[T]]:
 
     """Similar to `iter.batch()` except that it returns slices of a sequence.
     batch([1, 2, 3], 2) -> [1, 2], [3]
@@ -99,8 +86,9 @@ def batch(seq, size):
         yield seq[i * size : (i + 1) * size]
 
 
-def delete_duplicates_from_sorted_sequence(seq, key=None):
-    # type: (MutableSequence[T], Optional[Callable[[T], Comparable]]) -> None
+def delete_duplicates_from_sorted_sequence(
+    seq: MutableSequence[T], key: Optional[Callable[[T], Comparable]] = None
+) -> None:
 
     """Deletes duplicates from a sorted sequence `seq` based on `key`.
     Works in-place.
@@ -115,14 +103,12 @@ def delete_duplicates_from_sorted_sequence(seq, key=None):
             i += 1
 
 
-def remove_duplicate_rows_from_sorted_table(seq, key):
-    # type: (MutableSequence[Dict[str, T]], str) -> None
+def remove_duplicate_rows_from_sorted_table(seq: MutableSequence[Dict[str, T]], key: str) -> None:
 
     return delete_duplicates_from_sorted_sequence(seq, itemgetter(key))
 
 
-def cycle_sort(seq):
-    # type: (MutableSequence[Orderable], ) -> Iterator[Tuple[int, int]]
+def cycle_sort(seq: MutableSequence[Orderable]) -> Iterator[Tuple[int, int]]:
 
     """Sort a sequence in place and yield swaps.
     based on: https://rosettacode.org/wiki/Sorting_algorithms/Cycle_sort#Python

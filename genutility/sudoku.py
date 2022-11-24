@@ -1,7 +1,7 @@
 from __future__ import generator_stop
 
 from copy import deepcopy
-from typing import Collection, Generic, Optional, Set, Tuple, TypeVar
+from typing import Collection, Generic, Iterator, List, Optional, Set, Tuple, TypeVar
 
 from .compat.math import isqrt
 from .exceptions import assert_type
@@ -17,8 +17,7 @@ class Unsolvable(Exception):
 
 
 class Sudoku(Generic[T]):
-    def __init__(self, board, sym_set, sym_free):
-        # type: (Collection[T], Set[T], T) -> None
+    def __init__(self, board: Collection[T], sym_set: Set[T], sym_free: T) -> None:
 
         assert_type("sym_set", sym_set, set)
 
@@ -42,38 +41,33 @@ class Sudoku(Generic[T]):
 
         self.solved = False
 
-    def init_board(self, board):
-        # type: (Collection[T], ) -> Collection[T]
+    def init_board(self, board: Collection[T]) -> Collection[T]:
 
         raise NotImplementedError
 
-    def get_board(self):
-        # type: () -> Collection[T]
+    def get_board(self) -> Collection[T]:
 
         raise NotImplementedError
 
-    def print_square(self):
-        # type: () -> None
+    def print_square(self) -> None:
 
         for i, num in enumerate(self.get_board(), 1):
             print(num, end=" ")
             if i % self.outer_square_size == 0:
                 print()
 
-    def solve(self, strategy=None):
-        # type: (Optional[str], ) -> Collection[T]
+    def solve(self, strategy: Optional[str] = None) -> Collection[T]:
 
         self.square = self.init_board(self.square)
         return self._solve(strategy)
 
-    def _solve(self, strategy=None):
-        # type: (Optional[str], ) -> Collection[T]
+    def _solve(self, strategy: Optional[str] = None) -> Collection[T]:
 
         raise NotImplementedError
 
 
 class SudokuRulebased(Sudoku):
-    def init_board(self, board):
+    def init_board(self, board: Collection[T]) -> List[Set[T]]:
         square = []
         for i in board:
             if i != self.sym_free:
@@ -82,7 +76,7 @@ class SudokuRulebased(Sudoku):
                 square.append(self.sym_set.copy())
         return square
 
-    def get_board(self):
+    def get_board(self) -> Iterator[Set[T]]:
         for num in self.square:
             if len(num) == 1:
                 yield setget(num)
@@ -161,13 +155,12 @@ class SudokuBruteforce(Sudoku):
                 inner_square_set.add(self.square[x])
         return inner_square_set
 
-    def get_possible_nums(self, i):
-        # type: (int, ) -> Set[T]
+    def get_possible_nums(self, i: int) -> Set[T]:
 
         all = self.get_row_nums(i) | self.get_column_nums(i) | self.get_inner_square_nums(i)
         return self.sym_set - all
 
-    def get_next_higher_possible_num(self, i, num):
+    def get_next_higher_possible_num(self, i: T, num: T) -> T:
         for pn in sorted(
             self.get_possible_nums(i)
         ):  # fixme: sorting is bad here. # why? for algorithmic performance or python performance?
@@ -176,14 +169,14 @@ class SudokuBruteforce(Sudoku):
 
         return self.sym_free
 
-    def get_next_lower_possible_num(self, i, num):
+    def get_next_lower_possible_num(self, i: T, num: T) -> T:
         for pn in sorted(self.get_possible_nums(i), reverse=False):  # see: get_next_higher_possible_num
             if pn < num:
                 return pn
 
         return self.sym_free
 
-    def _solve(self, strategy=None):
+    def _solve(self, strategy: Optional[str] = None) -> Tuple[int, int]:
 
         strategy = strategy or "inc"
 
@@ -202,7 +195,7 @@ class SudokuBruteforce(Sudoku):
             raise ValueError("Invalid strategy")
 
         i = 0
-        backtrack = []  # type: Tuple[int, T]
+        backtrack: Tuple[int, T] = []
         backtracks = 0
         steps = 0
 
@@ -235,8 +228,7 @@ class SudokuBruteforce(Sudoku):
         return backtracks, steps
 
 
-def is_valid_solution(board, sym_set):
-    # type: (Collection[T], Set[T]) -> bool
+def is_valid_solution(board: Collection[T], sym_set: Set[T]) -> bool:
 
     """Checks if `board` is a valid solved Sudoku configuration"""
 

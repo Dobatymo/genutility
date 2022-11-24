@@ -11,9 +11,9 @@ class RoutingObject:
 
         self.value = value
 
-        self.subtree = None  # type: Optional[NodeType]
-        self.distance_to_parent = None  # type: Optional[float]
-        self.covering_radius = None  # type: Optional[float]
+        self.subtree: Optional["NodeType"] = None
+        self.distance_to_parent: Optional[float] = None
+        self.covering_radius: Optional[float] = None
 
     def __repr__(self) -> str:
         return f"RoutingObject({self.value}, radius={self.covering_radius}, tree={self.subtree})"
@@ -48,37 +48,34 @@ class MNode:
 
     maxsize = 4
 
-    def __init__(self, distance_func, parent_node, parent_object):
-        # type: (Callable, Optional[NodeType], Optional[ObjectType]) -> None
+    def __init__(
+        self, distance_func: Callable, parent_node: Optional["NodeType"], parent_object: Optional["ObjectType"]
+    ) -> None:
 
         self.distance_func = distance_func
         self.parent_node = parent_node
         self.parent_object = parent_object
 
     @property
-    def is_root(self):
-        # type: () -> bool
+    def is_root(self) -> bool:
 
         return self.parent_node is None
 
     @property
-    def is_full(self):
-        # type: () -> bool
+    def is_full(self) -> bool:
 
         return len(self.objects) >= self.maxsize
 
-    def add(self, object):
-        # type: (ObjectType, ) -> None
+    def add(self, obj: "ObjectType") -> None:
 
-        self.objects.add(object)
-        if isinstance(object, RoutingObject):
-            object.subtree.parent_node = self
+        self.objects.add(obj)
+        if isinstance(obj, RoutingObject):
+            obj.subtree.parent_node = self
 
         if not self.is_root:
-            object.distance_to_parent = self.distance_func(object.value, self.parent_object.value)
+            obj.distance_to_parent = self.distance_func(obj.value, self.parent_object.value)
 
-    def replace(self, o1, o2):
-        # type: (ObjectType, ObjectType) -> None
+    def replace(self, o1: "ObjectType", o2: "ObjectType") -> None:
 
         self.objects.remove(o1)
         self.objects.add(o2)
@@ -94,14 +91,14 @@ class MNode:
 
 
 class InternalNode(MNode):
-    def __init__(self, distance_func, parent_node, parent_object):
-        # type: (Callable, Optional[NodeType], Optional[ObjectType]) -> None
+    def __init__(
+        self, distance_func: Callable, parent_node: Optional["NodeType"], parent_object: Optional["ObjectType"]
+    ) -> None:
 
         MNode.__init__(self, distance_func, parent_node, parent_object)
-        self.objects = set()  # type: Set[RoutingObject]
+        self.objects: Set[RoutingObject] = set()
 
-    def set_objects(self, objects):
-        # type: (Set[RoutingObject], ) -> None
+    def set_objects(self, objects: Set[RoutingObject]) -> None:
 
         self.objects = objects
         op = self.parent_object
@@ -134,14 +131,14 @@ class InternalNode(MNode):
 
 
 class LeafNode(MNode):
-    def __init__(self, distance_func, parent_node, parent_object):
-        # type: (Callable, Optional[NodeType], Optional[ObjectType]) -> None
+    def __init__(
+        self, distance_func: Callable, parent_node: Optional["NodeType"], parent_object: Optional["ObjectType"]
+    ) -> None:
 
         MNode.__init__(self, distance_func, parent_node, parent_object)
-        self.objects = set()  # type: Set[LeafObject]
+        self.objects: Set[LeafObject] = set()
 
-    def set_objects(self, objects):
-        # type: (Set[LeafObject], ) -> None
+    def set_objects(self, objects: Set[LeafObject]) -> None:
 
         self.objects = objects
         op = self.parent_object
@@ -171,18 +168,18 @@ NodeType = Union[InternalNode, LeafNode]
 from random import sample
 
 
-def _promote_random(distance_func, objects):
-    # type: (Callable, Set[ObjectType]) -> Tuple[ObjectType, ObjectType]
+def _promote_random(distance_func: Callable, objects: Set[ObjectType]) -> Tuple[ObjectType, ObjectType]:
 
     a, b = sample(objects, 2)
     return a, b
 
 
-def _partition_generalized_hyperplane(distance_func, objects, o1, o2):
-    # type: (Callable, Set[ObjectType], ObjectType, ObjectType) -> Tuple[Set[ObjectType], Set[ObjectType]]
+def _partition_generalized_hyperplane(
+    distance_func: Callable, objects: Set[ObjectType], o1: ObjectType, o2: ObjectType
+) -> Tuple[Set[ObjectType], Set[ObjectType]]:
 
-    a = set()  # type: Set[ObjectType]
-    b = set()  # type: Set[ObjectType]
+    a: Set[ObjectType] = set()
+    b: Set[ObjectType] = set()
 
     for o in objects:
         d1 = distance_func(o.value, o1.value)
@@ -200,8 +197,13 @@ class MTree:
 
     """See: M-tree: An Efficient Access Method for Similarity Search in Metric Spaces (1997)"""
 
-    def __init__(self, distance_func, promote=None, partition=None, does_not_work_yet=None):
-        # type: (Callable[[ObjectType, ObjectType], float], Optional[str], Optional[str], Optional[str]) -> None
+    def __init__(
+        self,
+        distance_func: Callable[[ObjectType, ObjectType], float],
+        promote: Optional[str] = None,
+        partition: Optional[str] = None,
+        does_not_work_yet: Optional[str] = None,
+    ) -> None:
 
         if does_not_work_yet != "OK":
             raise RuntimeError("MTree is work in progress")
@@ -228,15 +230,14 @@ class MTree:
             for lo in node.objects:
                 yield lo.value
 
-    def _split(self, node, object):
-        # type: (NodeType, ObjectType) -> None
+    def _split(self, node: NodeType, obj: ObjectType) -> None:
 
         # if not node.is_root:
         op = node.parent_object
         np = node.parent_node
 
         n_new = type(node)(self.distance_func, np, op)  # same type like existing
-        all_objects = node.objects | {object}
+        all_objects = node.objects | {obj}
         o1, o2 = self._promote(self.distance_func, all_objects)
         os1, os2 = self._partition(self.distance_func, all_objects, o1, o2)
 
@@ -266,12 +267,11 @@ class MTree:
                 np.add(o2)
                 np.update_objects()
 
-    def _add(self, node, object):
-        # type: (NodeType, LeafObject) -> None
+    def _add(self, node: NodeType, obj: LeafObject) -> None:
 
         if not isinstance(node, LeafNode):
             # print("not leaf", node)
-            distances = [self.distance_func(ro.value, object.value) for ro in node.objects]
+            distances = [self.distance_func(ro.value, obj.value) for ro in node.objects]
 
             n_in = [(ro, d) for ro, d in zip(node.objects, distances) if d <= ro.covering_radius]
             if n_in:
@@ -282,14 +282,14 @@ class MTree:
                 found = min_entry[0]
                 found.covering_radius = min_entry[2]
 
-            self._add(found.subtree, object)
+            self._add(found.subtree, obj)
         else:
             if not node.is_full:
                 # print("not full", "LeafNode", node)
-                node.add(object)
+                node.add(obj)
             else:
                 # print("is full", "LeafNode", node)
-                self._split(node, object)
+                self._split(node, obj)
 
     def _find(self, node, value, radius):
 
@@ -312,13 +312,11 @@ class MTree:
     def keys(self):
         yield from self._keys(self.root)
 
-    def add(self, value):
-        # type: (T, ) -> None
+    def add(self, value: T) -> None:
 
         self._add(self.root, LeafObject(value))
 
-    def find(self, value, radius):
-        # type: (T, float) -> Iterator[T]
+    def find(self, value: T, radius: float) -> Iterator[T]:
 
         node = self.root
 
@@ -337,8 +335,7 @@ def len_dist(s1, s2):
     return abs(len(s1) - len(s2))
 
 
-def vals(start, end):
-    # type: (int, int) -> Set[str]
+def vals(start: int, end: int) -> Set[str]:
 
     return {str(i) * i for i in range(start, end + 1)}
 

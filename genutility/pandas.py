@@ -27,8 +27,7 @@ def intersect_columns(*dfs: DataFrame, sort=False) -> Tuple[DataFrame, ...]:
     return dfs
 
 
-def pandas_json(obj):
-    # type: (Any, ) -> Any
+def pandas_json(obj: Any) -> Any:
 
     """Can be used for the `json.dump` `default` argument
     to make some pandas objects JSON serializable.
@@ -42,9 +41,7 @@ def pandas_json(obj):
     raise TypeError(f"object of type {type(obj)} cannot be JSON serialized: {obj}")
 
 
-def strlist(sep):
-    # type: (str, ) -> Callable[[str], List[str]]
-
+def strlist(sep: str) -> Callable[[str], List[str]]:
     def inner(s):
         if s:
             return s.split(sep)
@@ -54,8 +51,12 @@ def strlist(sep):
     return inner
 
 
-def dataframe_to_dict(df, empty=False, cellfunc=None, dictcls=dict):
-    # type: (DataFrame, bool, Optional[Callable], Callable[[Iterable[Tuple[str, Any]]], T]) -> T
+def dataframe_to_dict(
+    df: DataFrame,
+    empty: bool = False,
+    cellfunc: Optional[Callable] = None,
+    dictcls: Callable[[Iterable[Tuple[str, Any]]], T] = dict,
+) -> T:
 
     """Turns dataframes into trees. Columns first, then rows"""
 

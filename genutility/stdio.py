@@ -23,16 +23,14 @@ class PrintOnError:
     before an exception is printed by the python runtime.
     """
 
-    def __init__(self, *args, **kwargs):
-        # type: (*Any, **Any) -> None
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
 
         """All arguments are passed to the `print` function."""
 
         self.args = args
         self.kwargs = kwargs
 
-    def __enter__(self):
-        # type: () -> PrintOnError
+    def __enter__(self) -> "PrintOnError":
 
         return self
 

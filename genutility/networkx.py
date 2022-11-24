@@ -13,8 +13,7 @@ if TYPE_CHECKING:
     T = TypeVar("T")
 
 
-def complete_weighted_bipartite_graph(first, second, weights):
-    # type: (Sequence[T], Sequence[T], np.ndarray) -> Graph
+def complete_weighted_bipartite_graph(first: Sequence[T], second: Sequence[T], weights: np.ndarray) -> Graph:
 
     graph = Graph()
 
@@ -28,8 +27,7 @@ def complete_weighted_bipartite_graph(first, second, weights):
     return graph
 
 
-def connected_subgraph(graph, minsize=2):
-    # type: (Graph, int) -> Graph
+def connected_subgraph(graph: Graph, minsize: int = 2) -> Graph:
 
     """Returns all the connected subgraphs of `graph`,
     which are at least of size `minsize`.
