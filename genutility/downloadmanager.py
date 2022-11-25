@@ -9,6 +9,7 @@ from typing import Any, Deque, List, Optional, Set
 import aiohttp
 
 from .datetime import now
+from .url import get_filename_from_url
 
 logger = logging.getLogger(__name__)
 
@@ -135,10 +136,11 @@ class DownloadManager:
         self._trystart()
 
     def download(
-        self, url: str, path: str = "tmp.txt", priority: int = 0, force: bool = False
+        self, url: str, path: Optional[str] = None, priority: int = 0, force: bool = False
     ) -> Optional[asyncio.Task]:
 
-        logger.info("starting download")
+        path = path or get_filename_from_url(url)
+        logger.info("Starting download <%s> to <%s>", url, path)
         task = DownloadTask(url, path)
         if force:
             return self._start(task)
@@ -154,10 +156,6 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
 
-    dm = DownloadManager()
-
-    from asyncio.events import get_event_loop
-
     import wx
     from wxasync import AsyncBind, StartCoroutine, WxAsyncApp
 
@@ -166,6 +164,8 @@ if __name__ == "__main__":
     class TestFrame(wx.Frame):
         def __init__(self, parent=None):
             super().__init__(parent)
+            self.dm = DownloadManager()
+
             vbox = wx.BoxSizer(wx.VERTICAL)
             button1 = wx.Button(self, label="Submit")
             self.edit = wx.StaticText(self, style=wx.ALIGN_CENTRE_HORIZONTAL | wx.ST_NO_AUTORESIZE)
@@ -181,17 +181,25 @@ if __name__ == "__main__":
 
         async def async_callback(self, event):
             self.edit.SetLabel("WX WAITING")
-            dm.download(DOWNLOAD_URL)
+            self.dm.download(DOWNLOAD_URL)
             self.edit.SetLabel("WX COMPLETE")
 
         async def update_clock(self):
             while True:
-                self.edit_timer.SetLabel(dm.status())
+                self.edit_timer.SetLabel(self.dm.status())
                 await asyncio.sleep(0.5)
 
-    app = WxAsyncApp()
-    frame = TestFrame()
-    frame.Show()
-    app.SetTopWindow(frame)
-    loop = get_event_loop()
-    loop.run_until_complete(app.MainLoop())
+    async def main():
+        app = WxAsyncApp()
+        frame = TestFrame()
+        frame.Show()
+        app.SetTopWindow(frame)
+        await app.MainLoop()
+
+    loop = asyncio.events.new_event_loop()
+    try:
+        asyncio.events.set_event_loop(loop)
+        loop.run_until_complete(main())
+    finally:
+        asyncio.events.set_event_loop(None)
+        loop.close()
