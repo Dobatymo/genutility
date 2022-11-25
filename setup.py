@@ -63,7 +63,7 @@ extras_require = {
     # "browscap": ["re2"], # unfinished
     "cholesky": ["numpy", "numba"],
     "config": ["jsonschema", "sortedcontainers"],
-    "downloadmanager": ["aiohttp>=0.16.3", "orderedset"],
+    "downloadmanager": ["aiohttp>=0.16.3"],
     "encoder": ["numpy", "nltk>=3.6.1"],
     "filesdb": ["tls-property"],
     "fingerprinting": ["numpy", "numba", "pillow"],
@@ -107,7 +107,7 @@ extras_require = {
     "powerpoint": ["python-pptx"],
     "rasa": ["requests", "aiohttp>=2.3", "ruamel.yaml"],
     "salesforce": ["simple-salesforce>=1.1.0", "simplejson", "aiohttp>=2.3", "requests", "pandas"],
-    "scipy": ["numpy", "scipy<1.6.0"],
+    "scipy": ["numpy", "scipy<1.6.0; python_version<'3.7'", "scipy<1.8.0; python_version>='3.7'"],
     "spark": ["pyspark>=3.0.0"],
     "toml": ["toml"],
     "torch": ["torch"],

@@ -6,7 +6,7 @@ import logging
 import re
 import time
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Collection, Coroutine, Dict, Generic, Iterable, Iterator, List
+from typing import TYPE_CHECKING, Any, Coroutine, Dict, Generic, Iterable, Iterator, List
 from typing import Mapping as MappingT
 from typing import Optional
 from typing import Sequence as SequenceT
@@ -43,7 +43,7 @@ def sosl_escape(s: str) -> str:
     return _sosl_pat.sub(_sosl_repl, s)
 
 
-def one(result: Collection[T]) -> T:
+def one(result: SequenceT[T]) -> T:
     if len(result) == 1:
         return result[0]
     else:

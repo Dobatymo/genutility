@@ -2,11 +2,11 @@ from __future__ import generator_stop
 
 import asyncio
 import logging
+from collections import deque
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Deque, List, Optional, Set
 
 import aiohttp
-from orderedset import OrderedSet
 
 from .datetime import now
 
@@ -38,19 +38,19 @@ class DownloadTask:
 
 
 class DownloadManager:
-    def __init__(self) -> None:
+    def __init__(self, concurrent_downloads: int = 3) -> None:
 
         self.loop = asyncio.get_event_loop()
         self.timeout = aiohttp.ClientTimeout(total=None, sock_read=60)
         self.session = aiohttp.ClientSession(loop=self.loop, timeout=self.timeout, auto_decompress=False)
-        self.concurrent_downloads = 3
+        self.concurrent_downloads = concurrent_downloads
         # self.sem = asyncio.Semaphore(1000)
         self.chunksize = 1024 * 1024  # file write buffer
 
-        self.queue = OrderedSet()
-        self.active = OrderedSet()
-        self.done = OrderedSet()
-        self.error = OrderedSet()
+        self.queue: Deque[DownloadTask] = deque()
+        self.active: Set[DownloadTask] = set()
+        self.done: List[DownloadTask] = []
+        self.error: List[DownloadTask] = []
 
     def status(self) -> str:
 
@@ -64,21 +64,25 @@ class DownloadManager:
 
     def _enqueue(self, task: DownloadTask, priority: Any) -> None:
 
-        self.queue.add(task)
+        self.queue.append(task)
 
-    def _start(self, task: DownloadTask) -> asyncio.Task:
+    def _start(self, task: DownloadTask) -> Optional[asyncio.Task]:
 
-        self.active.add(task)
-        atask = asyncio.ensure_future(self._download(task))
-        return atask
+        if task not in self.active:
+            self.active.add(task)
+            atask = asyncio.ensure_future(self._download(task))
+            return atask
+        else:
+            self.error.append(task)
+            return None
 
     def _trystart(self) -> Optional[asyncio.Task]:
 
         if len(self.active) < self.concurrent_downloads:
             try:
-                task = self.queue.pop()
+                task = self.queue.popleft()
                 return self._start(task)
-            except KeyError:
+            except IndexError:
                 if not self.active:
                     logger.info("all done")
                     # self.loop.stop()
@@ -122,9 +126,9 @@ class DownloadManager:
                     print("incomplete", task.downloaded, "of", size)
 
         except asyncio.TimeoutError:
-            self.error.add(task)
+            self.error.append(task)
         else:
-            self.done.add(task)
+            self.done.append(task)
 
         task.done()
         self.active.remove(task)
