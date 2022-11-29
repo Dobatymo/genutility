@@ -5,11 +5,12 @@ from datetime import timedelta
 from fractions import Fraction
 from os import PathLike, fspath
 from pathlib import Path
-from typing import Any, Iterator, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Iterator, Sequence, Tuple, Union
 
 import numpy as np
 
-from av import VideoFrame
+if TYPE_CHECKING:
+    from av import VideoFrame
 
 WsgiApp = Any
 
@@ -168,13 +169,13 @@ class CvVideo(VideoBase):
 
 
 def object_attributes(obj):
-    def asd():
+    def inner():
         for attr in dir(obj):
             val = getattr(obj, attr)
             if not callable(val):
                 yield attr, val
 
-    return dict(asd())
+    return dict(inner())
 
 
 class AvVideo(VideoBase):
@@ -219,6 +220,8 @@ class AvVideo(VideoBase):
         vcc = {attr: getattr(vcc, attr) for attr in self.vcc_attrs}
         del vcc["format"]
 
+        vcc["average_rate"] = getattr(self.vstream, "average_rate", None)  # for av>=10.0.0
+
         self.native_duration = self.vstream.duration  # exclusive
         self.time_base = self.vstream.time_base
 
@@ -236,11 +239,11 @@ class AvVideo(VideoBase):
             "width": vcc["width"],
             "height": vcc["height"],
             "duration": duration,
-            "fps": vcc["framerate"],
+            "fps": vcc["framerate"] or vcc["average_rate"],
             "sample_aspect_ratio": vcc["sample_aspect_ratio"] or Fraction(1, 1),
             "display_aspect_ratio": vcc["display_aspect_ratio"] or Fraction(vcc["width"], vcc["height"]),
             "format": vcc["pix_fmt"],
-            # "containser_bit_rate": self.container.bit_rate,
+            # "container_bit_rate": self.container.bit_rate,
         }
 
     @staticmethod
@@ -287,7 +290,7 @@ class AvVideo(VideoBase):
 
         raise NoGoodFrame("Could not find good frame after trying various offsets")
 
-    def _frame_to_file(self, frame: VideoFrame, outpath: Path) -> None:
+    def _frame_to_file(self, frame: "VideoFrame", outpath: Path) -> None:
 
         frame.to_image(fspath(outpath))
 

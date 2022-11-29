@@ -3,6 +3,6 @@ aioresponses<0.7
 bandit
 flake8
 hypothesis
-Pillow>=8.1.1
+packaging
 pre-commit
 requests-mock

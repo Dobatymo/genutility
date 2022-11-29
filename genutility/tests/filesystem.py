@@ -57,6 +57,8 @@ class FilesystemTest(MyTestCase):
             "16.txt",
             "minimal_1.pdf",
             "minimal_2.pdf",
+            "com.apple.quicktime.artwork.mp4",
+            "empty.mp4",
         ]
 
         results = list(entry.name for entry in scandir_rec("testfiles", rec=True))

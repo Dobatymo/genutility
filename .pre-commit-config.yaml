@@ -47,6 +47,7 @@ repos:
         additional_dependencies:
           - aiohttp>=2.3
           - aria2p
+          - av>=8.0
           - beautifulsoup4
           - bencode.py>=2.0.0
           - cryptography>=1.5.3

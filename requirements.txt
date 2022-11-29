@@ -1,6 +1,6 @@
 aiohttp>=3.7.4
-# av # no simple build
 aria2p
+av>=8.0; python_version>='3.8'
 beautifulsoup4
 bencode.py>=2.0.0 # bencode
 certifi
@@ -21,7 +21,8 @@ opencv-python # cv2
 pandas
 piexif
 Pillow>=8.1.1
-pymediainfo
+pymediainfo<6.0; python_version<'3.7'
+pymediainfo; python_version>='3.7'
 pymongo
 pyOpenSSL>=17.5.0 # OpenSSL
 PyPDF2>=2.5.0
