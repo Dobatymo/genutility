@@ -5,7 +5,7 @@ beautifulsoup4
 bencode.py>=2.0.0 # bencode
 certifi
 cryptography>=1.5.3
-ctypes-windows-sdk>=0.0.7; sys_platform=='win32'
+ctypes-windows-sdk>=0.0.10; sys_platform=='win32'
 flask>=0.12.3
 gensim>=4.0.0
 hyper

@@ -39,7 +39,7 @@ extras_require = {
     "mongo": [],
     "object": [],
     "ops": [],
-    "os": ["ctypes-windows-sdk>=0.0.7; sys_platform == 'win32'"],
+    "os": ["ctypes-windows-sdk>=0.0.10; sys_platform == 'win32'"],
     "pickle": [],
     "profile": [],
     "rand": [],
@@ -135,7 +135,7 @@ setup(
     packages=["genutility", "genutility.compat", "genutility.fileformats", "genutility.hardware", "genutility.win"],
     package_data={"genutility": ["py.typed", "data/*.tsv"]},
     python_requires=">=3.6",
-    install_requires=["ctypes-windows-sdk>=0.0.7; sys_platform=='win32'", "typing-extensions"],
+    install_requires=["ctypes-windows-sdk>=0.0.10; sys_platform=='win32'", "typing-extensions"],
     extras_require=extras_require,
     license_files=["LICENSE"],
 )

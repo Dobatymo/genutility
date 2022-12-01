@@ -15,6 +15,8 @@ from cwinsdk.um.fileapi import OPEN_EXISTING, CreateFileW
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE, CloseHandle
 from cwinsdk.um.ioapiset import DeviceIoControl
 from cwinsdk.um.winioctl import (
+    DEVICE_SEEK_PENALTY_DESCRIPTOR,
+    DEVICE_TRIM_DESCRIPTOR,
     DISK_GEOMETRY,
     FSCTL_ALLOW_EXTENDED_DASD_IO,
     FSCTL_LOCK_VOLUME,
@@ -35,6 +37,7 @@ from cwinsdk.um.winioctl import (
     STORAGE_PROPERTY_QUERY,
     STORAGE_QUERY_TYPE,
     STORAGE_READ_CAPACITY,
+    STORAGE_TEMPERATURE_DATA_DESCRIPTOR,
     VERIFY_INFORMATION,
 )
 from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
@@ -42,9 +45,52 @@ from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
 from ..exceptions import assert_true
 from .handle import WindowsHandle, _mode2access
 
+volumep = re.compile(r"^\\\\[\.\?]\\[A-Z]:$")
+drivep = re.compile(r"^\\\\[\.\?]\\PHYSICALDRIVE[0-9]$")
+
 
 class EMPTY_BUFFER(Structure):
     pass
+
+
+def MyDeviceIoControl(
+    DeviceHandle: Any, IoControlCode: Any, InBuffer: Any, OutBuffer: Any, check_output: bool = True
+) -> None:
+
+    BytesReturned = DWORD()
+
+    assert_true("IoControlCode", IoControlCode)
+
+    ret = DeviceIoControl(
+        DeviceHandle,
+        IoControlCode,
+        byref(InBuffer),
+        sizeof(InBuffer),
+        byref(OutBuffer),
+        sizeof(OutBuffer),
+        byref(BytesReturned),
+        None,
+    )
+
+    if ret == 0:
+        raise WinError()
+
+    if check_output and BytesReturned.value != sizeof(OutBuffer):
+        raise RuntimeError(f"DeviceIoControl expected {sizeof(OutBuffer)} bytes but got {BytesReturned.value} bytes")
+
+
+def open_device(FileName, mode: str = "r"):
+
+    DesiredAccess = _mode2access[mode]
+
+    DeviceHandle = CreateFileW(
+        FileName, DesiredAccess, FILE_SHARE_READ | FILE_SHARE_WRITE, None, OPEN_EXISTING, 0, None
+    )
+
+    if DeviceHandle == INVALID_HANDLE_VALUE:
+        raise WinError()
+
+    return DeviceHandle
 
 
 def get_length(path: str) -> int:
@@ -64,6 +110,20 @@ def get_length(path: str) -> int:
 
     finally:
         CloseHandle(handle)
+
+
+def open_logical_volume(FileName):
+    assert volumep.match(FileName)
+    return open_device(FileName)
+
+
+def open_physical_drive(DriveIndex: int) -> Any:
+
+    assert isinstance(DriveIndex, int)
+    drive = rf"\\.\PHYSICALDRIVE{DriveIndex}"
+    FileName = create_unicode_buffer(drive)
+
+    return open_device(FileName)
 
 
 class Volume(WindowsHandle):
@@ -155,6 +215,44 @@ class Drive(WindowsHandle):
 
         MyDeviceIoControl(self.handle, IOCTL_DISK_VERIFY, InBuffer, OutBuffer)
 
+    def get_seek_penalty(self) -> bool:
+
+        InBuffer = STORAGE_PROPERTY_QUERY()
+        OutBuffer = DEVICE_SEEK_PENALTY_DESCRIPTOR()
+
+        InBuffer.PropertyId = STORAGE_PROPERTY_ID.StorageDeviceSeekPenaltyProperty
+        InBuffer.QueryType = STORAGE_QUERY_TYPE.PropertyStandardQuery
+
+        MyDeviceIoControl(self.handle, IOCTL_STORAGE_QUERY_PROPERTY, InBuffer, OutBuffer)
+
+        return bool(OutBuffer.IncursSeekPenalty)
+
+    def get_trim_enabled(self) -> bool:
+
+        InBuffer = STORAGE_PROPERTY_QUERY()
+        OutBuffer = DEVICE_TRIM_DESCRIPTOR()
+
+        InBuffer.PropertyId = STORAGE_PROPERTY_ID.StorageDeviceTrimProperty
+        InBuffer.QueryType = STORAGE_QUERY_TYPE.PropertyStandardQuery
+
+        MyDeviceIoControl(self.handle, IOCTL_STORAGE_QUERY_PROPERTY, InBuffer, OutBuffer)
+
+        return bool(OutBuffer.TrimEnabled)
+
+    def get_temperature(self) -> dict:
+
+        # requires Windows 10
+
+        InBuffer = STORAGE_PROPERTY_QUERY()
+        OutBuffer = STORAGE_TEMPERATURE_DATA_DESCRIPTOR()
+
+        InBuffer.PropertyId = STORAGE_PROPERTY_ID.StorageDeviceTemperatureProperty
+        InBuffer.QueryType = STORAGE_QUERY_TYPE.PropertyStandardQuery
+
+        MyDeviceIoControl(self.handle, IOCTL_STORAGE_QUERY_PROPERTY, InBuffer, OutBuffer)
+
+        return struct2dict(OutBuffer)
+
 
 def get_drive_size(DriveIndex: int) -> int:
     with Drive(DriveIndex) as drive:
@@ -168,50 +266,6 @@ def partition_style_string(partition_style: int) -> str:
 
 def partition_type_string(partition_type) -> str:
     return {PARTITION_IFS: "NTFS/exFAT", PARTITION_MSFT_RECOVERY: "Recovery"}.get(partition_type, "Unknown")
-
-
-def MyDeviceIoControl(
-    DeviceHandle: Any, IoControlCode: Any, InBuffer: Any, OutBuffer: Any, check_output: bool = True
-) -> None:
-
-    BytesReturned = DWORD()
-
-    assert_true("IoControlCode", IoControlCode)
-
-    ret = DeviceIoControl(
-        DeviceHandle,
-        IoControlCode,
-        byref(InBuffer),
-        sizeof(InBuffer),
-        byref(OutBuffer),
-        sizeof(OutBuffer),
-        byref(BytesReturned),
-        None,
-    )
-
-    if ret == 0:
-        raise WinError()
-
-    if check_output and BytesReturned.value != sizeof(OutBuffer):
-        raise RuntimeError(f"DeviceIoControl expected {sizeof(OutBuffer)} bytes but got {BytesReturned.value} bytes")
-
-
-def open_device(FileName, mode: str = "r"):
-
-    DesiredAccess = _mode2access[mode]
-
-    DeviceHandle = CreateFileW(
-        FileName, DesiredAccess, FILE_SHARE_READ | FILE_SHARE_WRITE, None, OPEN_EXISTING, 0, None
-    )
-
-    if DeviceHandle == INVALID_HANDLE_VALUE:
-        raise WinError()
-
-    return DeviceHandle
-
-
-volumep = re.compile(r"^\\\\[\.\?]\\[A-Z]:$")
-drivep = re.compile(r"^\\\\[\.\?]\\PHYSICALDRIVE[0-9]$")
 
 
 def is_volume_or_drive(s: str) -> str:
@@ -230,20 +284,6 @@ def is_volume_or_drive(s: str) -> str:
         raise ArgumentTypeError("X: or PHYSICALDRIVEX")
 
 
-def open_logical_volume(FileName):
-    assert volumep.match(FileName)
-    return open_device(FileName)
-
-
-def open_physical_drive(DriveIndex: int) -> Any:
-
-    assert isinstance(DriveIndex, int)
-    drive = rf"\\.\PHYSICALDRIVE{DriveIndex}"
-    FileName = create_unicode_buffer(drive)
-
-    return open_device(FileName)
-
-
 if __name__ == "__main__":
 
     from argparse import ArgumentParser
@@ -254,10 +294,22 @@ if __name__ == "__main__":
 
     with Drive(args.driveindex) as d:
         print("Alignment:", d.get_alignment())
+        try:
+            print("Seek penalty:", d.get_seek_penalty())
+        except OSError as e:
+            print("Seek penalty:", e)
+        try:
+            print("Trim enabled:", d.get_trim_enabled())
+        except OSError as e:
+            print("Trim enabled:", e)
         print("Capacity:", d.get_capacity())
         print("Device:", d.get_device())
         print("Geometry:", d.get_geometry())
         try:
             print("SMART version:", d.get_smart_version())
         except OSError as e:
-            print(e)
+            print("SMART version:", e)
+        try:
+            print("Temperature:", d.get_temperature())
+        except OSError as e:
+            print("Temperature:", e)

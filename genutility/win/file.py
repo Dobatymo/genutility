@@ -1,10 +1,14 @@
 from __future__ import generator_stop
 
 from ctypes import FormatError, GetLastError, WinError, byref, sizeof
+from ctypes.wintypes import DWORD, USHORT
 from errno import EACCES
 
+from cwinsdk.um.fileapi import INVALID_FILE_SIZE, CreateFileW, GetCompressedFileSizeW
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
-from cwinsdk.um.winnt import FILE_SHARE_READ, FILE_SHARE_WRITE
+from cwinsdk.um.WinBase import GetFileInformationByHandleEx, OpenFileById
+from cwinsdk.um.winioctl import FSCTL_SET_COMPRESSION
+from cwinsdk.um.winnt import COMPRESSION_FORMAT_DEFAULT, COMPRESSION_FORMAT_NONE, FILE_SHARE_READ, FILE_SHARE_WRITE
 from cwinsdk.windows import ERROR_SHARING_VIOLATION  # structs; enums
 from cwinsdk.windows import (
     FILE_ID_DESCRIPTOR,
@@ -13,16 +17,29 @@ from cwinsdk.windows import (
     FILE_INFO_BY_HANDLE_CLASS,
     GENERIC_READ,
     OPEN_EXISTING,
-    CreateFileW,
-    GetFileInformationByHandleEx,
-    OpenFileById,
 )
 
+from .device import EMPTY_BUFFER, MyDeviceIoControl
 from .handle import WindowsHandle, _mode2access
+
+NO_ERROR = 0
 
 
 class SharingViolation(OSError):
     pass
+
+
+def GetCompressedFileSize(path: str) -> int:
+    HighPart = DWORD()
+    LowPart = GetCompressedFileSizeW(path, byref(HighPart))
+
+    if LowPart == INVALID_FILE_SIZE:
+        if GetLastError() != NO_ERROR:
+            e = WinError()
+            e.filename = path
+            raise e
+
+    return (HighPart.value << 32) + LowPart
 
 
 class WindowsFile(WindowsHandle):
@@ -59,7 +76,9 @@ class WindowsFile(WindowsHandle):
                 strerror = FormatError(winerror)
                 raise SharingViolation(errno, strerror, path, winerror)
             else:
-                raise WinError()
+                e = WinError()
+                e.filename = path
+                raise e
 
         return cls(handle)
 
@@ -84,6 +103,13 @@ class WindowsFile(WindowsHandle):
         )
         return FileInformation
 
+    def set_compression(self, compressed: bool) -> None:
+        if compressed:
+            InBuffer = USHORT(COMPRESSION_FORMAT_DEFAULT)
+        else:
+            InBuffer = USHORT(COMPRESSION_FORMAT_NONE)
+        MyDeviceIoControl(self.handle, FSCTL_SET_COMPRESSION, InBuffer, EMPTY_BUFFER())
+
 
 def is_open_for_write(path: str) -> bool:
 
@@ -96,6 +122,11 @@ def is_open_for_write(path: str) -> bool:
             return False
     except SharingViolation:
         return True
+
+
+def set_compression(path: str, compressed: bool) -> None:
+    with WindowsFile.from_path(path, mode="w+") as wf:
+        wf.set_compression(compressed)
 
 
 if __name__ == "__main__":
