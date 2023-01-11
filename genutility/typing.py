@@ -1,11 +1,19 @@
 from __future__ import generator_stop
 
-from typing import Any, Iterable, Optional, Sequence, TypeVar, Union
+from typing import Any, Iterable, Iterator, Optional, Sequence, TypeVar, Union
 
-from typing_extensions import Protocol  # typing.Protocol is availalble in Python 3.8+
+from typing_extensions import Protocol  # typing.Protocol is available in Python 3.8+
 
 Number = Union[int, float]
 T = TypeVar("T")
+
+
+class SizedIterable(Protocol[T]):
+    def __len__(self) -> int:
+        ...
+
+    def __iter__(self) -> Iterator[T]:
+        ...
 
 
 class Comparable(Protocol):

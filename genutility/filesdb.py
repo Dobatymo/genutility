@@ -5,7 +5,21 @@ import os.path
 import sqlite3
 from itertools import chain, repeat
 from os import fspath
-from typing import Any, Callable, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional, Tuple, TypeVar
+from pathlib import Path
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    FrozenSet,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+)
 
 from tls_property import tls_property
 
@@ -19,7 +33,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class GenericFileDb:
+class GenericDb:
 
     order_col = "_order"
 
@@ -70,8 +84,8 @@ class GenericFileDb:
         logger.debug("SQL trace: %s", query)
 
     @classmethod
-    def latest_order_by(cls) -> str:
-        return "entry_date DESC"
+    def latest_order_by(cls) -> Tuple[str, str, str]:
+        raise NotImplementedError
 
     @classmethod
     def primary(cls) -> List[Tuple[str, str, str]]:
@@ -105,10 +119,10 @@ class GenericFileDb:
 
         raise NotImplementedError
 
-    def __enter__(self):
+    def __enter__(self) -> "GenericDb":
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
 
     def __len__(self) -> int:
@@ -116,6 +130,12 @@ class GenericFileDb:
         self.cursor.execute(sql)
         (result,) = fetchone(self.cursor)
         return result
+
+    def __bool__(self) -> bool:
+        sql = f"SELECT EXISTS (SELECT 1 FROM {self.table})"  # nosec
+        self.cursor.execute(sql)
+        (result,) = fetchone(self.cursor)
+        return result == 1
 
     def close(self) -> None:
 
@@ -134,8 +154,8 @@ class GenericFileDb:
         self.cursor.execute(sql)
         self.commit()
 
-    def normalize_path(self, path):
-        raise NotImplementedError
+    def normalize_mandatory(self, mandatory: Sequence) -> Sequence:
+        return mandatory
 
     def commit(self) -> None:
 
@@ -143,9 +163,7 @@ class GenericFileDb:
 
     def _args(
         self,
-        path: str,
-        filesize: int,
-        mod_date: int,
+        mandatory: Sequence[Any],
         derived: Dict[str, Any],
         ignore_null: bool = True,
     ) -> tuple:
@@ -153,24 +171,22 @@ class GenericFileDb:
         if ignore_null:
             return tuple(
                 chain(
-                    (self.normalize_path(path), filesize, mod_date),
+                    self.normalize_mandatory(mandatory),
                     (derived[n] for n, t, v in self._derived if n in derived),
                 )
             )
         else:
-            return tuple(
-                chain((self.normalize_path(path), filesize, mod_date), (derived.get(n) for n, t, v in self._derived))
-            )
+            return tuple(chain(self.normalize_mandatory(mandatory), (derived.get(n) for n, t, v in self._derived)))
 
     def _args_many(
         self,
-        mandatory: Iterable[Tuple[str, int, int]],
+        mandatory: Iterable[Sequence[Any]],
         derived: Optional[Iterable[Dict[str, Any]]] = None,
         ignore_null: bool = True,
     ) -> Iterator[tuple]:
         derived = derived or repeat({})
-        for (path, filesize, mod_date), _derived in zip(mandatory, derived):
-            yield self._args(path, filesize, mod_date, _derived, ignore_null)
+        for _mandatory, _derived in zip(mandatory, derived):
+            yield self._args(_mandatory, _derived, ignore_null)
 
     def iter(self, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> Iterator[tuple]:
 
@@ -211,11 +227,9 @@ class GenericFileDb:
 
         return fields
 
-    def get_latest(
+    def _get_latest(
         self,
-        path: str,
-        filesize: int,
-        mod_date: int,
+        mandatory: Sequence[Any],
         derived: Optional[Dict[str, Any]] = None,
         ignore_null: bool = True,
         only: FrozenSet[str] = frozenset(),
@@ -239,10 +253,12 @@ class GenericFileDb:
         fields = ", ".join(self._get_fields(only, no))
         _derived = self._filtered_derived(derived, ignore_null)
         conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
-        order_by = self.latest_order_by()
+        latest_col, latest_dir, latest_agg = self.latest_order_by()
 
-        sql = f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {order_by} LIMIT 1"  # nosec
-        args = self._args(path, filesize, mod_date, derived, ignore_null)
+        sql = (
+            f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {latest_col} {latest_dir} LIMIT 1"  # nosec
+        )
+        args = self._args(mandatory, derived, ignore_null)
 
         self.cursor.execute(sql, args)
 
@@ -250,7 +266,7 @@ class GenericFileDb:
 
     def get_latest_many(
         self,
-        mandatory: Iterable[Tuple[str, int, int]],
+        mandatory: Iterable[Sequence[Any]],
         total: int,
         derived_names: Optional[Tuple[str, ...]] = None,
         derived: Optional[Iterable[Dict[str, Any]]] = None,
@@ -279,12 +295,13 @@ class GenericFileDb:
         join_group_by = ", ".join(f"t.{n}" for n in affected_fields)
 
         # fmt: off
+        latest_col, latest_dir, latest_agg = self.latest_order_by()
         sql = (  # nosec
         f"""
             WITH conditions ({self.order_col}, {group_by}) AS (VALUES {values})  -- create table with order key and match values
             SELECT {select}
             FROM {self.table} t INNER JOIN conditions c ON {join_on}
-            GROUP BY {join_group_by} HAVING entry_date = max(entry_date)  -- select only the latest entry from each group
+            GROUP BY {join_group_by} HAVING {latest_col} = {latest_agg}({latest_col})  -- select only the latest entry from each group
             ORDER BY c.{self.order_col}  -- order rows according to input order
         """
         )
@@ -295,20 +312,10 @@ class GenericFileDb:
 
         return iterfetch(self.cursor)
 
-    def get(self, path: EntryType, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
-
-        """Retrieves latest row based on mandatory information
-        which is solely based on the `path`.
-        Use `only`/`no` to include/exclude returned fields.
-        """
-
-        stats = path.stat()
-        return self.get_latest(fspath(path), stats.st_size, stats.st_mtime_ns, ignore_null=True, only=only, no=no)
-
     def _filtered_values_str(self, derived, ignore_null: bool):
         return
 
-    def _add_file(self, path: str, filesize: int, mod_date: int, derived: Dict[str, Any], replace: bool = True) -> None:
+    def _add_file(self, mandatory: Sequence[Any], derived: Dict[str, Any], replace: bool = True) -> None:
 
         """Adds a new entry to the database and doesn't check if file
         with the same mandatory fields already exists.
@@ -325,21 +332,19 @@ class GenericFileDb:
         if replace:
             sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"
         else:
-            # fixme: this might keep the wrong derived information if the non-primary mandatory data like filesize or mod_date changed
+            # fixme: this might keep the wrong derived information if the non-primary mandatory data changed
             update_set = ", ".join(f"{n}=excluded.{n}" for n in affected_fields)
             sql = (
                 f"INSERT INTO {self.table} ({fields}) VALUES ({values}) ON CONFLICT DO UPDATE SET {update_set}"  # nosec
             )
 
-        args = self._args(path, filesize, mod_date, derived, ignore_null=True)
+        args = self._args(mandatory, derived, ignore_null=True)
 
         assert self.cursor.execute(sql, args).rowcount == 1
 
     def _add_file_no_dup(
         self,
-        path: str,
-        filesize: int,
-        mod_date: int,
+        mandatory: Sequence[Any],
         derived: Optional[Dict[str, Any]] = None,
         ignore_null: bool = True,
     ) -> bool:
@@ -355,19 +360,49 @@ class GenericFileDb:
         conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
 
         sql = f"REPLACE INTO {self.table} ({fields}) SELECT {values} WHERE NOT EXISTS (SELECT 1 FROM {self.table} WHERE {conditions})"  # nosec
-        args = self._args(path, filesize, mod_date, derived, ignore_null) * 2
+        args = self._args(mandatory, derived, ignore_null) * 2
 
         return self.cursor.execute(sql, args).rowcount == 1
 
         """ fixme: benchmark if this is really slower
         try:
-            self.get_latest(path, filesize, mod_date, derived, ignore_null=ignore_null)
+            self._get_latest(mandatory, derived, ignore_null=ignore_null)
             return False
 
         except NoResult:
-            self._add_file(path, filesize, mod_date, derived)
+            self._add_file(mandatory, derived)
             return True
         """
+
+
+class GenericFileDb(GenericDb):
+    @classmethod
+    def latest_order_by(cls) -> Tuple[str, str, str]:
+        return ["entry_date", "DESC", "max"]
+
+    def get_latest(
+        self,
+        path: str,
+        filesize: int,
+        mod_date: int,
+        derived: Optional[Dict[str, Any]] = None,
+        ignore_null: bool = True,
+        only: FrozenSet[str] = frozenset(),
+        no: FrozenSet[str] = frozenset(),
+    ) -> tuple:
+
+        mandatory = (path, filesize, mod_date)
+        return self._get_latest(mandatory, derived, ignore_null, only, no)
+
+    def get(self, path: EntryType, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
+
+        """Retrieves latest row based on mandatory information
+        which is solely based on the `path`.
+        Use `only`/`no` to include/exclude returned fields.
+        """
+
+        stats = path.stat()
+        return self.get_latest(fspath(path), stats.st_size, stats.st_mtime_ns, ignore_null=True, only=only, no=no)
 
     def add(
         self, path: EntryType, derived: Optional[Dict[str, Any]] = None, commit: bool = True, replace: bool = True
@@ -380,7 +415,8 @@ class GenericFileDb:
 
         derived = derived or {}
         stats = path.stat()
-        self._add_file(fspath(path), stats.st_size, stats.st_mtime_ns, derived, replace)
+        mandatory = (fspath(path), stats.st_size, stats.st_mtime_ns)
+        self._add_file(mandatory, derived, replace)
         if commit:
             self.commit()
 
@@ -388,7 +424,8 @@ class GenericFileDb:
 
         """Only adds a new entry to the db if all the provided information doesn't match a row in the db yet."""
 
-        result = self._add_file_no_dup(path, filesize, mod_date, derived)
+        mandatory = (path, filesize, mod_date)
+        result = self._add_file_no_dup(mandatory, derived)
         self.commit()
         return result
 
@@ -399,7 +436,8 @@ class GenericFileDb:
         """
 
         for path, filesize, mod_date, derived in batch:
-            yield self._add_file_no_dup(path, filesize, mod_date, derived)
+            mandatory = (path, filesize, mod_date)
+            yield self._add_file_no_dup(mandatory, derived)
 
         self.commit()
 
@@ -436,9 +474,11 @@ class FileDbHistory(GenericFileDb):
             ("mod_date", "INTEGER", "?"),
         ]
 
-    def normalize_path(self, path):
-        drive, path = os.path.splitdrive(path)
-        return normalize_seps(os.path.normpath(path))
+    def normalize_mandatory(self, mandatory: Sequence) -> Sequence:
+        path, filesize, mod_date = mandatory
+        drive, path = os.path.splitdrive(mandatory[0])
+        path = normalize_seps(os.path.normpath(path))
+        return path, filesize, mod_date
 
 
 class FileDbSimple(GenericFileDb):
@@ -460,5 +500,53 @@ class FileDbSimple(GenericFileDb):
             ("mod_date", "INTEGER", "?"),
         ]
 
-    def normalize_path(self, path):
-        return path
+
+class FileDbWithId(GenericFileDb):
+    @classmethod
+    def primary(cls):
+        return []
+
+    @classmethod
+    def auto(cls):
+        return [
+            ("entry_date", "DATETIME", "datetime('now')"),
+        ]
+
+    @classmethod
+    def mandatory(cls):
+        return [
+            ("path", "VARCHAR(256) NOT NULL PRIMARY KEY", "?"),
+            ("file_id", "INTEGER", "?"),
+            ("device_id", "INTEGER", "?"),
+            ("filesize", "INTEGER", "?"),
+            ("mod_date", "INTEGER", "?"),
+        ]
+
+    def get(self, path: Path, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
+
+        """Retrieves latest row based on mandatory information
+        which is solely based on the `path`.
+        Use `only`/`no` to include/exclude returned fields.
+        """
+
+        stats = path.stat()
+        assert stats.st_ino != 0 and stats.st_dev != 0
+        mandatory = (fspath(path), stats.st_ino, stats.st_dev, stats.st_size, stats.st_mtime_ns)
+        return self._get_latest(mandatory, ignore_null=True, only=only, no=no)
+
+    def add(
+        self, path: Path, derived: Optional[Dict[str, Any]] = None, commit: bool = True, replace: bool = True
+    ) -> None:
+
+        """Adds a new entry to the database and doesn't check if file
+        with the same mandatory fields already exists.
+        However it will replace entries based on PRIMARY KEYs or UNIQUE indices
+        """
+
+        derived = derived or {}
+        stats = path.stat()
+        assert stats.st_ino != 0 and stats.st_dev != 0
+        mandatory = (fspath(path), stats.st_ino, stats.st_dev, stats.st_size, stats.st_mtime_ns)
+        self._add_file(mandatory, derived, replace)
+        if commit:
+            self.commit()

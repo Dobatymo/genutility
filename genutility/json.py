@@ -10,7 +10,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import IO, Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optional, Sequence, Tuple, Type, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict  # typing.TypedDict is available in Python 3.8+
 
 from .atomic import TransactionalCreateFile, sopen
 from .compat.datetime import datetime as compat_datetime

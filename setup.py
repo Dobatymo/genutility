@@ -56,7 +56,7 @@ extras_require = {
     "string": [],
     "test": [],
     "time": [],
-    "typing": ["typing-extensions"],
+    "typing": [],
     "text": [],
     "twitch": [],
     "url": [],

@@ -2,7 +2,7 @@ from __future__ import generator_stop
 
 from collections import defaultdict
 from datetime import timedelta
-from time import monotonic, sleep
+from time import perf_counter, sleep
 from typing import Any, Callable, DefaultDict, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
 
 T = TypeVar("T")
@@ -11,9 +11,9 @@ T = TypeVar("T")
 def iter_timer(it: Iterator[T]) -> Iterator[Tuple[T, float]]:
     try:
         while True:
-            start = monotonic()
+            start = perf_counter()
             res = next(it)
-            delta = monotonic() - start
+            delta = perf_counter() - start
             yield res, delta
     except StopIteration:
         pass
@@ -28,6 +28,11 @@ class TakeAtleast:
 
     def __init__(self, delta: Union[float, timedelta], wait_on_error: bool = False) -> None:
 
+        """Uses `time.perf_counter` and `os.sleep` to make sure the execution of the code under context manager
+        took at least `delta` time. If the code executed faster it will simply sleep afterwards.
+        If `wait_on_error` is False and an exception is thrown, it won't sleep.
+        """
+
         if isinstance(delta, timedelta):
             self.delta = delta.total_seconds()
         else:
@@ -37,13 +42,13 @@ class TakeAtleast:
         self.now = None
 
     def __enter__(self) -> "TakeAtleast":
-        self.now = monotonic()
+        self.now = perf_counter()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> Optional[bool]:
 
         if exc_type is None or self.wait_on_error:
-            elapsed = monotonic() - self.now
+            elapsed = perf_counter() - self.now
             if elapsed < self.delta:
                 sleep(self.delta - elapsed)
 
@@ -57,7 +62,7 @@ class DeltaTime:
     def __init__(self) -> None:
 
         self.start = None
-        self.end = monotonic()
+        self.end = perf_counter()
 
     def __iter__(self) -> "DeltaTime":
 
@@ -65,20 +70,20 @@ class DeltaTime:
 
     def __next__(self) -> float:
 
-        self.start, self.end = self.end, monotonic()
+        self.start, self.end = self.end, perf_counter()
         return self.end - self.start
 
     def get(self) -> float:
 
-        return monotonic() - self.end
+        return perf_counter() - self.end
 
     def reset(self) -> None:
 
-        self.end = monotonic()
+        self.end = perf_counter()
 
     def get_reset(self) -> float:
 
-        self.start, self.end = self.end, monotonic()
+        self.start, self.end = self.end, perf_counter()
         return self.end - self.start
 
 
@@ -89,6 +94,11 @@ class PrintStatementTime:
     start: Optional[float]
 
     def __init__(self, tpl: Optional[str] = None) -> None:
+        """Times the execution of the code under the context manager and print it afterwards.
+        `tpl` is a format string with one field `delta` to include time in seconds.
+        The default is `"Execution took {delta}s"`.
+        """
+
         if tpl is None:
             self.tpl = "Execution took {delta}s"
         else:
@@ -96,13 +106,12 @@ class PrintStatementTime:
         self.start = None
 
     def __enter__(self) -> "PrintStatementTime":
-        self.start = monotonic()
+        self.start = perf_counter()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> Optional[bool]:
-        end = monotonic()
-        delta = end - self.start
-        msg = self.tpl.format(start=self.start, end=end, delta=delta)
+        delta = perf_counter() - self.start
+        msg = self.tpl.format(delta=delta)
         if exc_type:
             print(msg + " (interrupted)")
         else:
@@ -120,18 +129,18 @@ class MeasureTime:
         self.start = None
 
     def __enter__(self) -> "MeasureTime":
-        self.start = monotonic()
+        self.start = perf_counter()
         return self
 
     def __exit__(self, type, value, traceback) -> Optional[bool]:
-        self.delta = monotonic() - self.start
+        self.delta = perf_counter() - self.start
 
     def get(self) -> float:
 
         if self.delta:
             return self.delta
         else:
-            return monotonic() - self.start
+            return perf_counter() - self.start
 
 
 class TimeIt:
