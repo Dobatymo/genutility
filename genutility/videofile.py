@@ -102,8 +102,11 @@ class CvVideo(VideoBase):
         frame_height = int(self.cap.get(self.cv2.CAP_PROP_FRAME_HEIGHT))
         frame_count = int(self.cap.get(self.cv2.CAP_PROP_FRAME_COUNT))
 
-        if frame_width == 0 or frame_height == 0 or frame_count == 0:
-            raise ValueError(f"Invalid video file: {path}")
+        if frame_width == 0 or frame_height == 0:
+            raise ValueError(f"Invalid video file (zero frame dimensions): {path}")
+
+        if frame_count == 0:
+            raise ValueError(f"Invalid video file (zero frame count): {path}")
 
         pixel_aspect_ratio = Fraction(
             int(self.cap.get(self.cv2.CAP_PROP_SAR_NUM)), int(self.cap.get(self.cv2.CAP_PROP_SAR_DEN))

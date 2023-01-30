@@ -102,7 +102,7 @@ extras_require = {
     "nltk": ["nltk>=3.6.1"],
     "networkx": ["networkx"],
     "pandas": ["pandas"],
-    "pdf": ["PyPDF2>=2.5.0"],
+    "pdf": ["PyPDF2>=3.0.0"],
     "pillow": ["pillow", "piexif"],
     "powerpoint": ["python-pptx"],
     "rasa": ["requests", "aiohttp>=2.3", "ruamel.yaml"],
