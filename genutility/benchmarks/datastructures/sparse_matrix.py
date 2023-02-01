@@ -7,7 +7,7 @@ height = 1000
 width = 100
 
 lol = np.arange(height * width).reshape((height, width)).tolist()
-d = dict()
+d = {}
 for i, col in enumerate(lol):
     for j, val in enumerate(col):
         d[i, j] = val

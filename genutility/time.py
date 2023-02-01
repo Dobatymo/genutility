@@ -147,7 +147,7 @@ class TimeIt:
     def __init__(self) -> None:
 
         self.results: DefaultDict[Hashable, List[float]] = defaultdict(list)
-        self.starts: Dict[Hashable, DeltaTime] = dict()
+        self.starts: Dict[Hashable, DeltaTime] = {}
 
     def __call__(self, key: Hashable, func: Callable[..., T], *args: Any, **kwargs: Any) -> T:
 

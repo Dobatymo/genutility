@@ -154,8 +154,6 @@ def build_multiple_replace(d: Mapping[str, str], escape: bool = True) -> Callabl
     """Returns a callable, which when applied to a string,
     replaces all the keys in `d` with the corresponding values.
     The replacement happens in iteration order of the mapping.
-    If the order of replacement is important, an OrderedDict should
-    be used instead of a dict for Python < 3.7.
     The complexity then is linear in  the length of the input string.
     """
 

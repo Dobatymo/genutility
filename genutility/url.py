@@ -17,7 +17,7 @@ uri_schemes = ("http", "https", "ftp", "sftp", "irc", "magnet", "file", "data")
 url_base_pattern = r"(?:(?:{}:\/\/)|www\.)(?:[{}]|%[a-zA-Z0-9]{{2}})+"
 
 
-def get_url_pattern(schemes: Optional[Iterable[str]] = None) -> "re.Pattern":  # py3.6 fix
+def get_url_pattern(schemes: Optional[Iterable[str]] = None) -> re.Pattern:
 
     schemes = schemes or uri_schemes
     return re.compile(url_base_pattern.format("|".join(schemes), re.escape(valid_uri_characters)))

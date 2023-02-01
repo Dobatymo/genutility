@@ -270,7 +270,7 @@ class UnboundedSparseMatrix(Generic[T]):
 
         self.dtype = dtype
         self.zero = self.dtype(0)
-        self.m: Dict[Tuple[int, int], T] = dict()
+        self.m: Dict[Tuple[int, int], T] = {}
         self.cols = 0
         self.rows = 0
 

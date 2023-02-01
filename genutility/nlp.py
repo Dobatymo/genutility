@@ -41,7 +41,7 @@ def batch_gensim_indexer(embeddings: KeyedVectors, docs: Iterable[str], ignore: 
 def load_freqs(fname: Union[str, TextIO], normalize: bool = False, limit: Optional[int] = None) -> Dict[str, int]:
 
     with PathOrTextIO(fname, "rt", encoding="utf-8") as fin:
-        freqs = dict()
+        freqs = {}
 
         for line in islice(fin, limit):
             word, count = line.split()

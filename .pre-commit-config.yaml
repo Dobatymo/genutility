@@ -24,12 +24,10 @@ repos:
     rev: '22.10.0'
     hooks:
       - id: black
-        language_version: python3 # Should be a command that runs python3.6+
   - repo: https://github.com/PyCQA/isort
     rev: '5.10.1'
     hooks:
       - id: isort
-        language_version: python3
   - repo: https://github.com/PyCQA/bandit
     rev: '1.7.4'
     hooks:
@@ -45,7 +43,7 @@ repos:
       - id: mypy
         args: ["--install-types", "--non-interactive", "--show-error-codes"]
         additional_dependencies:
-          - aiohttp>=2.3
+          - aiohttp>=3.7.4
           - aria2p
           - av>=8.0
           - beautifulsoup4
@@ -77,8 +75,7 @@ repos:
           - requests
           - rhash
           - ruamel.yaml
-          - scipy<1.6.0; python_version<'3.7'
-          - scipy<1.8.0; python_version>='3.7'
+          - scipy<1.8.0
           - simple_salesforce>=1.1.0
           - simplejson
           - sortedcontainers

@@ -1,6 +1,7 @@
 from __future__ import generator_stop
 
 from collections import defaultdict
+from contextlib import nullcontext
 from difflib import unified_diff
 from functools import wraps
 from itertools import product, zip_longest
@@ -17,17 +18,6 @@ from .signal import HandleKeyboardInterrupt  # problem here
 
 T = TypeVar("T")
 U = TypeVar("U")
-
-
-class nullcontext:  # see: .compat.contextlib
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        pass
 
 
 anullcontext = nullcontext()

@@ -17,7 +17,7 @@ class CaseDict(Generic[T]):
 
     def __init__(self) -> None:
 
-        self.d: Dict[str, T] = dict()
+        self.d: Dict[str, T] = {}
         self.casemap: DefaultDict[str, Set[str]] = defaultdict(set)
 
     def __len__(self) -> int:

@@ -39,7 +39,7 @@ def exifinfo(image: Image.Image) -> Dict[str, Any]:
         try:
             tag = TAGS[k]
             if tag == "GPSInfo":
-                ret[tag] = dict()
+                ret[tag] = {}
                 for k, v in v.items():
                     try:
                         gpstag = GPSTAGS[k]

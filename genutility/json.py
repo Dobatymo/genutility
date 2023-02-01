@@ -13,7 +13,6 @@ from typing import IO, Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optio
 from typing_extensions import TypedDict  # typing.TypedDict is available in Python 3.8+
 
 from .atomic import TransactionalCreateFile, sopen
-from .compat.datetime import datetime as compat_datetime
 from .datetime import datetime_from_utc_timestamp_ms, now
 from .file import copen
 from .filesystem import mdatetime
@@ -81,7 +80,7 @@ class BuiltinRoundtripDecoder(json.JSONDecoder):
             if key == "$timedelta":
                 return datetime.timedelta(*value)
             elif key == "$datetime":
-                return compat_datetime.fromisoformat(value)
+                return datetime.datetime.fromisoformat(value)
             elif key == "$date":  # for compatibility with bson.json_util
                 return datetime_from_utc_timestamp_ms(value)
             elif key == "$set":
@@ -487,7 +486,7 @@ class JsonLinesFormatter(logging.Formatter):
 
     myfields = {
         "datetime": now,  # requires non-default json serializer
-        "datetime-str": lambda: now().isoformat(),
+        "datetime-str": lambda: now().isoformat(),  # note: lambda required
     }
 
     def __init__(

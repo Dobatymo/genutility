@@ -5,8 +5,6 @@ from functools import partial
 
 from msgpack import ExtType, packb, unpackb
 
-from .compat.datetime import datetime as compat_datetime
-
 
 class EXTID:
     datetime = 1
@@ -15,7 +13,7 @@ class EXTID:
 
 
 def default(obj):
-    if isinstance(obj, (datetime, compat_datetime)):
+    if isinstance(obj, datetime):
         return ExtType(EXTID.datetime, obj.isoformat().encode("utf-8"))  # todo: use struct.Struct instead
     elif isinstance(obj, set):
         return ExtType(EXTID.set, packb(tuple(obj), use_bin_type=True))
@@ -27,7 +25,7 @@ def default(obj):
 
 def ext_hook(code, data):
     if code == EXTID.datetime:
-        return compat_datetime.fromisoformat(data.decode("utf-8"))
+        return datetime.fromisoformat(data.decode("utf-8"))
     elif code == EXTID.set:
         return set(unpackb(data, use_list=False, raw=False))
     elif code == EXTID.frozenset:

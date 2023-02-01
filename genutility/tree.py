@@ -73,7 +73,7 @@ class SequenceTree(MutableMapping):
 
         node = self.root
         for key in keys:
-            node = node.setdefault(key, dict())
+            node = node.setdefault(key, {})
 
         node[self.endkey] = value
 
@@ -83,7 +83,7 @@ class SequenceTree(MutableMapping):
 
         node = self.root
         for word in keys:
-            node = node.setdefault(word, dict())
+            node = node.setdefault(word, {})
 
         if self.endkey in node:
             node[self.endkey] = value
@@ -101,7 +101,7 @@ class SequenceTree(MutableMapping):
 
     def _copy(self, node: dict) -> dict:
 
-        ret = dict()
+        ret = {}
 
         for k, v in node.items():
             if k != self.endkey:
@@ -227,7 +227,7 @@ class SequenceTree(MutableMapping):
 
         node = self.root
         for word in keys:
-            node = node.setdefault(word, dict())
+            node = node.setdefault(word, {})
 
         return node.setdefault(self.endkey, default)
 
