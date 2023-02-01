@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import csv
 from itertools import islice
 

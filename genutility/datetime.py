@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from datetime import datetime
 from datetime import time as dtime
 from datetime import timedelta, timezone

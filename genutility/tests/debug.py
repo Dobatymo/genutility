@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.debug import args_str
 from genutility.test import MyTestCase, parametrize
 

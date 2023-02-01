@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from itertools import product
 from random import shuffle
 

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import defaultdict
 from datetime import timedelta
 from time import perf_counter, sleep

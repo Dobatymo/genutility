@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import os.path
 from configparser import ConfigParser
 from importlib.util import find_spec

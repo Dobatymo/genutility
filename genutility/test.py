@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import defaultdict
 from contextlib import nullcontext
 from difflib import unified_diff

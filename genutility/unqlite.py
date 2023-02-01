@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Any, Hashable, List
 
 from unqlite import UnQLite

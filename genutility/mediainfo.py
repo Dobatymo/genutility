@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from os import PathLike, fspath
 from pathlib import Path
 from typing import Any, Dict, Union

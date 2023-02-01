@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.dict import (
     KeyExistsError,
     NoOverwriteDict,

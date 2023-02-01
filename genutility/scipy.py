@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import numpy as np
 from scipy.linalg import solve_triangular
 from scipy.optimize import linear_sum_assignment

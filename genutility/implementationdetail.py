@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from inspect import currentframe, getfile, getouterframes, getsourcefile
 from pathlib import Path
 from sys import _getframe  # sys._getframe() is not guaranteed to exist

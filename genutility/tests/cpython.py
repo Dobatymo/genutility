@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.cpython import find_local_in_call_stack
 from genutility.test import MyTestCase
 

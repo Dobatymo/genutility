@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from datetime import datetime
 from functools import partial
 

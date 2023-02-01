@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import asyncio
 import sys
 from numbers import Number

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.test import MyTestCase, closeable_tempfile, parametrize
 from genutility.toml import read_toml, write_toml
 

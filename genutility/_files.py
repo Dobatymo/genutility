@@ -2,7 +2,6 @@
     It should avoid any dependencies apart from the standard library.
 """
 
-from __future__ import generator_stop
 
 import os.path
 import re

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from functools import reduce
 
 import rhash

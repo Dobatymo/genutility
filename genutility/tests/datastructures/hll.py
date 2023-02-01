@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.datastructures.hll import HyperLogLog
 from genutility.test import MyTestCase, parametrize
 

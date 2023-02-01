@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import sys
 from time import sleep
 from unittest import skipIf

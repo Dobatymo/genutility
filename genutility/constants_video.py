@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Tuple
 
 DAR_WS = 16 / 9

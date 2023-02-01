@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from ctypes import FormatError, GetLastError, WinError, byref, sizeof
 from ctypes.wintypes import DWORD, USHORT
 from errno import EACCES

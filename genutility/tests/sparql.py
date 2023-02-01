@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.sparql import query_wikidata, wikidata_to_dataframe
 from genutility.test import MyTestCase
 

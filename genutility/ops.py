@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Any, Callable, Container, Sequence, TypeVar
 
 T = TypeVar("T")

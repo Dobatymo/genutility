@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import UserDict, defaultdict
 from collections.abc import Mapping, MutableMapping  # noqa: F401
 from copy import deepcopy

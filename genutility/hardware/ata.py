@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from ctypes import LittleEndianStructure
 from ctypes.wintypes import ULONG, USHORT
 

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import datetime
 import json
 import logging

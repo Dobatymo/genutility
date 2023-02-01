@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from operator import itemgetter
 
 from genutility.benchmarks.sequence import pop_many_2

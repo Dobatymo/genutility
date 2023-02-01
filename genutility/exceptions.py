@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, TypeVar, Union
 
 T = TypeVar("T")

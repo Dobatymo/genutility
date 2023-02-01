@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import unittest
 from datetime import timedelta
 from fractions import Fraction

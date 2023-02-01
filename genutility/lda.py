@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import Counter
 from itertools import chain
 from math import exp, log2

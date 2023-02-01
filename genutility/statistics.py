@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from math import pow
 from random import sample
 from typing import Collection

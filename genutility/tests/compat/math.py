@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.compat.math import prod
 from genutility.test import MyTestCase, parametrize
 

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from pathlib import Path
 
 from genutility.file import write_file

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Union
 
 from cryptography.hazmat.backends import default_backend

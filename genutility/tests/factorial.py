@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from math import factorial
 
 from genutility.factorial import SplitRecursive

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import pkg_resources
 
 from genutility.json import read_json

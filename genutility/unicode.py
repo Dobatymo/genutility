@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import defaultdict
 from pathlib import Path
 from sys import maxunicode

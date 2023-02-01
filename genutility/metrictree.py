@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from operator import itemgetter
 from typing import Callable, Iterator, Optional, Set, Tuple, TypeVar, Union
 

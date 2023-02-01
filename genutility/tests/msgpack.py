@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.datetime import now
 from genutility.msgpack import dumps, loads
 from genutility.test import MyTestCase, parametrize

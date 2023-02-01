@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from ctypes import Structure
 
 from cwinsdk.shared.ntdef import UCHAR

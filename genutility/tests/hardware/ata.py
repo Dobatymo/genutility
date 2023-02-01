@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from ctypes import sizeof
 
 from genutility.hardware.ata import IDENTIFY_DEVICE_DATA

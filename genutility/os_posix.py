@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import fcntl
 import os
 import signal

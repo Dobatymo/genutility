@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import codecs
 import logging
 import sqlite3

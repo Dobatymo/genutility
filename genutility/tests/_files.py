@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility._files import to_dos_device_path, to_dos_path
 from genutility.test import MyTestCase, parametrize
 

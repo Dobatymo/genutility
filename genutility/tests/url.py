@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from urllib.parse import urlsplit
 
 from genutility.test import MyTestCase, parametrize

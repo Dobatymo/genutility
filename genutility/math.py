@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import Counter, defaultdict
 from functools import partial
 from itertools import islice

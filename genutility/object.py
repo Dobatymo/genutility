@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from builtins import sorted as _builtin_sorted
 from copy import copy
 from json import dumps

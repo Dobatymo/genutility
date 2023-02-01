@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Iterator, List
 
 from pptx import Presentation  # python-pptx

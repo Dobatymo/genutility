@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from itertools import islice
 from math import pi
 

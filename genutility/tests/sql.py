@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.sql import convert_mysql_to_sqlite
 from genutility.test import MyTestCase, parametrize
 

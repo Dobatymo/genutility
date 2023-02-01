@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from math import sqrt
 
 import numpy as np

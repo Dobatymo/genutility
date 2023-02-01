@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Any, Callable, Iterable, List, Optional, Tuple, TypeVar
 
 from pandas import DataFrame, Series

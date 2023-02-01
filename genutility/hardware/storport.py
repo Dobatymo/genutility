@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 FILE_DEVICE_SCSI = 0x0000001B
 
 IOCTL_SCSI_EXECUTE_IN = (FILE_DEVICE_SCSI << 16) + 0x0011

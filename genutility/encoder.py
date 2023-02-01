@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Callable, Dict, Generic, Hashable, Iterable, Iterator, List, TypeVar, Union
 
 import numpy as np

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from ctypes import WinError
 from msvcrt import get_osfhandle, open_osfhandle
 from os import fdopen

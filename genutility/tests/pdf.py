@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from pathlib import Path
 
 from genutility.pdf import iter_pdf_text, join_pdfs_in_folder

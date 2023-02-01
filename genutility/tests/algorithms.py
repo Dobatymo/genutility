@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from unittest import expectedFailure
 
 from genutility.algorithms import median_of_medians

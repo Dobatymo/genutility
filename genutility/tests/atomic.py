@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.atomic import TransactionalCreateFile
 from genutility.test import MyTestCase
 

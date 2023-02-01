@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from contextlib import ExitStack
 from os import PathLike
 from pathlib import Path
@@ -93,7 +91,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Merge pdf files in directory into one file.")
     parser.add_argument("dir", type=is_dir, help="input directory")
     parser.add_argument("out", type=Path, help="output file path")
-    parser.add_argument("--rotate", type=float, help="Rotate in 90 degree increments")
+    parser.add_argument("--rotate", type=int, help="Rotate in 90 degree increments")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing output files")
     parser.add_argument("--password", type=str, help="Input file password")
     args = parser.parse_args()

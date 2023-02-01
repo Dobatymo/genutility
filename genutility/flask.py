@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from typing import Dict, Hashable, Optional, TypeVar
 from urllib.parse import quote, unquote

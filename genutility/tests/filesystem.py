@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import os.path
 from pathlib import Path
 from types import TracebackType

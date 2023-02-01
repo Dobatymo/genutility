@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.func import applymap, call_repeated, compose, identity, outermap, recmap, retry, zipmap
 from genutility.test import MyTestCase, parametrize
 

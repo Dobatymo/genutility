@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import os.path
 import re
 from string import ascii_letters, digits

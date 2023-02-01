@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Any, Iterable, Iterator, Optional, Sequence, TypeVar, Union
 
 from typing_extensions import Protocol  # typing.Protocol is available in Python 3.8+

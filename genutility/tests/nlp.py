@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.nlp import detokenize, resembles_english_word, tokenize
 from genutility.test import MyTestCase, parametrize
 

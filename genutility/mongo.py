@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import TYPE_CHECKING
 
 from .exceptions import InconsistentState, NoResult

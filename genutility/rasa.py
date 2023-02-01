@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import os.path
 from abc import ABCMeta, abstractmethod
 from typing import Any, Coroutine, Dict, Generic, List, Optional, TypeVar, Union

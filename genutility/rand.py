@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from random import choice, randrange, sample
 from typing import Iterator, Sequence, Tuple
 

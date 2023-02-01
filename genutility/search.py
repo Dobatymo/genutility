@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from enum import Enum
 from typing import Callable, Optional, Sequence, TypeVar
 

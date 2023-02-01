@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.flask import Base64Converter
 from genutility.test import MyTestCase, parametrize
 

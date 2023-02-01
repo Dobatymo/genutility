@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 STARS = {
     "Sun": {
         "mass": 1.9891e30,

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from copy import deepcopy
 from typing import Collection, Generic, Iterator, List, Optional, Set, Tuple, TypeVar
 

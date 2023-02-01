@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Iterable, Iterator, Union
 
 from .exceptions import assert_choice

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from datetime import datetime, time, timezone
 
 from genutility.datetime import between, datetime_from_utc_timestamp, datetime_from_utc_timestamp_ms

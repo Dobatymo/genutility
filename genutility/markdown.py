@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import re
 
 _markdown_newline_pat = re.compile(r"[^\n]\n[^\n]")

@@ -1,6 +1,3 @@
-from __future__ import generator_stop
-
-
 class RingList:
 
     """bad complexity, moves all data if ring is full"""

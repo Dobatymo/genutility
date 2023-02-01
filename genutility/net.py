@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import re
 import socket
 from typing import Optional

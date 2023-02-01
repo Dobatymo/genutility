@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import random
 from operator import add
 from sys import maxsize

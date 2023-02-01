@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Any, Callable, Dict, Iterable, Mapping, Optional
 
 from werkzeug.exceptions import BadRequest

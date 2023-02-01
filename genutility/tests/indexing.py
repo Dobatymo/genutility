@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.indexing import subblock_indices, window_combinations_indices
 from genutility.test import MyTestCase, parametrize
 

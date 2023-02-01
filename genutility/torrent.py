@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import binascii
 import gzip
 import logging

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from logging import Formatter, LogRecord
 from logging import basicConfig as _basicConfig
 from logging import root as _root

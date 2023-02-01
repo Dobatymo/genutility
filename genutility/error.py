@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from functools import wraps
 from typing import Callable
 from warnings import warn

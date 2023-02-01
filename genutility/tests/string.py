@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from random import shuffle
 
 from hypothesis import given, strategies

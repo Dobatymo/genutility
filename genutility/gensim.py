@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import namedtuple
 from itertools import islice
 from typing import Any, Callable, Collection, Iterable, Iterator, Optional, TextIO, Tuple, Union

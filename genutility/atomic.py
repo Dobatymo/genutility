@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import os.path
 from os import PathLike, fspath, remove, replace
 from tempfile import mkstemp

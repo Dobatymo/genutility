@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections import defaultdict
 from typing import Callable, DefaultDict, Dict, Generic, Hashable, ItemsView, Iterable, Optional, Tuple, TypeVar
 

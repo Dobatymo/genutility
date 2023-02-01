@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from math import log
 from typing import Callable, Hashable, Iterable, List, Optional, Union
 

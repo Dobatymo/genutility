@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, Dict, Hashable
 from typing import Iterable as IterableT

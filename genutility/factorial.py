@@ -1,6 +1,3 @@
-from __future__ import generator_stop
-
-
 class SplitRecursive:
 
     """Fast non-prime-based factorial algorithm.

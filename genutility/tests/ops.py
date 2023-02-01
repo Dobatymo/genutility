@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.ops import (
     bit_or,
     converse_implication,

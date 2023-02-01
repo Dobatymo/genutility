@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import sys
 from types import FrameType
 from typing import Any, Optional

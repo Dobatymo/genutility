@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from typing import Callable, Iterator, MutableSequence, TypeVar
 
 T = TypeVar("T")

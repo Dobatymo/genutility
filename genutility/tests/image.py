@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import numpy as np
 from PIL import Image, ImageOps
 

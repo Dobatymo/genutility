@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import os.path
 from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from mmap import mmap

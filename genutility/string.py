@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import re
 from collections import OrderedDict
 from functools import partial

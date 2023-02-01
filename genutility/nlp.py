@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from itertools import islice
 from string import ascii_letters
 from typing import Dict, Iterable, Iterator, List, Optional, Sequence, TextIO, Union

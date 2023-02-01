@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import sys
 from collections.abc import Sequence
 from time import sleep

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from itertools import count
 from socket import timeout as SocketTimeout
 from time import sleep

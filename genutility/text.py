@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 import re
 from string import whitespace
 from typing import Callable, Iterable, Iterator, Optional, Sequence, Union

@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from math import exp, sqrt
 from typing import Any, Callable, Dict, Generic, Iterator, Optional, Sequence, Tuple, TypeVar
 

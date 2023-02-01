@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from genutility.binary import decode_binary, encode_binary
 from genutility.test import MyTestCase, parametrize
 

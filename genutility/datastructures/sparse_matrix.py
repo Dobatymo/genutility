@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from collections.abc import MutableMapping
 from typing import AbstractSet, Iterator, List, Tuple, TypeVar, cast
 

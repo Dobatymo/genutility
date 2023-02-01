@@ -1,5 +1,3 @@
-from __future__ import generator_stop
-
 from fractions import Fraction
 from typing import Tuple, Union
 
