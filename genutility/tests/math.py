@@ -25,17 +25,17 @@ from genutility.test import MyTestCase, parametrize
 
 class TestPosInfInt(MyTestCase):
     def test_cmp(self):
-        self.assertTrue(PosInfInt > 2**128)
-        self.assertTrue(PosInfInt > 0)
-        self.assertTrue(PosInfInt > -(2**128))
+        self.assertGreater(PosInfInt, 2**128)
+        self.assertGreater(PosInfInt, 0)
+        self.assertGreater(PosInfInt, -(2**128))
 
         self.assertFalse(PosInfInt < 2**128)
         self.assertFalse(PosInfInt < 0)
         self.assertFalse(PosInfInt < -(2**128))
 
     def test_addsub(self):
-        self.assertTrue(PosInfInt + 1 is PosInfInt)
-        self.assertTrue(PosInfInt - 1 is PosInfInt)
+        self.assertIs(PosInfInt + 1, PosInfInt)
+        self.assertIs(PosInfInt - 1, PosInfInt)
 
 
 class MathTest(MyTestCase):

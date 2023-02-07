@@ -103,7 +103,7 @@ class IterTest(MyTestCase):
     def test_iterrandrange(self):
         result = set(islice(iterrandrange(0, 10), 100))
         truth = set(range(0, 10))
-        self.assertTrue(result <= truth)
+        self.assertLessEqual(result, truth)
 
     def test_iterrandrange_2(self):
         with self.assertRaises((TypeError, ValueError)):
@@ -526,13 +526,12 @@ class IterTest(MyTestCase):
         self.assertIterIterEqual(truth, result)
 
     def test_empty(self):
-
         from collections.abc import Generator, Iterable, Iterator
 
         it = empty()
-        self.assertTrue(isinstance(it, Iterable))
-        self.assertTrue(isinstance(it, Iterator))
-        self.assertTrue(isinstance(it, Generator))
+        self.assertIsInstance(it, Iterable)
+        self.assertIsInstance(it, Iterator)
+        self.assertIsInstance(it, Generator)
         with self.assertRaises(StopIteration):
             next(it)
         self.assertEqual(tuple(empty()), tuple())
