@@ -25,7 +25,6 @@ def install_markdown_excepthook(console=None):
 
 
 if __name__ == "__main__":
-
     install_markdown_excepthook()
 
     MARKDOWN = """

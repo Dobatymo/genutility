@@ -9,7 +9,6 @@ from ..file import read_or_raise
 from ..string import backslash_escaped_ascii
 
 if TYPE_CHECKING:
-
     from _hashlib import HASH as Hashobj
 
     Segment = Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]
@@ -101,7 +100,6 @@ metadata_segments = {
 
 
 def iter_jpeg_fp(fr: BinaryIO, translate: bool = True) -> Iterator[Segment]:
-
     """Iterate over JPEG file given in binary stream `fr` and yield the segments.
     `translate=False` can be used to reconstruct the file in a bit-identical way.
     See copy_jpeg() for an example.
@@ -187,7 +185,6 @@ def iter_jpeg_fp(fr: BinaryIO, translate: bool = True) -> Iterator[Segment]:
 
 
 def iter_jpeg(path: str, translate: bool = True) -> Iterator[Segment]:
-
     """Same as `iter_jpeg_fp()` except that it accepts a path."""
 
     with open(path, "rb") as fr:
@@ -195,7 +192,6 @@ def iter_jpeg(path: str, translate: bool = True) -> Iterator[Segment]:
 
 
 def copy_jpeg_fp(fin: BinaryIO, fout: BinaryIO, ignore_segments: Optional[Set[str]] = None) -> None:
-
     """Same as `copy_jpeg()` except that it accepts file-like objects."""
 
     ignore_segments = ignore_segments or set()
@@ -208,7 +204,6 @@ def copy_jpeg_fp(fin: BinaryIO, fout: BinaryIO, ignore_segments: Optional[Set[st
 
 
 def copy_jpeg(inpath: str, outpath: str, ignore_segments: Optional[Set[str]] = None) -> None:
-
     """Copy JPEG file `inpath` to `outpath` while ignoring the JPEG segments
     given in `ignore_segments`.
 
@@ -221,7 +216,6 @@ def copy_jpeg(inpath: str, outpath: str, ignore_segments: Optional[Set[str]] = N
 
 
 def hash_raw_jpeg(path: str, hashobj: Hashobj) -> None:
-
     """Create a hash of the JPEG at `path` skipping over meta data sections."""
 
     for name, marker, size, data in iter_jpeg(path, translate=False):

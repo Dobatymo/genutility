@@ -7,7 +7,6 @@ if TYPE_CHECKING:
 
 
 def findone(db: Collection, query: dict) -> dict:
-
     docs = list(db.find(query))
 
     if len(docs) == 0:

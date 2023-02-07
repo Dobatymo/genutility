@@ -6,7 +6,6 @@ import netifaces
 
 
 def is_ipv4(s: str) -> bool:
-
     """Tests if `s` is a IPv4 address string.
     It only validates the common `x.x.x.x` format and rejects less common ones like `x.x`.
     """
@@ -22,7 +21,6 @@ simple_email_regex = r"[^@\s]+@[^@\s]+\.[^@\s]+"
 
 
 def is_email(s: str) -> bool:
-
     """Coarse check to test of a string is an email. Will accept some invalid ones like
     "asd@.asd.com" and reject some valid ones like "asd@localhost"
     """
@@ -31,7 +29,6 @@ def is_email(s: str) -> bool:
 
 
 def get_standard_gateway(default: Optional[str] = None) -> Optional[str]:
-
     """Returns the standard IPv4 gateway."""
 
     for ipv4_gateway in netifaces.gateways()["default"][netifaces.AF_INET]:

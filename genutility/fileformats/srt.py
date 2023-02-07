@@ -53,7 +53,6 @@ class Subtitle:
 
 
 class SRTFile:
-
     nl = "\n"
     sep = " --> "
 
@@ -74,7 +73,6 @@ class SRTFile:
         self.fp.close()
 
     def write_subtitle(self, subtitle):
-
         start, end = subtitle.get_times()
         if self.overwrite_index:
             self.fp.write(str(self.sub_num) + self.nl)
@@ -145,7 +143,6 @@ def merge(srtlines, lim):
 
 
 def srt2txt(srt_fp):
-
     lim = "- "
     pos = 0
     lines = []
@@ -161,9 +158,7 @@ def srt2txt(srt_fp):
 
 
 def compare_srt_and_txt(srt_file, txt_file):
-
     with SRTFile(srt_file, "r", encoding="utf-8-sig") as srt, open(txt_file, encoding="utf-8-sig") as txt:
-
         srtiter = srt2txt(srt)
 
         limit = 10

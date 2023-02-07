@@ -4,7 +4,6 @@ T = TypeVar("T")
 
 
 def pop_many_2(seq: MutableSequence[T], func: Callable) -> Iterator[T]:
-
     """pop()s a values from `seq` where func(value) is true."""
 
     i = 0

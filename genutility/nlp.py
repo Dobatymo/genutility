@@ -12,14 +12,12 @@ english_word_chars = set(ascii_letters) | {"-", "'"}
 
 
 def resembles_english_word(word: str) -> bool:
-
     """Returns True if `word` only consists of English letters and - or '."""
 
     return all(t in english_word_chars for t in word)
 
 
 def gensim_indexer(embeddings: KeyedVectors, doc: str, ignore: bool = True) -> Iterator[int]:
-
     for word in tokenize(doc):
         try:
             yield embeddings.vocab[word.lower()].index
@@ -31,13 +29,11 @@ def gensim_indexer(embeddings: KeyedVectors, doc: str, ignore: bool = True) -> I
 
 
 def batch_gensim_indexer(embeddings: KeyedVectors, docs: Iterable[str], ignore: bool = True) -> Iterator[List[int]]:
-
     for doc in docs:
         yield list(gensim_indexer(embeddings, doc, ignore))
 
 
 def load_freqs(fname: Union[str, TextIO], normalize: bool = False, limit: Optional[int] = None) -> Dict[str, int]:
-
     with PathOrTextIO(fname, "rt", encoding="utf-8") as fin:
         freqs = {}
 
@@ -55,7 +51,6 @@ def load_freqs(fname: Union[str, TextIO], normalize: bool = False, limit: Option
 
 
 def detokenize(tokens: Sequence[str]) -> str:
-
     """Simply wraps the nltk `TreebankWordDetokenizer` into a convenience function."""
 
     detokenizer = (

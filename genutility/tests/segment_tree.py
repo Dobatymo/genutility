@@ -31,7 +31,6 @@ class SegmentTreeTest(MyTestCase):
             st.build()
 
             for left, right in range_generator(size, tests):
-
                 result = st.query(left, right)
                 truth = truthfunc(t[left:right])
                 self.assertEqual(truth, result)

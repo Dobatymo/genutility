@@ -78,7 +78,6 @@ class URLRequestBuilder:
     def __init__(
         self, cookiejar: Optional["CookieJar"] = None, basicauth: Optional[Tuple[str, str, str]] = None
     ) -> None:
-
         handlers: List[request.BaseHandler] = []
 
         if cookiejar:
@@ -137,7 +136,6 @@ class FileLike:
 
 
 def get_redirect_url(url, headers=None):
-
     import requests
 
     r = requests.get(url, allow_redirects=False, headers=headers)
@@ -154,7 +152,6 @@ def get_redirect_url(url, headers=None):
 
 
 class URLRequest:
-
     headers: "HTTPMessage"
 
     def __init__(
@@ -167,7 +164,6 @@ class URLRequest:
         basicauth: Optional[Tuple[str, str, str]] = None,
         openfunc: Optional[Callable] = None,
     ) -> None:
-
         self.url = url
         self.timeout = timeout
         headers = headers or {}
@@ -183,14 +179,12 @@ class URLRequest:
         self.response.close()
 
     def __enter__(self) -> "URLRequest":
-
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.response.close()
 
     def _content_length(self) -> Optional[int]:
-
         try:
             content_length = self.headers["Content-Length"]
             return int(content_length)
@@ -198,7 +192,6 @@ class URLRequest:
             return None
 
     def _last_modified(self) -> Optional[float]:
-
         try:
             last_modified = self.headers["Last-Modified"]
             return parsedate_to_timestamp(last_modified)
@@ -210,7 +203,6 @@ class URLRequest:
         return self.response.geturl()
 
     def _load(self) -> bytes:
-
         with FileLike(self) as fp:
             try:
                 return fp.read()
@@ -218,7 +210,6 @@ class URLRequest:
                 raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
 
     def _json(self) -> "JsonObject":
-
         with FileLike(self) as fp:
             try:
                 return json.load(fp)
@@ -234,7 +225,6 @@ class URLRequest:
         suffix: str = ".partial",
         report: Optional[Callable[[int, int], None]] = None,
     ) -> Tuple[Optional[int], str]:
-
         """PermissionError: [WinError 32] Der Prozess kann nicht auf die Datei zugreifen,
         da sie von einem anderen Prozess verwendet wird:
         'G:\\PUBLIC\\Audio\\Podcasts\\Radio Nukular\\radio_nukular_057.m4a.partial'
@@ -303,14 +293,12 @@ class URLRequest:
         return (content_length, filename)
 
     def load(self) -> bytes:
-
         try:
             return self._load()
         finally:
             self.response.close()
 
     def json(self) -> "JsonObject":
-
         try:
             return self._json()
         finally:
@@ -325,7 +313,6 @@ class URLRequest:
         suffix: str = ".partial",
         report: Optional[Callable[[int, int], None]] = None,
     ) -> Tuple[Optional[int], str]:
-
         try:
             return self._download(basepath, filename, fn_prio, overwrite, suffix, report)
         finally:

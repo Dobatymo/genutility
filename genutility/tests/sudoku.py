@@ -29,7 +29,6 @@ class SudokuTest(MyTestCase):
         self.assertFalse(result)
 
     def test_sudoku_bruteforce(self):
-
         sudokus = read_json(pkg_resources.resource_filename("genutility", "data/sudokus.json"))
         sym_set = set(sudokus["symbols"])
         sym_free = sudokus["free"]

@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 def wx_to_cv_image(wximage: "wx.Image") -> np.ndarray:
-
     buf = wximage.GetDataBuffer()
     arr = np.asarray(buf, dtype=np.uint8)
 
@@ -19,12 +18,10 @@ def wx_to_cv_image(wximage: "wx.Image") -> np.ndarray:
 
 
 def grayscale(cvimg: np.ndarray) -> np.ndarray:
-
     return cv2.cvtColor(cvimg, cv2.COLOR_RGB2GRAY)
 
 
 def iter_video(input: Union[str, int] = 0, show: bool = False) -> Iterator[np.ndarray]:
-
     cap = cv2.VideoCapture(input)
     logger.debug("Reading video using %s backend", cap.getBackendName())
 

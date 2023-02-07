@@ -6,7 +6,6 @@ T = TypeVar("T")
 
 class RoutingObject:
     def __init__(self, value: T) -> None:
-
         self.value = value
 
         self.subtree: Optional["NodeType"] = None
@@ -23,7 +22,6 @@ class RoutingObject:
 
 class LeafObject:
     def __init__(self, value: T) -> None:
-
         self.value = value
 
         self.distance_to_parent: Optional[float] = None
@@ -43,29 +41,24 @@ def isid(obj):
 
 
 class MNode:
-
     maxsize = 4
 
     def __init__(
         self, distance_func: Callable, parent_node: Optional["NodeType"], parent_object: Optional["ObjectType"]
     ) -> None:
-
         self.distance_func = distance_func
         self.parent_node = parent_node
         self.parent_object = parent_object
 
     @property
     def is_root(self) -> bool:
-
         return self.parent_node is None
 
     @property
     def is_full(self) -> bool:
-
         return len(self.objects) >= self.maxsize
 
     def add(self, obj: "ObjectType") -> None:
-
         self.objects.add(obj)
         if isinstance(obj, RoutingObject):
             obj.subtree.parent_node = self
@@ -74,7 +67,6 @@ class MNode:
             obj.distance_to_parent = self.distance_func(obj.value, self.parent_object.value)
 
     def replace(self, o1: "ObjectType", o2: "ObjectType") -> None:
-
         self.objects.remove(o1)
         self.objects.add(o2)
 
@@ -92,12 +84,10 @@ class InternalNode(MNode):
     def __init__(
         self, distance_func: Callable, parent_node: Optional["NodeType"], parent_object: Optional["ObjectType"]
     ) -> None:
-
         MNode.__init__(self, distance_func, parent_node, parent_object)
         self.objects: Set[RoutingObject] = set()
 
     def set_objects(self, objects: Set[RoutingObject]) -> None:
-
         self.objects = objects
         op = self.parent_object
 
@@ -132,12 +122,10 @@ class LeafNode(MNode):
     def __init__(
         self, distance_func: Callable, parent_node: Optional["NodeType"], parent_object: Optional["ObjectType"]
     ) -> None:
-
         MNode.__init__(self, distance_func, parent_node, parent_object)
         self.objects: Set[LeafObject] = set()
 
     def set_objects(self, objects: Set[LeafObject]) -> None:
-
         self.objects = objects
         op = self.parent_object
 
@@ -167,7 +155,6 @@ from random import sample
 
 
 def _promote_random(distance_func: Callable, objects: Set[ObjectType]) -> Tuple[ObjectType, ObjectType]:
-
     a, b = sample(objects, 2)
     return a, b
 
@@ -175,7 +162,6 @@ def _promote_random(distance_func: Callable, objects: Set[ObjectType]) -> Tuple[
 def _partition_generalized_hyperplane(
     distance_func: Callable, objects: Set[ObjectType], o1: ObjectType, o2: ObjectType
 ) -> Tuple[Set[ObjectType], Set[ObjectType]]:
-
     a: Set[ObjectType] = set()
     b: Set[ObjectType] = set()
 
@@ -202,7 +188,6 @@ class MTree:
         partition: Optional[str] = None,
         does_not_work_yet: Optional[str] = None,
     ) -> None:
-
         if does_not_work_yet != "OK":
             raise RuntimeError("MTree is work in progress")
 
@@ -229,7 +214,6 @@ class MTree:
                 yield lo.value
 
     def _split(self, node: NodeType, obj: ObjectType) -> None:
-
         # if not node.is_root:
         op = node.parent_object
         np = node.parent_node
@@ -266,7 +250,6 @@ class MTree:
                 np.update_objects()
 
     def _add(self, node: NodeType, obj: LeafObject) -> None:
-
         if not isinstance(node, LeafNode):
             # print("not leaf", node)
             distances = [self.distance_func(ro.value, obj.value) for ro in node.objects]
@@ -290,7 +273,6 @@ class MTree:
                 self._split(node, obj)
 
     def _find(self, node, value, radius):
-
         assert not node.is_root
 
         distance_parent_to_value = self.distance_func(node.parent_object.value, value)
@@ -311,11 +293,9 @@ class MTree:
         yield from self._keys(self.root)
 
     def add(self, value: T) -> None:
-
         self._add(self.root, LeafObject(value))
 
     def find(self, value: T, radius: float) -> Iterator[T]:
-
         node = self.root
 
         if not isinstance(node, LeafNode):
@@ -334,7 +314,6 @@ def len_dist(s1, s2):
 
 
 def vals(start: int, end: int) -> Set[str]:
-
     return {str(i) * i for i in range(start, end + 1)}
 
 
@@ -373,7 +352,6 @@ class MTreeTests(TestCase):
 
 
 if __name__ == "__main__":
-
     import unittest
 
     unittest.main()

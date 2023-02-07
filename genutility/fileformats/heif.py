@@ -11,7 +11,6 @@ def heif_get_exif(path: str) -> bytes:
     entries = None
 
     for depth, pos, type, size, content, leaf in enumerate_atoms(path, parse_atoms=True, unparsed_data=True):
-
         if type == "infe":
             if content["item_type"] == b"Exif":
                 item_id = content["item_ID"]

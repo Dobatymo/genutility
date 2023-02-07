@@ -4,7 +4,6 @@ T = TypeVar("T")
 
 
 def _insertion(seq: MutableSequence, cmp_: Callable, left: int, right: int, gap: int) -> None:
-
     loc = left + gap
     while loc <= right:
         i = loc - gap
@@ -20,7 +19,6 @@ GROUP_SIZE = 5
 
 
 def cmp(x: T, y: T) -> int:
-
     """
     Return negative if x<y, zero if x==y, positive if x>y.
     """
@@ -30,7 +28,6 @@ def cmp(x: T, y: T) -> int:
 def median_of_medians(
     seq: MutableSequence, cmp_: Optional[Callable] = None, left: int = 0, right: Optional[int] = None, depth: int = 0
 ) -> int:
-
     """Approximate median selection algorithm.
     This is not the full median of medians algorithm.
     Currently only works for len(seq) == GROUP_SIZE ** x

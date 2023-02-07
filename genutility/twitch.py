@@ -15,7 +15,6 @@ class StreamWatcher:
     def watch(
         self, notify_started: Callable[[str, str, Optional[str]], None], notify_stopped: Callable[[str, str], None]
     ) -> None:
-
         user_ids = self.followed_names.keys()
         streams = self.api.get_streams(user_ids)
         online = streams.keys()
@@ -33,7 +32,6 @@ class StreamWatcher:
 
 
 class TwitchAPI:
-
     base = "https://api.twitch.tv/helix/"
     login = "users"
     follows = "users/follows"
@@ -46,7 +44,6 @@ class TwitchAPI:
         username: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
     ) -> None:
-
         if not logical_xor(userid, username):
             raise ValueError("Either the userid or the username must be given")
 
@@ -60,13 +57,11 @@ class TwitchAPI:
             self.userid = self.get_userid(username)
 
     def req(self, url: str, params: List[Tuple[str, str]]) -> dict:
-
         qs = "&".join(k + "=" + v for k, v in params)
         data = URLRequest(url + "?" + qs, headers={"Client-ID": self.client_id}, context=self.ssl_context).load()
         return json.loads(data)
 
     def get_userid(self, username: str) -> str:
-
         d = self.req(self.base + self.login, [("login", username)])
         return d["data"][0]["id"]
 
@@ -81,5 +76,4 @@ class TwitchAPI:
         return ret
 
     def watcher(self) -> StreamWatcher:
-
         return StreamWatcher(self)

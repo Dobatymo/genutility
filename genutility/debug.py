@@ -5,9 +5,7 @@ from typing import Any, Callable, Iterable, Optional
 
 
 def printr(*objs: Any, end: str = "\n", depth: int = 0) -> None:
-
     for i, obj in enumerate(objs, 1):
-
         if isinstance(obj, str):
             print(obj, end="")
         elif isinstance(obj, dict):
@@ -38,7 +36,6 @@ def printr(*objs: Any, end: str = "\n", depth: int = 0) -> None:
 
 
 def _to_union(types: Iterable[str]) -> str:
-
     types = list(set(types))
 
     if not types:
@@ -52,12 +49,10 @@ def _to_union(types: Iterable[str]) -> str:
 
 
 def _type_str(obj: Any) -> str:
-
     return type(obj).__name__
 
 
 def rec_repr(obj: Any) -> str:
-
     if isinstance(obj, defaultdict):
         return _type_str(obj) + "[" + rec_repr(obj.default_factory) + "]"
     elif isinstance(obj, list):
@@ -69,7 +64,6 @@ def rec_repr(obj: Any) -> str:
 
 
 def _arg_str(arg: Any, maxlen: Optional[int] = None, app: str = "...", repr_args: bool = True) -> str:
-
     if repr_args:
         arg = repr(arg)
 
@@ -85,12 +79,10 @@ def _arg_str(arg: Any, maxlen: Optional[int] = None, app: str = "...", repr_args
 
 
 def _kwarg_str(key: str, value: Any, maxlen: Optional[int] = None, app: str = "...", repr_args: bool = True) -> str:
-
     return key + "=" + _arg_str(value, maxlen, app, repr_args)
 
 
 def args_str(args: tuple, kwargs: dict, maxlen: Optional[int] = 20, app: str = "...", repr_args: bool = True) -> str:
-
     """Creates printable string from function arguments.
     If the string needs to be truncated to fit `maxlen`, `app` will be appended.
     The length of `app` is not included in `maxlen`.
@@ -114,7 +106,6 @@ def args_str(args: tuple, kwargs: dict, maxlen: Optional[int] = 20, app: str = "
 
 
 def log_call(s: str) -> Callable:
-
     """Decorator to log function calls using template string `s`.
     Available format fields are: 'name', 'args' and 'kwargs'.
     """
@@ -130,7 +121,6 @@ def log_call(s: str) -> Callable:
 
 
 def log_wrap_call(func: Callable) -> Callable:
-
     """Decorator which logs all calls to `func` with all arguments."""
 
     @wraps(func)
@@ -150,7 +140,6 @@ def log_wrap_call(func: Callable) -> Callable:
 
 
 def log_methodcall(func: Callable) -> Callable:
-
     """Decorator to log method calls with arguments."""
 
     @wraps(func)
@@ -164,7 +153,6 @@ def log_methodcall(func: Callable) -> Callable:
 
 
 def log_methodcall_result(func: Callable) -> Callable:
-
     """Decorator to log method calls with arguments and results."""
 
     @wraps(func)

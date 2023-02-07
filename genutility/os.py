@@ -12,16 +12,13 @@ system = platform.system()
 
 
 class CurrentWorkingDirectory:
-
     __slots__ = ("oldcwd",)
 
     def __init__(self, path: PathStr) -> None:
-
         self.oldcwd = os.getcwd()
         os.chdir(path)
 
     def close(self) -> None:
-
         os.chdir(self.oldcwd)
 
     def __enter__(self) -> "CurrentWorkingDirectory":
@@ -40,7 +37,6 @@ def _not_available(func_name: str) -> Callable:
 
 
 if system == "Windows":
-
     from .os_win import _disk_usage_windows as disk_usage
     from .os_win import _filemanager_cmd_windows as filemanager_cmd
     from .os_win import _get_appdata_dir as get_appdata_dir
@@ -51,7 +47,6 @@ if system == "Windows":
     from .os_win import _volume_info_windows as volume_info
 
 elif system == "Linux":
-
     from .os_posix import _disk_usage_posix as disk_usage
     from .os_posix import _get_appdata_dir as get_appdata_dir
     from .os_posix import _lock as lock
@@ -64,7 +59,6 @@ elif system == "Linux":
     from .os_posix import _interrupt_posix as interrupt
 
 elif system == "Darwin":
-
     from .os_posix import _disk_usage_posix as disk_usage
     from .os_posix import _lock as lock
     from .os_posix import _unlock as unlock

@@ -8,7 +8,6 @@ def _markdown_newline_func(x) -> str:
 
 
 def markdown_newline(s: str) -> str:
-
     """Convert newlines to markdown linebreaks."""
 
     return _markdown_newline_pat.sub(_markdown_newline_func, s)
@@ -20,7 +19,6 @@ _markdown_urls_pat = re.compile(
 
 
 def markdown_urls(s: str, ignore_trailing_dot: bool = True) -> str:
-
     """Converts text with URLs to text with markdown formatted URLs.
     markdown_urls("Visit https://google.com") -> "Visit <https://google.com>"
     This function is idempotent, which means that it will not convert URLs which are already in the correct format.

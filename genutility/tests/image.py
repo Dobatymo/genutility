@@ -87,7 +87,6 @@ class ImageTest(MyTestCase):
             self.assertEqual(truth, result)
 
     def test_normalize_image_rotation(self):
-
         path = "testfiles/quadrant-0.png"
         with Image.open(path) as img:
             truth = np.asarray(img)

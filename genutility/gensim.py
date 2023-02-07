@@ -15,7 +15,6 @@ class DuplicateEntry(ValueError):
 
 
 def false(x: Any) -> bool:
-
     return False
 
 
@@ -34,7 +33,6 @@ class KeyedVectors(KeyedVectorsOriginal):
         datatype: Any = np.float32,
         discard: Optional[Callable[[str], bool]] = None,
     ) -> KeyedVectorsOriginal:
-
         discard = discard or false
 
         result = cls(vector_size)
@@ -72,7 +70,6 @@ class KeyedVectors(KeyedVectorsOriginal):
         return result
 
     def add(self, wwc: Collection[Tuple[str, np.ndarray, int]]) -> Iterator[Vocab]:
-
         """`wwc` is a collection of (word, weights, count) tuples"""
 
         vocab_size, vector_size = self.vectors.shape
@@ -98,7 +95,6 @@ class KeyedVectors(KeyedVectorsOriginal):
     def load_muse_format(
         cls, fname: Union[str, TextIO], limit: Optional[int] = None, discard: Optional[Callable[[str], bool]] = None
     ) -> KeyedVectorsOriginal:
-
         """reads at most `limit` vectors from muse file, if `discard` is not None it might be less.
         discard is a callable which should return False if word should not be loaded from file.
         """
@@ -119,7 +115,6 @@ class KeyedVectors(KeyedVectorsOriginal):
     def load_glove_format(
         cls, fname: Union[str, TextIO], limit: int, vector_size: int, discard: Optional[Callable[[str], bool]] = None
     ) -> KeyedVectorsOriginal:
-
         """Reads at most `limit` vectors from glove file, if `discard` is not None it might be less.
         `discard` is a callable which should return False if word should not be loaded from file.
         """
@@ -131,7 +126,6 @@ class KeyedVectors(KeyedVectorsOriginal):
                 raise ValueError(f"duplicate word '{e}' in {fname}")
 
     def get_keras_embedding(self, train_embeddings: bool = False, mask_zero: bool = True) -> "Embedding":  # noqa: F821
-
         try:
             from keras.layers import Embedding
         except ImportError:
@@ -156,16 +150,13 @@ class KeyedVectors(KeyedVectorsOriginal):
         return layer
 
     def transform_words_to_indices(self, words: Collection[str]) -> Iterator[int]:
-
         return (self.key_to_index[word] for word in words)
 
     def transform_words_to_indices_tuple(self, words: Collection[str]) -> Tuple[int, ...]:
-
         return tuple(self.transform_words_to_indices(words))
 
 
 if __name__ == "__main__":
-
     import argparse
 
     parser = argparse.ArgumentParser()

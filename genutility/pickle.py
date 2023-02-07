@@ -22,7 +22,6 @@ PathType = Union[str, PathLike]
 
 
 def read_pickle(path: PathType) -> Any:
-
     """Read pickle file from `path`.
     Warning: All usual security consideration regarding the pickle module still apply.
     """
@@ -32,7 +31,6 @@ def read_pickle(path: PathType) -> Any:
 
 
 def write_pickle(result: Any, path: PathType, protocol: Optional[int] = None, safe: bool = False) -> None:
-
     """Write `result` to `path` using pickle serialization.
 
     `protocol': pickle protocol version
@@ -44,7 +42,6 @@ def write_pickle(result: Any, path: PathType, protocol: Optional[int] = None, sa
 
 
 def read_iter(path: PathType) -> Iterator[Any]:
-
     """Read pickled iterable from `path`.
     Warning: All usual security consideration regarding the pickle module still apply.
     """
@@ -56,7 +53,6 @@ def read_iter(path: PathType) -> Iterator[Any]:
 
 
 def write_iter(it: Iterable[Any], path: PathType, protocol: Optional[int] = None, safe: bool = False) -> Iterator[Any]:
-
     """Write iterable `it` to `path` using pickle serialization. This uses much less memory than
             writing a full list at once.
     Read back using `read_iter()`. If `safe` is True, the original file is not overwritten
@@ -92,7 +88,6 @@ def cache(
     file_ext: Optional[str] = None,
     cached_only: bool = False,
 ) -> Callable[[Callable], Callable]:
-
     """Decorator to cache function calls. Doesn't take function arguments into regard.
     It's using `pickle` to deserialize the data. So don't use it with untrusted inputs.
 
@@ -117,7 +112,6 @@ def cache(
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def inner(*args: Any, **kwargs: Any) -> Any:
-
             strpath = fspath(path).format(ppv=protocol)
 
             if not ignoreargs:
@@ -144,7 +138,6 @@ def cache(
                 invalid = True
 
             if invalid:
-
                 if cached_only:
                     raise LookupError("Not in cache")
 
@@ -185,7 +178,6 @@ def cache(
 
 
 def unpickle(path: PathType, requirements: Iterable[Tuple[str, Optional[str]]] = ()) -> Any:
-
     """Can be used to unpickle objects when normal unpickling fails to import some dependencies correctly.
     path: Path to the pickled file.
     requirements: Iterable of (module, package) tuples to be imported.

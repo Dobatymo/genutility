@@ -10,11 +10,9 @@ class CorruptFile(Exception):
 
 
 def iter_video(path: str) -> Iterator[np.ndarray]:
-
     """Yield frames from a video file. For video device support see `genutility.cv.iter_video`."""
 
     with av.open(path, "r") as container:
-
         vs = container.streams.video[0]
         vs.thread_type = "AUTO"
 

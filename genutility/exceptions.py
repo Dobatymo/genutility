@@ -124,7 +124,6 @@ class MalformedFile(ValueError):
 
 
 def assert_choice(name: str, value: Optional[T], choices: Set[T], optional: bool = False) -> None:
-
     if optional and value is None:
         return
 
@@ -133,7 +132,6 @@ def assert_choice(name: str, value: Optional[T], choices: Set[T], optional: bool
 
 
 def assert_choices(name: str, values: Optional[Sequence[T]], choices: Set[T], optional: bool = False) -> None:
-
     if values is None:
         if optional:
             return
@@ -145,7 +143,6 @@ def assert_choices(name: str, values: Optional[Sequence[T]], choices: Set[T], op
 
 
 def assert_choice_map(name: str, value: T, choices: Dict[T, U]) -> U:
-
     try:
         return choices[value]
     except KeyError:
@@ -153,7 +150,6 @@ def assert_choice_map(name: str, value: T, choices: Dict[T, U]) -> U:
 
 
 def assert_type(name: str, value: Any, types: Union[Type[Any], Tuple[Type[Any], ...]]) -> None:
-
     if not isinstance(value, types):
         if not isinstance(types, tuple):
             types = (types,)

@@ -13,13 +13,11 @@ try:
 except ImportError:
 
     def prod(it: Iterable[T], start: T = 1) -> T:  # type: ignore
-
         """Counterpart to built-in `sum()`."""
 
         return reduce(mul, it, start)
 
     def prod_2(it: Iterable[Computable], start: Computable = 1) -> Computable:
-
         """Counterpart to built-in `sum()`."""
 
         for x in it:
@@ -30,7 +28,6 @@ except ImportError:
 try:
     from math import dist  # New in version 3.8
 except ImportError:
-
     from math import sqrt
 
     def dist(p, q):
@@ -41,7 +38,6 @@ try:
     from math import isqrt  # New in version 3.8
 
 except ImportError:
-
     try:
         import gmpy2
 

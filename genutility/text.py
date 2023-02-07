@@ -11,7 +11,6 @@ uni_cats = unicode_categories()
 
 
 def extract_urls(text: str) -> Iterator[str]:
-
     """Yields URLs from `text`."""
 
     pattern = r"https?\:\/\/[" + re.escape(valid_uri_characters) + r"]+"
@@ -21,7 +20,6 @@ def extract_urls(text: str) -> Iterator[str]:
 
 
 def replace_typographical_punctuation(s: str) -> str:
-
     """Replaces typographical punctuation with ASCII punctuation."""
 
     d = {
@@ -42,7 +40,6 @@ def replace_typographical_punctuation(s: str) -> str:
 
 
 def newlines_to_spaces(s: str) -> str:
-
     """Replaces newline characters with spaces."""
 
     d = {
@@ -54,7 +51,6 @@ def newlines_to_spaces(s: str) -> str:
 
 
 def collapse_whitespace(s: str) -> str:
-
     """Collapses repeated whitespace into a single space character."""
 
     # separator_cats = ("Zl", "Zp", "Zs")
@@ -64,7 +60,6 @@ def collapse_whitespace(s: str) -> str:
 
 
 def collapse_space(s: str, space: str = " ") -> str:
-
     """Collapses repeated spaces into a single space character."""
 
     # slower: variant of this with join
@@ -83,7 +78,6 @@ def collapse_space(s: str, space: str = " ") -> str:
 
 
 def collapse_punctuation_symbols(s: str) -> str:
-
     """Collapses any successive Unicode punctuation symbol in `s`."""
 
     punctuation_cats = ("Pc", "Pd", "Pe", "Pf", "Pi", "Po", "Ps")
@@ -96,7 +90,6 @@ def collapse_punctuation_symbols(s: str) -> str:
 
 class ReplaceURLs:
     def __init__(self, replacement: Union[str, Iterable], schemes: Optional[Sequence[str]] = None) -> None:
-
         if isinstance(replacement, str):
             self.repl: Union[str, Callable[[str], str]] = replacement
         else:
@@ -105,5 +98,4 @@ class ReplaceURLs:
         self.pattern = get_url_pattern(schemes)
 
     def __call__(self, s: str, count: int = 0) -> str:
-
         return self.pattern.sub(self.repl, s, count)

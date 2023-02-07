@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class Worker(threading.Thread):
-
     TASK_IDLE = 0
     TASK_COMPLETE = 1
     TASK_EXCEPTION = 2
@@ -30,7 +29,6 @@ class Worker(threading.Thread):
         tasks: "Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]",
         returns: "Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]",
     ):
-
         threading.Thread.__init__(self)
         self.tasks = tasks
         self.returns = returns
@@ -40,7 +38,6 @@ class Worker(threading.Thread):
         self.start()
 
     def run(self) -> None:
-
         while self.running:
             # self.returns.put((self.TASK_IDLE, self))
             task = self.tasks.get(True)
@@ -67,18 +64,15 @@ class Worker(threading.Thread):
         logger.debug("thread ended")
 
     def cancel(self) -> None:
-
         self.running = False
 
 
 class ThreadPool:
-
     tasks: "Queue[Optional[Tuple[int, int, Callable, tuple, dict]]]"
     returns: "Queue[Tuple[int, int, Tuple[int, Union[Any, Exception]]]]"
     state: int
 
     def __init__(self, num_threads: int) -> None:
-
         self.num_threads = num_threads
         self.tasks = Queue()
         self.returns = Queue()
@@ -86,11 +80,9 @@ class ThreadPool:
         self.state = 0  # this is used to be able to cancel (or ignore the results of ongoing) tasks
 
     def add_task(self, id: int, func: Callable[..., Any], *args: Any, **kargs: Any) -> None:
-
         self.tasks.put((self.state, id, func, args, kargs))
 
     def get(self) -> Tuple[int, Optional[Any]]:
-
         state: int
         type_: int
         result: Tuple[int, Union[Any, Exception]]
@@ -107,7 +99,6 @@ class ThreadPool:
 
     @staticmethod
     def clear(queue: "Queue[Any]") -> None:
-
         """Only undocumented methods."""
 
         with queue.mutex:
@@ -117,7 +108,6 @@ class ThreadPool:
 
     @staticmethod
     def _clear(queue: "Queue[Any]") -> None:
-
         """Only uses documented methods, but is slower."""
 
         while not queue.empty():
@@ -125,7 +115,6 @@ class ThreadPool:
             queue.task_done()
 
     def close(self, finishall: bool = False) -> None:
-
         """if `finishall` is True, it will finish all tasks currently in the queue,
         if `finishall` is False, only currently active tasks will be finished
         """
@@ -138,7 +127,6 @@ class ThreadPool:
                 w.cancel()
 
     def cancel(self) -> None:
-
         """Does not cancel already running tasks. Just clears queue and ignores
         results of currently running tasks.
         """
@@ -148,14 +136,12 @@ class ThreadPool:
         self.state += 1
 
     def wait(self) -> None:
-
         self.tasks.join()
 
 
 def gather_all_unsorted(
     threadpool: ThreadPool, func: Callable, params: Iterable, *args: Any, **kwargs: Any
 ) -> Iterator[Tuple[Any, Any]]:
-
     """Runs multiple tasks concurrently and returns all results in the order
     of execution finish as soon as possible.
     """
@@ -170,7 +156,6 @@ def gather_all_unsorted(
 
 
 def gather_any(threadpool: ThreadPool, func: Callable, params: Iterable, *args: Any, **kwargs: Any) -> Tuple[Any, Any]:
-
     """Runs multiple tasks concurrently and just returns the result of the first
     task which finishes.
     """
@@ -182,13 +167,11 @@ def gather_any(threadpool: ThreadPool, func: Callable, params: Iterable, *args: 
 
 
 def NotThreadSafe(verify: bool = False) -> Callable[[type], type]:
-
     """Class decorator. Only works on new style classes (object)
     `verify=True` prohibits write access to attributes.
     """
 
     def OnClass(TheClass: type) -> type:
-
         if verify:
             orig_init = TheClass.__init__
             orig_setattr = TheClass.__setattr__
@@ -215,7 +198,6 @@ class AbortIteration(Exception):
 
 
 class IterWorker(threading.Thread):
-
     STATE_WAITING = 0
     STATE_RUNNING = 1
     STATE_PAUSING = 2
@@ -226,7 +208,6 @@ class IterWorker(threading.Thread):
     CMD_ABORT = 1
 
     def __init__(self, taskqueue: "Queue[Optional[Iterable]]", onstatechange: Optional[Callable] = None):
-
         threading.Thread.__init__(self)
         self.queue = taskqueue
         self.onstatechange = onstatechange
@@ -235,12 +216,10 @@ class IterWorker(threading.Thread):
 
     @property
     def state(self) -> int:
-
         return self._state
 
     @state.setter
     def state(self, value: int) -> None:
-
         assert_choice("value", value, (0, 1, 2, 3, 4))
 
         self._state = value
@@ -248,7 +227,6 @@ class IterWorker(threading.Thread):
             self.onstatechange(value)
 
     def run(self) -> None:
-
         while True:
             iter = self.queue.get()
             if not iter:
@@ -273,22 +251,18 @@ class IterWorker(threading.Thread):
             self.state = self.STATE_WAITING
 
     def pause(self) -> None:
-
         if self.state == self.STATE_RUNNING:
             self.state = self.STATE_PAUSING
 
     def resume(self) -> None:
-
         if self.state == self.STATE_PAUSED:
             self.control.put(self.CMD_RESUME)
 
     def stop(self) -> None:
-
         if self.state < self.STATE_STOPPED:
             self.queue.put(None)
 
     def clear(self) -> None:
-
         try:
             while True:
                 self.queue.get_nowait()
@@ -297,14 +271,12 @@ class IterWorker(threading.Thread):
             pass
 
     def abort(self) -> None:
-
         self.pause()
         self.control.put(self.CMD_ABORT)
 
 
 # was: DownloadWorker
 class ProgressWorker(threading.Thread):
-
     running: bool
     task: Optional[TaskT]
 
@@ -350,7 +322,6 @@ class ProgressWorker(threading.Thread):
 
 # was: ThreadedDownloader
 class ProgressThreadPool:
-
     completed: List[Any]
     failed: List[Tuple[Exception, Any]]
 
@@ -404,7 +375,6 @@ class ProgressThreadPool:
 
 
 class BoundedQueue:
-
     # similar: pip install bounded-iterator
 
     """Semaphor bounded queue. Can be used with `multiprocessing.Pool` for example.
@@ -420,19 +390,16 @@ class BoundedQueue:
         timeout: Optional[float] = None,
         semaphore: Callable[[int], Any] = threading.BoundedSemaphore,
     ) -> None:
-
         self.semaphore = semaphore(size)
         self.iterable = it
         self.timeout = timeout
         self.iterator: Optional[Iterator[T]] = None
 
     def __iter__(self) -> Iterator[T]:
-
         self.iterator = iter(self.iterable)
         return self
 
     def __next__(self) -> T:
-
         if self.iterator is None:
             raise TypeError
 
@@ -442,7 +409,6 @@ class BoundedQueue:
         return next(self.iterator)
 
     def done(self) -> None:
-
         self.semaphore.release()
 
 
@@ -454,12 +420,10 @@ class BufferedIterable(Generic[T]):
         self.bufsize = bufsize
 
     def __iter__(self) -> Iterator[T]:
-
         self.iterator = iter(self.iterable)
         return self
 
     def __next__(self) -> T:
-
         if self.iterator is None:
             raise TypeError
 
@@ -485,12 +449,10 @@ class CompletedFutures:
         self.timeout = timeout
 
     def __iter__(self) -> Iterator[concurrent.futures.Future]:
-
         self.iterator = iter(self.iterable)
         return self
 
     def __next__(self) -> concurrent.futures.Future:
-
         if self.iterator is None:
             raise TypeError
 
@@ -517,7 +479,6 @@ class CompletedFutures:
 
 
 def _ignore_sigint() -> None:
-
     """This need to be pickle'able to work with `multiprocessing.Pool`."""
 
     try:
@@ -536,7 +497,6 @@ def parallel_map(
     bufsize: int = 1,
     chunksize: int = 1,
 ) -> Iterator[U]:
-
     """Parallel map which uses multiprocessing to distribute tasks.
     `bufsize` should be used to limit memory usage when the iterable `it`
     can be processed faster than the output iterator is consumed.
@@ -546,14 +506,12 @@ def parallel_map(
     """
 
     if parallel:
-
         if poolcls is None:
             poolcls = Pool
 
         q = BoundedQueue(bufsize, it)
 
         with poolcls(workers, _ignore_sigint) as p:
-
             if ordered:
                 process = p.imap
             else:
@@ -588,11 +546,9 @@ def executor_map(
     workers: Optional[int] = None,
     bufsize: int = 1,
 ) -> Iterator[concurrent.futures.Future]:
-
     """Starts processing when the iterator is started to be consumed."""
 
     if parallel:
-
         if executercls is None:
             executercls = concurrent.futures.ThreadPoolExecutor
 

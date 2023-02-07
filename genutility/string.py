@@ -25,12 +25,10 @@ german_vowels = "aeiou"
 
 
 def backslash_escaped_ascii(text: bytes) -> str:
-
     return text.decode("ascii", "backslashreplace")
 
 
 def truncate(text: str, width: int, placeholder: str = "...") -> str:
-
     """Simple character based truncate method.
     To truncate at word boundaries use `textwrap.shorten`.
     """
@@ -48,7 +46,6 @@ def truncate(text: str, width: int, placeholder: str = "...") -> str:
 
 
 def toint(obj: Any, default: T = None) -> Union[int, T]:
-
     """Converts `obj` to int if possible and returns `default` otherwise."""
 
     try:
@@ -58,7 +55,6 @@ def toint(obj: Any, default: T = None) -> Union[int, T]:
 
 
 def tryint(obj: T) -> Union[int, T]:
-
     """Converts `obj` to int if possible and returns the original object otherwise."""
 
     try:
@@ -68,7 +64,6 @@ def tryint(obj: T) -> Union[int, T]:
 
 
 def removeprefix(s: str, prefix: str) -> str:
-
     """If string `s` starts with `prefix` cut it off and return the remaining string."""
 
     if s.startswith(prefix):
@@ -78,7 +73,6 @@ def removeprefix(s: str, prefix: str) -> str:
 
 
 def removeprefixes(s: str, prefixes: Iterable[str]) -> str:
-
     """If string `s` starts with one of `prefixes` cut it off and return the remaining string."""
 
     for prefix in prefixes:
@@ -89,7 +83,6 @@ def removeprefixes(s: str, prefixes: Iterable[str]) -> str:
 
 
 def removesuffix(s: str, suffix: str) -> str:
-
     """If string `s` ends with `suffix` cut it off and return the preceding string."""
 
     if s.endswith(suffix):
@@ -99,7 +92,6 @@ def removesuffix(s: str, suffix: str) -> str:
 
 
 def removesuffixes(s: str, suffixes: Iterable[str]) -> str:
-
     """If string `s` ends with one of the `suffixes` cut it off and return the preceding string."""
 
     for suffix in suffixes:
@@ -110,14 +102,12 @@ def removesuffixes(s: str, suffixes: Iterable[str]) -> str:
 
 
 def encode_case(s: str) -> bytes:
-
     """Encode case information of a string to a bit-encoded bytes string."""
 
     return encode_binary(c.isupper() for c in s)
 
 
 def decode_case(s: str, key: bytes) -> str:
-
     """Apply the case information encoded in `key` to string `s`."""
 
     return "".join(c.upper() if b else c for c, b in zip(s, decode_binary(key)))
@@ -148,7 +138,6 @@ def locale_sorted(seq: Sequence[str], case_insensitive: bool = True, lower_befor
 
 
 def build_multiple_replace(d: Mapping[str, str], escape: bool = True) -> Callable[[str], str]:
-
     """Returns a callable, which when applied to a string,
     replaces all the keys in `d` with the corresponding values.
     The replacement happens in iteration order of the mapping.
@@ -165,7 +154,6 @@ def build_multiple_replace(d: Mapping[str, str], escape: bool = True) -> Callabl
 
 
 def multiple_replace(d: Mapping[str, str], s: str) -> str:
-
     """Uses mapping `d` to replace keys with values in `s`.
     This is a wrapper for `build_multiple_replace`,
     which should be used directly for improved performance
@@ -177,7 +165,6 @@ def multiple_replace(d: Mapping[str, str], s: str) -> str:
 
 
 def replace_multiple(s: Iterable[str], d: Mapping[str, str]) -> str:  # cython candidate...
-
     """Use dictionary `d` to replace instances of key with value.
     If input `s` is a string, the keys must be strings of length 1.
     If the input is an iterable of strings,
@@ -190,7 +177,6 @@ def replace_multiple(s: Iterable[str], d: Mapping[str, str]) -> str:  # cython c
 
 
 def backslash_unescape(s: str) -> str:
-
     """Converts strings with backslash-escaped entities like \n or \u1234
     to a string with these entities.
     Example: backslash_unescape("\\n") -> "\n"
@@ -206,7 +192,6 @@ _backslashquote_escape = build_multiple_replace(OrderedDict([("\\", "\\\\"), ('"
 
 
 def backslashquote_escape(s: str) -> str:
-
     """Converts \\ to \\\\ and " to \\" """
 
     return _backslashquote_escape(s)
@@ -216,7 +201,6 @@ _backslashquote_unescape = build_multiple_replace(OrderedDict([('\\"', '"'), ("\
 
 
 def backslashquote_unescape(s: str) -> str:
-
     """Unescapes \\ and \" in `s`."""
 
     return _backslashquote_unescape(s)
@@ -228,7 +212,6 @@ _backslashcontrol_escape = build_multiple_replace(
 
 
 def backslashcontrol_escape(s: str) -> str:
-
     """Escapes \\ and \\t \\n \\r in `s`."""
 
     return _backslashcontrol_escape(s)
@@ -246,7 +229,6 @@ def backslashcontrol_unescape(s: str) -> str:
 
 
 def are_parentheses_matched(s: str, open: str = "([{", close: str = ")]}") -> bool:
-
     stack = list()
     parentheses = dict(chain(switched_enumerate(open), switched_enumerate(close)))
     assert len(parentheses) == len(open) + len(close)
@@ -265,7 +247,6 @@ def are_parentheses_matched(s: str, open: str = "([{", close: str = ")]}") -> bo
 
 
 def filter_join(s: str, it: Iterable[str], func: Optional[Callable[[str], bool]] = None) -> str:
-
     if func is None:
         return s.join(i for i in it if i)
     else:
@@ -273,7 +254,6 @@ def filter_join(s: str, it: Iterable[str], func: Optional[Callable[[str], bool]]
 
 
 def surrounding_join(j: str, it: Iterable[str], left: str = "", right: str = "") -> str:
-
     """Example: surrounding_join(", ", ("a", "b", "c"), left="[", right="]") -> "[a], [b], [c]" """
 
     s = (right + j + left).join(it)
@@ -283,7 +263,6 @@ def surrounding_join(j: str, it: Iterable[str], left: str = "", right: str = "")
 
 
 def replace_pairs_bytes(s: bytes, items: Dict[bytes, Optional[bytes]]) -> bytes:
-
     frm = b"".join(k for k, v in items.items() if v)
     to = b"".join(v for k, v in items.items() if v)
     delete = b"".join(k for k, v in items.items() if v is None)
@@ -294,7 +273,6 @@ def replace_pairs_bytes(s: bytes, items: Dict[bytes, Optional[bytes]]) -> bytes:
 
 
 def replace_pairs_chars(s: str, items: Dict[UnicodeOrdinalT, Optional[UnicodeOrdinalT]]) -> str:
-
     table = s.maketrans(items)  # type: ignore # mypy issue #4374
 
     return s.translate(table)
@@ -304,14 +282,12 @@ _contains_digit = re.compile(r"\d")
 
 
 def contains_digit(s: str) -> bool:
-
     """Tests if a digit is contained in string `s`."""
 
     return _contains_digit.search(s) is not None
 
 
 def all_splits(text: str, include_start: bool = False, include_end: bool = True) -> Iterator[Tuple[str, str]]:
-
     if include_start:
         start = 0
     else:

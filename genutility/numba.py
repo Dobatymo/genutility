@@ -14,7 +14,6 @@ except ImportError:
 
 
 def opjit(*args: Any, **kwargs: Any) -> Callable:
-
     """Optional / opportunistic numba jit decorator."""
 
     try:

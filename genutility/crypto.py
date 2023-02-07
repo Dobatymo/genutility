@@ -3,7 +3,6 @@ from typing import Iterable, Iterator
 
 
 def xor_stream(it: Iterable[bytes], key: Iterable[bytes], cyclekey: bool = True) -> Iterator[bytes]:
-
     if cyclekey:
         key = cycle(key)
 

@@ -7,7 +7,6 @@ class SequenceTreeTest(MyTestCase):
         self.tree = SequenceTree()
 
     def test_setgetitem(self):
-
         init = {
             (1,): 1,
             (1, 2): 2,

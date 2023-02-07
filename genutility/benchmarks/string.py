@@ -1,5 +1,4 @@
 def contains_digit_2(s: str) -> bool:
-
     return any(i.isdigit() for i in s)
 
 

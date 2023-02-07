@@ -31,19 +31,16 @@ inf = float("inf")
 
 
 def reciprocal(n: Computable) -> Computable:
-
     return 1.0 / n
 
 
 def sqr(x: Computable) -> Computable:
-
     """Returns `x` to the power of 2."""
 
     return x * x
 
 
 def dot(a: Iterable[Computable], b: Iterable[Computable]) -> Computable:
-
     """Returns the dot product (inner product) of vectors `a` and `b`."""
 
     return sum(map(mul, a, b))
@@ -51,28 +48,24 @@ def dot(a: Iterable[Computable], b: Iterable[Computable]) -> Computable:
 
 # was: euclidic_norm
 def euclidean_norm(x: Iterable[Computable]) -> Computable:
-
     """Returns the Euclidean norm of vector `x`."""
 
     return sqrt(sum(map(sqr, x)))
 
 
 def shannon_entropy(ps: Iterable[float], base: int = 2) -> float:
-
     """Calculates the Shannon entropy for probabilities `ps` with `base` in pure Python."""
 
     return -sum(p * log(p, base) for p in ps)
 
 
 def cosine_similarity(a: Iterable[Computable], b: Iterable[Computable]) -> Computable:
-
     """Calculate the cosine similarity (normalized dot product) of vectors `a` and `b`."""
 
     return dot(a, b) / euclidean_norm(a) / euclidean_norm(b)
 
 
 def argmin(seq: Sequence[OrderableT], s: int = 0, e: Optional[int] = None) -> OrderableT:
-
     if not seq:
         raise EmptyIterable()
 
@@ -85,7 +78,6 @@ def argmin(seq: Sequence[OrderableT], s: int = 0, e: Optional[int] = None) -> Or
 
 
 def argmax(seq: Sequence[OrderableT], s: int = 0, e: Optional[int] = None) -> int:
-
     if not seq:
         raise EmptyIterable()
 
@@ -98,7 +90,6 @@ def argmax(seq: Sequence[OrderableT], s: int = 0, e: Optional[int] = None) -> in
 
 
 def argmax_pair(iterable: Iterable[OrderableT]) -> Tuple[int, OrderableT]:
-
     it = iter(iterable)
     arg = 0
     try:
@@ -119,13 +110,11 @@ from operator import itemgetter
 
 
 def argmax_v2(iterable: Iterable[OrderableT]) -> int:
-
     """nicer, but almost 2 times slower than above"""
     return max(zip(count(), iterable), key=itemgetter(1))[0]
 
 
 def minmax(a: OrderableT, b: OrderableT) -> Tuple[OrderableT, OrderableT]:
-
     """`default` argument cannot be used, because the C level function doesn't have a default value
     but an overload.
     """
@@ -143,7 +132,6 @@ def _argfind_cmp(
     op2: Callable[[OrderableT, OrderableT], bool],
     pos: int = 0,
 ) -> Tuple[int, Optional[OrderableT]]:
-
     """Find the largest element in `it` less than or equal to `target` and return the index and value.
     Return (-1, None) if no such element can be found.
     """
@@ -182,7 +170,6 @@ def argfind_gte(it, target, pos=0):
 
 
 def degree_to_rad(angle: float) -> float:
-
     return 2.0 * pi * angle / 360.0
 
 
@@ -197,7 +184,6 @@ def limit(x, left=0, right=1):
 
 
 def relative_luminance(r: float, g: float, b: float) -> float:
-
     """Converts linear RGB components to relative luminance.
     See: https://en.wikipedia.org/wiki/Relative_luminance
     """
@@ -241,19 +227,16 @@ PosInfInt = _PosInfInt()
 
 
 def multinomial_coefficient(n: int, ks: Iterable[int]) -> int:
-
     return factorial(n) / prod(map(factorial, ks))
 
 
 def num_unique_permutations(word: str) -> int:
-
     """Number of unique permutations of `word`."""
 
     return multinomial_coefficient(len(word), Counter(word).values())
 
 
 def discrete_distribution(it: Iterable[H]) -> Tuple[DefaultDict[H, int], int]:
-
     """Creates a discrete distribution of the elements of `it`."""
 
     d: DefaultDict[H, int] = defaultdict(int)
@@ -265,7 +248,6 @@ def discrete_distribution(it: Iterable[H]) -> Tuple[DefaultDict[H, int], int]:
 
 
 def fibonaccigen(f0: int = 0, f1: int = 1) -> Iterator[int]:
-
     """A000045 [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, ...]
     arguments are the first two element of the Fibonacci series
 
@@ -279,14 +261,12 @@ def fibonaccigen(f0: int = 0, f1: int = 1) -> Iterator[int]:
 
 
 def floordiv2(n: int) -> Iterator[int]:
-
     while n > 0:
         yield n
         n = n // 2
 
 
 def isintlog(num: int, base: int) -> bool:
-
     if num <= 0 or base <= 0:
         raise ValueError("num and base must be larger than 0")
 
@@ -342,7 +322,6 @@ def _fibonacci_v2(n: int) -> Tuple[int, int]:
 
 
 def fibonacci(n: int) -> int:
-
     """implementation of "fast doubling". can be derived from this identity:
     [[1, 1], [1, 0]]^n = [[F_n+1, F_n], [F_n, F_n-1]]
     """
@@ -356,7 +335,6 @@ def fibonacci(n: int) -> int:
 
 
 def byte2size(byte: SupportsFloat, exp: int = 0, base: int = 1024) -> Tuple[float, str]:
-
     """Converts integer number to float and unit string"""
 
     byte = float(byte)
@@ -372,7 +350,6 @@ def byte2size(byte: SupportsFloat, exp: int = 0, base: int = 1024) -> Tuple[floa
 
 
 def byte2size_str(byte: SupportsFloat, roundval: int = 3) -> str:
-
     """Converts integer number to human readable size string."""
 
     byte, value = byte2size(byte)
@@ -382,7 +359,6 @@ def byte2size_str(byte: SupportsFloat, roundval: int = 3) -> str:
 
 
 def primes(stop: Optional[int] = None) -> Iterable[int]:
-
     """Naive algorithm to yield all primes which are smaller than `stop`.
     If `stop` is None it will never stop generating primes.
     For better algorithms see here: https://stackoverflow.com/questions/2211990/how-to-implement-an-efficient-infinite-generator-of-prime-numbers-in-python/10733621#10733621
@@ -406,7 +382,6 @@ def primes(stop: Optional[int] = None) -> Iterable[int]:
 
 
 def additaet(n: int) -> int:
-
     """sums all numbers from 0 to n using Gaussian formula.
     basically same performance
             (n*n + n) >> 1
@@ -424,14 +399,12 @@ addity = additaet
 
 
 def digitsum(n: int) -> int:
-
     """Use for numbers with more than 6 digits."""
 
     return sum(map(int, str(n)))
 
 
 def digitsum_small(n: int) -> int:
-
     """Use for numbers with less than 6 digits."""
 
     s = 0
@@ -442,14 +415,12 @@ def digitsum_small(n: int) -> int:
 
 
 def digitsum_base(n: int, base: int = 10) -> int:
-
     """Use with string input if base is not 10."""
 
     return sum(map(partial(int, base=base), str(n)))
 
 
 def euclidean_distance(a: Computable, b: Computable) -> Computable:
-
     """Euclidean distance between `a` and `b`."""
 
     return abs(b - a)
@@ -460,19 +431,16 @@ def closest(
     number: Computable,
     distance_func: Callable[[Computable, Computable], Computable] = euclidean_distance,
 ) -> Computable:
-
     """For a list of `numbers`, return the closest number to `number`."""
 
     return min(numbers, key=partial(distance_func, number))
 
 
 def absolute_difference(a: Computable, b: Computable) -> Computable:
-
     return abs(b - a)
 
 
 def sortedsample(n: int, k: int) -> List[int]:
-
     """Sorted random sample without replacements."""
 
     return sorted(sample(range(n), k))

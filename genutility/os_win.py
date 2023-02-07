@@ -23,7 +23,6 @@ PathType = Union[str, os.PathLike]
 
 
 def get_stdout_handle() -> HANDLE:
-
     """Might return a redirect handle. For the real handle, use CreateFile("CONOUT$")"""
 
     return GetStdHandle(STD_OUTPUT_HANDLE)
@@ -31,7 +30,6 @@ def get_stdout_handle() -> HANDLE:
 
 class EnableAnsi:  # doesn't work for some reason...
     def __init__(self) -> None:
-
         # os.system("") # calls cmd, which sets ANSI mode, but doesn't disable it when exiting (it's a bug probably)
         self.handle = get_stdout_handle()
         self.oldmode = DWORD()
@@ -40,7 +38,6 @@ class EnableAnsi:  # doesn't work for some reason...
         SetConsoleMode(self.handle, self.oldmode.value | ENABLE_VIRTUAL_TERMINAL_PROCESSING)
 
     def close(self) -> None:
-
         SetConsoleMode(self.handle, self.oldmode.value)
 
     def __enter__(self) -> None:
@@ -51,7 +48,6 @@ class EnableAnsi:  # doesn't work for some reason...
 
 
 def _islink(path: PathType) -> bool:
-
     """Tests if `path` refers to a symlink or a junction.
     - Python >= 3.2 `os.path.islink()` only supports symlinks, not junctions.
     - Python < 3.2 `os.path.islink()` always returns `False` on Windows.
@@ -69,7 +65,6 @@ def _islink(path: PathType) -> bool:
 
 
 def _get_mount_path(path: str) -> str:
-
     FileName = LPCWSTR(path)
     BufferLength = 50  # MSDN suggestion
     VolumeName = create_unicode_buffer(BufferLength)
@@ -78,7 +73,6 @@ def _get_mount_path(path: str) -> str:
 
 
 def _lock(fp: IO, exclusive: bool = True, block: bool = False) -> None:
-
     fd = fp.fileno()
     handle = get_osfhandle(fd)
 
@@ -95,7 +89,6 @@ def _lock(fp: IO, exclusive: bool = True, block: bool = False) -> None:
 
 
 def _unlock(fp: IO) -> None:
-
     fd = fp.fileno()
     handle = get_osfhandle(fd)
 
@@ -106,7 +99,6 @@ def _unlock(fp: IO) -> None:
 
 
 def _get_appdata_dir(roaming: bool = False) -> str:
-
     if roaming:
         folderid = FOLDERID_RoamingAppData
     else:
@@ -132,7 +124,6 @@ def _get_appdata_dir(roaming: bool = False) -> str:
 
 
 def _disk_usage_windows(path: str) -> _usagetuple:
-
     DirectoryName = LPCWSTR(path)
     FreeBytesAvailableToCaller = ULARGE_INTEGER(0)  # user free
     TotalNumberOfBytes = ULARGE_INTEGER(0)  # user total
@@ -149,7 +140,6 @@ def _disk_usage_windows(path: str) -> _usagetuple:
 
 
 def _volume_info_windows(path: str) -> _volumeinfotuple:
-
     if not path.endswith("\\"):
         raise ValueError("X: usually doesn't work. X:\\ does.")
 
@@ -183,12 +173,10 @@ def _volume_info_windows(path: str) -> _volumeinfotuple:
 
 
 def _interrupt_windows() -> None:
-
     os.kill(os.getpid(), signal.CTRL_C_EVENT)  # fixme: verify: works on win 10 but not on win 7
 
 
 def _filemanager_cmd_windows(path: str) -> str:
-
     return f'explorer.exe /select,"{path}"'
 
 

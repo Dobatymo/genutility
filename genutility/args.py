@@ -26,7 +26,6 @@ def get_args(argparser: ArgumentParser) -> Namespace:
         pprint(action)
 
     for k, v in argparser._option_string_actions.items():
-
         nargs = v.nargs if v.nargs is not None else 1
 
         if nargs == 0:
@@ -51,7 +50,6 @@ def arg_to_path(func: Callable[[Path], Path]) -> Callable:
 
 
 def multiple_of(divisor: int) -> Callable[[str], int]:
-
     from builtins import int as builtin_int
 
     """ This function is called 'int' so that argparse can show a nicer error message
@@ -60,7 +58,6 @@ def multiple_of(divisor: int) -> Callable[[str], int]:
     """
 
     def int(s: str) -> builtin_int:
-
         number = builtin_int(s)
 
         if number % divisor != 0:
@@ -73,11 +70,9 @@ def multiple_of(divisor: int) -> Callable[[str], int]:
 
 
 def in_range(start: int, stop: int, step: int = 1) -> Callable[[str], int]:
-
     from builtins import int as builtin_int
 
     def int(s: str) -> builtin_int:  # see: multiple_of()
-
         number = builtin_int(s)
 
         r = range(start, stop, step)
@@ -91,11 +86,9 @@ def in_range(start: int, stop: int, step: int = 1) -> Callable[[str], int]:
 
 
 def between(start: float, stop: float) -> Callable[[str], float]:
-
     from builtins import float as builtin_float
 
     def float(s: str) -> builtin_float:
-
         number = builtin_float(s)
 
         if not (start <= number < stop):
@@ -108,7 +101,6 @@ def between(start: float, stop: float) -> Callable[[str], float]:
 
 
 def suffix(s: str) -> str:
-
     """Checks if `s` is a valid suffix."""
 
     if not s.startswith("."):
@@ -119,7 +111,6 @@ def suffix(s: str) -> str:
 
 
 def lowercase(s: str) -> str:
-
     """Converts argument to lowercase."""
 
     return s.lower()
@@ -131,7 +122,6 @@ def suffix_lower(s: str) -> str:
 
 @arg_to_path
 def existing_path(path: Path) -> Path:
-
     """Checks if a path exists."""
 
     if not path.exists():
@@ -143,7 +133,6 @@ def existing_path(path: Path) -> Path:
 
 @arg_to_path
 def new_path(path: Path) -> Path:
-
     """Checks if a path exists."""
 
     if path.exists():
@@ -155,7 +144,6 @@ def new_path(path: Path) -> Path:
 
 @arg_to_path
 def is_dir(path: Path) -> Path:
-
     """Checks if a path is an actual directory"""
 
     if not path.is_dir():
@@ -167,7 +155,6 @@ def is_dir(path: Path) -> Path:
 
 @arg_to_path
 def abs_path(path: Path) -> Path:
-
     """Checks if a path is an actual directory"""
 
     return path.resolve()
@@ -175,7 +162,6 @@ def abs_path(path: Path) -> Path:
 
 @arg_to_path
 def is_file(path: Path) -> Path:
-
     """Checks if a path is an actual file"""
 
     if not path.is_file():
@@ -187,7 +173,6 @@ def is_file(path: Path) -> Path:
 
 @arg_to_path
 def future_file(path: Path) -> Path:
-
     """Tests if file can be created to catch errors early.
     Checks if directory is writeable and file does not exist yet.
     """
@@ -203,7 +188,6 @@ def future_file(path: Path) -> Path:
 
 @arg_to_path
 def out_dir(path: Path) -> Path:
-
     """Tests if `path` is a directory. If not it tries to create one."""
 
     if not path.is_dir():
@@ -218,7 +202,6 @@ def out_dir(path: Path) -> Path:
 
 @arg_to_path
 def empty_dir(dirname: Path) -> Path:
-
     """tests if directory is empty"""
 
     from .iter import is_empty
@@ -243,7 +226,6 @@ def json_file(path: Union[str, Path]) -> Any:
 
 
 if __name__ == "__main__":
-
     parser = ArgumentParser()
     parser.add_argument("--str")
     parser.add_argument("--required", action="store_true")

@@ -28,11 +28,9 @@ def make_binary_search(target: int) -> Callable[[int], BisectRetVal]:
 def make_binary_search_sequence(
     seq: Sequence[T], target: U, key: Optional[Callable[[T], U]] = None
 ) -> Callable[[int], BisectRetVal]:
-
     _key = key or identity
 
     def binary_search_func(x: int) -> BisectRetVal:
-
         result = _key(seq[x])
         if result < target:
             return BisectRetVal.Higher
@@ -45,7 +43,6 @@ def make_binary_search_sequence(
 
 
 def bisect_left_generic(lo: int, hi: int, func: Callable[[int], BisectRetVal]) -> int:
-
     """Generic left bisection (binary search). Finds a specific `lo<=x<=hi` where
     `func(x) == BisectRetVal.Equal` or where the return value changes from BisectRetVal.Higher
     to `BisectRetVal.Lower`.
@@ -62,7 +59,6 @@ def bisect_left_generic(lo: int, hi: int, func: Callable[[int], BisectRetVal]) -
 
 
 def bisect_right_generic(lo: int, hi: int, func: Callable[[int], BisectRetVal]) -> int:
-
     """Generic right bisection (binary search). Finds a specific `lo<=x<=hi` where
     `func(x) == BisectRetVal.Equal` or where the return value changes from BisectRetVal.Higher
     to `BisectRetVal.Lower`.
@@ -93,7 +89,6 @@ def bisect_right_sequence(seq: Sequence[T], target, key=None) -> int:
 
 
 def search_sorted(seq: Sequence[T], newitem: U, key: Optional[Callable[[T], U]] = None) -> int:
-
     _key = key or identity
 
     for i, item in enumerate(seq):

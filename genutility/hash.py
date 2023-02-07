@@ -16,7 +16,6 @@ FILE_IO_BUFFER_SIZE = 8 * 1024 * 1024
 def hash_file(
     path: str, hashcls: HashCls, chunk_size: int = FILE_IO_BUFFER_SIZE, mode: str = "rb", encoding: Optional[str] = None
 ) -> Hashobj:
-
     # fixme: does this even work with `mode="rt"`?
 
     if isinstance(hashcls, str):
@@ -40,7 +39,6 @@ def hash_filelike(fr: IO[bytes], hashcls: HashCls, chunk_size: int = FILE_IO_BUF
 
 
 def hash_data(data: bytes, hashcls: HashCls) -> Hashobj:
-
     """Hashes `data` with `hashcls`.
     `hashcls` can either be a string like "md5" or a hash object like `hashlib.md5`.
     """
@@ -59,7 +57,6 @@ sha1_hash_data = partial(hash_data, hashcls=hashlib.sha1)
 
 
 def crc32_hash_iter(it: Iterable[bytes]) -> int:
-
     """Create CRC32 hash from bytes takes from `it`."""
 
     prev = 0
@@ -72,7 +69,6 @@ def crc32_hash_iter(it: Iterable[bytes]) -> int:
 def crc32_hash_file(
     path: str, chunk_size: int = FILE_IO_BUFFER_SIZE, mode: str = "rb", encoding: Optional[str] = None
 ) -> str:
-
     """Return crc32 hash of file at `path`."""
 
     crcint = crc32_hash_iter(blockfileiter(path, mode, encoding, chunk_size=chunk_size))
@@ -84,7 +80,6 @@ sha1_hash_file = partial(hash_file, hashcls=hashlib.sha1)
 
 
 def hashsum_file_format(hashobj: Hashobj, path: str) -> str:
-
     return f"{hashobj.hexdigest()} *{path}"
 
 
@@ -92,7 +87,6 @@ ed2k_chunksize = 9728000
 
 
 def ed2k_hash_file_v1(path: Path) -> str:
-
     """Returns ed2k hash.
     This hashing method is used by
     - MLDonkey
@@ -111,7 +105,6 @@ def ed2k_hash_file_v1(path: Path) -> str:
 
 
 def ed2k_hash_file_v2(path: Path) -> str:
-
     """Returns ed2k hash.
     This hashing method is used by
     - eMule

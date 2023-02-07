@@ -11,7 +11,6 @@ def sample_range(total, num):
 
 
 def arithmetic_mean(col: Collection) -> float:
-
     """Arithmetic mean of `col`."""
 
     return sum(col) / len(col)
@@ -21,14 +20,12 @@ mean = arithmetic_mean
 
 
 def harmonic_mean(col: Collection) -> float:
-
     """Harmonic mean of `col`."""
 
     return len(col) / sum(map(reciprocal, col))
 
 
 def geometric_mean(col: Collection) -> float:
-
     """Geometric mean of `col`."""
 
     return pow(prod(col), reciprocal(len(col)))

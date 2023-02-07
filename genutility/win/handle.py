@@ -10,7 +10,6 @@ _mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "w+": GENERIC_READ
 
 class WindowsHandle:
     def __init__(self, handle: int, doclose: bool = True) -> None:
-
         if not isinstance(handle, int):
             raise ValueError("handle must be an int")
 
@@ -32,12 +31,10 @@ class WindowsHandle:
         return fdopen(self.get_fd(flags), mode, buffering, encoding, errors, newline, closefd)
 
     def close(self) -> None:
-
         if CloseHandle(self.handle) == 0:
             raise WinError()
 
     def __enter__(self) -> "WindowsHandle":
-
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

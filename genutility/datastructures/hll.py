@@ -14,7 +14,6 @@ class HyperLogLog:
     registers: List[int]
 
     def __init__(self, b: int = 14, hashfunc: Optional[Callable] = None, hashbits: Optional[int] = None) -> None:
-
         assert b >= 4 and logical_xnor(hashfunc, hashbits)
 
         self.b = b
@@ -46,18 +45,15 @@ class HyperLogLog:
 
     @property
     def error(self) -> float:
-
         return 1.04 / (self.m**0.5)
 
     def _merge_registers(self, other: "HyperLogLog") -> List[int]:
-
         if self.b != other.b or self.hash != other.hash or self.width != other.width:
             raise ValueError("HyperLogLog object need to have the same number of registers and same hashes")
 
         return list(map(max, self.registers, other.registers))  # type: ignore[arg-type]
 
     def add(self, value: Hashable) -> None:
-
         h = self.hash(value)
 
         # memory layout: zeros[hashbits-b], register[b].
@@ -69,7 +65,6 @@ class HyperLogLog:
         self.registers[register] = max(self.registers[register], zeroes)
 
     def update(self, other: Union["HyperLogLog", Iterable]) -> None:
-
         if isinstance(other, HyperLogLog):
             self.registers = self._merge_registers(other)
         else:
@@ -77,7 +72,6 @@ class HyperLogLog:
                 self.add(value)
 
     def __len__(self) -> int:
-
         DV_est = self.alpha * self.m**2 * 1 / sum(2 ** (-r) for r in self.registers)
 
         if DV_est < 5 / 2 * self.m:  # small range correction
@@ -95,11 +89,9 @@ class HyperLogLog:
         return int(DV)
 
     def clear(self) -> None:
-
         self.registers = [0] * self.m
 
     def union(self, other: "HyperLogLog") -> "HyperLogLog":
-
         registers = self._merge_registers(other)
 
         hll = HyperLogLog(self.b, self.hash, self.width)
@@ -107,10 +99,8 @@ class HyperLogLog:
         return hll
 
     def __or__(self, other: "HyperLogLog") -> "HyperLogLog":
-
         return self.union(other)
 
     def __ror__(self, other: "HyperLogLog") -> "HyperLogLog":
-
         self.registers = self._merge_registers(other)
         return self

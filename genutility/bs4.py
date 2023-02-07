@@ -4,7 +4,6 @@ import bs4
 
 
 def find_one(node: bs4.element.Tag, *args: Any, **kwargs: Any) -> bs4.element.Tag:
-
     nodes = node.find_all(*args, **kwargs)
 
     if len(nodes) != 1:
@@ -14,7 +13,6 @@ def find_one(node: bs4.element.Tag, *args: Any, **kwargs: Any) -> bs4.element.Ta
 
 
 def find_zero_or_one(node: bs4.element.Tag, *args: Any, **kwargs: Any) -> bs4.element.Tag:
-
     nodes = node.find_all(*args, **kwargs)
 
     if len(nodes) == 0:

@@ -33,11 +33,9 @@ class RarError(Exception):
 
 
 class Rar:
-
     windows_executable = Path("C:/Program Files/WinRAR/Rar.exe")
 
     def __init__(self, archive: Path, executable: Optional[Path] = None) -> None:
-
         """archive: archive to work with, everything which is supported by winrar
         executable: path/to/Rar.exe"""
 
@@ -64,11 +62,9 @@ class Rar:
         self.options["recovery_volumes"] = (False, "rr%u%%")
 
     def add_file(self, pathname: str) -> None:
-
         self.filelist.append(pathname)
 
     def add_files(self, filelist: Iterable[str]) -> None:
-
         self.filelist.extend(filelist)
 
     def set_compression(self, level: Union[int, bool]) -> None:
@@ -170,7 +166,6 @@ def create_rar_from_folder(
     filter_func: Callable = lambda x: True,
     name_transform: Callable = lambda x: x,
 ) -> bool:
-
     if not path.is_dir():
         return False
 
@@ -178,7 +173,6 @@ def create_rar_from_folder(
         dest_path = path.parent
 
     with CurrentWorkingDirectory(path):
-
         try:
             r = Rar(dest_path / f"{name_transform(path.name)}.rar")
             if profile_setter_func:
@@ -200,12 +194,10 @@ def create_rar_from_file(
     profile_setter_func: Optional[Callable[[Rar], Any]] = None,
     name_transform: Callable = lambda x: x,
 ) -> bool:
-
     if dest_path == ".":
         dest_path = path.parent
 
     with CurrentWorkingDirectory(path.parent):
-
         try:
             r = Rar(dest_path / f"{name_transform(path.name)}.rar")
             if profile_setter_func:

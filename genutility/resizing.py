@@ -13,7 +13,6 @@ from .rand import rgb_colors
 
 
 def MSER_draw(img, boxes, centers, major_v, minor_v, labels):
-
     center_int = centers.astype(int)
     major_int = (centers + major_v).astype(int)
     minor_int = (centers + minor_v).astype(int)
@@ -84,7 +83,6 @@ def appearance_dissimmilarity():
 
 
 def symmetry_detection(image, K_c=5):
-
     # Identifying cells with MSER
     boxes, R_c, R_u, R_v = MSER(image)  # {r_i} set of MSERs (2d ellipsis) r_i = (center, major axis, minor axis)
 

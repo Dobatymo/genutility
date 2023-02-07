@@ -15,7 +15,6 @@ class progress_content:
         refresh: Number = 1,
         file: Optional[TextIO] = sys.stdout,
     ) -> None:
-
         self.it = it
         self.length = length
         self.refresh = refresh

@@ -17,7 +17,6 @@ U = TypeVar("U")
 
 
 def bubble_sort(seq: MutableSequence) -> None:
-
     """Slightly optimized version of stable bubble sort. Sorts input `seq` in place."""
 
     n = len(seq)
@@ -67,7 +66,6 @@ class OptionalValue(Generic[T]):
         return self.value == other.value
 
     def __lt__(self, other: "OptionalValue[T]") -> bool:
-
         a = self.value
         b = other.value
 
@@ -85,7 +83,6 @@ class OptionalValue(Generic[T]):
 
 
 def sorted_index(it: IterableT[T], reverse: bool = False) -> Iterator[Tuple[T, int]]:
-
     """adds the position of each element after sorting without changing the order of the elements
     eg. [2, 6, -1, 4] -> [(2, 2), (6, 4), (-1, 1), (4, 3)]
     """
@@ -99,7 +96,6 @@ def sorted_index(it: IterableT[T], reverse: bool = False) -> Iterator[Tuple[T, i
 def sorted_by_list(
     tosort: IterableT[T], sortby: IterableT[U], reverse: bool = False, include_keys: bool = False
 ) -> Union[IterableT[Tuple[T, U]], Iterator[T]]:
-
     """Sorts `tosort` using the elements of `sortby`.
     The length of the shorter of both list determines the length of the output.
     eg. [1,2,3,4], [2,4,1,3] -> [3,1,4,2] for include_keys is False
@@ -113,7 +109,6 @@ def sorted_by_list(
 
 
 def sorted_with_keys(it: IterableT[T], key: Callable[[T], U], reverse: bool = False) -> Iterator[Tuple[T, U]]:
-
     """Sorts `it` using function `key` adds keys to output.
     eg. [2,4,1,3], lambda x: -x -> [(4,-4),(3,-3),(2,-2),(1,-1)]
     """
@@ -130,7 +125,6 @@ def external_sort(
     max_lines_temp: Optional[int] = None,
     max_lines_final: Optional[int] = None,
 ) -> Iterator[AnyStr]:
-
     """Sorts `in_iterator` by using external files. Keeps at most `max_lines_temp` lines in memory at any time.
     `in_iterator` must not yield any newlines. They must be escaped beforehand.
     If mode is "t" `in_iterator` must yield `str`, mode "b" it must yield `bytes`.
@@ -208,7 +202,6 @@ def external_sort_file(
     max_lines_temp: Optional[int] = None,
     max_lines_final: Optional[int] = None,
 ) -> None:
-
     """Sorts file `in_file` to `out_file` line by line using external files
     provided by filename `template temp_file_template`.
     At most `max_lines_temp` lines will be in memory at any time.

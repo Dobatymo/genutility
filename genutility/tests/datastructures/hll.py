@@ -9,7 +9,6 @@ class HllTest(MyTestCase):
         (set(map(str, range(1000000))), 21000),
     )
     def test_HyperLogLog(self, values, delta):
-
         hll = HyperLogLog()
         hll.update(values)
         self.assertLessEqual(abs(len(values) - len(hll)), delta)

@@ -15,7 +15,6 @@ def compile_options() -> List[str]:
 
 
 def quote_identifier(s: str, errors: str = "strict") -> str:
-
     """Escapes sqlite identifiers (like table or column names).
     Copied from: https://stackoverflow.com/a/6701665
     """
@@ -33,7 +32,6 @@ def quote_identifier(s: str, errors: str = "strict") -> str:
 
 
 def vacuum(db_path: str) -> None:
-
     """Vacuums a sqlite database."""
 
     with sqlite3.connect(db_path) as conn:
@@ -43,7 +41,6 @@ def vacuum(db_path: str) -> None:
 def batch_executer(
     cursor: sqlite3.Cursor, query_str: str, it: Iterable[tuple], batch_size: int = 10000, exclusive: bool = True
 ) -> int:
-
     """Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
     If `exclusive` is True the database will be locked in exclusive mode.
     """
@@ -54,7 +51,6 @@ def batch_executer(
     entries = 0
 
     for queries_batch in batch(progress(it), batch_size):
-
         # need to cache batch data, because if the iterable is exhausted,
         # executemany raises `sqlite3.ProgrammingError`
         data = list(queries_batch)
@@ -70,7 +66,6 @@ def batch_executer(
 def safe_batch_executer(
     cursor: sqlite3.Cursor, query_str: str, it: Iterable[tuple], batch_size: int = 10000, exclusive: bool = True
 ) -> None:
-
     """Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
     If `exclusive` is True the database will be locked in exclusive mode.
     If an db integrity error occurs, the batch will be skipped and the transaction for

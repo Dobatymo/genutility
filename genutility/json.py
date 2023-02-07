@@ -24,12 +24,10 @@ logger = logging.getLogger(__name__)
 
 class BuiltinEncoder(json.JSONEncoder):
     def __init__(self, *args: Any, sort_sets: bool = False, **kwargs: Any) -> None:
-
         json.JSONEncoder.__init__(self, *args, **kwargs)
         self.sort_sets = sort_sets
 
     def default(self, obj):
-
         # collections.OrderedDict is supported by default
 
         from base64 import b85encode
@@ -90,7 +88,6 @@ class BuiltinRoundtripDecoder(json.JSONDecoder):
 
 
 def read_json_schema(path: PathStr) -> JsonDict:
-
     with open(path, encoding="utf-8") as fr:
         return json.load(fr)
 
@@ -98,7 +95,6 @@ def read_json_schema(path: PathStr) -> JsonDict:
 def read_json(
     path: PathStr, schema: Optional[Union[str, JsonDict]] = None, cls: Any = None, object_hook: Any = None
 ) -> Any:
-
     """Read the json file at `path` and optionally validates the input according to `schema`.
     The validation requires `jsonschema`.
     `schema` can either be a path as well, or a Python dict which represents the schema.
@@ -133,7 +129,6 @@ def write_json(
     safe: bool = False,
     **kw: Any,
 ) -> None:
-
     """Writes python object `obj` to `path` as json files and optionally validates the object
     according to `schema`. The validation requires `jsonschema`.
     The remaining optional parameters are passed through to `json.dump`.
@@ -179,7 +174,6 @@ class json_lines:
         object_pairs_hook: Optional[Callable] = None,
         **kw: Any,
     ) -> None:
-
         """Don't use directly. Use `from_path` or `from_stream` classmethods instead."""
 
         """ fixme: how should `close` be handled?
@@ -216,7 +210,6 @@ class json_lines:
         object_pairs_hook: Optional[Callable] = None,
         **kw: Any,
     ) -> "json_lines":
-
         """Binary writing modes "wb", "ab", "r+b", "w+b" are not supported by the python json module.
         Use text modes instead. Binary read-only is fine.
         """
@@ -252,20 +245,17 @@ with open("{file}", "r") as fr:
         object_pairs_hook: Optional[Callable] = None,
         **kw: Any,
     ) -> "json_lines":
-
         return json_lines(
             stream, False, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw
         )
 
     def __enter__(self) -> "json_lines":
-
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
     def iterrange(self, start: int = 0, stop: Optional[int] = None) -> Iterator:
-
         try:
             import simplejson as sjson
 
@@ -287,7 +277,6 @@ with open("{file}", "r") as fr:
             raise
 
     def __iter__(self) -> Iterator:
-
         return self.iterrange()
 
     def write(
@@ -303,7 +292,6 @@ with open("{file}", "r") as fr:
         sort_keys: bool = False,
         **kw: Any,
     ) -> None:
-
         json.dump(
             obj,
             self.f,
@@ -337,13 +325,11 @@ with open("{file}", "r") as fr:
             self.write(obj)
 
     def close(self) -> None:
-
         if self.doclose:
             self.f.close()
 
 
 def read_json_lines(file: PathStr, object_hook: Optional[Callable] = None) -> Iterator[Any]:
-
     """Iterate over a JSON Lines `file` object by object.
     `object_hook` is passed through to `json.load`.
     """
@@ -353,7 +339,6 @@ def read_json_lines(file: PathStr, object_hook: Optional[Callable] = None) -> It
 
 
 def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Sequence[str]], mode: str = "xt") -> None:
-
     with json_lines.from_path(jlpath, "rt") as fr:
         with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
             fw = csv.writer(csvfile)
@@ -362,7 +347,6 @@ def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Seque
 
 
 def key_to_hash(key: Any, default: Optional[Callable] = None) -> str:
-
     from hashlib import md5
 
     binary = json.dumps(key, default=default).encode("utf-8")
@@ -378,7 +362,6 @@ def cache(
     default: Optional[Callable] = None,
     object_hook: Optional[Callable] = None,
 ) -> Callable:
-
     """Decorator to cache results of function to json files at `path` for `duration`.
     The remaining parameters are passed through to `json.dump`.
     """
@@ -391,7 +374,6 @@ def cache(
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def inner(*args, **kwargs):
-
             hash = key_to_hash(args_to_key(args, kwargs, {}), default=default)
             fullpath = path / hash
 
@@ -429,7 +411,6 @@ def jsonlines_cache(
     default: Optional[Callable] = None,
     object_hook: Optional[Callable] = None,
 ) -> Callable:
-
     """Decorator to cache results of function to jsonlines files at `path` for `duration`.
     The remaining parameters are passed through to `json_lines.from_path`.
     """
@@ -439,7 +420,6 @@ def jsonlines_cache(
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def inner(*args, **kwargs):
-
             hash = key_to_hash(args_to_key(args, kwargs, {}), default=default)
             fullpath = path / hash
 
@@ -493,7 +473,6 @@ class JsonLinesFormatter(logging.Formatter):
         builtins: FrozenSet[str] = frozenset(),
         default: Optional[Callable] = None,
     ) -> None:
-
         logging.Formatter.__init__(self)
         self.include_b = include & self.myfields.keys()
         self.builtins = builtins

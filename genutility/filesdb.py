@@ -32,11 +32,9 @@ T = TypeVar("T")
 
 
 class GenericDb:
-
     order_col = "_order"
 
     def __init__(self, dbpath: str, table: str, debug: bool = True, allow_add: bool = True) -> None:
-
         self.table = quote_identifier(table)
         self._primary = self.primary()
         self._auto = self.auto()
@@ -136,14 +134,12 @@ class GenericDb:
         return result == 1
 
     def close(self) -> None:
-
         """Only closes connections and cursors opened in the current thread"""
 
         self.cursor.close()
         self.connection.close()
 
     def setup(self) -> None:
-
         fields = ", ".join(f"{n} {t}" for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived))
 
         # unique = "UNIQUE({})".format(n for n, t, v in chain(self._mandatory, self._derived))
@@ -156,7 +152,6 @@ class GenericDb:
         return mandatory
 
     def commit(self) -> None:
-
         self.connection.commit()
 
     def _args(
@@ -165,7 +160,6 @@ class GenericDb:
         derived: Dict[str, Any],
         ignore_null: bool = True,
     ) -> tuple:
-
         if ignore_null:
             return tuple(
                 chain(
@@ -187,7 +181,6 @@ class GenericDb:
             yield self._args(_mandatory, _derived, ignore_null)
 
     def iter(self, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> Iterator[tuple]:
-
         if only and no:
             raise ValueError("Only `only` or `no` can be specified")
 
@@ -205,7 +198,6 @@ class GenericDb:
         return iterfetch(self.cursor)
 
     def _filtered_derived(self, derived: Collection[str], ignore_null: bool):
-
         if ignore_null:
             return ((n, t, v) for n, t, v in self._derived if n in derived)
         else:
@@ -233,7 +225,6 @@ class GenericDb:
         only: FrozenSet[str] = frozenset(),
         no: FrozenSet[str] = frozenset(),
     ) -> tuple:
-
         """Retrieve latest row based on mandatory and derived information.
 
         If `ignore_null=True` (default), values which are not provided in `derived`
@@ -272,7 +263,6 @@ class GenericDb:
         only: FrozenSet[str] = frozenset(),
         no: FrozenSet[str] = frozenset(),
     ) -> Iterator[tuple]:
-
         """`derived_names` must be equal to the keys of the `derived` dicts"""
 
         # This function creates a join table to match multiple values at once
@@ -314,7 +304,6 @@ class GenericDb:
         return
 
     def _add_file(self, mandatory: Sequence[Any], derived: Dict[str, Any], replace: bool = True) -> None:
-
         """Adds a new entry to the database and doesn't check if file
         with the same mandatory fields already exists.
         However it will replace entries based on PRIMARY KEYs or UNIQUE indices.
@@ -346,7 +335,6 @@ class GenericDb:
         derived: Optional[Dict[str, Any]] = None,
         ignore_null: bool = True,
     ) -> bool:
-
         """Only adds a new entry to the db if the provided information
         does not exist in the db yet.
         """
@@ -388,12 +376,10 @@ class GenericFileDb(GenericDb):
         only: FrozenSet[str] = frozenset(),
         no: FrozenSet[str] = frozenset(),
     ) -> tuple:
-
         mandatory = (path, filesize, mod_date)
         return self._get_latest(mandatory, derived, ignore_null, only, no)
 
     def get(self, path: EntryType, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
-
         """Retrieves latest row based on mandatory information
         which is solely based on the `path`.
         Use `only`/`no` to include/exclude returned fields.
@@ -405,7 +391,6 @@ class GenericFileDb(GenericDb):
     def add(
         self, path: EntryType, derived: Optional[Dict[str, Any]] = None, commit: bool = True, replace: bool = True
     ) -> None:
-
         """Adds a new entry to the database and doesn't check if file
         with the same mandatory fields already exists.
         However it will replace entries based on PRIMARY KEYs or UNIQUE indices
@@ -419,7 +404,6 @@ class GenericFileDb(GenericDb):
             self.commit()
 
     def add_file(self, path: str, filesize: int, mod_date: int, derived: Optional[Dict[str, Any]] = None) -> bool:
-
         """Only adds a new entry to the db if all the provided information doesn't match a row in the db yet."""
 
         mandatory = (path, filesize, mod_date)
@@ -428,7 +412,6 @@ class GenericFileDb(GenericDb):
         return result
 
     def add_files(self, batch: Iterable[Tuple[str, int, int, Optional[Dict[str, Any]]]]) -> Iterator[bool]:
-
         """Adds multiple new entries to the db while ignoring already existing entries with the same information.
         Yields True for new entries, False otherwise.
         """
@@ -521,7 +504,6 @@ class FileDbWithId(GenericFileDb):
         ]
 
     def get(self, path: Path, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
-
         """Retrieves latest row based on mandatory information
         which is solely based on the `path`.
         Use `only`/`no` to include/exclude returned fields.
@@ -535,7 +517,6 @@ class FileDbWithId(GenericFileDb):
     def add(
         self, path: Path, derived: Optional[Dict[str, Any]] = None, commit: bool = True, replace: bool = True
     ) -> None:
-
         """Adds a new entry to the database and doesn't check if file
         with the same mandatory fields already exists.
         However it will replace entries based on PRIMARY KEYs or UNIQUE indices

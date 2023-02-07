@@ -9,17 +9,14 @@ class VariableRowMatrixItems(AbstractSet[Tuple[Tuple[int, int], T]]):
         self.vrm = vrm
 
     def __iter__(self) -> Iterator[Tuple[Tuple[int, int], T]]:
-
         for r, row in enumerate(self.vrm.lol):
             for c, value in enumerate(row):
                 yield (r, c), value
 
     def __len__(self) -> int:
-
         return sum(len(row) for row in self.vrm.lol)
 
     def __contains__(self, key: object) -> bool:
-
         (i, j), value = cast(Tuple[Tuple[int, int], T], key)
 
         return self.vrm.lol[i][j] == value
@@ -27,33 +24,27 @@ class VariableRowMatrixItems(AbstractSet[Tuple[Tuple[int, int], T]]):
 
 class VariableRowMatrix(MutableMapping[Tuple[int, int], T]):
     def __init__(self, default: T) -> None:
-
         self.lol: List[List[T]] = []
         self.default = default
 
     @classmethod
     def from_list_of_lists(cls, lol: List[List[T]]) -> "VariableRowMatrix[T]":
-
         m = VariableRowMatrix.__new__(cls)
         m.lol = lol
         return m
 
     def __len__(self) -> int:
-
         return len(self.lol)
 
     def __iter__(self) -> Iterator[Tuple[int, int]]:
-
         for r, row in enumerate(self.lol):
             for c, value in enumerate(row):
                 yield (r, c)
 
     def items(self) -> VariableRowMatrixItems[T]:
-
         return VariableRowMatrixItems(self)
 
     def __setitem__(self, key: Tuple[int, int], value: T) -> None:
-
         i, j = key
 
         try:
@@ -72,13 +63,11 @@ class VariableRowMatrix(MutableMapping[Tuple[int, int], T]):
             row[j] = value
 
     def __delitem__(self, key: Tuple[int, int]) -> None:
-
         """del vrm[i, j] only sets the the value to 0"""
 
         i, j = key
         self.lol[i][j] = self.default
 
     def __getitem__(self, key: Tuple[int, int]) -> T:
-
         i, j = key
         return self.lol[i][j]

@@ -23,7 +23,6 @@ class STAR:
 
 
 def args_to_key(args: tuple, kwargs: dict, separator: Any = STAR) -> tuple:
-
     """Create cache key from function arguments."""
 
     key: List[tuple] = []
@@ -37,7 +36,6 @@ def args_to_key(args: tuple, kwargs: dict, separator: Any = STAR) -> tuple:
 
 
 def compress(value: Any) -> Any:
-
     """Creates a copy of the object where some data structures are replaced with equivalent ones
     which take up less space, but are not necessarily mutable anymore.
 

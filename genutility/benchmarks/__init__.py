@@ -3,7 +3,6 @@ from timeit import repeat
 
 
 def run(benchmarks: dict) -> None:
-
     parser = ArgumentParser()
     parser.add_argument("testcases", nargs="*")
     args = parser.parse_args()

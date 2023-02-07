@@ -22,18 +22,15 @@ PrivateKey = Union[RSAPrivateKey, DSAPrivateKey, DHPrivateKey, EllipticCurvePriv
 
 
 def load_certificate_file(filename: str) -> X509:
-
     with open(filename, "rb") as fr:
         return crypto.load_certificate(crypto.FILETYPE_PEM, fr.read())
 
 
 def get_pubkey_from_x509(x509: X509) -> bytes:
-
     return crypto.dump_privatekey(crypto.FILETYPE_ASN1, x509.get_pubkey())
 
 
 def load_keyfile(filename: str, encoding: str = "PEM") -> PrivateKey:
-
     try:
         load_func = {
             "PEM": load_pem_private_key,
@@ -51,7 +48,6 @@ def load_keyfile(filename: str, encoding: str = "PEM") -> PrivateKey:
 def generate_rsa_keyfile_pair(
     priv_key: str, pub_key: str, key_size: int = 4096, encoding: str = "PEM", format: str = "modern"
 ) -> RSAPrivateKey:
-
     """
     encoding: "PEM" -> ASN.1 encoding, "DER" -> base64 PEM
     """

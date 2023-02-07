@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 
 def complete_weighted_bipartite_graph(first: Sequence[T], second: Sequence[T], weights: np.ndarray) -> Graph:
-
     graph = Graph()
 
     graph.add_nodes_from(first, bipartite=0)
@@ -26,7 +25,6 @@ def complete_weighted_bipartite_graph(first: Sequence[T], second: Sequence[T], w
 
 
 def connected_subgraph(graph: Graph, minsize: int = 2) -> Graph:
-
     """Returns all the connected subgraphs of `graph`,
     which are at least of size `minsize`.
     """

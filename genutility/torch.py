@@ -8,5 +8,4 @@ if TYPE_CHECKING:
 
 
 def categorical(probs: tensor, size: tensor = torch.Size()) -> tensor:
-
     return Categorical(probs).sample(size)

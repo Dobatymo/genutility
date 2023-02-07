@@ -12,7 +12,6 @@ V = TypeVar("V")
 
 
 def flatten(d: Union[Dict[T, U], List[U], Tuple[U, ...]]) -> Iterator[U]:
-
     """Flattens dicts/lists of (dicts/lists of ...) lists to lists."""
 
     if isinstance(d, (list, tuple)):
@@ -25,7 +24,6 @@ def flatten(d: Union[Dict[T, U], List[U], Tuple[U, ...]]) -> Iterator[U]:
 
 
 def _flatten_keys(d: Dict[Any, Any], out: Dict[tuple, Any], path: tuple) -> None:
-
     for k, v in d.items():
         if isinstance(v, dict):
             _flatten_keys(v, out, path + (k,))
@@ -40,7 +38,6 @@ def flatten_keys(d: Dict[Any, Any]) -> Dict[tuple, Any]:
 
 
 def rec_update(d: MutableMappingT, u: MappingT) -> None:
-
     """Updates dict `d` recursively with values from `u`.
     Requires `setdefault` method.
     """
@@ -56,7 +53,6 @@ def rec_update(d: MutableMappingT, u: MappingT) -> None:
 
 
 def rec_update_mod(d: Any, u: MappingT) -> None:
-
     """Similar to `rec_update`, except that `d` doesn't require the `setdefault` method."""
 
     for k, v in u.items():
@@ -73,7 +69,6 @@ def rec_update_mod(d: Any, u: MappingT) -> None:
 
 
 def get_one_of(d: Dict[T, U], keys: Iterable[T]) -> Tuple[T, U]:
-
     """Returns the (key, value) pair of the first key of `keys` found in `d`."""
 
     for key in keys:
@@ -87,7 +82,6 @@ def get_one_of(d: Dict[T, U], keys: Iterable[T]) -> Tuple[T, U]:
 
 # similar: subdict
 def get_available(d: Dict[T, U], keys: Iterable[T]) -> Iterator[Tuple[T, U]]:
-
     """Returns all the key-value pairs in `d` for the keys in `it`.
     Missing keys are ignored.
     """
@@ -100,7 +94,6 @@ def get_available(d: Dict[T, U], keys: Iterable[T]) -> Iterator[Tuple[T, U]]:
 
 
 def subdict(d: MappingT[T, U], it: Iterable[T]) -> Dict[T, U]:
-
     """Uses the elements of `it` as keys to extract a new sub-dictionary.
     Raises if not all keys in `it` are available.
     """
@@ -118,21 +111,18 @@ def mapmap(d: MappingT[T, U], it: Iterable[T]) -> Iterator[U]:
 
 
 def hasvalues(d: dict) -> dict:
-
     """Returns a sub-dictionary which leaves out all pairs where the value evaluates to False."""
 
     return {k: v for k, v in d.items() if v}
 
 
 def valuemap(func: Callable[[U], V], d: Dict[T, U]) -> Dict[T, V]:
-
     """Returns a new dictionary with `func` applied to all values of `d`."""
 
     return {k: func(v) for k, v in d.items()}
 
 
 def itemgetter(it: Iterable[T]) -> Callable[[MappingT[T, U]], Iterator[U]]:
-
     """Similar to `operator.itemgetter` except that it always expects and returns iterables.
     Compare `mapmap`
     """
@@ -141,14 +131,12 @@ def itemgetter(it: Iterable[T]) -> Callable[[MappingT[T, U]], Iterator[U]]:
 
 
 def subdictdefault(d: MappingT[T, U], it: Iterable[T], default: V = None) -> Dict[T, Union[U, V]]:
-
     """Uses the elements of `it` as keys to extract a new sub-dictionary."""
 
     return {key: d.get(key, default) for key in it}
 
 
 def update(d1: dict, d2: dict) -> None:
-
     """Same as `dict.update` except that `None` values are skipped."""
 
     for k, v in d2.items():
@@ -161,7 +149,6 @@ class keydefaultdict(defaultdict):
     """defaultdict which passes a key to the default factory."""
 
     def __missing__(self, key: Hashable) -> Any:
-
         if self.default_factory is None:
             raise KeyError(key)
         else:
@@ -190,7 +177,6 @@ class NoOverwriteDict(UserDict):
 
 
 def _merge_schema(d1: dict, d2: dict) -> None:
-
     """Merge `d2` into `d1`. `d2` stays unmodified."""
 
     a = d1.keys()
@@ -232,7 +218,6 @@ def _get_intsize(num: int) -> str:
 
 
 def _post_schema(d: dict) -> None:
-
     for k in d:
         if isinstance(d[k], dict):
             _post_schema(d[k])
@@ -269,7 +254,6 @@ def get_schema_simple(d: Iterable[dict]) -> dict:
 
 # was: zipmap
 def zipget(objs: Iterable[MappingT[T, U]], keys: Iterable[T]) -> Iterator[U]:
-
     """Gets a list of keys from a list of mappings.
         zipget([[1, 2], [3, 4]], [0, 1]) -> (1, 4)
 

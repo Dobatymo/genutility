@@ -6,7 +6,6 @@ from genutility.test import MyTestCase, closeable_tempfile, parametrize
 
 
 class MyTestCaseTest(MyTestCase):
-
     # don't do self.tc = MyTestCase()
     # constructor cannot be called in python, use inheritance only.
 

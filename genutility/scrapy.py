@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 def read_dbm_httpcache(
     path: str, open_func: Callable[[str, str], ContextManager[MutableMapping]] = dbm.open, decompress: bool = True
 ) -> Iterator[Tuple[bytes, float, Any]]:
-
     """Loads scrapy dbm http cache files.
     Uses pickle so only use on trusted file.
     """
@@ -27,9 +26,7 @@ def read_dbm_httpcache(
         import brotli
 
     with open_func(path, "r") as db:
-
         for key, value in dbm_items(db):
-
             if key.endswith(b"_data"):
                 hash = key[:-5]
                 time = float(db[hash + b"_time"])
@@ -50,7 +47,6 @@ def read_dbm_httpcache(
 
 
 def print_progress(spider: scrapy.Spider) -> None:
-
     queue = len(spider.crawler.engine.slot.scheduler)
     requests = len(spider.crawler.engine.slot.scheduler.df.fingerprints)
     delta = datetime.utcnow() - spider.crawler.stats.get_value("start_time")
@@ -92,7 +88,6 @@ def get_url_logger(urllogfile: Optional[str], name: str = "urllog", funcname: bo
 
 
 if __name__ == "__main__":
-
     from argparse import ArgumentParser
 
     parser = ArgumentParser()

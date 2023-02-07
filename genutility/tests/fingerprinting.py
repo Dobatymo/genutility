@@ -10,7 +10,6 @@ from genutility.test import MyTestCase, parametrize, random_arguments
 class FingerprintingTest(MyTestCase):
     @random_arguments(100, partial(np.random.uniform, size=(4, 4)))
     def test_moments(self, arr):
-
         try:
             import cv2
         except ImportError:

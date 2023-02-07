@@ -32,7 +32,6 @@ def naive_to_aware(dt, tzinfo=timezone.utc) -> datetime:
 
 
 def now(aslocal: bool = False) -> datetime:
-
     """Returns the current datetime as timezone aware object in
     UTC timezone if `aslocal=False` (the default)
     or local timezone if `aslocal=True`.
@@ -45,7 +44,6 @@ def now(aslocal: bool = False) -> datetime:
 
 
 def datetime_from_utc_timestamp(epoch: float, aslocal: bool = False) -> datetime:
-
     """Converts a UNIX epoch time in seconds to a timezone aware datetime.
     Negative values are supported and return a datetime counted backwards
     from 1970-01-01 UTC.
@@ -61,7 +59,6 @@ def datetime_from_utc_timestamp(epoch: float, aslocal: bool = False) -> datetime
 
 
 def datetime_from_utc_timestamp_ms(epoch: int, aslocal: bool = False) -> datetime:
-
     """Converts a UNIX epoch time in milliseconds to a timezone aware datetime.
     Negative values are supported and return a datetime counted backwards
     from 1970-01-01 UTC.
@@ -79,7 +76,6 @@ def datetime_from_utc_timestamp_ms(epoch: int, aslocal: bool = False) -> datetim
 
 
 def datetime_from_utc_timestamp_ns(epoch: int, aslocal: bool = False) -> datetime:
-
     """Converts a UNIX epoch time in nano seconds to a timezone aware datetime.
     Negative values are supported and return a datetime counted backwards
     from 1970-01-01 UTC.
@@ -108,7 +104,6 @@ def between(dt: dtime, start: Optional[dtime], end: Optional[dtime]) -> bool:
 
 
 def between(dt, start=None, end=None):
-
     """Tests if `dt` is in-between `start` and `end` (inclusive and optionally open ended).
 
     If the parameters are datetimes, they all most be either offset-aware or native.

@@ -20,7 +20,6 @@ def batch_solve_triangular(
     overwrite_b: bool = False,
     check_finite: bool = False,
 ) -> np.ndarray:
-
     B, M1, M2 = matrices.shape
     B2, V = vectors.shape
 

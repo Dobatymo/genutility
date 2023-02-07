@@ -54,7 +54,6 @@ MyDirEntryT = Union[DirEntry, BaseDirEntry]
 
 
 def entrysuffix(entry: MyDirEntryT) -> str:
-
     return os.path.splitext(entry.name)[1]
 
 

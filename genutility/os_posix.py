@@ -7,7 +7,6 @@ from .os_shared import _usagetuple
 
 
 def _lock(fp: IO, exclusive: bool = True, block: bool = False) -> None:
-
     if exclusive:
         operation = fcntl.LOCK_EX
     else:
@@ -24,7 +23,6 @@ def _unlock(fp: IO) -> None:
 
 
 def _disk_usage_posix(path: str) -> _usagetuple:
-
     st = os.statvfs(path)
 
     total = st.f_blocks * st.f_frsize
@@ -38,7 +36,6 @@ def _interrupt_posix() -> None:
 
 
 def _filemanager_cmd_posix(path: str) -> str:
-
     return f'nautilus "{path}"'  # gnome only. xdg-open for the rest?
 
 

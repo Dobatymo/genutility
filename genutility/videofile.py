@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 
 
 def _raise_exists(outpath: Path, overwrite: bool = False) -> None:
-
     if not overwrite and outpath.exists():
         raise FileExistsError()
 
@@ -38,25 +37,20 @@ class BadFile(Exception):
 
 
 class VideoBase:
-
     single_frame_ratio = 0.5  # fixme: what is this used for?
     time_base: Fraction
     native_duration: int
 
     def calculate_offsets(self, time_base: Fraction, duration: int) -> Iterator[int]:
-
         raise NotImplementedError
 
     def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
-
         raise NotImplementedError
 
     def _frame_to_file(self, frame: Any, outpath: PathLike) -> None:
-
         raise NotImplementedError
 
     def iterate(self) -> Iterator[Tuple[float, np.ndarray]]:
-
         for offset in self.calculate_offsets(self.time_base, self.native_duration):
             try:
                 yield self._get_frame(offset)
@@ -64,7 +58,6 @@ class VideoBase:
                 yield offset, e
 
     def save_frame_to_file(self, pos: float, outpath: PathLike) -> None:
-
         frametime, frame = self._get_frame(int(self.native_duration * pos), native=True)
         self._frame_to_file(frame, outpath)
 
@@ -88,7 +81,6 @@ def fourcc(integer):
 
 class CvVideo(VideoBase):
     def __init__(self, path: Union[str, PathLike, int]) -> None:
-
         self.cv2 = self.import_backend()
 
         if isinstance(path, PathLike):
@@ -140,11 +132,9 @@ class CvVideo(VideoBase):
         return cv2
 
     def time_to_seconds(self, offset: int) -> float:
-
         return offset / self.meta["fps"]
 
     def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
-
         self.cap.set(self.cv2.CAP_PROP_POS_FRAMES, offset)
 
         ret, frame = self.cap.read()
@@ -156,7 +146,6 @@ class CvVideo(VideoBase):
             raise NoGoodFrame("Could not find good frame")
 
     def _frame_to_file(self, frame: np.ndarray, outpath: PathLike) -> None:
-
         is_success: bool
         im_buf: np.ndarray
 
@@ -165,7 +154,6 @@ class CvVideo(VideoBase):
         im_buf.tofile(fspath(outpath))  # cv2.imwrite doesn't handle unicode paths correctly
 
     def close(self) -> None:
-
         self.cap.release()
 
 
@@ -180,7 +168,6 @@ def object_attributes(obj):
 
 
 class AvVideo(VideoBase):
-
     vcc_attrs = [
         "coded_height",
         "coded_width",
@@ -198,7 +185,6 @@ class AvVideo(VideoBase):
     ]
 
     def __init__(self, path: PathLike, videostream: int = 0) -> None:
-
         self.av = self.import_backend()
 
         if isinstance(path, PathLike):
@@ -254,7 +240,6 @@ class AvVideo(VideoBase):
         return av
 
     def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
-
         for i in range(1):  # trying x times to find good frames
             try:
                 self.container.seek(
@@ -292,11 +277,9 @@ class AvVideo(VideoBase):
         raise NoGoodFrame("Could not find good frame after trying various offsets")
 
     def _frame_to_file(self, frame: "VideoFrame", outpath: Path) -> None:
-
         frame.to_image(fspath(outpath))
 
     def close(self) -> None:
-
         self.container.close()
 
 
@@ -307,7 +290,6 @@ def grab_pic(
     overwrite: bool = False,
     backend: str = "cv",
 ) -> None:
-
     vf: VideoBase
 
     if backend == "av":
@@ -336,7 +318,6 @@ def grab_pic(
 
 
 if __name__ == "__main__":
-
     from argparse import ArgumentParser
 
     parser = ArgumentParser()

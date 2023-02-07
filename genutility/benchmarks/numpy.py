@@ -14,7 +14,6 @@ bincount_batch_arr = np.random.randint(0, 10000, (1000, 1000))
 
 
 def bincount_batch_2(x, axis=-1, minlength=0):
-
     """Only slightly faster than bincount-batch.
     Only supports 2D arrays with axis=-1 however.
     """

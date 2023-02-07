@@ -10,7 +10,6 @@ Color = Union[str, Tuple[int, int, int]]
 
 
 def multiline_textsize(text: str, ttf: ImageFont, spacing: int = 4) -> Tuple[int, int]:
-
     lines = text.splitlines()
 
     width = 0
@@ -25,7 +24,6 @@ def multiline_textsize(text: str, ttf: ImageFont, spacing: int = 4) -> Tuple[int
 
 
 def exifinfo(image: Image.Image) -> Dict[str, Any]:
-
     ret: Dict[str, Any] = {}
 
     exifd = image._getexif()
@@ -61,7 +59,6 @@ def text_with_outline(
     outlinecolor: Color,
     outlinesize: int = 1,
 ) -> None:
-
     x, y = pos
     delta = outlinesize
 
@@ -90,7 +87,6 @@ def write_text(
     fontsize: Union[float, int] = 0.03,
     padding: Union[float, Tuple[int, int]] = (5, 5),
 ) -> None:
-
     if alignment not in {"TL", "TC", "TR", "BL", "BC", "BR"}:
         raise ValueError(f"Invalid alignment: {alignment}")
 
@@ -130,7 +126,6 @@ def write_text(
 
 
 def _fix_orientation(img: Image.Image, orientation: int) -> Image.Image:
-
     if orientation == 1:
         raise NoActionNeeded("File already properly rotated")
     elif orientation == 2:
@@ -154,7 +149,6 @@ def _fix_orientation(img: Image.Image, orientation: int) -> Image.Image:
 
 
 def fix_orientation(img: Image.Image, exif: dict) -> Image.Image:
-
     orientation = exif["0th"][piexif.ImageIFD.Orientation]
     img = _fix_orientation(img, orientation)
     exif["0th"][piexif.ImageIFD.Orientation] = 1

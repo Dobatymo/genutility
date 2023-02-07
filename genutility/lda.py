@@ -21,7 +21,6 @@ Indices = Union[slice, np.ndarray]
 def top_topics(
     id2word: Dict[int, str], term_topic_matrix: np.ndarray, num_words: int = 10, decimals: int = 2
 ) -> Iterator[List[Tuple[str, float]]]:
-
     """
     term_topic_matrix: float[K, V]
     """
@@ -34,7 +33,6 @@ def top_topics(
 
 
 def format_topics(topics: Iterable[List[Tuple[str, float]]], linesep: str = "\n", tokensep: str = "\t") -> str:
-
     buffer: List[str] = []
 
     for terms in topics:
@@ -45,24 +43,19 @@ def format_topics(topics: Iterable[List[Tuple[str, float]]], linesep: str = "\n"
 
 class LDADocument(Collection[int]):
     def __init__(self, words: RawDocument) -> None:
-
         self.words = words
 
     def __iter__(self) -> Iterator[int]:
-
         return iter(self.words)
 
     def __len__(self) -> int:
-
         return len(self.words)
 
     def __repr__(self) -> str:
-
         return f"LDADocument({repr(self.words)})"
 
 
 class LDABase:
-
     K: int
     nmk: np.ndarray
     nkt: np.ndarray
@@ -77,28 +70,23 @@ class LDABase:
     docs: List[LDADocument]
 
     def __init__(self, seed: Optional[int] = None) -> None:
-
         np.seterr(all="raise")
         np.random.seed(seed)
 
     def init_topic(self) -> int:
-
         return np.random.randint(self.K)
 
     def add_counts(self, m: int, t: int, k: int) -> None:
-
         self.nmk[m, k] += 1
         self.nkt[k, t] += 1
         self.nk[k] += 1
 
     def sub_counts(self, m: int, t: int, k: int) -> None:
-
         self.nmk[m, k] -= 1
         self.nkt[k, t] -= 1
         self.nk[k] -= 1
 
     def _validate(self, M: int, K: int, V: int) -> None:
-
         if M <= 0:
             raise ValueError("Number of documents must be larger than zero")
         if K <= 0:
@@ -112,14 +100,12 @@ class LDABase:
         assert self.nk.shape == (K,)
 
     def _initialize_topics(self, docs: IterableDocuments, topics: TopicsMapping) -> None:
-
         for m, doc in enumerate(progress(docs, file=stderr)):
             for i, t in enumerate(doc):
                 k = topics[m, i] = self.init_topic()
                 self.add_counts(m, t, k)
 
     def calc_probs(self, m: int, t: int, k_select: Indices = slice(None)) -> np.ndarray:
-
         # notes: np.sum(self.nkt, axis=-1) == self.nk
         # notes: np.sum(self.nmk[m], axis=-1) == self.nm[m]
 
@@ -141,12 +127,10 @@ class LDABase:
         return left * right  # [K]
 
     def sample(self, m: int, t: int) -> int:
-
         probs = self.calc_probs(m, t)  # [K]
         return categorical(probs)
 
     def _sample_all(self, docs: IterableDocuments, topics: TopicsMapping) -> None:
-
         for m, doc in enumerate(progress(docs, file=stderr)):
             for i, t in enumerate(doc):
                 k = topics[m, i]
@@ -155,35 +139,29 @@ class LDABase:
                 self.add_counts(m, t, k)
 
     def initialize(self) -> None:
-
         """Set base parameters"""
 
         raise NotImplementedError
 
     def initialize_docs(self) -> None:
-
         """Set parameters based on input docs"""
 
         raise NotImplementedError
 
     def initialize_topics(self) -> None:  # step1
-
         """Initialize topics matrix"""
 
         raise NotImplementedError
 
     def sample_all(self) -> None:  # step2 and step3
-
         """Sample new topics"""
 
         raise NotImplementedError
 
     def metric(self) -> float:
-
         raise NotImplementedError
 
     def fit(self, n_iter: int = 100, verbose: bool = False) -> None:
-
         """Fit LDA"""
 
         assert self.docs, "No documents added to model"
@@ -198,7 +176,6 @@ class LDABase:
                 print(f"Step #{i}, metric: {self.metric()}")
 
     def theta(self) -> np.ndarray:
-
         """
         returns: float[M, K]
         """
@@ -208,7 +185,6 @@ class LDABase:
         return num / denom[:, None]  # [M, K]
 
     def phi(self) -> np.ndarray:
-
         """
         returns: float[K, V]
         """
@@ -218,7 +194,6 @@ class LDABase:
         return num / denom[:, None]  # [K, V]
 
     def _perplexity(self, docs: IterableDocuments) -> float:
-
         θ = self.theta()
         φ = self.phi()
 
@@ -233,7 +208,6 @@ class LDABase:
         return exp(-num / denom)
 
     def docs2topics(self) -> np.ndarray:
-
         """
         returns: int[M]
         """
@@ -241,13 +215,11 @@ class LDABase:
         return np.argmax(self.theta(), axis=-1)  # [M]
 
     def print_topics(self, id2word: Dict[int, str], num_words: int = 10) -> None:
-
         topics = top_topics(id2word, self.phi(), num_words)
         print(format_topics(topics))
 
     @staticmethod
     def generate(theta: np.ndarray, phi: np.ndarray, doc_lens: Iterable[int]) -> Tuple[dict, dict]:
-
         """
         theta: float[K, V]
         phi: float[M, K]
@@ -264,7 +236,6 @@ class LDABase:
         return z, w
 
     def inferencer(self) -> "LDAInfer":
-
         return cast(self, LDAInfer)
 
 
@@ -279,7 +250,6 @@ class LDA(LDABase):
     """
 
     def __init__(self, n_topics: int, alpha: float = 0.1, beta: float = 0.01, seed: Optional[int] = None) -> None:
-
         LDABase.__init__(self, seed)
 
         self.K = n_topics  # number of topics
@@ -293,7 +263,6 @@ class LDA(LDABase):
         self.inttype = np.int32
 
     def initialize(self) -> None:
-
         self.V = self.word_encoder.num_labels
 
         self.α = self.alpha / self.K  # symmetric Dirichlet prior for document-topic distribution θ
@@ -306,7 +275,6 @@ class LDA(LDABase):
         self.nk = np.zeros((self.K,), dtype=self.inttype)  # [K] total topic counts
 
     def initialize_docs(self) -> None:
-
         self.M = len(self.docs)
 
         self.nmk = np.zeros((self.M, self.K), dtype=self.inttype)  # [M, K] document-topic counts
@@ -320,29 +288,23 @@ class LDA(LDABase):
         )  # `z`, sparse document-word topics matrix (because rows can have different lengths)
 
     def initialize_topics(self) -> None:
-
         self._validate(self.M, self.K, self.V)
 
         return self._initialize_topics(self.docs, self.topics)
 
     def sample_all(self) -> None:
-
         return self._sample_all(self.docs, self.topics)
 
     def metric(self) -> float:
-
         return self._perplexity(self.docs)
 
     def perplexity(self, docs: IterableDocuments) -> float:
-
         return self._perplexity(docs)
 
     def transform(self, doc_lens: Iterable[int]) -> Tuple[dict, dict]:
-
         return self.generate(self.theta(), self.phi(), doc_lens)
 
     def add_doc(self, doc: str) -> int:
-
         assert isinstance(doc, str)
 
         words = list(self.word_encoder.fit_transform(doc))
@@ -352,7 +314,6 @@ class LDA(LDABase):
         return ret
 
     def make_doc(self, doc: str) -> LDADocument:
-
         assert isinstance(doc, str)
 
         words = list(self.word_encoder.transform(doc))
@@ -370,7 +331,6 @@ class LDATermWeight(LDABase):
     """
 
     def __init__(self, n_topics: int, tws: str = "PMI", alpha: float = 0.1, beta: float = 0.01) -> None:
-
         """tws: Term weighting scheme
         ONE: Consider every term equal (same as standard LDA)
         TF: Term frequency
@@ -402,7 +362,6 @@ class LDATermWeight(LDABase):
         self.inttype = np.int32
 
     def _one(self, docs: Any) -> np.ndarray:
-
         """
         returns: int[M, V]
         """
@@ -411,7 +370,6 @@ class LDATermWeight(LDABase):
         return np.broadcast_to(1, (self.M, self.V))  # is this slower for indexing later?
 
     def _tf(self, docs: IterableDocuments) -> np.ndarray:
-
         """
         returns: float[M, V]
         """
@@ -425,7 +383,6 @@ class LDATermWeight(LDABase):
         return np.broadcast_to(tw, (self.M, self.V))
 
     def _idf(self, docs: IterableDocuments) -> np.ndarray:
-
         """
         returns: float[M, V]
         """
@@ -444,7 +401,6 @@ class LDATermWeight(LDABase):
         raise NotImplementedError
 
     def _pmi(self, docs: IterableDocuments) -> np.ndarray:
-
         """
         returns: float[M, V]
         """
@@ -462,7 +418,6 @@ class LDATermWeight(LDABase):
         return tw
 
     def _rand(self, docs: Any) -> np.ndarray:
-
         """
         returns: float[M, V]
         """
@@ -470,7 +425,6 @@ class LDATermWeight(LDABase):
         return np.random.uniform(0, 1, (self.M, self.V)).astype(self.floattype)
 
     def initialize(self) -> None:
-
         self.V = self.word_encoder.num_labels
 
         self.α = self.alpha / self.K  # symmetric Dirichlet prior for document-topic distribution θ
@@ -486,7 +440,6 @@ class LDATermWeight(LDABase):
         # self.wk = np.zeros((self.K, ), dtype=self.floattype) # [K] weights
 
     def initialize_docs(self) -> None:
-
         self.M = len(self.docs)
 
         self.tw = self.create_term_weights(self.docs)
@@ -514,13 +467,11 @@ class LDATermWeight(LDABase):
         )  # [M, Variable] `z`, sparse document-word topics matrix
 
     def initialize_topics(self) -> None:
-
         # self._validate(self.M, self.K, self.V)
 
         self._initialize_topics(self.docs, self.topics)
 
     def calc_probs(self, m: int, t: int) -> np.ndarray:
-
         """
         returns: float[K]
         """
@@ -568,7 +519,6 @@ class LDATermWeight(LDABase):
     """
 
     def add_counts(self, m: int, t: int, k: int) -> None:
-
         self.nmk[m, k] += 1
         self.nkt[k, t] += 1
         self.nk[k] += 1
@@ -591,7 +541,6 @@ class LDATermWeight(LDABase):
         """
 
     def sub_counts(self, m: int, t: int, k: int) -> None:
-
         self.nmk[m, k] -= 1
         self.nkt[k, t] -= 1
         self.nk[k] -= 1
@@ -602,23 +551,19 @@ class LDATermWeight(LDABase):
         # self.wk[k] -= self.tw[m, t]
 
     def sample_all(self) -> None:
-
         self._sample_all(self.docs, self.topics)
 
     def metric(self) -> float:
-
         return self._perplexity(self.docs)
 
 
 class LDAInfer(LDA):
     def __init__(self) -> None:
-
         self.nkt_old = self.nkt
         self.nk_old = self.nk
         self.docs = []
 
     def calc_probs(self, m: int, t: int, k_select: Indices = slice(None)) -> np.ndarray:
-
         """
         returns: float[K]
         """
@@ -630,7 +575,6 @@ class LDAInfer(LDA):
         return left * num / denom  # [K]
 
     def initialize(self) -> None:
-
         assert self.K > 0, "Number of topics must be larger than zero"
         assert self.V > 0, "Vocabulary size must be larger than zero"
 

@@ -35,7 +35,6 @@ class os_resources(Resource):
 
 class cpu_usage(Resource):
     def __init__(self, wmii=None, proc_name: str = "_Total") -> None:
-
         """proc_name is the name of the processor,
         default value mean across all processors.
         """
@@ -98,7 +97,6 @@ class hdd_usage(Resource):
 
 
 def event_logs(server: str = "localhost", source: str = "System") -> Iterator[dict]:
-
     """
     EventType: severity level
 

@@ -20,7 +20,6 @@ class Empty(OSError):
 
 
 def _check_arguments(mode: str, encoding: Optional[str] = None) -> Optional[str]:
-
     is_text = "t" in mode
     is_binary = "b" in mode
 
@@ -43,7 +42,6 @@ def _stripmode(mode: str) -> str:
 def read_file(
     path: PathType, mode: str = "b", encoding: Optional[str] = None, errors: Optional[str] = None
 ) -> Union[str, bytes]:
-
     """Reads and returns whole file. If content is not needed use consume_file()"""
 
     encoding = _check_arguments(mode, encoding)
@@ -62,7 +60,6 @@ def write_file(
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
 ) -> None:
-
     """Writes file."""
 
     encoding = _check_arguments(mode, encoding)
@@ -73,18 +70,15 @@ def write_file(
 
 @overload
 def read_or_raise(fin: IO[Data], size: int) -> Data:
-
     ...
 
 
 @overload
 def read_or_raise(fin: mmap, size: int) -> bytes:
-
     ...
 
 
 def read_or_raise(fin, size):
-
     """Instead of returning a result smaller than `size` like `io.read()`,
     it raises and EOFError.
     """
@@ -99,14 +93,12 @@ def read_or_raise(fin, size):
 
 
 def get_file_range(path: PathType, start: int, size: int) -> bytes:
-
     with open(path, "rb") as fp:
         fp.seek(start)
         return fp.read(size)
 
 
 def truncate_file(path: PathType, size: int) -> None:
-
     with open(path, "r+b") as fp:
         fp.truncate(size)
 
@@ -130,7 +122,6 @@ def copen(
     ext: Optional[str] = None,
     handle_archives: bool = True,
 ) -> IO:
-
     """Generic file open method. It supports transparent compression and improved text-mode handling.
 
     `file`: Can be a path, file-like or file descriptor.
@@ -173,7 +164,6 @@ def copen(
             return bz2.open(file, mode, compresslevel=compresslevel, encoding=encoding, errors=errors, newline=newline)
 
         elif ext == ".zip" and archive_file:
-
             from zipfile import ZipFile
 
             newmode = _stripmode(mode)
@@ -209,7 +199,6 @@ class OpenFileAndDeleteOnError:
         newline: Optional[str] = None,
         compresslevel: int = 9,
     ) -> None:
-
         encoding = _check_arguments(mode, encoding)
 
         self.file = file
@@ -221,7 +210,6 @@ class OpenFileAndDeleteOnError:
         self.fp: Optional[IO] = None
 
     def __enter__(self) -> IO:
-
         self.fp = copen(self.file, self.mode, None, self.encoding, self.errors, self.newline, self.compresslevel)
         return self.fp
 
@@ -245,7 +233,6 @@ class OptionalWriteOnlyFile:
         newline: Optional[str] = None,
         compresslevel: int = 9,
     ) -> None:
-
         if path:
             self.fp: Optional[IO] = copen(
                 path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel
@@ -280,7 +267,6 @@ class StdoutFile:
         newline: Optional[str] = None,
         compresslevel: int = 9,
     ) -> None:
-
         encoding = _check_arguments(mode, encoding)
 
         if path:
@@ -305,7 +291,6 @@ class StdoutFile:
 
 class PathOrBinaryIO:
     def __init__(self, fname: Union[PathType, BinaryIO], mode: str = "rb", close: bool = False) -> None:
-
         if isinstance(fname, (RawIOBase, BufferedIOBase)):
             self.doclose: bool = close
             self.fp: BinaryIO = fname
@@ -314,7 +299,6 @@ class PathOrBinaryIO:
             self.fp = copen(fname, mode)
 
     def __enter__(self) -> IO:
-
         return self.fp
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -332,7 +316,6 @@ class PathOrTextIO:
         newline: Optional[str] = None,
         close: bool = False,
     ) -> None:
-
         if isinstance(fname, TextIOBase):
             self.doclose: bool = close
             self.fp: TextIO = fname
@@ -341,7 +324,6 @@ class PathOrTextIO:
             self.fp = copen(fname, mode, encoding=encoding, errors=errors, newline=newline)
 
     def __enter__(self) -> IO:
-
         return self.fp
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -350,7 +332,6 @@ class PathOrTextIO:
 
 
 class LastLineFile:
-
     chunk_size = 1024 * 4
     nl = "\n"
 
@@ -413,7 +394,6 @@ class LastLineFile:
 
 class Tell:
     def __init__(self, fp: IO) -> None:
-
         try:
             assert not fp.seekable()
         except AttributeError:
@@ -563,7 +543,6 @@ def copyfilelike(
     buffer: int = FILE_IO_BUFFER_SIZE,
     report: Optional[Callable] = None,
 ) -> int:
-
     """Read data from `fin` in chunks of size `buffer` and write them to `fout`.
     Optionally limit the amount of data to `amount`. `report` can be a callable which receives
     the total number of bytes copied and bytes remaining.
@@ -590,7 +569,6 @@ def copyfilelike(
 
 
 def simple_file_iter(fr: IO[Data], chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[Data]:
-
     """Iterate file-like object `fr` and yield chunks of size `chunk_size`."""
 
     assert isinstance(chunk_size, int), "chunk_size needs to be an integer"
@@ -605,7 +583,6 @@ def simple_file_iter(fr: IO[Data], chunk_size: int = FILE_IO_BUFFER_SIZE) -> Ite
 
 
 def reversed_file_iter(fp: IO[Data], chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[Data]:
-
     """Generate blocks of file's contents in reverse order."""
 
     fp.seek(0, SEEK_END)
@@ -618,7 +595,6 @@ def reversed_file_iter(fp: IO[Data], chunk_size: int = FILE_IO_BUFFER_SIZE) -> I
 
 
 def limited_file_iter(fr: IO[Data], amount: int, chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[Data]:
-
     """Iterate file-like object `fr` and yield chunks of size `chunk_size`.
     Limit output to `amount` bytes.
     """
@@ -634,7 +610,6 @@ def limited_file_iter(fr: IO[Data], amount: int, chunk_size: int = FILE_IO_BUFFE
 def iterfilelike(
     fr: IO[Data], start: int = 0, amount: Optional[int] = None, chunk_size: int = FILE_IO_BUFFER_SIZE
 ) -> Iterable[Data]:
-
     """Iterate file-like object `fr` and yield chunks of size `chunk_size`.
     Starts reading at `start` and optionally limit output to `amount` bytes.
     """
@@ -657,7 +632,6 @@ def blockfileiter(
     amount: Optional[int] = None,
     chunk_size: int = FILE_IO_BUFFER_SIZE,
 ) -> Iterator[Union[str, bytes]]:
-
     """Iterate over file at `path` and yield chunks of size `chunk_size`.
     Optionally limit output to `amount` bytes.
     """
@@ -669,7 +643,6 @@ def blockfileiter(
 
 
 def blockfilesiter(paths: Iterable[PathType], chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[bytes]:
-
     """Iterate over a list of files and return their contents in a
     continuous stream of chunks of size `chunk_size`.
     That means one chunk can span multiple files.
@@ -711,7 +684,6 @@ def bufferedfileiter(
     amount: Optional[int] = None,
     buffer_size: int = FILE_IO_BUFFER_SIZE,
 ) -> Iterable[Union[str, bytes]]:
-
     """Iterate over file at `path` reading chunks of size `buffer_size` at a time.
     Yields data chunks of `chunk_size` and optionally limits output to `amount` bytes.
     """
@@ -720,7 +692,6 @@ def bufferedfileiter(
 
 
 def byte_out(path: PathType, buffer_size: int = FILE_IO_BUFFER_SIZE) -> Iterable[bytes]:
-
     """Reads file at `path` byte by byte, using a read buffer of size `buffer_size`."""
 
     return resizer(blockfileiter(path, mode="rb", chunk_size=buffer_size), 1)
@@ -741,7 +712,6 @@ def equal_files(
     amount: Optional[int] = None,
     chunk_size: int = FILE_IO_BUFFER_SIZE,
 ) -> bool:
-
     """Check if files at `*paths` are equal. Chunks of size `chunk_size` are read at a time.
     Data can be optionally limited to `amount`.
     """
@@ -754,7 +724,6 @@ def equal_files(
 
 
 def is_all_byte(fr: IO, thebyte: bytes = b"\0", chunk_size: int = FILE_IO_BUFFER_SIZE) -> bool:
-
     """Test if file-like `fr` consists only of `thebyte` bytes."""
 
     assert isinstance(thebyte, bytes)
@@ -774,7 +743,6 @@ def iter_zip(
     newline: Optional[str] = None,
     password: Optional[bytes] = None,
 ) -> Iterator[Tuple[str, IO]]:
-
     """
     Iterate file-pointers to archived files. They are valid for one iteration step each.
     If `file` is a file-like, it must be seekable.
@@ -801,7 +769,6 @@ def iter_7zip(
     newline: Optional[str] = None,
     password: Optional[str] = None,
 ) -> Iterator[Tuple[str, IO]]:
-
     from py7zr import SevenZipFile
 
     encoding = _check_arguments(mode, encoding)
@@ -819,7 +786,6 @@ def iter_tar(
     errors: Optional[str] = None,
     newline: Optional[str] = None,
 ) -> Iterator[Tuple[str, IO]]:
-
     """
     Iterate file-pointers to archived files. They are valid for one iteration step each.
     With the correct mode, `file` can be a non-seekable file-like.
@@ -857,7 +823,6 @@ def iter_dir(
     archives: bool = False,
     joiner: str = "/",
 ) -> Iterator[Tuple[str, IO]]:
-
     """
     Iterate file-pointers to files in directory `path`.
     They are valid for one iteration step each.
@@ -882,7 +847,6 @@ def iter_dir(
     with scandir(path) as scan:
         for entry in scan:
             if entry.is_file(follow_symlinks=follow_symlinks):
-
                 ext = entrysuffix(entry).lower()
                 iter_archive = archive_funcs.get(ext, None)
                 if archives and iter_archive:
@@ -903,13 +867,11 @@ def iter_lines(
     newline: Optional[str] = None,
     verbose: bool = False,
 ) -> Iterator[str]:
-
     """Yield lines from text file. Handles compressed files as well.
     if verbose is True, print a progress bar
     """
 
     with copen(path, "rt", encoding=encoding, errors=errors, newline=newline) as fr:
-
         if verbose:
             from tqdm import tqdm
 
@@ -936,7 +898,6 @@ def iter_lines(
 def iter_stripped(
     path: PathType, encoding: str = "utf-8", errors: str = "strict", newline: Optional[str] = None
 ) -> Iterator[str]:
-
     """Yield lines from text file with trailing newlines stripped.
     Handles compressed files as well.
     """
@@ -950,7 +911,6 @@ def iter_stripped(
 def file_byte_reader(
     filename: PathType, inputblocksize: int, outputblocksize: int, DEBUG: bool = True
 ) -> Iterator[bytes]:
-
     assert (inputblocksize % outputblocksize == 0) or (
         outputblocksize % inputblocksize == 0
     ), "Neither input nor output size is a multiple of the other"

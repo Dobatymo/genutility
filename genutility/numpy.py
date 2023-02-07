@@ -12,7 +12,6 @@ RGB_WHITE = (255, 255, 255)
 
 
 def assert_square(name: str, value: np.ndarray) -> None:
-
     """Raises a ValueError if matrix `value` is not square.
     value: [A, A]
     """
@@ -28,7 +27,6 @@ def normalized_choice(
 
 
 def shannon_entropy(ps: np.ndarray, base: int = 2) -> float:
-
     """Calculates the Shannon entropy for probabilities `ps` with `base`."""
 
     return -np.sum(ps * np.log(ps) / np.log(base))
@@ -42,7 +40,6 @@ def is_rgb(img: np.ndarray) -> bool:
 
 # @opjit() # np.errstate doesn't work in numba...
 def rgb_to_hsi(image: np.ndarray) -> np.ndarray:
-
     """Converts an array [..., channels] of RGB values to HSI color values (H in rad).
     RGB values are assumed to be normalized to (0, 1).
     """
@@ -74,7 +71,6 @@ def rgb_to_hsi(image: np.ndarray) -> np.ndarray:
 
 # @opjit() # np.dot with more than 2 dimensions is not supported...
 def rgb_to_ycbcr(image: np.ndarray) -> np.ndarray:
-
     """Converts an array [..., channels] of RGB values to Digital Y'CbCr (0-255).
     RGB values are assumed to be normalized to (0, 1).
     Don't forget to cast to uint8 for pillow.
@@ -99,7 +95,6 @@ def rgb_to_ycbcr(image: np.ndarray) -> np.ndarray:
 
 
 def random_triangular_matrix(size: int, lower: bool = True) -> np.ndarray:
-
     """Returns a triangular matrix with random value between 0 and 1 uniformly."""
 
     a = np.random.uniform(0, 1, (size, size))
@@ -113,7 +108,6 @@ def random_triangular_matrix(size: int, lower: bool = True) -> np.ndarray:
 
 
 def is_square(A: np.ndarray) -> bool:
-
     if len(A.shape) != 2:
         return False
 
@@ -124,7 +118,6 @@ def is_square(A: np.ndarray) -> bool:
 
 
 def batch_vTAv(A: np.ndarray, v: np.ndarray) -> np.ndarray:
-
     """Performs batched calculation of `v^T A v` transform.
     Special case of bilinear form `x^T A y`
 
@@ -143,7 +136,6 @@ def batch_vTAv(A: np.ndarray, v: np.ndarray) -> np.ndarray:
 
 
 def batch_inner(a: np.ndarray, b: np.ndarray, verify: bool = True) -> np.ndarray:
-
     """Performs a batched inner product over the last dimension.
     Replacement for deprecated `from numpy.core.umath_tests import inner1d`.
     Shapes: (B, X), (B, X) -> (B, )
@@ -159,7 +151,6 @@ def batch_inner(a: np.ndarray, b: np.ndarray, verify: bool = True) -> np.ndarray
 
 
 def batch_outer(a: np.ndarray, b: np.ndarray, verify: bool = True) -> np.ndarray:
-
     """Performs a batched outer product over the last dimension.
     Shapes: (B, X), (B, Y) -> (B, X, Y)
     """
@@ -173,7 +164,6 @@ def batch_outer(a: np.ndarray, b: np.ndarray, verify: bool = True) -> np.ndarray
 def batchtopk(
     probs: np.ndarray, k: Optional[int] = None, axis: int = -1, reverse: bool = False
 ) -> Tuple[np.ndarray, np.ndarray]:
-
     """`probs` values ndarray
     `k` take the smallest `k` elements, if `reverse` is False
             and the largest `k` if `reverse` is True
@@ -214,7 +204,6 @@ def logtrace(m: np.ndarray) -> np.ndarray:
 
 
 def shiftedexp(pvals: np.ndarray) -> np.ndarray:
-
     """Shifts `pvals` by the largest value in the last dimension
     before the exp is calculated to prevent overflow (batchwise if necessary).
     Can be used if probabilities are normalized again later.
@@ -235,27 +224,23 @@ class Sampler:
         self.psum = cdf[-1]
 
     def __call__(self) -> int:
-
         """Sample one."""
 
         rand = np.random.uniform(0, self.psum)
         return np.searchsorted(self.cdf, rand, side="right")
 
     def sample(self, n: int) -> np.ndarray:
-
         """Sample `n`."""
 
         rands = np.random.uniform(0, self.psum, n)
         return np.searchsorted(self.cdf, rands, side="right")
 
     def pdf(self, n: int, minlength: Optional[int] = None) -> np.ndarray:
-
         out = np.bincount(self.sample(n), minlength=minlength)
         return out / n
 
 
 def sample_probabilities(pvals: np.ndarray) -> Callable[[], int]:
-
     """Sample from list of probabilities `pvals` with replacement.
     The probabilities don't need to be normalized.
     """
@@ -265,7 +250,6 @@ def sample_probabilities(pvals: np.ndarray) -> Callable[[], int]:
 
 class UnboundedSparseMatrix(Generic[T]):
     def __init__(self, dtype: type = float) -> None:
-
         self.dtype = dtype
         self.zero = self.dtype(0)
         self.m: Dict[Tuple[int, int], T] = {}
@@ -273,18 +257,15 @@ class UnboundedSparseMatrix(Generic[T]):
         self.rows = 0
 
     def __getitem__(self, slice: Tuple[int, int]) -> T:
-
         return self.m.get(slice, self.zero)
 
     def __setitem__(self, slice: Tuple[int, int], value: T) -> None:
-
         c, r = slice
         self.cols = max(self.cols, c + 1)
         self.rows = max(self.rows, r + 1)
         self.m[slice] = value
 
     def todense(self) -> np.ndarray:
-
         ret = np.zeros((self.cols, self.rows), dtype=self.dtype)
 
         for slice, value in self.m.items():
@@ -294,12 +275,10 @@ class UnboundedSparseMatrix(Generic[T]):
 
 
 def normalize(pvals: np.ndarray) -> np.ndarray:
-
     return pvals / np.sum(pvals)
 
 
 def categorical(pvals: np.ndarray) -> int:
-
     """Sample from the categorical distribution using `pvals`.
     See: https://en.wikipedia.org/wiki/Categorical_distribution
     """
@@ -308,7 +287,6 @@ def categorical(pvals: np.ndarray) -> int:
 
 
 def population2cdf(population: np.ndarray) -> np.ndarray:
-
     """Convert a population (list of observations) to a CDF."""
 
     population = np.sort(population)
@@ -316,7 +294,6 @@ def population2cdf(population: np.ndarray) -> np.ndarray:
 
 
 def pmf2cdf(pdf: np.ndarray) -> np.ndarray:
-
     """Convert a discrete PDF into a discrete CDF."""
 
     cdf = np.cumsum(pdf)
@@ -326,7 +303,6 @@ def pmf2cdf(pdf: np.ndarray) -> np.ndarray:
 def _two_sample_kolmogorov_smirnov_same_length(
     cdf1: np.ndarray, cdf2: np.ndarray, n1: int, n2: int
 ) -> Tuple[float, float]:
-
     # note: yields different results as `scipy.stats.ks_2samp`
 
     if len(cdf1) != len(cdf2):
@@ -340,7 +316,6 @@ def _two_sample_kolmogorov_smirnov_same_length(
 def _two_sample_kolmogorov_smirnov_population(
     p1: np.ndarray, p2: np.ndarray, alpha: float = 0.05
 ) -> Tuple[float, float, bool]:
-
     # note: yields different results as `scipy.stats.ks_2samp`
 
     cdf1 = population2cdf(p1)
@@ -354,7 +329,6 @@ def _two_sample_kolmogorov_smirnov_population(
 def _two_sample_kolmogorov_smirnov_pmf(
     pmf1: np.ndarray, pmf2: np.ndarray, alpha: float = 0.05
 ) -> Tuple[float, float, bool]:
-
     # note: yields different results as `scipy.stats.ks_2samp`
     """Tests the null hypothesis that both samples belong to the same distribution.
     See: https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test#Two-sample_Kolmogorov%E2%80%93Smirnov_test
@@ -376,7 +350,6 @@ def _two_sample_kolmogorov_smirnov_pmf(
 
 
 def inf_matrix_power(pm: np.ndarray, dtype=np.float64) -> np.ndarray:
-
     """Calculate stochastic matrix `pm` to the power of infinity,
     by finding the eigenvector which corresponds to the eigenvalue 1.
     """
@@ -396,7 +369,6 @@ def inf_matrix_power(pm: np.ndarray, dtype=np.float64) -> np.ndarray:
 
 
 def decompress(selectors: np.ndarray, data: np.ndarray, default) -> np.ndarray:
-
     """Same result as:
     `np.array(list(genutility.iter.decompress(selectors, iter(data), default)))`
     but faster.
@@ -409,7 +381,6 @@ def decompress(selectors: np.ndarray, data: np.ndarray, default) -> np.ndarray:
 
 
 def unblock(arr: np.ndarray, n1: int, n2: int, axis1: int = -1, axis2: int = -2, blocksize: bool = False) -> np.ndarray:
-
     """Inverse of np.block.
     Set axis to (-2, -1) to modify the order of the result.
     """
@@ -483,7 +454,6 @@ def block2d(arr: np.ndarray, bn1: int, bn2: int, bs1: int, bs2: int) -> np.ndarr
 
 
 def remove_color(img: np.ndarray, ratio: float, neutral_color: Tuple[int, int, int] = RGB_WHITE) -> None:
-
     """Replace colored pixels with a `neutral_color`. The `ratio` defines the 'colorfulness' above
     which level the pixel should be replace.
     I.e. if the `ratio` is 1 nothing will be replaced,
@@ -503,7 +473,6 @@ def remove_color(img: np.ndarray, ratio: float, neutral_color: Tuple[int, int, i
 def sliding_window_2d(
     image: np.ndarray, window_size: Tuple[int, int], step_size: Tuple[int, int] = (1, 1)
 ) -> Iterator[np.ndarray]:
-
     win_x, win_y = window_size
     step_x, step_y = step_size
     height, width = image.shape[0:2]
@@ -514,7 +483,6 @@ def sliding_window_2d(
 
 
 def histogram_correlation(hist1: np.ndarray, hist2: np.ndarray) -> np.ndarray:
-
     """Input shape of `hist1` and `hist2`: [batch..., levels]. The correlation is calculated over `levels`
     and then batched over the remaining dimensions.
     Similar to `cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)`.
@@ -535,7 +503,6 @@ def histogram_correlation(hist1: np.ndarray, hist2: np.ndarray) -> np.ndarray:
 
 
 def bincount_batch(x: np.ndarray, axis: int = -1, minlength: int = 0) -> np.ndarray:
-
     if x.shape[axis] == 0:
         raise ValueError("Specified axis of x cannot be 0")
 
@@ -544,7 +511,6 @@ def bincount_batch(x: np.ndarray, axis: int = -1, minlength: int = 0) -> np.ndar
 
 
 def stochastic(x: np.ndarray) -> np.ndarray:
-
     """It normalizes the last dimension of an ndarray to sum to 1.
     It can be used to convert (batches of) vectors to stochastic vectors
     or (batches of) matrices to *right* stochastic matrices.
@@ -559,7 +525,6 @@ def stochastic(x: np.ndarray) -> np.ndarray:
 
 
 def sequence_mask(lengths: np.ndarray, maxlen: Optional[int] = None, dtype: Any = None) -> np.ndarray:
-
     """cf. tf.sequence_mask
     lengths: [N]
     """
@@ -583,7 +548,6 @@ def sequence_mask(lengths: np.ndarray, maxlen: Optional[int] = None, dtype: Any 
 def _viterbi_dense_masked(
     p_emit: np.ndarray, p_trans: np.ndarray, p_trans0: np.ndarray, mask: np.ndarray
 ) -> np.ndarray:
-
     batch_size, T, N = p_emit.shape
 
     N1, N2 = p_trans.shape
@@ -623,7 +587,6 @@ def _viterbi_dense_masked(
 def viterbi_dense(
     p_emit: np.ndarray, p_trans: np.ndarray, p_trans0: Optional[np.ndarray] = None, mask: Optional[np.ndarray] = None
 ) -> np.ndarray:
-
     """Viterbi algorithm for finding the optimal path.
     One square transition matrix can be specified.
 
@@ -650,7 +613,6 @@ def viterbi_dense(
 
 # @opjit() # doesn't work atm because numba cannot store arbitrary elements in lists I think
 def viterbi_sparse(p_emit: Sequence[np.ndarray], p_trans: Sequence[np.ndarray]) -> np.ndarray:
-
     """Viterbi algorithm for finding the optimal path.
     The number of emission probabilities per index can vary
     and a separate matrix can be specified for each transition.
@@ -708,7 +670,6 @@ def broadcast_shapes(*shapes: Tuple[int, ...]) -> Tuple[int, ...]:
 def hamming_dist_packed_chunked(
     a: np.ndarray, b: np.ndarray, chunksize: Tuple[int, ...], axis: Optional[int] = -1
 ) -> Iterator[Tuple[Tuple[int, ...], np.ndarray]]:
-
     outshape = broadcast_shapes(a.shape, b.shape)
     select_broadcasted_axis = slice(0, 1)
 
@@ -732,7 +693,6 @@ def hamming_dist_packed_chunked(
     elif len(outshape) == 3:
         for x in range(0, outshape[0], chunksize[0]):
             for y in range(0, outshape[1], chunksize[1]):
-
                 if a.shape[0] != outshape[0]:
                     aix = select_broadcasted_axis
                 else:

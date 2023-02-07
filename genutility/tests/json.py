@@ -32,7 +32,6 @@ class JsonTest(MyTestCase):
         self.assertEqual(truth, result)
 
     def test_JsonLinesFormatter(self):
-
         stream = StringIO()
 
         logger = logging.getLogger("JsonLinesFormatter")

@@ -4,7 +4,6 @@ from .exceptions import assert_choice
 
 
 def encode_binary(boolit: Union[str, Iterator[bool]], pad: str = "0") -> bytes:
-
     """Encode a string consisting of 0s and 1s or an iterable returns boolean values
     to bytes.
 
@@ -26,14 +25,12 @@ def encode_binary(boolit: Union[str, Iterator[bool]], pad: str = "0") -> bytes:
 
 
 def _str2bool_it(s: Iterable[str]) -> Iterator[bool]:
-
     for chunk in s:
         for c in chunk:
             yield True if c == "1" else False
 
 
 def decode_binary(key: bytes, tostring: bool = False) -> Union[str, Iterator[bool]]:
-
     """Decode bytes to either a string of 0s and 1s or an iterable of booleans."""
 
     it = (f"{b:08b}" for b in key)

@@ -8,7 +8,6 @@ from typing import Any, Optional
 
 
 def find_local_in_call_stack(funcname: str, varname: str, stacklevel: int = 2) -> Any:
-
     """Finds a local variable by name `varname` by going up the call stack,
     looking for functions called `funcname`.
 

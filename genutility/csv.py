@@ -8,7 +8,6 @@ from .func import compose, identity, zipmap
 
 
 def iter_csv(path: str, delimiter: str = ",", encoding: str = "utf-8", skip: int = 0) -> Iterator[List[str]]:
-
     with open(path, encoding="utf-8", newline="") as fr:
         yield from islice(csv.reader(fr, delimiter=delimiter), skip, None)
 
@@ -21,7 +20,6 @@ def read_csv(
     dtype: Optional[Sequence[Callable]] = None,
     encoding: str = "utf-8",
 ) -> Iterator[tuple]:
-
     with open(path, encoding=encoding, newline="") as csvfile:
         if usecols:
             if dtype:

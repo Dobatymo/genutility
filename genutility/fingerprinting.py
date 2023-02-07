@@ -10,7 +10,6 @@ from .numpy import rgb_to_hsi, rgb_to_ycbcr, unblock
 
 
 def phash_antijpeg(image: Image.Image) -> np.ndarray:
-
     """Source: An Anti-JPEG Compression Image Perceptual Hashing Algorithm
     `image` is a RGB pillow image.
     """
@@ -19,7 +18,6 @@ def phash_antijpeg(image: Image.Image) -> np.ndarray:
 
 
 def hu_moments(channels: np.ndarray) -> np.ndarray:
-
     """Calculates all Hu invariant image moments for all channels separately.
     Input array must be of shape [width, height, channels]
     Returns shape [moments, channels]
@@ -42,7 +40,6 @@ def hu_moments(channels: np.ndarray) -> np.ndarray:
         return mu(p, q, xb, yb) / mu00**gamma
 
     def loop():
-
         M00 = M(0, 0)
         if not np.all(M00 > 0.0):
             logging.error("M00: %s", M00)
@@ -94,7 +91,6 @@ def phash_moments_array(arr: np.ndarray) -> np.ndarray:
 
 
 def phash_moments(image: Image.Image) -> np.ndarray:
-
     """Source: Perceptual Hashing for Color Images Using Invariant Moments
     `image` is a RGB pillow image. Results should be compared with L^2-Norm of difference vector.
     """
@@ -110,7 +106,6 @@ def phash_moments(image: Image.Image) -> np.ndarray:
 
 
 def phash_blockmean_array(arr: np.ndarray, bits: int = 256) -> np.ndarray:
-
     """If bits is not a multiple of 8,
     the result will be zero padded from the right.
     """
@@ -130,7 +125,6 @@ def phash_blockmean_array(arr: np.ndarray, bits: int = 256) -> np.ndarray:
 
 
 def phash_blockmean(image: Image.Image, bits: int = 256, x: int = 256) -> bytes:
-
     """Source: Block Mean Value Based Image Perceptual Hashing
     Method: 1
     Metric: 'Bit error rate' (normalized hamming distance)

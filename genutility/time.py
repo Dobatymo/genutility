@@ -18,14 +18,12 @@ def iter_timer(it: Iterator[T]) -> Iterator[Tuple[T, float]]:
 
 
 class TakeAtleast:
-
     __slots__ = ("delta", "wait_on_error", "now")
     delta: float
     wait_on_error: bool
     now: Optional[float]
 
     def __init__(self, delta: Union[float, timedelta], wait_on_error: bool = False) -> None:
-
         """Uses `time.perf_counter` and `os.sleep` to make sure the execution of the code under context manager
         took at least `delta` time. If the code executed faster it will simply sleep afterwards.
         If `wait_on_error` is False and an exception is thrown, it won't sleep.
@@ -44,7 +42,6 @@ class TakeAtleast:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> Optional[bool]:
-
         if exc_type is None or self.wait_on_error:
             elapsed = perf_counter() - self.now
             if elapsed < self.delta:
@@ -52,41 +49,33 @@ class TakeAtleast:
 
 
 class DeltaTime:
-
     __slots__ = ("start", "end")
     start: Optional[float]
     end: float
 
     def __init__(self) -> None:
-
         self.start = None
         self.end = perf_counter()
 
     def __iter__(self) -> "DeltaTime":
-
         return self
 
     def __next__(self) -> float:
-
         self.start, self.end = self.end, perf_counter()
         return self.end - self.start
 
     def get(self) -> float:
-
         return perf_counter() - self.end
 
     def reset(self) -> None:
-
         self.end = perf_counter()
 
     def get_reset(self) -> float:
-
         self.start, self.end = self.end, perf_counter()
         return self.end - self.start
 
 
 class PrintStatementTime:
-
     __slots__ = ("tpl", "start")
     tpl: str
     start: Optional[float]
@@ -117,7 +106,6 @@ class PrintStatementTime:
 
 
 class MeasureTime:
-
     __slots__ = ("delta", "start")
     delta: Optional[float]
     start: Optional[float]
@@ -134,7 +122,6 @@ class MeasureTime:
         self.delta = perf_counter() - self.start
 
     def get(self) -> float:
-
         if self.delta:
             return self.delta
         else:
@@ -143,29 +130,23 @@ class MeasureTime:
 
 class TimeIt:
     def __init__(self) -> None:
-
         self.results: DefaultDict[Hashable, List[float]] = defaultdict(list)
         self.starts: Dict[Hashable, DeltaTime] = {}
 
     def __call__(self, key: Hashable, func: Callable[..., T], *args: Any, **kwargs: Any) -> T:
-
         with MeasureTime() as t:
             ret = func(*args, **kwargs)
         self.results[key].append(t.get())
         return ret
 
     def start(self, key: Hashable) -> None:
-
         self.starts[key] = DeltaTime()
 
     def stop(self, key: Hashable) -> None:
-
         self.results[key].append(self.starts[key].get())
 
     def min(self, key: Hashable) -> float:
-
         return min(self.results[key])
 
     def length(self, key: Hashable) -> int:
-
         return len(self.results[key])

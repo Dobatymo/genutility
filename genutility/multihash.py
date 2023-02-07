@@ -8,7 +8,6 @@ from .ops import bit_or
 
 
 def multi_hash_file(path, hash_types, base=None, mode="rb", encoding=None, errors=None, chunk_size=FILE_IO_BUFFER_SIZE):
-
     """Hashes `path` with multiple hash functions.
     `hash_types` is a list of names, eg. ("CRC32", "SHA1").
     """

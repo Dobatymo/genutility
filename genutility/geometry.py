@@ -4,7 +4,6 @@ from math import sqrt
 
 # was: FindWidthToHeightRatio
 def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=None):
-
     """Return the width-to-height ratio of a perspectivly transformed rectangle.
     taken from: http://stackoverflow.com/questions/1194352/proportions-of-a-perspective-deformed-rectangle
     corners: corners of the quadrilateral

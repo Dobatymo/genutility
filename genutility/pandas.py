@@ -8,7 +8,6 @@ T = TypeVar("T")
 
 
 def intersect_columns(*dfs: DataFrame, sort=False) -> Tuple[DataFrame, ...]:
-
     """Takes multiple dataframes and removes the columns which are not present in the other dataframes.
     The order of columns will be equalized.
     """
@@ -26,7 +25,6 @@ def intersect_columns(*dfs: DataFrame, sort=False) -> Tuple[DataFrame, ...]:
 
 
 def pandas_json(obj: Any) -> Any:
-
     """Can be used for the `json.dump` `default` argument
     to make some pandas objects JSON serializable.
     """
@@ -55,7 +53,6 @@ def dataframe_to_dict(
     cellfunc: Optional[Callable] = None,
     dictcls: Callable[[Iterable[Tuple[str, Any]]], T] = dict,
 ) -> T:
-
     """Turns dataframes into trees. Columns first, then rows"""
 
     if cellfunc is None:

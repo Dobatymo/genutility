@@ -34,7 +34,6 @@ pqmap = {
 
 
 def _to_pq_schema(d: Dict[str, Any], sort_keys: bool, outer: Callable[[list], T]) -> Union[T, pa.struct]:
-
     fields = []
 
     if sort_keys:

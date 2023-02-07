@@ -21,21 +21,18 @@ class NotRetried(RuntimeError):
 
 
 def identity(x: T) -> T:
-
     """Identity function."""
 
     return x
 
 
 def nop() -> None:
-
     """Function which does absolutely nothing (aka pass, noop)."""
 
     pass
 
 
 def partial_decorator(*args: Any, **kwargs: Any) -> Callable:
-
     """Same as `functools.partial` but applied as a decorator."""
 
     def decorator(func):
@@ -45,14 +42,12 @@ def partial_decorator(*args: Any, **kwargs: Any) -> Callable:
 
 
 def compose_two(f: Callable[[Any], Any], g: Callable[[Any], Any]) -> Callable[[Any], Any]:
-
     """compose_two(f, g) -> lambda x: f(g(x))"""
 
     return lambda x: f(g(x))
 
 
 def compose(*functions: Callable[[Any], Any]) -> Callable[[Any], Any]:
-
     """compose(f, g, h) -> lambda x: f(g(h(x))).
     see: Function composition
     """
@@ -61,21 +56,18 @@ def compose(*functions: Callable[[Any], Any]) -> Callable[[Any], Any]:
 
 
 def apply(f: Callable[[T], U], x: T) -> U:  # *args, **kwargs
-
     """Same as `f(x)`."""
 
     return f(x)
 
 
 def zipmap(funcs: Iterable[Callable[[T], U]], vals: Iterable[T]) -> Iterator[U]:
-
     """Applies a list of functions to a list of values."""
 
     return map(apply, funcs, vals)
 
 
 def multiapply(funcs: Iterable[Callable], elm: Any) -> Any:
-
     """Applies functions `funcs` to element `elm` iteratively."""
 
     for func in funcs:
@@ -85,7 +77,6 @@ def multiapply(funcs: Iterable[Callable], elm: Any) -> Any:
 
 
 def multimap(funcs: Sequence[Callable], it: Iterable) -> Iterator:
-
     """Applies functions `funcs` to each element of `it` iteratively."""
 
     for i in it:
@@ -93,7 +84,6 @@ def multimap(funcs: Sequence[Callable], it: Iterable) -> Iterator:
 
 
 def deepmap(func: Callable, *iterables: Iterable) -> Iterator:
-
     """Simlar to `map`, but it maps recursively over sequences of sequnces.
     Returns a generator of generators.
     To output plain objects use `recmap` instead.
@@ -115,7 +105,6 @@ def deepmap(func: Callable, *iterables: Iterable) -> Iterator:
 
 
 def outermap(func: Callable[[T], U], iterable: It) -> Union[It, U]:
-
     """Examples:
     outermap(list, (1, (2, 3))) -> [1, [2, 3]]
     outermap(sum, (1, (2, 3)) -> 6
@@ -130,7 +119,6 @@ def outermap(func: Callable[[T], U], iterable: It) -> Union[It, U]:
 
 
 def recmap(func: Callable, iterable: Iterable[Any]) -> list:
-
     """Simlar to `map`, but it maps recursively over sequences of sequnces and puts the result into a list of lists.
     To return a generator of generators use `deepmap` instead.
 
@@ -142,7 +130,6 @@ def recmap(func: Callable, iterable: Iterable[Any]) -> list:
 
 
 def call_repeated(num: int) -> Callable[[Callable], Callable]:
-
     """Function decorator to call decorated function `num` times with the same arguments.
     Returns the results of the last call.
     """
@@ -164,7 +151,6 @@ def call_repeated(num: int) -> Callable[[Callable], Callable]:
 
 
 def print_return_type(func: Callable, file: TextIO = stdout) -> Callable:
-
     """Wraps function to print the return type after calling."""
 
     @wraps(func)
@@ -196,7 +182,6 @@ def retry(
     jitter_dist: str = "uniform",
     waitfunc: Callable[[float], Any] = sleep,
 ) -> T:
-
     """Retry function `func` multiple times in case of raised `exceptions`.
     See `genutility.iter.retrier()` for the remaining arguments.
     Reraises the last exception in case the function call doesn't succeed after retrying.
@@ -237,7 +222,6 @@ class CustomCache:
     """
 
     def __init__(self, reader: Callable, writer: Callable) -> None:
-
         self.reader = reader
         self.writer = writer
 
@@ -245,7 +229,6 @@ class CustomCache:
         def dec(func: Callable) -> Callable:
             @wraps(func)
             def inner(*args: Any, **kwargs: Any) -> Any:
-
                 if os.path.exists(path):
                     logger.debug("Loading object from cache %s", path)
                     return self.reader(path)
@@ -274,7 +257,6 @@ class RunScheduled:
 
 
 def applymap(func: Callable[..., T], it: Iterable[tuple]) -> Iterator[T]:
-
     """Maps `func` over the unpacked `it`."""
 
     return (func(*args) for args in it)

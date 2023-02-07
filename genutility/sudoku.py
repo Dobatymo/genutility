@@ -16,7 +16,6 @@ class Unsolvable(Exception):
 
 class Sudoku(Generic[T]):
     def __init__(self, board: Collection[T], sym_set: Set[T], sym_free: T) -> None:
-
         assert_type("sym_set", sym_set, set)
 
         self.square = board
@@ -40,27 +39,22 @@ class Sudoku(Generic[T]):
         self.solved = False
 
     def init_board(self, board: Collection[T]) -> Collection[T]:
-
         raise NotImplementedError
 
     def get_board(self) -> Collection[T]:
-
         raise NotImplementedError
 
     def print_square(self) -> None:
-
         for i, num in enumerate(self.get_board(), 1):
             print(num, end=" ")
             if i % self.outer_square_size == 0:
                 print()
 
     def solve(self, strategy: Optional[str] = None) -> Collection[T]:
-
         self.square = self.init_board(self.square)
         return self._solve(strategy)
 
     def _solve(self, strategy: Optional[str] = None) -> Collection[T]:
-
         raise NotImplementedError
 
 
@@ -154,7 +148,6 @@ class SudokuBruteforce(Sudoku):
         return inner_square_set
 
     def get_possible_nums(self, i: int) -> Set[T]:
-
         all = self.get_row_nums(i) | self.get_column_nums(i) | self.get_inner_square_nums(i)
         return self.sym_set - all
 
@@ -175,7 +168,6 @@ class SudokuBruteforce(Sudoku):
         return self.sym_free
 
     def _solve(self, strategy: Optional[str] = None) -> Tuple[int, int]:
-
         strategy = strategy or "inc"
 
         try:
@@ -227,7 +219,6 @@ class SudokuBruteforce(Sudoku):
 
 
 def is_valid_solution(board: Collection[T], sym_set: Set[T]) -> bool:
-
     """Checks if `board` is a valid solved Sudoku configuration"""
 
     edge_len = isqrt(len(board))
@@ -258,7 +249,6 @@ def is_valid_solution(board: Collection[T], sym_set: Set[T]) -> bool:
 
 
 if __name__ == "__main__":
-
     from argparse import ArgumentParser
 
     from genutility.time import MeasureTime

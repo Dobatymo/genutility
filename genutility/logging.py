@@ -39,7 +39,6 @@ class IsoDatetimeFormatter(Formatter):
         timespec: str = "auto",
         aslocal: bool = False,
     ) -> None:
-
         Formatter.__init__(self, fmt, datefmt, style, validate)
         assert datefmt is None
         self.sep = sep
@@ -47,7 +46,6 @@ class IsoDatetimeFormatter(Formatter):
         self.aslocal = aslocal
 
     def formatTime(self, record: LogRecord, datefmt: Type[None]) -> str:
-
         return datetime_from_utc_timestamp(record.created, aslocal=self.aslocal).isoformat(self.sep, self.timespec)
 
 
@@ -64,12 +62,10 @@ class OverwriteFormatter(Formatter):
     """
 
     def __init__(self, map: Dict[str, str], *args: Any, **kwargs: Any) -> None:
-
         self.map = map
         Formatter.__init__(self, *args, **kwargs)
 
     def format(self, record: LogRecord) -> str:
-
         for k, v in self.map.items():
             try:
                 setattr(record, v, getattr(record, k))

@@ -24,7 +24,6 @@ class QueryBasedParagraphExtraction:
         self.tokenizer = get_spacy_tokenizer(modelname)
 
     def extract(self, text: str, query: str) -> str:
-
         paragraphs = split_paragraphs(text)
         it = ((same_words_similarity(p, query, self.tokenizer), p) for p in paragraphs)
 
@@ -38,7 +37,6 @@ from .test import MyTestCase
 
 
 class TextSummarizationTests(MyTestCase):
-
     text = [
         """Copyright laws are changing all over the world. Be sure to check the
 copyright laws for your country before downloading or redistributing
@@ -69,7 +67,6 @@ donation to Project Gutenberg, and how to get involved.
 
 
 if __name__ == "__main__":
-
     import unittest
 
     unittest.main()

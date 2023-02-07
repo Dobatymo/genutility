@@ -16,18 +16,15 @@ url_base_pattern = r"(?:(?:{}:\/\/)|www\.)(?:[{}]|%[a-zA-Z0-9]{{2}})+"
 
 
 def get_url_pattern(schemes: Optional[Iterable[str]] = None) -> re.Pattern:
-
     schemes = schemes or uri_schemes
     return re.compile(url_base_pattern.format("|".join(schemes), re.escape(valid_uri_characters)))
 
 
 def get_filename_from_url(url: str, strip: Optional[str] = None) -> str:
-
     return urlsplit(url).path.rstrip(strip).rsplit("/", 1)[1]
 
 
 def get_url_argument(split_url: SplitResult, argument: str, path: Optional[str] = None) -> Optional[str]:
-
     """Extracts a parameter value from the url query string. Optionally compares the url path.
     For example:
     > get_url_argument(urlsplit("https://www.google.com/search?q=python"), "q")
@@ -43,7 +40,6 @@ def get_url_argument(split_url: SplitResult, argument: str, path: Optional[str] 
 
 
 def url_replace_query(split_url: SplitResult, query: Dict[str, str], drop_fragment: bool = True) -> str:
-
     """Replace the query part of an URL with a new one.
     For example:
     > url_replace_query(urlsplit("https://www.google.com/search?source=hp&q=java"), {"q": "python"})
@@ -64,7 +60,6 @@ def path_ext(path: str) -> str:
 
 
 def url_ext(url: str) -> str:
-
     """Returns the lowercase file extension of the URI/URL."""
 
     path = urlsplit(url).path

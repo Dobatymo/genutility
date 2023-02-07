@@ -69,7 +69,6 @@ class SortTest(MyTestCase):
         self.assertIterEqual(truth, result)
 
     def test_external_sort(self):
-
         seq = list(map(str, range(10)))
 
         for i, max_lines in product(range(5), range(10)):

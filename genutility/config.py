@@ -7,7 +7,6 @@ from .os import get_appdata_dir
 
 
 def sort_config(inpath: str, outpath: str) -> None:
-
     from sortedcontainers import SortedDict
 
     config = ConfigParser(dict_type=SortedDict)
@@ -17,7 +16,6 @@ def sort_config(inpath: str, outpath: str) -> None:
 
 
 def _load(*names: str) -> Dict[str, Any]:
-
     from .toml import read_toml
 
     name = names[-1]
@@ -60,7 +58,6 @@ def _load(*names: str) -> Dict[str, Any]:
 
 
 def load(*names: str, json_schema: Optional[Union[dict, str]] = None) -> Dict[str, Any]:
-
     from .json import read_json_schema
 
     obj = _load(*names)

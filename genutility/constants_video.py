@@ -16,7 +16,6 @@ PAR_HD = 1
 
 
 def SAR(RES: Tuple[int, int]) -> float:
-
     x, y = RES
     return x / y
 

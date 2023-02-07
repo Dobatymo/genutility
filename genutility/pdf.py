@@ -15,7 +15,6 @@ def join_pdfs_in_folder(
     rotate: Optional[int] = None,
     password: Optional[Union[str, bytes]] = None,
 ) -> None:
-
     """Join all PDFs in `path_in` and write to `file_out`.
     `overwrite`: Overwrite existing output files
     `rotate`: Optionally rotate pages in 90 degree increments
@@ -48,7 +47,6 @@ def join_pdfs_in_folder(
 
 
 def iter_pdf_text(path: str) -> Iterator[str]:
-
     with open(path, "rb") as fr:
         pdf = PdfReader(fr)
         for page in pdf.pages:
@@ -71,7 +69,6 @@ def _read_pdf_tika(path: str) -> str:
 
 
 def read_pdf(path: str, engine: str = "pdfminer") -> str:
-
     try:
         func = {
             "pdfminer": _read_pdf_pdfminer,

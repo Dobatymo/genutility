@@ -4,12 +4,10 @@ T = TypeVar("T")
 
 
 def obj2tuple(obj: T) -> Tuple[T]:
-
     return (obj,)
 
 
 def row_indices(n: int, square_length: int) -> Iterable[int]:
-
     """Returns the one-dimensional indices of all the cells belonging to the
     same row as index `n`.
     """
@@ -19,7 +17,6 @@ def row_indices(n: int, square_length: int) -> Iterable[int]:
 
 
 def col_indices(n: int, square_length: int) -> Iterable[int]:
-
     """Returns the one-dimensional indices of all the cells belonging to the
     same column as index `n`.
     """
@@ -29,7 +26,6 @@ def col_indices(n: int, square_length: int) -> Iterable[int]:
 
 
 def subblock_indices(n: int, outer_square_length: int, inner_square_length: int) -> Iterator[int]:
-
     """Returns the one-dimensional indices of all the cells belonging to the
     same block as index `n`.
     `outer_square_length` is the number of cells per block.
@@ -53,7 +49,6 @@ def subblock_indices(n: int, outer_square_length: int, inner_square_length: int)
 
 
 def triangular_indices(n: int) -> Iterator[Tuple[int, int]]:
-
     """Returns all combinations of indices for a sequence of length `n` with duplicates and self-combinations.
     triangular_indices(4) -> (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
     """
@@ -64,18 +59,15 @@ def triangular_indices(n: int) -> Iterator[Tuple[int, int]]:
 
 
 def to_2d_index(n: int, width: int) -> Tuple[int, int]:
-
     return n // width, n % width
 
 
 def indices_2d(n: int, width: int) -> Iterator[Tuple[int, int]]:
-
     for i in range(n):
         yield i // width, i % width
 
 
 def window_combinations_indices(size: int, window_size: int) -> Iterator[Tuple[int, int]]:
-
     """Yields all pairs of indices of a sequence of length `size` which are within a window
     of size `window_size`.
 
@@ -94,7 +86,6 @@ def window_combinations_indices(size: int, window_size: int) -> Iterator[Tuple[i
 
 
 def _combination_indices(start: int, sizes: Sequence[int]) -> Iterator[Tuple[int, ...]]:
-
     """earlier (left) dimensions can never be higher than later (right) dimensions."""
 
     if len(sizes) > 1:
@@ -106,7 +97,6 @@ def _combination_indices(start: int, sizes: Sequence[int]) -> Iterator[Tuple[int
 
 
 def combination_indices(*sizes: int) -> Iterator[Tuple[int, ...]]:
-
     """Given sequences of size a, b, c, ... yield the indices to index into each of them,
     so that all combinations of elements from the sequences are returned.
     """

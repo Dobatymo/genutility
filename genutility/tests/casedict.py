@@ -4,7 +4,6 @@ from genutility.test import MyTestCase
 
 class CaseDictTest(MyTestCase):
     def test_all(self):
-
         cd = CaseDict()
         cd["ASD"] = 1
         cd["asd"] = 2

@@ -42,12 +42,10 @@ def GetCompressedFileSize(path: str) -> int:
 
 class WindowsFile(WindowsHandle):
     def __init__(self, handle: int) -> None:
-
         WindowsHandle.__init__(self, handle, doclose=True)
 
     @classmethod
     def from_path(cls, path: str, mode: str = "r", shared: bool = False) -> "WindowsFile":
-
         """Create a Windows file objects from `path`.
         If shared is False: allow write access from other processes.
         """
@@ -110,7 +108,6 @@ class WindowsFile(WindowsHandle):
 
 
 def is_open_for_write(path: str) -> bool:
-
     """Tests if file is already open for write
     by trying to open it in exclusive read model.
     """
@@ -128,7 +125,6 @@ def set_compression(path: str, compressed: bool) -> None:
 
 
 if __name__ == "__main__":
-
     from argparse import ArgumentParser
 
     parser = ArgumentParser()

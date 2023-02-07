@@ -21,7 +21,6 @@ meta_data_chunks = {b"iTXt", b"tEXt", b"zTXt", b"tIME", b"bKGD", b"eXIf", b"dSIG
 
 
 def png_chunk(chunk_type_ascii: str, chunk: bytes) -> bytes:
-
     chunk_type = chunk_type_ascii.encode("ascii")
 
     length = pack("!I", len(chunk))
@@ -32,7 +31,6 @@ def png_chunk(chunk_type_ascii: str, chunk: bytes) -> bytes:
 
 
 def IHDR(width: int, height: int) -> bytes:
-
     bitdepth = 1
     colortype = 0  # grayscale
     compression = 0
@@ -44,23 +42,19 @@ def IHDR(width: int, height: int) -> bytes:
 
 
 def IEND() -> bytes:
-
     return png_chunk("IEND", b"")
 
 
 def IDAT(binary: bytes, level: int = 9) -> bytes:
-
     # ignores filter for scanlines
     return png_chunk("IDAT", zlib.compress(binary, level))
 
 
 def binary2png(binary: bytes, width: int, height: int) -> bytes:
-
     return png_sig + IHDR(width, height) + IDAT(binary) + IEND()
 
 
 def iter_png_fp(stream: IO[bytes], translate: bool = True, verify_crc: bool = True) -> Iterator[tuple]:
-
     """Parses PNG / APNG files."""
 
     signature = read_or_raise(stream, 8)
@@ -113,7 +107,6 @@ def iter_png_fp(stream: IO[bytes], translate: bool = True, verify_crc: bool = Tr
 
 
 def iter_png(path: str, translate: bool = True, verify_crc: bool = True) -> Iterator[tuple]:
-
     """Same as `iter_png_fp()` except that it accepts a path."""
 
     with open(path, "rb") as fr:
@@ -123,7 +116,6 @@ def iter_png(path: str, translate: bool = True, verify_crc: bool = True) -> Iter
 def copy_png_fp(
     fin: IO[bytes], fout: IO[bytes], filter_chunks: Optional[Callable[[bytes], bool]] = None, verify_crc: bool = False
 ) -> None:
-
     """Same as `copy_png()` except that it accepts file-like objects."""
 
     filter_chunks = filter_chunks or (lambda chunk_type: True)
@@ -139,7 +131,6 @@ def copy_png_fp(
 def copy_png(
     inpath: str, outpath: str, filter_chunks: Optional[Callable[[bytes], bool]] = None, verify_crc: bool = False
 ) -> None:
-
     """Copy PNG file `inpath` to `outpath` while ignoring the PNG chunks
     given by `filter_chunks`.
 
@@ -152,11 +143,9 @@ def copy_png(
 
 
 def hash_raw_png(path: str, hashobj: Hashobj) -> None:
-
     """Create a hash of the JPEG at `path` skipping over meta data sections."""
 
     def filter_chunks(ct: bytes) -> bool:
-
         return ct in image_chunks
 
     for length, chunk_type, chunk, crc in iter_png(path, translate=False, verify_crc=False):
@@ -167,13 +156,11 @@ def hash_raw_png(path: str, hashobj: Hashobj) -> None:
 
 
 def parse_tEXt(chunk: bytes) -> Tuple[str, str]:
-
     keyword, text = chunk.split(b"\0")
     return keyword.decode("latin1"), text.decode("latin1")
 
 
 def parse_tIME(chunk: bytes) -> Tuple[int, int, int, int, int, int]:
-
     year, month, day, hour, minute, second = unpack("!HBBBBB", chunk)
 
     return year, month, day, hour, minute, second

@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 class DownloadTask:
     def __init__(self, url: str, path: str = ".") -> None:
-
         self.url = url
         self.path = path
         self.downloaded = 0
@@ -26,19 +25,16 @@ class DownloadTask:
         return hash((self.url, self.path))
 
     def start(self) -> None:
-
         logger.info("starting download")
         self.dt_started = now()
 
     def done(self) -> None:
-
         logger.info("finished download")
         self.dt_finished = now()
 
 
 class DownloadManager:
     def __init__(self, concurrent_downloads: int = 3) -> None:
-
         self.loop = asyncio.get_event_loop()
         self.timeout = aiohttp.ClientTimeout(total=None, sock_read=60)
         self.session = aiohttp.ClientSession(loop=self.loop, timeout=self.timeout, auto_decompress=False)
@@ -52,7 +48,6 @@ class DownloadManager:
         self.error: List[DownloadTask] = []
 
     def status(self) -> str:
-
         total_active = sum(t.downloaded for t in self.active)
         total_done = sum(t.downloaded for t in self.done)
         total_error = sum(t.downloaded for t in self.error)
@@ -62,11 +57,9 @@ class DownloadManager:
         )
 
     def _enqueue(self, task: DownloadTask, priority: Any) -> None:
-
         self.queue.append(task)
 
     def _start(self, task: DownloadTask) -> Optional[asyncio.Task]:
-
         if task not in self.active:
             self.active.add(task)
             atask = asyncio.ensure_future(self._download(task))
@@ -76,7 +69,6 @@ class DownloadManager:
             return None
 
     def _trystart(self) -> Optional[asyncio.Task]:
-
         if len(self.active) < self.concurrent_downloads:
             try:
                 task = self.queue.popleft()
@@ -90,14 +82,12 @@ class DownloadManager:
         return None
 
     async def _download(self, task: DownloadTask) -> None:
-
         task.start()
         # await asyncio.sleep(10)
 
         # send http head request first to check for range support
 
         try:
-
             # async with self.session.get(task.url, headers={"Range": "bytes=0-10"}) as response:
             async with self.session.get(task.url, headers={}) as response:
                 stream = response.content
@@ -136,7 +126,6 @@ class DownloadManager:
     def download(
         self, url: str, path: Optional[str] = None, priority: int = 0, force: bool = False
     ) -> Optional[asyncio.Task]:
-
         path = path or get_filename_from_url(url)
         logger.info("Starting download <%s> to <%s>", url, path)
         task = DownloadTask(url, path)
@@ -151,7 +140,6 @@ class DownloadManager:
 
 
 if __name__ == "__main__":
-
     logging.basicConfig(level=logging.INFO)
 
     import wx

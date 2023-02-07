@@ -26,7 +26,6 @@ BENCODE_UTF8 = bencodepy.Bencode(encoding="utf-8", encoding_fallback="value", di
 
 
 def read_torrent(path: str, binary: bool = True) -> dict:
-
     if binary:
         return BENCODE_BINARY.read(path)
     else:
@@ -34,7 +33,6 @@ def read_torrent(path: str, binary: bool = True) -> dict:
 
 
 def write_torrent(data: dict, path: str) -> None:
-
     BENCODE_BINARY.write(data, path)
 
 
@@ -49,7 +47,6 @@ def iterdecode(items: Iterable[Union[str, bytes]], encoding: str = "latin1") -> 
 
 
 def read_torrent_info_dict(path: str, normalize_string_fields: bool = False) -> dict:
-
     if normalize_string_fields:
         info = BENCODE_UTF8.read(path)["info"]
     else:
@@ -57,7 +54,6 @@ def read_torrent_info_dict(path: str, normalize_string_fields: bool = False) -> 
 
     if normalize_string_fields:
         if isinstance(info["name"], bytes):
-
             try:
                 info["name"] = info["name.utf-8"]
                 del info["name.utf-8"]
@@ -83,7 +79,6 @@ def read_torrent_info_dict(path: str, normalize_string_fields: bool = False) -> 
 
 
 def iter_torrent(path: str) -> Iterator[FileProperties]:
-
     """Returns file informations from a torrent file.
     Hash (SHA-1) is obtained according to BEP0047 (if available).
     """
@@ -150,7 +145,6 @@ def pieces_field(pieces: Iterable[bytes]) -> bytes:
 
 
 def create_torrent_info_dict(path: Path, piece_size: int, private: Optional[int] = None) -> Dict[str, Any]:
-
     if private is not None:
         assert_choice("private", private, {0, 1})
 
@@ -198,7 +192,6 @@ def get_torrent_hash(path: str) -> str:
 
 
 def create_torrent(path: Path, piece_size: int, announce: str = "") -> bytes:
-
     info = create_torrent_info_dict(path, piece_size)
     torrent = {"info": info, "announce": announce}
 
@@ -206,7 +199,6 @@ def create_torrent(path: Path, piece_size: int, announce: str = "") -> bytes:
 
 
 def scrape(tracker_url: str, hashes: List[str]) -> Dict[str, dict]:
-
     if not tracker_url.startswith(("http://", "https://")):
         raise ValueError(f"Only http(s) scrape is supported: <{tracker_url}>")
 

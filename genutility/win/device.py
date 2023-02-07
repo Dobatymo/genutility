@@ -54,7 +54,6 @@ class EMPTY_BUFFER(Structure):
 def MyDeviceIoControl(
     DeviceHandle: Any, IoControlCode: Any, InBuffer: Any, OutBuffer: Any, check_output: bool = True
 ) -> None:
-
     BytesReturned = DWORD()
 
     assert_true("IoControlCode", IoControlCode)
@@ -78,7 +77,6 @@ def MyDeviceIoControl(
 
 
 def open_device(FileName, mode: str = "r"):
-
     DesiredAccess = _mode2access[mode]
 
     DeviceHandle = CreateFileW(
@@ -92,7 +90,6 @@ def open_device(FileName, mode: str = "r"):
 
 
 def get_length(path: str) -> int:
-
     """Returns for:
     partitions: the full partition size (might be larger than disk_usage().total)
     drives: the full drive size (might be larger than the one computed from the drive geometry)
@@ -116,7 +113,6 @@ def open_logical_volume(FileName):
 
 
 def open_physical_drive(DriveIndex: int) -> Any:
-
     assert isinstance(DriveIndex, int)
     drive = rf"\\.\PHYSICALDRIVE{DriveIndex}"
     FileName = create_unicode_buffer(drive)
@@ -126,7 +122,6 @@ def open_physical_drive(DriveIndex: int) -> Any:
 
 class Volume(WindowsHandle):
     def __init__(self, path: str) -> None:
-
         handle = open_logical_volume(path)
         WindowsHandle.__init__(self, handle)
 
@@ -142,12 +137,10 @@ class Volume(WindowsHandle):
 
 class Drive(WindowsHandle):
     def __init__(self, DriveIndex: int) -> None:
-
         handle = open_physical_drive(DriveIndex)
         WindowsHandle.__init__(self, handle)
 
     def get_alignment(self) -> dict:
-
         InBuffer = STORAGE_PROPERTY_QUERY()
         OutBuffer = STORAGE_ACCESS_ALIGNMENT_DESCRIPTOR()
 
@@ -159,7 +152,6 @@ class Drive(WindowsHandle):
         return struct2dict(OutBuffer)
 
     def get_capacity(self) -> dict:
-
         """Accept drive and volume handles, but always returns related drive information.
         The DiskLength returned is the same as if `get_length` is used on the related drive.
         """
@@ -172,7 +164,6 @@ class Drive(WindowsHandle):
 
     # was: StorageQuery
     def get_device(self) -> dict:
-
         InBuffer = STORAGE_PROPERTY_QUERY()
         OutBuffer = STORAGE_DEVICE_DESCRIPTOR()
 
@@ -185,7 +176,6 @@ class Drive(WindowsHandle):
         return struct2dict(OutBuffer)
 
     def get_geometry(self) -> dict:
-
         InBuffer = EMPTY_BUFFER()
         OutBuffer = DISK_GEOMETRY()
         MyDeviceIoControl(self.handle, IOCTL_DISK_GET_DRIVE_GEOMETRY, InBuffer, OutBuffer)
@@ -193,7 +183,6 @@ class Drive(WindowsHandle):
         return struct2dict(OutBuffer)
 
     def get_smart_version(self) -> dict:
-
         InBuffer = EMPTY_BUFFER()
         OutBuffer = GETVERSIONINPARAMS()
 
@@ -202,7 +191,6 @@ class Drive(WindowsHandle):
         return struct2dict(OutBuffer)
 
     def verify_extent(self, start: int, length: int) -> None:
-
         """Can cause issues with some drivers (like TrueCrypt)."""
 
         InBuffer = VERIFY_INFORMATION()
@@ -214,7 +202,6 @@ class Drive(WindowsHandle):
         MyDeviceIoControl(self.handle, IOCTL_DISK_VERIFY, InBuffer, OutBuffer)
 
     def get_seek_penalty(self) -> bool:
-
         InBuffer = STORAGE_PROPERTY_QUERY()
         OutBuffer = DEVICE_SEEK_PENALTY_DESCRIPTOR()
 
@@ -226,7 +213,6 @@ class Drive(WindowsHandle):
         return bool(OutBuffer.IncursSeekPenalty)
 
     def get_trim_enabled(self) -> bool:
-
         InBuffer = STORAGE_PROPERTY_QUERY()
         OutBuffer = DEVICE_TRIM_DESCRIPTOR()
 
@@ -238,7 +224,6 @@ class Drive(WindowsHandle):
         return bool(OutBuffer.TrimEnabled)
 
     def get_temperature(self) -> dict:
-
         # requires Windows 10
 
         InBuffer = STORAGE_PROPERTY_QUERY()
@@ -267,7 +252,6 @@ def partition_type_string(partition_type) -> str:
 
 
 def is_volume_or_drive(s: str) -> str:
-
     from argparse import ArgumentTypeError
 
     pre = "\\\\.\\"
@@ -283,7 +267,6 @@ def is_volume_or_drive(s: str) -> str:
 
 
 if __name__ == "__main__":
-
     from argparse import ArgumentParser
 
     parser = ArgumentParser()

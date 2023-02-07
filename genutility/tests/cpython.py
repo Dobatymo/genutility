@@ -4,7 +4,6 @@ from genutility.test import MyTestCase
 
 class CpythonTests(MyTestCase):
     def test_find_local_in_call_stack(self):
-
         truth = "asd"
 
         def func_a():
@@ -18,7 +17,6 @@ class CpythonTests(MyTestCase):
         self.assertEqual(truth, result)
 
     def test_find_local_in_call_stack_error(self):
-
         truth = "asd"
 
         def func_a():

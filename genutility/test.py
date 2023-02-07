@@ -82,7 +82,6 @@ class MyTestRunner(TextTestRunner):
 
 class NoRaise:
     def __init__(self, testcase: TestCase, message: Optional[str] = None) -> None:
-
         self.testcase = testcase
         self.message = message
 
@@ -98,7 +97,6 @@ class NoRaise:
 
 
 def make_comparable(d: Any) -> Any:
-
     if isinstance(d, (str, int, type(None))):
         return d
     elif isinstance(d, list):
@@ -112,7 +110,6 @@ def make_comparable(d: Any) -> Any:
 
 
 def is_equal_unordered(seq_a: Collection, seq_b: Collection) -> bool:
-
     if isinstance(seq_a, set) and isinstance(seq_b, set):
         return seq_a == seq_b
 
@@ -131,26 +128,21 @@ class MyTestCase(TestCase):
             return func(self, msg, **params)
 
     def assertAnd(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
-
         self.assertTrue(first and second, msg)
 
     def assertTypeEqual(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
-
         self.assertEqual(type(first), type(second), msg)
 
     def assertFilesEqual(self, first_path: Any, second_path: Any, msg: Optional[str] = None) -> None:
-
         self.assertTrue(equal_files(first_path, second_path), msg)
 
     def assertIterEqual(self, first: Iterable, second: Iterable, msg: Optional[str] = None) -> None:
-
         for i, (a, b) in enumerate(zip_longest(first, second)):
             if msg:
                 msg = " : " + str(msg)
             self.assertEqual(a, b, msg=f"in iteration index {i}: {msg}")
 
     def assertIterAlmostEqual(self, first: Iterable, second: Iterable, msg: Optional[str] = None) -> None:
-
         for i, (a, b) in enumerate(zip_longest(first, second)):
             if msg:
                 msg = " : " + str(msg)
@@ -160,7 +152,6 @@ class MyTestCase(TestCase):
                 raise AssertionError("Invalid types (probably different length iters)")  # from None
 
     def assertAllEqual(self, args: Iterable, msg: Optional[str] = None) -> None:  # *args doesn't work in python2!?
-
         it = iter(args)
         first = next(it)
         for second in it:
@@ -169,7 +160,6 @@ class MyTestCase(TestCase):
     def assertIterIterEqual(
         self, first: Iterable[Iterable], second: Iterable[Iterable], msg: Optional[str] = None
     ) -> None:  # UNTESTED
-
         for i, (a, b) in enumerate(zip_longest(first, second)):
             if msg:
                 msg = " : " + str(msg)
@@ -181,7 +171,6 @@ class MyTestCase(TestCase):
         second: Iterable[Optional[Tuple[Hashable, Hashable]]],
         msg: Optional[str] = None,
     ) -> None:
-
         d1: DefaultDict[Hashable, set] = defaultdict(set)
         d2: DefaultDict[Hashable, set] = defaultdict(set)
 
@@ -206,7 +195,6 @@ class MyTestCase(TestCase):
         self.assertEqual(d1, d2, msg)
 
     def assertUnorderedSeqEqual(self, first: Iterable, second: Iterable, msg: Optional[str] = None) -> None:
-
         # fixme: use is_equal_unordered
 
         first = sorted(first)
@@ -214,11 +202,9 @@ class MyTestCase(TestCase):
         self.assertEqual(first, second, msg)
 
     def assertNoRaise(self, msg: Optional[str] = None) -> NoRaise:
-
         return NoRaise(self, msg)
 
     def assertEqualsOneOf(self, result: T, truths: Iterable[T]) -> None:
-
         for truth in truths:
             if result == truth:
                 return
@@ -228,7 +214,6 @@ class MyTestCase(TestCase):
     def assertUnorderedMappingEqual(
         self, first: Mapping[T, U], second: Mapping[T, U], msg: Optional[str] = None
     ) -> None:
-
         self.assertEqual(len(first), len(second), msg)
 
         for a, b in zip(sorted(first.keys()), sorted(second.keys())):
@@ -293,11 +278,9 @@ def repeat(number: int) -> Callable[[Callable], Callable]:
 
 
 class closeable_tempfile:
-
     Uninterrupted = HandleKeyboardInterrupt()
 
     def __init__(self, mode="w+b", encoding=None):
-
         encoding = _check_arguments(mode, encoding)
         self.f = NamedTemporaryFile(mode=mode, encoding=encoding, delete=False)
 

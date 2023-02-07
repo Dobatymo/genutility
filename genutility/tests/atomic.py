@@ -4,7 +4,6 @@ from genutility.test import MyTestCase
 
 class AtomicTest(MyTestCase):
     def test_TransactionalCreateFile(self):
-
         path = "testtemp/TransactionalCreateFile.txt"
         values = ["asd", "qwe"]
 

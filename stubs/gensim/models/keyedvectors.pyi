@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 
 class Vocab:
-
     count: int
     index: int
     def __init__(self, **kwargs: Any) -> None: ...

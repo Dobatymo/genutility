@@ -22,7 +22,6 @@ AsyncReturnT = Coroutine[Any, Any, ResponseT]
 
 
 class RasaABC(Generic[ReturnT], metaclass=ABCMeta):
-
     sender: str
 
     @abstractmethod
@@ -53,7 +52,6 @@ class RasaABC(Generic[ReturnT], metaclass=ABCMeta):
 
 
 class Rasa:
-
     sender: str
 
     def __init__(
@@ -64,7 +62,6 @@ class Rasa:
         token: Optional[str] = None,
         timeout: int = 60,
     ) -> None:
-
         self.sender = sender
         self.scheme = scheme
         self.netloc = netloc
@@ -72,13 +69,11 @@ class Rasa:
         self.timeout = timeout
 
     def get_endpoint(self, path: str) -> str:
-
         return f"{self.scheme}://{self.netloc}{path}"
 
 
 class RasaRest(Rasa):
     def get_request(self, url: str, params: Optional[JsonDict] = None, raw: bool = False) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -94,7 +89,6 @@ class RasaRest(Rasa):
     def post_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
     ) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -110,7 +104,6 @@ class RasaRest(Rasa):
     def put_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
     ) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -130,7 +123,6 @@ class RasaRest(Rasa):
     def delete_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
     ) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -150,7 +142,6 @@ class RasaRest(Rasa):
 
 class RasaRestAsync(Rasa):
     async def get_request(self, url: str, params: Optional[JsonDict] = None, raw: bool = False) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -167,7 +158,6 @@ class RasaRestAsync(Rasa):
     async def post_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
     ) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -184,7 +174,6 @@ class RasaRestAsync(Rasa):
     async def put_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
     ) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -204,7 +193,6 @@ class RasaRestAsync(Rasa):
     async def delete_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
     ) -> ResponseT:
-
         params = params or {}
 
         if self.token:
@@ -238,7 +226,6 @@ OUTPUT_CHANNEL_ENUM = {
 
 class _RasaRestConversations(RasaABC[ReturnT]):
     def get_tracker(self, include_events: Optional[str] = None, until: Optional[int] = None) -> ReturnT:
-
         """Retrieve a conversations tracker.
 
         The tracker represents the state of the conversation. The state of the tracker is created by applying a sequence of events, which modify the state. These events can optionally be included in the response.
@@ -264,7 +251,6 @@ class _RasaRestConversations(RasaABC[ReturnT]):
         output_channel: Optional[str] = None,
         execute_side_effects: bool = False,
     ) -> ReturnT:
-
         """Append events to a tracker.
 
         Appends one or multiple new events to the tracker state of the conversation. Any existing events will be kept and the new events will be appended, updating the existing state. If events are appended to a new conversation ID, the tracker will be initialised with a new session.
@@ -289,7 +275,6 @@ class _RasaRestConversations(RasaABC[ReturnT]):
         )
 
     def get_story(self, until: Optional[int] = None, all_sessions: bool = False) -> ReturnT:
-
         """Retrieve an end-to-end story corresponding to a conversation.
 
         The story represents the whole conversation in end-to-end format. This can be posted to the '/test/stories' endpoint and used as a test.
@@ -314,7 +299,6 @@ class _RasaRestConversations(RasaABC[ReturnT]):
         include_events: Optional[str] = None,
         output_channel: Optional[str] = None,
     ) -> ReturnT:
-
         """Run an action in a conversation.
 
         DEPRECATED. Runs the action, calling the action server if necessary. Any responses sent by the executed action will be forwarded to the channel specified in the `output_channel` parameter. If no output channel is specified, any messages that should be sent to the user will be included in the response of this endpoint.
@@ -345,7 +329,6 @@ class _RasaRestConversations(RasaABC[ReturnT]):
         include_events: Optional[str] = None,
         output_channel: Optional[str] = None,
     ) -> ReturnT:
-
         """Inject an intent into a conversation.
 
         Sends a specified intent and list of entities in place of a user message. The bot then predicts and executes a response action. Any responses sent by the executed action will be forwarded to the channel specified in the output_channel parameter. If no output channel is specified, any messages that should be sent to the user will be included in the response of this endpoint.
@@ -384,7 +367,6 @@ class _RasaRestModel(RasaABC[ReturnT]):
         save_to_default_model_directory: bool = True,
         force_training: bool = False,
     ) -> ReturnT:
-
         """Train a Rasa model.
 
         Trains a new Rasa model. Depending on the data given only a dialogue model, only a NLU model, or a model combining a trained dialogue model with an NLU model will be trained. The new model is not loaded by default.
@@ -419,7 +401,6 @@ class _RasaRestModel(RasaABC[ReturnT]):
         model_server: Optional[JsonDict] = None,
         remote_storage: Optional[str] = None,
     ) -> ReturnT:
-
         """Replace the currently loaded model.
 
         Updates the currently loaded model. First, tries to load the model from the local storage system. Secondly, tries to load the model from the provided model server configuration. Last, tries to load the model from the provided remote storage.
@@ -442,7 +423,6 @@ class _RasaRestModel(RasaABC[ReturnT]):
         )
 
     def unload_model(self) -> ReturnT:
-
         url = self.get_endpoint("/model")
 
         return self.delete_request(url)
@@ -450,13 +430,11 @@ class _RasaRestModel(RasaABC[ReturnT]):
 
 class _RasaRestWebhook(RasaABC[ReturnT]):
     def health(self) -> ReturnT:
-
         url = self.get_endpoint("/webhooks/rest/")
 
         return self.get_request(url)
 
     def send_message(self, message: str) -> ReturnT:
-
         url = self.get_endpoint("/webhooks/rest/webhook")
 
         return self.post_request(
@@ -470,7 +448,6 @@ class _RasaRestWebhook(RasaABC[ReturnT]):
 
 class _RasaCallbackWebhook(RasaABC[ReturnT]):
     def send_message(self, message: str) -> ReturnT:
-
         url = self.get_endpoint("/webhooks/callback/webhook")
 
         return self.post_request(

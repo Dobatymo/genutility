@@ -7,14 +7,12 @@ from pymediainfo import MediaInfo, Track
 
 class MediaInfoHelper:
     def __init__(self, path: Union[str, Path]) -> None:
-
         if isinstance(path, PathLike):
             path = fspath(path)
 
         self.mi = MediaInfo.parse(path)
 
     def audio_duration(self) -> float:
-
         """Returns audio duration in seconds."""
 
         for track in self.mi.tracks:
@@ -40,7 +38,6 @@ class MediaInfoHelper:
         return self.first_track("Text")
 
     def first_track(self, track_type: str) -> Track:
-
         for track in self.mi.tracks:
             if track.track_type == track_type:
                 return track
@@ -55,10 +52,8 @@ class MediaInfoHelper:
         return False
 
     def meta_info(self) -> Dict[str, Any]:
-
         for track in self.mi.tracks:
             if track.track_type == "General":
-
                 if track.duration is None:
                     duration = None
                 else:

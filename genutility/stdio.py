@@ -22,14 +22,12 @@ class PrintOnError:
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-
         """All arguments are passed to the `print` function."""
 
         self.args = args
         self.kwargs = kwargs
 
     def __enter__(self) -> "PrintOnError":
-
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -38,7 +36,6 @@ class PrintOnError:
 
 
 def safe_input(s: str, block: int = 10) -> str:
-
     """Makes sure ctrl-c on input() only raises KeyboardInterrupt and not EOFError+KeyboardInterrupt.
     Waits at most `block` seconds to be sure.
     """
@@ -51,7 +48,6 @@ def safe_input(s: str, block: int = 10) -> str:
 
 
 def info_print(msg: Optional[str] = None, args: tuple = tuple(), exception: Optional[Exception] = None) -> None:
-
     # not (msg or exception) this doesn't do anything
 
     if exception and msg:
@@ -65,7 +61,6 @@ def info_print(msg: Optional[str] = None, args: tuple = tuple(), exception: Opti
 
 
 def input_ex(s: str, file_out: IO = sys.stdout, file_in: IO = sys.stdin) -> str:
-
     print(s, file=file_out, end="")
     file_out.flush()
     return sys.stdin.readline().rstrip("\n")
@@ -97,7 +92,6 @@ def input_type(
 
 
 def confirm(msg: str, yesno: bool = True) -> bool:
-
     if yesno:
         s = input_type(msg + " (yes, no): ", predicate=lambda x: x.strip().lower() in {"yes", "y", "n", "no"})
         return s.strip().lower() in {"yes", "y"}

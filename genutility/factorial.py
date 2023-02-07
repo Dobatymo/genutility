@@ -5,7 +5,6 @@ class SplitRecursive:
     """
 
     def factorial(self, n: int) -> int:
-
         if n < 0:
             raise ArithmeticError(f"Factorial: n has to be >= 0, but was {n}")
 

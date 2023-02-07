@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
-
     # wx.LC_SORT_* breaks idtopos
     def __init__(self, *args, **kwargs):
         wx.ListCtrl.__init__(self, *args, **kwargs)

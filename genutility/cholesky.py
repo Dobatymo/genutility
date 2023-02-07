@@ -8,7 +8,6 @@ from .numpy import is_square
 
 @opjit(["void(f4[:,:], f4[:], f4)", "void(f8[:,:], f8[:], f8)"])
 def _choldate(L, x, sign):
-
     for k in range(L.shape[0]):
         r = sqrt(L[k, k] * L[k, k] + sign * x[k] * x[k])
         c = r / L[k, k]
@@ -20,7 +19,6 @@ def _choldate(L, x, sign):
 
 
 def choldate(L: np.ndarray, x: np.ndarray, sign: str) -> None:
-
     """This function computes the lower triangular Cholesky decomposition L' of matrix A' from L in-place
     (the cholesky decomp of A) where A' = A + sign*x*x^T.
     Based on: https://en.wikipedia.org/wiki/Cholesky_decomposition#Rank-one_update

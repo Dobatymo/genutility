@@ -156,7 +156,6 @@ def co64(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
 
 
 def prft(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-
     p = BoxParser(fin, size)
 
     if version == 0:
@@ -170,7 +169,6 @@ def prft(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
 
 
 def iref_parser(fin, size, version):
-
     p = BoxParser(fin, size)
     if version == 0:
         (from_item_id,) = p.unpack(">H", 2)
@@ -195,21 +193,18 @@ def iref_parser(fin, size, version):
 
 
 def dimg(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-
     """Not a fullbox, inherits parent version"""
 
     return iref_parser(fin, size, version)
 
 
 def thmb(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-
     """Not a fullbox, inherits parent version"""
 
     return iref_parser(fin, size, version)
 
 
 def cdsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
-
     """Not a fullbox, inherits parent version"""
 
     return iref_parser(fin, size, version)
@@ -501,7 +496,6 @@ versions = {
 
 
 def _load_atoms() -> Dict[str, Tuple[str, str, str]]:
-
     package_name = __package__ or "genutility"
     atoms_path = pkg_resources.resource_filename(package_name, "data/mp4-atoms.tsv")
 
@@ -534,7 +528,6 @@ def parse_atom(fin: IO[bytes], code: str, size: int, version: int, flags: bytes)
 
 
 def read_atom(fin: IO[bytes], parent_version: Optional[int] = None) -> Tuple[int, str, int, int, int, bytes]:
-
     pos = fin.tell()
 
     p = BoxParser(fin)
@@ -579,7 +572,6 @@ def _enum_atoms(
     unparsed_data: bool = False,
     version: Optional[int] = None,
 ) -> Iterator[Tuple[int, int, str, int, Optional[dict], Optional[bytes]]]:
-
     while fin.tell() < total_size:
         pos, type, size, delta, version, flags = read_atom(fin, version)
 
@@ -621,7 +613,6 @@ def _enum_atoms(
 def enumerate_atoms(
     path: str, parse_atoms: bool = False, unparsed_data: bool = False
 ) -> Iterator[Tuple[int, int, str, int, Optional[dict], Optional[bytes]]]:
-
     """Takes an ISO/IEC base media file format / mp4 file `path`
     and yields (depth, position, code, size, parsed_data, unparsed_data) tuples.
     Unknown atoms will print a warning.
@@ -638,7 +629,6 @@ def enumerate_atoms(
 
 
 if __name__ == "__main__":
-
     from argparse import ArgumentParser
     from os import fspath
     from sys import stderr

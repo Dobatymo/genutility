@@ -15,7 +15,6 @@ def grayscale(arr: np.ndarray) -> np.ndarray:
 
 
 def histogram_1d(arr: np.ndarray, levels: int) -> np.ndarray:
-
     """Input shape of `arr`: [batch..., x]. Histogrammed over x and batched over the remaining dimensions.
     Output shape: [batch..., levels]
     """
@@ -24,7 +23,6 @@ def histogram_1d(arr: np.ndarray, levels: int) -> np.ndarray:
 
 
 def resize_oar(max_width: int, max_height: int, dar: Rational) -> Tuple[int, int]:
-
     maxdar = max_width / max_height
 
     if dar >= maxdar:  # wider than it should be
@@ -38,12 +36,10 @@ def resize_oar(max_width: int, max_height: int, dar: Rational) -> Tuple[int, int
 
 
 def resize_maxsize(max_width: int, max_height: int, width: int, height: int) -> Tuple[int, int]:
-
     return resize_oar(max_width, max_height, width / height)
 
 
 def histogram_2d(arr: np.ndarray, levels: int) -> np.ndarray:
-
     """Input shape of `arr`: [batch..., y, x]. Histogrammed over x and y and batched over
     the remaining dimensions.
     Output shape: [batch..., levels]
@@ -59,7 +55,6 @@ def histogram_2d(arr: np.ndarray, levels: int) -> np.ndarray:
 
 
 def block_histogram_2d(arr: np.ndarray, by: int, bx: int, levels: int) -> np.ndarray:
-
     """Input shape of `arr`: [batch..., y, x]. Histogrammed over blocks of size bx and by
     and batched over the remaining dimensions.
     Output shape: [batch..., y/by, x/bx, levels]
@@ -73,7 +68,6 @@ def block_histogram_2d(arr: np.ndarray, by: int, bx: int, levels: int) -> np.nda
 
 
 def image_histogram(arr: np.ndarray, levels: int = 256) -> np.ndarray:
-
     """Input shape of RGB/BGR image `arr`: [batch..., x, y, channel]. It is summed over channels to create a grayscale
     image, then histogrammed over x and y and batched over the remaining dimensions.
     Output shape: [batch..., levels]
@@ -87,7 +81,6 @@ def image_histogram(arr: np.ndarray, levels: int = 256) -> np.ndarray:
 
 
 def image_block_histogram(arr: np.ndarray, bx: int, by: int, levels: int = 256) -> np.ndarray:
-
     """Input shape of RGB/BGR image `arr`: [batch..., x, y, channel]. It is summed over channels to create a grayscale
     image, then histogrammed over x and y and batched over the remaining dimensions.
     Output shape: [batch..., bx, by, levels]
