@@ -336,6 +336,20 @@ class ProgressThreadPool:
             w.daemon = True  # program will end even if threads are still running
             w.start()
 
+    def stop(self) -> None:
+        for _ in range(len(self.workers)):
+            self.waiting_queue.put(None)
+
+    def join(self, timeout: Optional[float] = None) -> bool:
+        """Returns True if all workers very terminated, otherwise False"""
+
+        for worker in self.workers:
+            worker.join(timeout)
+
+        self.workers = [worker for worker in self.workers if worker.is_alive()]
+
+        return len(self.workers) == 0
+
     def start(self, callable: Callable, *args, **kwargs) -> None:  # todo: add optional task id here.
         self.waiting_queue.put((callable, args, kwargs))
 

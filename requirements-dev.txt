@@ -1,7 +1,9 @@
 aioresponses>=0.7.2
 bandit
+black
 flake8
 hypothesis
+isort
 packaging
 pre-commit
 requests-mock
