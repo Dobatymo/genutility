@@ -1,9 +1,6 @@
-from typing import TYPE_CHECKING
+from pymongo.collection import Collection
 
 from .exceptions import InconsistentState, NoResult
-
-if TYPE_CHECKING:
-    from pymongo.collection import Collection
 
 
 def findone(db: Collection, query: dict) -> dict:
