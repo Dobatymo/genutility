@@ -4,10 +4,11 @@ from datetime import datetime, timedelta
 from functools import partial, reduce, wraps
 from sys import stdout
 from time import sleep
-from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, TypeVar, Union
 
 from ._func import rename, renameobj  # noqa: F401
 from .iter import nonstriter, retrier
+from .typing import ExceptionsType
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -174,7 +175,7 @@ def get_callable_name(func: Callable) -> str:
 def retry(
     func: Callable[[], T],
     waittime: float,
-    exceptions: Union[Type[Exception], Tuple[Type[Exception], ...]] = (Exception,),
+    exceptions: ExceptionsType = Exception,
     attempts: int = -1,
     multiplier: float = 1,
     jitter: float = 0,
@@ -200,6 +201,17 @@ def retry(
         raise last_exception  # pylint: disable=raising-bad-type
     else:
         raise NotRetried
+
+
+def default_except(
+    exceptions: ExceptionsType, default: T, func: Callable[..., U], *args: Any, **kwargs: Any
+) -> Union[T, U]:
+    """Call `func(*args, **kwargs)` and turn `exceptions` into `default`."""
+
+    try:
+        return func(*args, **kwargs)
+    except exceptions:
+        return default
 
 
 class CustomCache:

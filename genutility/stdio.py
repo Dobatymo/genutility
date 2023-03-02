@@ -3,7 +3,9 @@ import os
 import sys
 from shutil import get_terminal_size
 from time import sleep
-from typing import IO, Any, Callable, Optional, Type, TypeVar, Union
+from typing import IO, Any, Callable, Optional, TypeVar, Union
+
+from .typing import ExceptionsType
 
 T = TypeVar("T")
 _terminal_width = get_terminal_size((80, 30)).columns
@@ -72,7 +74,7 @@ def input_type(
     type: Optional[Callable[[str], T]] = None,
     predicate: Optional[Callable[[str], bool]] = None,
     errormsg: Optional[str] = None,
-    exception: Type[Exception] = Exception,
+    exception: ExceptionsType = Exception,
     file: IO = sys.stdout,
 ) -> Union[str, T]:
     while True:

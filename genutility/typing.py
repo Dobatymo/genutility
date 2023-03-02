@@ -1,16 +1,17 @@
-from typing import Any, Iterable, Iterator, Optional, Sequence, TypeVar, Union
+from typing import Any, Iterable, Iterator, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Protocol  # typing.Protocol is available in Python 3.8+
 
+ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
 Number = Union[int, float]
-T = TypeVar("T")
+T_co = TypeVar("T_co", covariant=True)
 
 
-class SizedIterable(Protocol[T]):
+class SizedIterable(Protocol[T_co]):
     def __len__(self) -> int:
         ...
 
-    def __iter__(self) -> Iterator[T]:
+    def __iter__(self) -> Iterator[T_co]:
         ...
 
 

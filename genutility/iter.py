@@ -31,10 +31,9 @@ from typing import (
 
 from .exceptions import EmptyIterable, IteratorExhausted
 from .ops import operator_in
-from .typing import Orderable
+from .typing import ExceptionsType, Orderable
 
 OrderableT = TypeVar("OrderableT", bound=Orderable)
-ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -127,6 +126,11 @@ def progress(
     extra = ""
     last = start = time()
     total = 0
+
+    if extra_info_callback:
+        extra = extra_info_callback(0, length)
+        extra = f" [{extra}]"
+    print(f"0{lstr}, running for 0 seconds{extra}.", end="\r", file=file)
 
     try:
         for elm in it:
