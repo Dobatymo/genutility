@@ -138,7 +138,7 @@ class FileLike:
 def get_redirect_url(url, headers=None):
     import requests
 
-    r = requests.get(url, allow_redirects=False, headers=headers)
+    r = requests.get(url, headers=headers, timeout=DEFAULT_TIMEOUT, allow_redirects=False)
     r.raise_for_status()
 
     try:

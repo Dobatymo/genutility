@@ -282,18 +282,15 @@ class GenericDb:
         join_on = " AND ".join(f"c.{n} = t.{n}" for n in affected_fields)
         join_group_by = ", ".join(f"t.{n}" for n in affected_fields)
 
-        # fmt: off
         latest_col, latest_dir, latest_agg = self.latest_order_by()
-        sql = (  # nosec
-        f"""
+        sql = f"""
             WITH conditions ({self.order_col}, {group_by}) AS (VALUES {values})  -- create table with order key and match values
             SELECT {select}
             FROM {self.table} t INNER JOIN conditions c ON {join_on}
             GROUP BY {join_group_by} HAVING {latest_col} = {latest_agg}({latest_col})  -- select only the latest entry from each group
             ORDER BY c.{self.order_col}  -- order rows according to input order
-        """
-        )
-        # fmt: on
+        """  # nosec
+
         args = tuple(chain.from_iterable(self._args_many(mandatory, derived)))
 
         self.cursor.execute(sql, args)

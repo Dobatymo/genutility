@@ -186,7 +186,7 @@ class MySalesforce:
         sess = self.session()
         headers = {"Authorization": "Bearer " + sess.session_id}
 
-        r = requests.post("https://" + sess.sf_instance + endpoint, headers=headers, json=params)
+        r = requests.post("https://" + sess.sf_instance + endpoint, json=params, headers=headers, timeout=self.timeout)
         r.raise_for_status()
         return r.json()
 
@@ -194,7 +194,7 @@ class MySalesforce:
         sess = self.session()
         headers = {"Authorization": "Bearer " + sess.session_id}
 
-        r = requests.get("https://" + sess.sf_instance + endpoint, headers=headers)
+        r = requests.get("https://" + sess.sf_instance + endpoint, headers=headers, timeout=self.timeout)
         r.raise_for_status()
         return r.json()
 
@@ -579,7 +579,7 @@ class LiveAgent(LiveAgentBase[JsonDict, bytes]):
         headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
         timeout = timeout or self.timeout
 
-        r = requests.get(self.urljoin(endpoint), headers=headers, params=params, timeout=self.timeout)
+        r = requests.get(self.urljoin(endpoint), params=params, headers=headers, timeout=self.timeout)
         r.raise_for_status()
         if r.status_code == 204:
             return {}
@@ -593,7 +593,7 @@ class LiveAgent(LiveAgentBase[JsonDict, bytes]):
         headers.setdefault("X-LIVEAGENT-SEQUENCE", self.sequence)
         timeout = timeout or self.timeout
 
-        r = requests.post(self.urljoin(endpoint), headers=headers, json=json, timeout=self.timeout)
+        r = requests.post(self.urljoin(endpoint), json=json, headers=headers, timeout=self.timeout)
         r.raise_for_status()
         return r.content
 

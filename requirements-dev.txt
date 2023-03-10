@@ -1,5 +1,5 @@
 aioresponses>=0.7.2
-bandit
+bandit>=1.7.5
 black
 flake8
 hypothesis
