@@ -1,9 +1,11 @@
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from time import sleep
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
+from typing import Mapping as MappingT
+from typing import Optional
 from typing import Sequence as SequenceT
-from typing import Set, TextIO, Tuple
+from typing import Set, TextIO, Tuple, Union
 
 from aria2p import Client
 from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
@@ -240,7 +242,7 @@ class AriaDownloader:
         uri: str,
         path: Optional[str] = None,
         filename: Optional[str] = None,
-        headers: Optional[SequenceT[str]] = None,
+        headers: Optional[Union[SequenceT[str], MappingT[str, str]]] = None,
         max_connections: Optional[int] = None,
         split: Optional[int] = None,
         continue_: Optional[bool] = None,
@@ -255,7 +257,10 @@ class AriaDownloader:
         """
 
         if headers is not None:
-            assert_type("headers", headers, Sequence)
+            assert_type("headers", headers, (Sequence, Mapping))
+
+        if isinstance(headers, Mapping):
+            headers = [f"{k}: {v}" for k, v in headers.items()]
 
         options = self.default_options.copy()
         update(
