@@ -97,7 +97,9 @@ class AriaDownloader:
         return len(self.gids)
 
     def block_one(self, progress_file: Optional[TextIO] = sys.stdout) -> Tuple[str, str]:
-        """Blocks until one download is done."""
+        """Blocks until one download is done.
+        Can raise `requests.exceptions.ReadTimeout`
+        """
 
         while True:
             """fixme: This loop has a (not very serious) race condition.

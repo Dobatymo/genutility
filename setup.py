@@ -67,7 +67,6 @@ extras_require = {
     "fingerprinting": ["numpy", "numba", "pillow"],
     "html": ["beautifulsoup4"],
     "http": ["requests", "certifi"],
-    "http2": ["hyper"],
     "image": ["numpy"],
     "json": ["jsonschema"],
     "lda": ["numpy", "nltk>=3.6.1"],
