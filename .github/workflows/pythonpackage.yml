@@ -9,8 +9,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v4
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.8
     - name: Install dependencies
@@ -20,7 +19,7 @@ jobs:
     - run: python -m black . --check
     - run: python -m isort . --check-only
     - run: python -m flake8 .
-    - run: python -m bandit . --recursive
+    - run: python -m bandit . --recursive -c pyproject.toml
 
   test:
     needs: lint

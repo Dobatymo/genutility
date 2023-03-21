@@ -1,18 +1,20 @@
 import sys
 from collections.abc import Mapping, Sequence
 from time import sleep
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 from typing import Mapping as MappingT
 from typing import Optional
 from typing import Sequence as SequenceT
 from typing import Set, TextIO, Tuple, Union
 
 from aria2p import Client
-from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, ClientException
+from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_TIMEOUT, ClientException
 from requests.exceptions import ConnectionError
 
 from .dict import update
 from .exceptions import DownloadFailed, ExternalProcedureUnavailable, InconsistentState, WouldBlockForever, assert_type
+
+CallbackFuncT = Callable[[Dict[str, Any]], None]
 
 
 def aria_bool(value: Optional[bool]) -> Optional[str]:
@@ -26,6 +28,27 @@ def aria_bool(value: Optional[bool]) -> Optional[str]:
         return "false"
     else:
         raise ValueError(str(value))
+
+
+def get_default_active_callback(file: TextIO = sys.stdout) -> CallbackFuncT:
+    def default_active_callback(entries: Dict[str, Any]) -> None:
+        completed = sum(int(entry["completedLength"]) for entry in entries.values())
+        total = sum(int(entry["totalLength"]) for entry in entries.values())
+        speed = sum(int(entry["downloadSpeed"]) for entry in entries.values())
+        print(
+            f"{len(entries)} downloads: {completed}/{total} bytes {speed} bytes/sec",
+            file=file,
+            end="\r",
+        )
+
+    return default_active_callback
+
+
+def get_default_waiting_callback(file: TextIO = sys.stdout) -> CallbackFuncT:
+    def default_waiting_callback(entries: Dict[str, Any]) -> None:
+        print(f"{len(entries)} downloads waiting or paused", file=file, end="\r")
+
+    return default_waiting_callback
 
 
 class AriaDownloader:
@@ -52,13 +75,14 @@ class AriaDownloader:
         port: int = DEFAULT_PORT,
         secret: str = "",
         poll: float = 1.0,
+        timeout: float = DEFAULT_TIMEOUT,
         global_options: Optional[dict] = None,
     ) -> None:
         """Initialize the aria2 client with `host`, `port` and `secret`.
         Poll aria2 every `poll` seconds.
         """
 
-        self.aria2 = Client(host, port, secret)
+        self.aria2 = Client(host, port, secret, timeout)
         self.poll = poll
 
         if global_options:
@@ -96,10 +120,17 @@ class AriaDownloader:
     def managed_downloads(self) -> int:
         return len(self.gids)
 
-    def block_one(self, progress_file: Optional[TextIO] = sys.stdout) -> Tuple[str, str]:
+    def block_one(
+        self, active_callback: Optional[CallbackFuncT] = None, waiting_callback: Optional[CallbackFuncT] = None
+    ) -> Tuple[str, str]:
         """Blocks until one download is done.
+        active_callback: Default `aria.get_default_active_callback()`
+        waiting_callback: Default `aria.get_default_waiting_callback()`
         Can raise `requests.exceptions.ReadTimeout`
         """
+
+        active_callback = active_callback or get_default_active_callback()
+        waiting_callback = waiting_callback or get_default_waiting_callback()
 
         while True:
             """fixme: This loop has a (not very serious) race condition.
@@ -124,6 +155,8 @@ class AriaDownloader:
                         return gid, entry["files"][0]["path"]
                     elif entry["status"] == "error":
                         raise DownloadFailed(gid, entry["errorCode"], entry["errorMessage"])
+                    elif entry["status"] == "removed":
+                        raise RuntimeError("Someone removed our download...")
                     else:
                         raise RuntimeError("Unexpected status: {}".format(entry["status"]))
 
@@ -132,22 +165,13 @@ class AriaDownloader:
 
             entries = self._entries(self.query("tell_active"))  # active
             if entries:
-                if progress_file:
-                    completed = sum(int(entry["completedLength"]) for entry in entries.values())
-                    total = sum(int(entry["totalLength"]) for entry in entries.values())
-                    speed = sum(int(entry["downloadSpeed"]) for entry in entries.values())
-                    print(
-                        f"{len(entries)} downloads: {completed}/{total} bytes {speed} bytes/sec",
-                        file=progress_file,
-                        end="\r",
-                    )
-
+                active_callback(entries)
                 sleep(self.poll)
                 continue
 
             entries = self._entries(self.query("tell_waiting", 0, self.max_num_results))  # waiting or paused
             if entries:
-                print(f"{len(entries)} downloads waiting or paused", end="\r")
+                waiting_callback(entries)
                 sleep(self.poll)
                 continue
 
@@ -157,18 +181,20 @@ class AriaDownloader:
                 However this is the only way to check for external modifications.
                 """
                 raise InconsistentState(
-                    "Some downloads got lost. We either encoutered a race condition \
+                    "Some downloads got lost. We either encountered a race condition \
                     or some external actor removed the download"
                 )
 
             raise WouldBlockForever("No downloads active or waiting")
 
-    def block_all(self) -> List[Tuple[Any, Optional[str]]]:
+    def block_all(
+        self, active_callback: Optional[CallbackFuncT] = None, waiting_callback: Optional[CallbackFuncT] = None
+    ) -> List[Tuple[Any, Optional[str]]]:
         ret: List[Tuple[Any, Optional[str]]] = []
 
         while True:
             try:
-                gid, path = self.block_one()
+                gid, path = self.block_one(active_callback, waiting_callback)
                 ret.append((None, path))
             except WouldBlockForever:
                 break
@@ -183,6 +209,10 @@ class AriaDownloader:
         # removes a complete/error/removed download
         # fails on active/waiting/paused (on CTRL-C for example)
         self.query("remove_download_result", gid)
+
+    def remove(self, gid: str) -> None:
+        self.gids.remove(gid)
+        self.query("remove", gid)
 
     def block_gid(self, gid: str, progress_file: Optional[TextIO] = sys.stdout) -> str:
         """Blocks until download is done.
@@ -292,7 +322,7 @@ class AriaDownloader:
         uri: str,
         path: Optional[str] = None,
         filename: Optional[str] = None,
-        headers: Optional[SequenceT[str]] = None,
+        headers: Optional[Union[SequenceT[str], MappingT[str, str]]] = None,
         max_connections: Optional[int] = None,
         split: Optional[int] = None,
         continue_: Optional[bool] = None,
@@ -301,6 +331,8 @@ class AriaDownloader:
         connect_timeout: Optional[int] = None,
         timeout: Optional[int] = None,
         no_netrc: Optional[bool] = None,
+        active_callback: Optional[CallbackFuncT] = None,
+        waiting_callback: Optional[CallbackFuncT] = None,
     ) -> Optional[Tuple[str, str, str]]:
         queued_gid = self.download(
             uri,
@@ -317,7 +349,7 @@ class AriaDownloader:
             no_netrc,
         )
         if self.managed_downloads() >= num:
-            finished_gid, path = self.block_one()
+            finished_gid, path = self.block_one(active_callback, waiting_callback)
             return queued_gid, finished_gid, path
 
         return None

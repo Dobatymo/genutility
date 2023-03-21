@@ -31,7 +31,7 @@ def join_pdfs_in_folder(
         for path in paths:
             if path.is_file():
                 fr = stack.enter_context(path.open("rb"))
-                reader = PdfReader(fr, strict=True, password=password)  # type: ignore[arg-type]
+                reader = PdfReader(fr, strict=True, password=password)
                 for page in reader.pages:
                     if rotate is not None:
                         page = page.rotate(rotate)
