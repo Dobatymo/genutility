@@ -40,7 +40,7 @@ class BuiltinEncoder(json.JSONEncoder):
                 return tuple(obj)
         elif isinstance(obj, complex):
             return [obj.real, obj.imag]
-        elif isinstance(obj, datetime.date, datetime.time, datetime.datetime):
+        elif isinstance(obj, (datetime.date, datetime.time, datetime.datetime)):
             return obj.isoformat()
         elif isinstance(obj, datetime.timedelta):
             return obj.total_seconds()

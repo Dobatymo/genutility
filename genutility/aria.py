@@ -1,7 +1,7 @@
 import sys
 from collections.abc import Mapping, Sequence
 from time import sleep
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, Iterator, List
 from typing import Mapping as MappingT
 from typing import Optional
 from typing import Sequence as SequenceT
@@ -187,21 +187,22 @@ class AriaDownloader:
 
             raise WouldBlockForever("No downloads active or waiting")
 
-    def block_all(
+    def block_all_iter(
         self, active_callback: Optional[CallbackFuncT] = None, waiting_callback: Optional[CallbackFuncT] = None
-    ) -> List[Tuple[Any, Optional[str]]]:
-        ret: List[Tuple[Any, Optional[str]]] = []
-
+    ) -> Iterator[Tuple[Optional[Exception], Optional[str], Optional[str]]]:
         while True:
             try:
                 gid, path = self.block_one(active_callback, waiting_callback)
-                ret.append((None, path))
+                yield (None, gid, path)
             except WouldBlockForever:
-                break
+                return
             except DownloadFailed as e:
-                ret.append((e.args, None))
+                yield (e, None, None)
 
-        return ret
+    def block_all(
+        self, active_callback: Optional[CallbackFuncT] = None, waiting_callback: Optional[CallbackFuncT] = None
+    ) -> List[Tuple[Optional[Exception], Optional[str], Optional[str]]]:
+        return list(self.block_all_iter(active_callback, waiting_callback))
 
     def remove_stopped(self, gid: str) -> None:
         self.gids.remove(gid)
@@ -333,7 +334,7 @@ class AriaDownloader:
         no_netrc: Optional[bool] = None,
         active_callback: Optional[CallbackFuncT] = None,
         waiting_callback: Optional[CallbackFuncT] = None,
-    ) -> Optional[Tuple[str, str, str]]:
+    ) -> Tuple[str, Optional[str], Optional[str]]:
         queued_gid = self.download(
             uri,
             path,
@@ -352,7 +353,7 @@ class AriaDownloader:
             finished_gid, path = self.block_one(active_callback, waiting_callback)
             return queued_gid, finished_gid, path
 
-        return None
+        return queued_gid, None, None
 
 
 class DownloadManager:
