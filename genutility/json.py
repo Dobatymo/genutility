@@ -2,7 +2,7 @@ import csv
 import datetime
 import json
 import logging
-from functools import partial, wraps
+from functools import partial
 from itertools import islice
 from pathlib import Path
 from types import ModuleType
@@ -10,11 +10,9 @@ from typing import IO, Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optio
 
 from typing_extensions import TypedDict  # typing.TypedDict is available in Python 3.8+
 
-from .atomic import TransactionalCreateFile, sopen
+from .atomic import sopen
 from .datetime import datetime_from_utc_timestamp_ms, now
 from .file import copen
-from .filesystem import mdatetime
-from .object import args_to_key
 
 PathStr = Union[Path, str]
 JsonDict = Dict[str, Any]
@@ -93,7 +91,10 @@ def read_json_schema(path: PathStr) -> JsonDict:
 
 
 def read_json(
-    path: PathStr, schema: Optional[Union[str, JsonDict]] = None, cls: Any = None, object_hook: Any = None
+    path: PathStr,
+    schema: Optional[Union[str, JsonDict]] = None,
+    cls: Optional[Type[json.JSONDecoder]] = None,
+    object_hook: Any = None,
 ) -> Any:
     """Read the json file at `path` and optionally validates the input according to `schema`.
     The validation requires `jsonschema`.
@@ -329,13 +330,30 @@ with open("{file}", "r") as fr:
             self.f.close()
 
 
-def read_json_lines(file: PathStr, object_hook: Optional[Callable] = None) -> Iterator[Any]:
+def read_json_lines(
+    file: PathStr, cls: Optional[Type[json.JSONDecoder]] = None, object_hook: Optional[Callable] = None
+) -> Iterator[Any]:
     """Iterate over a JSON Lines `file` object by object.
     `object_hook` is passed through to `json.load`.
     """
 
-    with json_lines.from_path(file, mode="rt", object_hook=object_hook) as fr:
+    with json_lines.from_path(file, mode="rt", cls=cls, object_hook=object_hook) as fr:
         yield from fr
+
+
+def write_json_lines(
+    it: Iterable[Any],
+    path,
+    ensure_ascii: bool = False,
+    sort_keys: bool = False,
+    default: Optional[Callable] = None,
+    safe: bool = False,
+) -> Iterator[Any]:
+    with sopen(path, "wt", encoding="utf-8", safe=safe) as fw:
+        with json_lines.from_stream(fw, ensure_ascii=ensure_ascii, sort_keys=sort_keys, default=default) as fw:
+            for obj in it:
+                fw.write(obj)
+                yield obj
 
 
 def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Sequence[str]], mode: str = "xt") -> None:
@@ -346,107 +364,13 @@ def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Seque
                 fw.writerow(keyfunc(obj))
 
 
-def key_to_hash(key: Any, default: Optional[Callable] = None) -> str:
+def key_to_hash(
+    key: Any, ensure_ascii: bool = False, sort_keys: bool = False, default: Optional[Callable] = None
+) -> str:
     from hashlib import md5
 
-    binary = json.dumps(key, default=default).encode("utf-8")
+    binary = json.dumps(key, ensure_ascii=ensure_ascii, sort_keys=sort_keys, default=default).encode("utf-8")
     return md5(binary).hexdigest()  # nosec
-
-
-def cache(
-    path: Path,
-    duration: Optional[datetime.timedelta] = None,
-    ensure_ascii: bool = False,
-    indent: Optional[Union[str, int]] = None,
-    sort_keys: bool = False,
-    default: Optional[Callable] = None,
-    object_hook: Optional[Callable] = None,
-) -> Callable:
-    """Decorator to cache results of function to json files at `path` for `duration`.
-    The remaining parameters are passed through to `json.dump`.
-    """
-
-    if duration is None:
-        _duration = datetime.timedelta.max
-    else:
-        _duration = duration
-
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def inner(*args, **kwargs):
-            hash = key_to_hash(args_to_key(args, kwargs, {}), default=default)
-            fullpath = path / hash
-
-            try:
-                invalid = now() - mdatetime(fullpath) > _duration
-            except FileNotFoundError:
-                invalid = True
-
-            if invalid:
-                path.mkdir(parents=True, exist_ok=True)
-                ret = func(*args, **kwargs)
-                write_json(
-                    ret,
-                    fullpath,
-                    ensure_ascii=ensure_ascii,
-                    indent=indent,
-                    sort_keys=sort_keys,
-                    default=default,
-                    safe=True,
-                )
-                return ret
-            else:
-                return read_json(fullpath, object_hook=object_hook)
-
-        return inner
-
-    return decorator
-
-
-def jsonlines_cache(
-    path: Path,
-    duration: Optional[datetime.timedelta] = None,
-    ensure_ascii: bool = False,
-    sort_keys: bool = False,
-    default: Optional[Callable] = None,
-    object_hook: Optional[Callable] = None,
-) -> Callable:
-    """Decorator to cache results of function to jsonlines files at `path` for `duration`.
-    The remaining parameters are passed through to `json_lines.from_path`.
-    """
-
-    duration = duration or datetime.timedelta.max
-
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def inner(*args, **kwargs):
-            hash = key_to_hash(args_to_key(args, kwargs, {}), default=default)
-            fullpath = path / hash
-
-            try:
-                invalid = now() - mdatetime(fullpath) > duration
-            except FileNotFoundError:
-                invalid = True
-
-            if invalid:
-                path.mkdir(parents=True, exist_ok=True)
-                with TransactionalCreateFile(fullpath, "wt") as stream:
-                    with json_lines.from_stream(
-                        stream, ensure_ascii=ensure_ascii, sort_keys=sort_keys, default=default
-                    ) as fw:
-                        # if `func` raises, TransactionalCreateFile makes sure that the original
-                        # cache file remains unmodified and that temporary files are deleted
-                        for obj in func(*args, **kwargs):
-                            fw.write(obj)
-                            yield obj
-            else:
-                with json_lines.from_path(fullpath, "rt", object_hook=object_hook) as fr:
-                    for obj in fr:
-                        yield obj
-
-        return inner
-
-    return decorator
 
 
 class JsonLinesFormatter(logging.Formatter):

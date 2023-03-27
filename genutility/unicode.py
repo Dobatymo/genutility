@@ -4,10 +4,10 @@ from sys import maxunicode
 from tempfile import gettempdir
 from unicodedata import category
 
-from .pickle import cache  # nosec
+from .cache import cache  # nosec
 
 
-@cache(Path(gettempdir() + "/unicode_categories.{ppv}.pkl"), ignoreargs=True)
+@cache(Path(gettempdir() + "/unicode_categories.{protocol}.pkl"), ignoreargs=True)
 def unicode_categories():
     unicode_categories = defaultdict(set)
     for c in map(chr, range(maxunicode + 1)):

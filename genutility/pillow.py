@@ -129,19 +129,19 @@ def _fix_orientation(img: Image.Image, orientation: int) -> Image.Image:
     if orientation == 1:
         raise NoActionNeeded("File already properly rotated")
     elif orientation == 2:
-        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     elif orientation == 3:
-        img = img.transpose(Image.ROTATE_180)
+        img = img.transpose(Image.Transpose.ROTATE_180)
     elif orientation == 4:
-        img = img.transpose(Image.FLIP_TOP_BOTTOM)
+        img = img.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
     elif orientation == 5:
-        img = img.transpose(Image.TRANSPOSE)
+        img = img.transpose(Image.Transpose.TRANSPOSE)
     elif orientation == 6:
-        img = img.transpose(Image.ROTATE_270)
+        img = img.transpose(Image.Transpose.ROTATE_270)
     elif orientation == 7:
-        img = img.transpose(Image.TRANSVERSE)
+        img = img.transpose(Image.Transpose.TRANSVERSE)
     elif orientation == 8:
-        img = img.transpose(Image.ROTATE_90)
+        img = img.transpose(Image.Transpose.ROTATE_90)
     else:
         raise ValueError("Unsupported orientation")
 
