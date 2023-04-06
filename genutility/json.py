@@ -56,6 +56,8 @@ class BuiltinRoundtripEncoder(json.JSONEncoder):
             return {"$timedelta": (obj.days, obj.seconds, obj.microseconds)}
         elif isinstance(obj, datetime.datetime):
             return {"$datetime": obj.isoformat()}
+        elif isinstance(obj, datetime.date):
+            return {"$dateobj": obj.isoformat()}
         elif isinstance(obj, set):
             return {"$set": tuple(obj)}
         elif isinstance(obj, frozenset):
@@ -77,6 +79,8 @@ class BuiltinRoundtripDecoder(json.JSONDecoder):
                 return datetime.datetime.fromisoformat(value)
             elif key == "$date":  # for compatibility with bson.json_util
                 return datetime_from_utc_timestamp_ms(value)
+            elif key == "$dateobj":
+                return datetime.date.fromisoformat(value)
             elif key == "$set":
                 return set(value)
             elif key == "$frozenset":

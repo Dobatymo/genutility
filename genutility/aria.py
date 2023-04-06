@@ -317,6 +317,18 @@ class AriaDownloader:
         self.gids.add(gid)
         return gid
 
+    def block_x(
+        self,
+        num: int,
+        active_callback: Optional[CallbackFuncT] = None,
+        waiting_callback: Optional[CallbackFuncT] = None,
+    ) -> Tuple[Optional[str], Optional[str]]:
+        if self.managed_downloads() >= num:
+            finished_gid, path = self.block_one(active_callback, waiting_callback)
+            return finished_gid, path
+        else:
+            return None, None
+
     def download_x(
         self,
         num: int,
@@ -349,11 +361,8 @@ class AriaDownloader:
             timeout,
             no_netrc,
         )
-        if self.managed_downloads() >= num:
-            finished_gid, path = self.block_one(active_callback, waiting_callback)
-            return queued_gid, finished_gid, path
-
-        return queued_gid, None, None
+        finished_gid, path = self.block_x(num, active_callback, waiting_callback)
+        return queued_gid, finished_gid, path
 
 
 class DownloadManager:
@@ -432,15 +441,25 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument("uris", metavar="URI", nargs="+", help="URLs to download")
+    parser.add_argument("action", choices=("download", "remove"))
+    parser.add_argument("--uris", metavar="URI", nargs="+", default=[], help="URLs to download")
     parser.add_argument("--outpath", default=".", help="Output directory")
     parser.add_argument("--max", default=2, type=int, help="Maximum concurrent downloads")
+    parser.add_argument("--gids", metavar="GID", nargs="+", default=[], help="GIDs")
     args = parser.parse_args()
 
     d = AriaDownloader()
-    for uri in args.uris:
-        path = d.download_x(args.max, uri, args.path)
-        print(f"Downloaded {uri} to {path}")
+    if args.action == "download":
+        for uri in args.uris:
+            try:
+                queued_gid, finished_gid, path = d.download_x(args.max, uri, args.path)
+                print(f"Downloaded {uri} to {path}")
+            except DownloadFailed as e:
+                print("Download failed: %s", e)
 
-    for a in d.block_all():
-        print(a)
+        for a in d.block_all():
+            print(a)
+
+    elif args.action == "remove":
+        for gid in args.gids:
+            d.query("remove", gid)

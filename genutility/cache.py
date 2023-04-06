@@ -57,7 +57,7 @@ def cache(
         read_iter = pickle.read_iter
         read_file = pickle.read_pickle
         key_to_hash = pickle.key_to_hash
-        _hash_sep = None
+        _hash_sep: Any = None
 
     elif serializer == "msgpack":
         from . import msgpack
