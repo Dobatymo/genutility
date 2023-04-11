@@ -1,59 +1,34 @@
 aiohttp>=3.7.4
-aria2p
+aioresponses>=0.7.2
 av>=8.0; python_version>='3.8'
-beautifulsoup4
-bencode.py>=2.0.0
-brotli
-certifi
-cryptography>=1.5.3
 ctypes-windows-sdk>=0.0.10; sys_platform=='win32'
 flask>=0.12.3
 gensim>=4.0.0
 gmpy2
+hypothesis
 jsonschema
 keras
-lxml
 msgpack>=0.6.0
-netifaces
-networkx
 nltk>=3.6.1
 numba; python_version<'3.11'
 numpy
 opencv-python
+packaging
 pandas
 pdfminer
-piexif
 Pillow>=8.1.1
 py7zr>=0.20.2
-pyarrow
-pymediainfo
-pymongo
-pyOpenSSL>=17.5.0
 PyPDF2>=3.0.0
-pyspark>=3.0.0
-python-pptx
 pywin32; sys_platform=='win32'
-re2
 requests
-rhash; sys_platform=='win32'
-rich
+requests-mock
 ruamel.yaml
-scikit-learn
-scipy
 setuptools
 simple-salesforce>=1.1.0
 simplejson
-sortedcontainers
-spacy
-tensorflow
 tika
 tls-property>=1.0.1
 toml
-torch
 tqdm
-twisted
 typing-extensions
 werkzeug>=0.11.11
-wmi; sys_platform=='win32'
-wxasync
-wxPython>=4

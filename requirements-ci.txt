@@ -1,0 +1,4 @@
+bandit[toml]>=1.7.5
+black
+flake8
+isort

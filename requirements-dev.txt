@@ -1,9 +1,0 @@
-aioresponses>=0.7.2
-bandit[toml]>=1.7.5
-black
-flake8
-hypothesis
-isort
-packaging
-pre-commit
-requests-mock
