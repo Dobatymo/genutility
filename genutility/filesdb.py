@@ -300,14 +300,14 @@ class GenericDb:
     def _filtered_values_str(self, derived, ignore_null: bool):
         return
 
-    def _add_file(self, mandatory: Sequence[Any], derived: Dict[str, Any], replace: bool = True) -> None:
-        """Adds a new entry to the database and doesn't check if file
-        with the same mandatory fields already exists.
+    def _add_row(self, mandatory: Sequence[Any], derived: Optional[Dict[str, Any]], replace: bool = True) -> None:
+        """Adds a new entry to the database and doesn't check if file with the same mandatory fields already exists.
         However it will replace entries based on PRIMARY KEYs or UNIQUE indices.
         If `replace` is True the values previously existing in the existing replaced row but not given in `derived` will be overwritten with empty values.
         If `replace` is False, only the given values will be updated.
         """
 
+        derived = derived or {}
         _derived = list(self._filtered_derived(derived, ignore_null=True))
         affected_fields = [n for n, t, v in chain(self._auto, self._mandatory, _derived)]
         fields = ", ".join(affected_fields)
@@ -326,7 +326,7 @@ class GenericDb:
 
         assert self.cursor.execute(sql, args).rowcount == 1
 
-    def _add_file_no_dup(
+    def _add_row_no_dup(
         self,
         mandatory: Sequence[Any],
         derived: Optional[Dict[str, Any]] = None,
@@ -353,7 +353,7 @@ class GenericDb:
             return False
 
         except NoResult:
-            self._add_file(mandatory, derived)
+            self._add_row(mandatory, derived)
             return True
         """
 
@@ -393,10 +393,9 @@ class GenericFileDb(GenericDb):
         However it will replace entries based on PRIMARY KEYs or UNIQUE indices
         """
 
-        derived = derived or {}
         stats = path.stat()
         mandatory = (fspath(path), stats.st_size, stats.st_mtime_ns)
-        self._add_file(mandatory, derived, replace)
+        self._add_row(mandatory, derived, replace)
         if commit:
             self.commit()
 
@@ -404,7 +403,7 @@ class GenericFileDb(GenericDb):
         """Only adds a new entry to the db if all the provided information doesn't match a row in the db yet."""
 
         mandatory = (path, filesize, mod_date)
-        result = self._add_file_no_dup(mandatory, derived)
+        result = self._add_row_no_dup(mandatory, derived)
         self.commit()
         return result
 
@@ -415,7 +414,7 @@ class GenericFileDb(GenericDb):
 
         for path, filesize, mod_date, derived in batch:
             mandatory = (path, filesize, mod_date)
-            yield self._add_file_no_dup(mandatory, derived)
+            yield self._add_row_no_dup(mandatory, derived)
 
         self.commit()
 
@@ -523,6 +522,6 @@ class FileDbWithId(GenericFileDb):
         stats = path.stat()
         assert stats.st_ino != 0 and stats.st_dev != 0
         mandatory = (fspath(path), stats.st_ino, stats.st_dev, stats.st_size, stats.st_mtime_ns)
-        self._add_file(mandatory, derived, replace)
+        self._add_row(mandatory, derived, replace)
         if commit:
             self.commit()

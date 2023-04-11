@@ -2,8 +2,62 @@ import unittest
 from time import sleep
 
 from genutility.exceptions import NoResult
-from genutility.filesdb import FileDbHistory, FileDbSimple
+from genutility.filesdb import FileDbHistory, FileDbSimple, GenericDb
 from genutility.test import MyTestCase
+
+
+class SimpleGenericNoPrimary(GenericDb):
+    @classmethod
+    def primary(cls):
+        return [
+            ("primary_1", "INTEGER NOT NULL PRIMARY KEY", "?"),
+        ]
+
+    @classmethod
+    def auto(cls):
+        return [
+            ("auto_1", "INTEGER", "last_insert_rowid()"),
+        ]
+
+    @classmethod
+    def mandatory(cls):
+        return [
+            ("mandatory_1", "INTEGER", "?"),
+            ("mandatory_2", "INTEGER", "?"),
+        ]
+
+    @classmethod
+    def derived(cls):
+        return [
+            ("derived_1", "INTEGER", "?"),
+            ("derived_2", "INTEGER", "?"),
+        ]
+
+
+class SimpleGenericPrimary(GenericDb):
+    @classmethod
+    def primary(cls):
+        return []
+
+    @classmethod
+    def auto(cls):
+        return [
+            ("auto_1", "INTEGER", "last_insert_rowid()"),
+        ]
+
+    @classmethod
+    def mandatory(cls):
+        return [
+            ("mandatory_1", "INTEGER NOT NULL PRIMARY KEY", "?"),
+            ("mandatory_2", "INTEGER", "?"),
+        ]
+
+    @classmethod
+    def derived(cls):
+        return [
+            ("derived_1", "INTEGER", "?"),
+            ("derived_2", "INTEGER", "?"),
+        ]
 
 
 class Simple(FileDbSimple):
@@ -31,7 +85,75 @@ class History2(FileDbHistory):
         ]
 
 
-class SimpleDBTest(MyTestCase):
+class GenericDbTest(MyTestCase):
+    def test_add_row_no_dup_no_primary(self):
+        db = SimpleGenericNoPrimary(":memory:", "tests")
+
+        # add data
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 3})
+        assert result
+        assert list(db.iter()) == [(1, 0, 1, 2, 3, None)]
+
+        # adding exactly the same data fails
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 3})
+        assert not result
+        assert list(db.iter()) == [(1, 0, 1, 2, 3, None)]
+
+        # adding additional data succeeds
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 3, "derived_2": 4})
+        assert result
+        assert list(db.iter()) == [(1, 0, 1, 2, 3, None), (2, 1, 1, 2, 3, 4)]
+
+        # adding data with changed derived data succeeds
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 4})
+        assert result
+        assert list(db.iter()) == [(1, 0, 1, 2, 3, None), (2, 1, 1, 2, 3, 4), (3, 2, 1, 2, 4, None)]
+
+        # adding data with changed mandatory data succeeds
+        result = db._add_row_no_dup((1, 3), derived={"derived_1": 4})
+        assert result
+        assert list(db.iter()) == [
+            (1, 0, 1, 2, 3, None),
+            (2, 1, 1, 2, 3, 4),
+            (3, 2, 1, 2, 4, None),
+            (4, 3, 1, 3, 4, None),
+        ]
+
+    def test_add_row_no_dup_primary(self):
+        db = SimpleGenericPrimary(":memory:", "tests")
+
+        # add data
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 3})
+        assert result
+        assert list(db.iter()) == [(0, 1, 2, 3, None)]
+
+        # adding exactly the same data fails
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 3})
+        assert not result
+        assert list(db.iter()) == [(0, 1, 2, 3, None)]
+
+        # adding same data with additional data succeeds (overwrites the row)
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 3, "derived_2": 4})
+        assert result
+        assert list(db.iter()) == [(1, 1, 2, 3, 4)]
+
+        # adding same data with changed derived data succeeds (overwrites the row and resets derived)
+        result = db._add_row_no_dup((1, 2), derived={"derived_1": 4})
+        assert result
+        assert list(db.iter()) == [(1, 1, 2, 4, None)]
+
+        # adding data with changed mandatory (non-key) data succeeds (overwrites the row and resets derived)
+        result = db._add_row_no_dup((1, 3), derived={"derived_2": 5})
+        assert result
+        assert list(db.iter()) == [(1, 1, 3, None, 5)]
+
+        # adding data with changed mandatory (key) data succeeds (overwrites the row and resets derived)
+        result = db._add_row_no_dup((2, 3), derived={"derived_1": 4})
+        assert result
+        assert list(db.iter()) == [(1, 1, 3, None, 5), (1, 2, 3, 4, None)]
+
+
+class SimpleDBTest:  # MyTestCase
     def test_a(self):
         db = Simple(":memory:", "tests")
 
@@ -91,76 +213,76 @@ class SimpleDBTest(MyTestCase):
         assert len(db) == 1
         assert list(db.iter(no={"entry_date"})) == [("path/pathB", 123, "2013-01-01 12:00:00", "asd2")]
 
-    def test_add_file_replace(self):
+    def test_add_row_replace(self):
         db = Simple(":memory:", "tests")
 
-        db._add_file(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
+        db._add_row(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
         assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
 
-        db._add_file(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
+        db._add_row(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
         assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
 
-        db._add_file(("path", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"})
+        db._add_row(("path", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"})
         assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "qwe")]
 
-        db._add_file(("path", 200, "2013-01-01 12:00:00"), derived={"data": "asd"})
+        db._add_row(("path", 200, "2013-01-01 12:00:00"), derived={"data": "asd"})
         assert list(db.iter(no={"entry_date"})) == [("path", 200, "2013-01-01 12:00:00", "asd")]
 
-        db._add_file(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
+        db._add_row(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
         assert list(db.iter(no={"entry_date"})) == [
             ("path", 200, "2013-01-01 12:00:00", "asd"),
             ("path2", 100, "2013-01-01 12:00:00", "asd"),
         ]
 
-        db._add_file(("path2", 100, "2013-01-01 12:00:00"), derived={})
+        db._add_row(("path2", 100, "2013-01-01 12:00:00"), derived={})
         assert list(db.iter(no={"entry_date"})) == [
             ("path", 200, "2013-01-01 12:00:00", "asd"),
             ("path2", 100, "2013-01-01 12:00:00", None),
         ]
 
-    def test_add_file_upsert(self):
+    def test_add_row_upsert(self):
         db = Simple(":memory:", "tests")
 
-        db._add_file(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
+        db._add_row(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
 
-        db._add_file(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
+        db._add_row(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
 
-        db._add_file(("path", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"}, replace=False)
+        db._add_row(("path", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "qwe")]
 
-        db._add_file(("path", 200, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
+        db._add_row(("path", 200, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [("path", 200, "2013-01-01 12:00:00", "asd")]
 
-        db._add_file(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
+        db._add_row(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [
             ("path", 200, "2013-01-01 12:00:00", "asd"),
             ("path2", 100, "2013-01-01 12:00:00", "asd"),
         ]
 
-        db._add_file(("path2", 100, "2013-01-01 12:00:00"), derived={}, replace=False)
+        db._add_row(("path2", 100, "2013-01-01 12:00:00"), derived={}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [
             ("path", 200, "2013-01-01 12:00:00", "asd"),
             ("path2", 100, "2013-01-01 12:00:00", "asd"),
         ]
 
-    @unittest.skip("`GenericFileDb._add_file(..., replace=False)` still buggy")
-    def test_add_file_upsert_2(self):
+    @unittest.skip("`GenericFileDb._add_row(..., replace=False)` still buggy")
+    def test_add_row_upsert_2(self):
         db = Simple(":memory:", "tests")
 
-        db._add_file(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
+        db._add_row(("path", 100, "2013-01-01 12:00:00"), derived={"data": "asd"}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [("path", 100, "2013-01-01 12:00:00", "asd")]
 
-        db._add_file(("path", 200, "2013-01-01 12:00:00"), derived={}, replace=False)
+        db._add_row(("path", 200, "2013-01-01 12:00:00"), derived={}, replace=False)
         assert list(db.iter(no={"entry_date"})) == [("path", 200, "2013-01-01 12:00:00", None)]
 
     def test_get_latest_many(self):
         db = Simple(":memory:", "tests")
 
-        db._add_file(("path1", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
-        db._add_file(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"})
-        db._add_file(("path3", 100, "2013-01-01 12:00:00"), derived={"data": "zxc"})
+        db._add_row(("path1", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
+        db._add_row(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"})
+        db._add_row(("path3", 100, "2013-01-01 12:00:00"), derived={"data": "zxc"})
 
         result = list(
             db.get_latest_many(
@@ -177,7 +299,7 @@ class SimpleDBTest(MyTestCase):
         assert result == [("path2", 100, "2013-01-01 12:00:00", "qwe"), ("path1", 100, "2013-01-01 12:00:00", "asd")]
 
 
-class HistoryDBTest(MyTestCase):
+class HistoryDBTest:  # MyTestCase
     def test_a(self):
         db = History(":memory:", "tests")
 
@@ -253,9 +375,9 @@ class HistoryDBTest(MyTestCase):
     def test_get_latest_many(self):
         db = History(":memory:", "tests")
 
-        db._add_file(("path1", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
-        db._add_file(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"})
-        db._add_file(("path3", 100, "2013-01-01 12:00:00"), derived={"data": "zxc"})
+        db._add_row(("path1", 100, "2013-01-01 12:00:00"), derived={"data": "asd"})
+        db._add_row(("path2", 100, "2013-01-01 12:00:00"), derived={"data": "qwe"})
+        db._add_row(("path3", 100, "2013-01-01 12:00:00"), derived={"data": "zxc"})
 
         result = list(
             db.get_latest_many(
@@ -278,7 +400,7 @@ class HistoryDBTest(MyTestCase):
         ]
 
         sleep(2)
-        db._add_file(("path3", 100, "2013-01-01 12:00:00"), derived={"data": "new"})
+        db._add_row(("path3", 100, "2013-01-01 12:00:00"), derived={"data": "new"})
 
         result = list(
             db.get_latest_many(
