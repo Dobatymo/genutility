@@ -9,10 +9,10 @@ import stat
 from datetime import datetime
 from fnmatch import fnmatch
 from functools import partial
-from itertools import zip_longest
+from itertools import chain, zip_longest
 from operator import attrgetter
 from os import DirEntry, PathLike, fspath
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
 from ._files import BaseDirEntry, MyDirEntryT, entrysuffix, to_dos_device_path
@@ -671,45 +671,44 @@ def mac_compliant_dirname(filename: str, replacement: str = "_") -> str:
     return _char_subber(filename, mac_illegal_chars, replacement)
 
 
-def windows_split_path(s: str) -> List[str]:
-    return _char_splitter(s, windows_sep)
+_os_map = {
+    "compliant_filename": {
+        "Windows": windows_compliant_filename,
+        "Linux": linux_compliant_filename,
+        "Darwin": mac_compliant_filename,
+    },
+    "compliant_dirname": {
+        "Windows": windows_compliant_dirname,
+        "Linux": linux_compliant_dirname,
+        "Darwin": mac_compliant_dirname,
+    },
+}
 
 
-def linux_split_path(s: str) -> List[str]:
-    return _char_splitter(s, linux_sep)
+def _get_os_func(name: str, force_system: Optional[str] = None) -> Callable:
+    system = force_system or platform.system()
+
+    return _os_map[name].get(system, _not_available(name))
 
 
-def mac_split_path(s: str) -> List[str]:
-    return _char_splitter(s, mac_sep)
+compliant_filename = _get_os_func("compliant_filename")
+compliant_dirname = _get_os_func("compliant_dirname")
 
 
-system = platform.system()
+def compliant_path(path: PurePath, replacement: str = "_", force_system: Optional[str] = None) -> Path:
+    if force_system is not None:
+        compliant_filename = _get_os_func("compliant_filename", force_system)
+        compliant_dirname = _get_os_func("compliant_dirname", force_system)
 
-if system == "Windows":
-    compliant_filename = windows_compliant_filename
-    compliant_dirname = windows_compliant_dirname
-    split_path = windows_split_path
-elif system == "Linux":
-    compliant_filename = linux_compliant_filename
-    compliant_dirname = linux_compliant_dirname
-    split_path = linux_split_path
-elif system == "Darwin":
-    compliant_filename = mac_compliant_filename
-    compliant_dirname = mac_compliant_dirname
-    split_path = mac_split_path
-else:
-    compliant_filename = _not_available("compliant_filename")
-    compliant_dirname = _not_available("compliant_dirname")
-    split_path = _not_available("split_path")
+    fn_func = partial(compliant_dirname, replacement=replacement)
 
+    if bool(path.drive) or bool(path.root):  # is_absolute() doesn't do the right thing here
+        parts = chain(path.parts[0:1], map(fn_func, path.parts[1:-1]))
+    else:
+        parts = map(fn_func, path.parts[:-1])
 
-def compliant_path(path: str, replace: str = "_") -> str:
-    fn_func = partial(compliant_dirname, replace=replace)
-    path_compontents = split_path(path)
-
-    ret = os.sep.join(map(fn_func, path_compontents[:-1]))
-    ret = os.path.join(ret, compliant_filename(path_compontents[-1]))
-    return ret
+    filename = compliant_filename(path.parts[-1], replacement)
+    return type(path)(*parts, filename)
 
 
 def reldirname(path: PathType) -> str:

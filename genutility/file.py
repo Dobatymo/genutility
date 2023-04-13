@@ -250,10 +250,10 @@ class OptionalWriteOnlyFile:
         if self.fp:
             self.fp.close()
 
-    def write(self, data):
+    def write(self, data) -> Optional[int]:
         pass
 
-    def seek(self, offset, whence=None):
+    def seek(self, offset: int, whence: int = 0) -> int:
         pass
 
 

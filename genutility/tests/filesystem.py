@@ -1,9 +1,9 @@
 import os.path
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from types import TracebackType
 from typing import Optional, Type
 
-from genutility.filesystem import append_to_filename, scandir_rec
+from genutility.filesystem import append_to_filename, compliant_path, scandir_rec
 from genutility.test import MyTestCase, parametrize
 
 
@@ -40,6 +40,44 @@ class FilesystemTest(MyTestCase):
     def test_append_to_filename(self, path, s, truth):
         result = append_to_filename(path, s)
         self.assertEqual(truth, result)
+
+    @parametrize(
+        ("asd", "asd"),
+        ("asd\0", "asd_"),
+        ("/asd", "/asd"),
+        ("/asd\0", "/asd_"),
+        ("./asd", "./asd"),
+        ("./asd\0", "./asd_"),
+    )
+    def test_compliant_path_posix(self, path, truth):
+        result = compliant_path(PurePosixPath(path), force_system="Linux")
+        self.assertEqual(PurePosixPath(truth), result)
+
+    @parametrize(
+        ("asd", "asd"),
+        ("???", "___"),
+        ("C:/asd", "C:/asd"),
+        ("C:/???", "C:/___"),
+        ("0:/asd", "0_/asd"),
+        ("XX:/asd", "XX_/asd"),
+        ("C:asd", "C:asd"),
+        ("C:???", "C:___"),
+        ("0:asd", "0_asd"),
+        ("XX:asd", "XX_asd"),
+        ("./asd", "asd"),
+        ("./???", "___"),
+        ("/asd", "/asd"),
+        ("/???", "/___"),
+        (r"\\?\C:/asd", r"\\?\C:/asd"),
+        (r"\\?\0:/asd", r"\\?\0_/asd"),
+        (r"\\?\XX:/asd", r"\\?\XX_/asd"),
+        (r"\\?\C:/???", r"\\?\C:/___"),
+        (r"\\?\C:asd", r"\\?\C:asd"),  # these are technically not allowed
+        (r"\\?\C:???", r"\\?\C:___"),  # these are technically not allowed
+    )
+    def test_compliant_path_windows(self, path, truth):
+        result = compliant_path(PureWindowsPath(path), force_system="Windows")
+        self.assertEqual(PureWindowsPath(truth), result)
 
     def test_scandir_rec(self):
         base = ["joined.pdf", "quadrant-0.png", "quadrant-1.png", "quadrant-2.png", "quadrant-3.png"]

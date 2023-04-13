@@ -141,7 +141,7 @@ def iter_jpeg_fp(fr: BinaryIO, translate: bool = True) -> Iterator[Segment]:
                     yield name, marker, size, data
 
                 prevenv = mm.tell()
-                for m in markerp.finditer(mm, prevenv, fs):  # type: ignore
+                for m in markerp.finditer(mm, prevenv, fs):
                     start, end = m.span(0)
                     if translate:
                         yield "ENTROPY", mm[prevenv:start]
