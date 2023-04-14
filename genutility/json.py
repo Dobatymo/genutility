@@ -5,6 +5,7 @@ import logging
 from functools import partial
 from itertools import islice
 from pathlib import Path
+from traceback import TracebackException
 from types import ModuleType
 from typing import IO, Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optional, Sequence, Tuple, Type, Union
 
@@ -87,6 +88,13 @@ class BuiltinRoundtripDecoder(json.JSONDecoder):
                 return frozenset(value)
 
         return obj
+
+
+class TracebackExceptionEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, TracebackException):
+            return "\n".join(obj.format())
+        return json.JSONEncoder.default(self, obj)
 
 
 def read_json_schema(path: PathStr) -> JsonDict:
@@ -399,16 +407,30 @@ class JsonLinesFormatter(logging.Formatter):
         self,
         include: FrozenSet[str] = frozenset(),
         builtins: FrozenSet[str] = frozenset(),
+        cls: Optional[Type[json.JSONEncoder]] = None,
         default: Optional[Callable] = None,
+        sort_keys: bool = False,
     ) -> None:
         logging.Formatter.__init__(self)
         self.include_b = include & self.myfields.keys()
         self.builtins = builtins
-        self.dumps = partial(json.dumps, ensure_ascii=False, indent=None, sort_keys=True, default=default)
 
-    def format(self, record):
+        """ If builtins includes exc_info, the json encoder class must support TracebackException objects.
+            if cls and default are both None, `genutility.json.TracebackExceptionEncoder` will be used.
+        """
+
+        if cls is None and default is None and "exc_info" in builtins:
+            cls = TracebackExceptionEncoder
+        self.dumps = partial(json.dumps, ensure_ascii=False, cls=cls, indent=None, default=default, sort_keys=sort_keys)
+
+    def format(self, record: logging.LogRecord) -> str:
         # add builtins logger fields
         row = {name: getattr(record, name) for name in self.builtins}
+
+        if "exc_info" in row:
+            exc_info = row["exc_info"]
+            if exc_info is not None:
+                row["exc_info"] = TracebackException(*exc_info)
 
         # add custom logger fields
         if self.include_b:

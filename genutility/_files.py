@@ -3,54 +3,58 @@
 """
 
 
+import os
 import os.path
 import re
-from os import DirEntry, PathLike
 from typing import Union
 
-PathType = Union[str, PathLike]
+PathType = Union[str, os.PathLike]
 
 
-class BaseDirEntry:
+class BaseDirEntry(os.PathLike):
     __slots__ = ("entry",)
 
-    def __init__(self, entry):
+    """ You cannot inherit from `os.DirEntry` (type 'nt.DirEntry' is not an acceptable base type),
+        so use this wrapper class instead.
+    """
+
+    def __init__(self, entry: os.DirEntry) -> None:
         self.entry = entry
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.entry.name
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self.entry.path
 
-    def inode(self):
+    def inode(self) -> int:
         return self.entry.inode()
 
-    def is_dir(self):
-        return self.entry.is_dir()
+    def is_dir(self, follow_symlinks=True) -> bool:
+        return self.entry.is_dir(follow_symlinks)
 
-    def is_file(self):
-        return self.entry.is_file()
+    def is_file(self, follow_symlinks=True) -> bool:
+        return self.entry.is_file(follow_symlinks)
 
-    def is_symlink(self):
+    def is_symlink(self) -> bool:
         return self.entry.is_symlink()
 
-    def stat(self):
+    def stat(self) -> os.stat_result:
         return self.entry.stat()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.entry)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.entry)
 
-    def __fspath__(self):
-        return self.entry.path
+    def __fspath__(self) -> str:
+        return os.fspath(self.entry)
 
 
-MyDirEntryT = Union[DirEntry, BaseDirEntry]
+MyDirEntryT = Union[os.DirEntry, BaseDirEntry]
 
 
 def entrysuffix(entry: MyDirEntryT) -> str:

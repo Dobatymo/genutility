@@ -11,19 +11,17 @@ from fnmatch import fnmatch
 from functools import partial
 from itertools import chain, zip_longest
 from operator import attrgetter
-from os import DirEntry, PathLike, fspath
 from pathlib import Path, PurePath
 from typing import Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
-from ._files import BaseDirEntry, MyDirEntryT, entrysuffix, to_dos_device_path
+from ._files import BaseDirEntry, MyDirEntryT, PathType, entrysuffix, to_dos_device_path
 from .datetime import datetime_from_utc_timestamp
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
 from .iter import is_empty
 from .ops import logical_implication
 from .os import _not_available, islink
 
-PathType = Union[str, PathLike]
-EntryType = Union[Path, DirEntry]
+EntryType = Union[Path, os.DirEntry]
 
 logger = logging.getLogger(__name__)
 
@@ -177,40 +175,44 @@ class DirEntryStub:
 
 
 class MyDirEntry(BaseDirEntry):
-    __slots__ = ("basepath", "_relpath", "follow")
+    __slots__ = ("_basepath", "_relpath", "follow")
 
-    def __init__(self, entry):
+    def __init__(self, entry: os.DirEntry) -> None:
         BaseDirEntry.__init__(self, entry)
 
-        self.basepath: Optional[str] = None
+        self._basepath: Optional[str] = None
         self._relpath: Optional[str] = None
         self.follow = True
 
     @property
+    def basepath(self) -> str:
+        if self._basepath is None:
+            raise AttributeError("basepath not set")
+
+        return self._basepath
+
+    @basepath.setter
+    def basepath(self, path: str) -> None:
+        self._relpath = os.path.relpath(self.entry.path, path)
+        self._basepath = path
+
+    @property
     def relpath(self) -> str:
-        if self._relpath is not None:
-            return self._relpath
+        if self._relpath is None:
+            raise AttributeError("basepath not set")
 
-        if self.basepath is None:
-            raise RuntimeError("relpath cannot be returned, because basepath is not set")
-
-        self._relpath = os.path.relpath(self.entry.path, self.basepath)
         return self._relpath
-
-    @relpath.setter
-    def relpath(self, path: str) -> None:
-        self._relpath = path
 
 
 if platform.system() == "Windows":
 
-    def long_path_support(path: str) -> str:
+    def long_path_support(path: PathType) -> str:
         return to_dos_device_path(os.path.abspath(path))
 
 else:
 
-    def long_path_support(path: str) -> str:
-        return path
+    def long_path_support(path: PathType) -> str:
+        return os.fspath(path)
 
 
 def mdatetime(path: PathType, aslocal: bool = False) -> datetime:
@@ -221,7 +223,7 @@ def mdatetime(path: PathType, aslocal: bool = False) -> datetime:
     and UTC otherwise (the default).
     """
 
-    if isinstance(path, (Path, DirEntry)):
+    if isinstance(path, (Path, os.DirEntry)):
         mtime = path.stat().st_mtime
     else:
         mtime = os.stat(path).st_mtime
@@ -296,23 +298,25 @@ def append_to_filename(path: PathType, s: str) -> str:
     return root + s + ext
 
 
-def scandir_error_log(entry: DirEntry, exception) -> None:
+def scandir_error_log(entry: os.DirEntry, exception) -> None:
     logger.exception("Error in %s", entry.path, exc_info=exception)
 
 
-def scandir_error_log_warning(entry: DirEntry, exception) -> None:
+def scandir_error_log_warning(entry: os.DirEntry, exception) -> None:
     logger.warning("Error in %s", entry.path, exc_info=exception)
 
 
-def scandir_error_raise(entry: DirEntry, exception) -> None:
+def scandir_error_raise(entry: os.DirEntry, exception) -> None:
     raise exception
 
 
-def scandir_error_ignore(entry: DirEntry, exception) -> None:
+def scandir_error_ignore(entry: os.DirEntry, exception) -> None:
     pass
 
 
-def _is_loop(rootentry: DirEntry, entry: DirEntry, is_link: bool, loops: Optional[Set[str]]) -> bool:
+def _is_loop(rootentry: os.DirEntry, entry: os.DirEntry, is_link: bool, loops: Optional[Set[str]]) -> bool:
+    _path: str
+
     if loops is not None:
         if is_link:
             _path = os.readlink(entry)
@@ -331,13 +335,15 @@ def _is_loop(rootentry: DirEntry, entry: DirEntry, is_link: bool, loops: Optiona
 
 
 def _scandir_rec_skippable(
-    rootentry: DirEntry,
+    rootentry: os.DirEntry,
     files: bool = True,
     others: bool = False,
     follow_symlinks: bool = True,
     prevent_loops_set: Optional[Set[str]] = None,
-    errorfunc: Callable[[DirEntry, Exception], None] = scandir_error_raise,
+    errorfunc: Callable[[os.DirEntry, Exception], None] = scandir_error_raise,
 ) -> Iterator[MyDirEntry]:
+    is_link = False
+
     try:
         with os.scandir(rootentry.path) as it:
             for entry in it:
@@ -366,16 +372,16 @@ def _scandir_rec_skippable(
 
 
 def _scandir_rec(
-    rootentry: DirEntry,
+    rootentry: os.DirEntry,
     files: bool = True,
     dirs: bool = False,
     others: bool = False,
     rec: bool = True,
     follow_symlinks: bool = True,
     prevent_loops_set: Optional[Set[str]] = None,
-    errorfunc: Callable[[DirEntry, Exception], None] = scandir_error_raise,
-) -> Iterator[DirEntry]:
-    is_link: Optional[bool] = None
+    errorfunc: Callable[[os.DirEntry, Exception], None] = scandir_error_raise,
+) -> Iterator[os.DirEntry]:
+    is_link = False
 
     try:
         with os.scandir(rootentry.path) as it:
@@ -405,7 +411,7 @@ def _scandir_rec(
         errorfunc(rootentry, e)
 
 
-def _get_entry_stub(path: str) -> DirEntry:
+def _get_entry_stub(path: str) -> os.DirEntry:
     return DirEntryStub(os.path.basename(path), long_path_support(path))
 
 
@@ -442,8 +448,8 @@ def scandir_rec(
     if not logical_implication(allow_skip, dirs and rec):
         raise ValueError("allow_skip implies dirs and rec")
 
-    if isinstance(path, PathLike):
-        path = fspath(path)
+    if isinstance(path, os.PathLike):
+        path = os.fspath(path)
 
     if not follow_symlinks or not rec:
         prevent_loops = False
@@ -485,7 +491,7 @@ def scandir_rec_simple(
     follow_symlinks: bool = True,
     prevent_loops: bool = True,
     errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log_warning,
-) -> Iterator[DirEntry]:
+) -> Iterator[os.DirEntry]:
     entry = DirEntryStub(os.path.basename(path), path)
     prevent_loops_set: Optional[Set[str]] = set() if prevent_loops else None
 
@@ -499,7 +505,7 @@ def scandir_ext(
     follow_symlinks: bool = False,
     relative: bool = False,
     errorfunc: Callable = scandir_error_log,
-) -> Iterator[DirEntry]:
+) -> Iterator[MyDirEntryT]:
     for entry in scandir_rec(
         path, files=True, dirs=False, rec=rec, follow_symlinks=follow_symlinks, relative=relative, errorfunc=errorfunc
     ):
@@ -519,7 +525,7 @@ def scandir_ext_2(path: str, extensions: Set[str], rec: bool = True) -> Iterator
             yield p
 
 
-def _scandir_depth(rootentry: DirEntry, depth: int, errorfunc: Callable):
+def _scandir_depth(rootentry: os.DirEntry, depth: int, errorfunc: Callable):
     try:
         with os.scandir(rootentry.path) as it:
             for entry in it:
@@ -536,9 +542,11 @@ def _scandir_depth(rootentry: DirEntry, depth: int, errorfunc: Callable):
         errorfunc(rootentry, e)
 
 
-def scandir_depth(path: str, depth: int = 0, onerror: Callable = scandir_error_log) -> Iterator[Tuple[int, DirEntry]]:
+def scandir_depth(
+    path: str, depth: int = 0, onerror: Callable = scandir_error_log
+) -> Iterator[Tuple[int, os.DirEntry]]:
     """Recursive version of `scandir` which yields the current path depth
-    along with the DirEntry.
+    along with the os.DirEntry.
     Directories are returned first, then files.
     The order is arbitrary otherwise.
     """
@@ -696,18 +704,21 @@ compliant_dirname = _get_os_func("compliant_dirname")
 
 
 def compliant_path(path: PurePath, replacement: str = "_", force_system: Optional[str] = None) -> Path:
-    if force_system is not None:
-        compliant_filename = _get_os_func("compliant_filename", force_system)
-        compliant_dirname = _get_os_func("compliant_dirname", force_system)
+    if force_system is None:
+        _compliant_filename = compliant_filename
+        _compliant_dirname = compliant_dirname
+    else:
+        _compliant_filename = _get_os_func("compliant_filename", force_system)
+        _compliant_dirname = _get_os_func("compliant_dirname", force_system)
 
-    fn_func = partial(compliant_dirname, replacement=replacement)
+    fn_func = partial(_compliant_dirname, replacement=replacement)
 
     if bool(path.drive) or bool(path.root):  # is_absolute() doesn't do the right thing here
         parts = chain(path.parts[0:1], map(fn_func, path.parts[1:-1]))
     else:
         parts = map(fn_func, path.parts[:-1])
 
-    filename = compliant_filename(path.parts[-1], replacement)
+    filename = _compliant_filename(path.parts[-1], replacement)
     return type(path)(*parts, filename)
 
 
@@ -761,7 +772,7 @@ def search(
     files: bool = True,
     rec: bool = True,
     follow_symlinks: bool = False,
-) -> Iterator[DirEntry]:
+) -> Iterator[MyDirEntryT]:
     """Search for files and folders matching the wildcard `pattern`."""
 
     for directory in directories:
@@ -860,7 +871,7 @@ def _scandir_counts(
     rec: bool = True,
     total: bool = False,
     errorfunc: Callable = scandir_error_raise,
-) -> Iterator[Tuple[DirEntry, Optional[Counts]]]:
+) -> Iterator[Tuple[os.DirEntry, Optional[Counts]]]:
     counts = Counts()
 
     try:
@@ -899,14 +910,14 @@ def scandir_counts(
     rec: bool = True,
     total: bool = False,
     onerror: Callable = scandir_error_log,
-) -> Iterator[Tuple[DirEntry, Optional[Counts]]]:
+) -> Iterator[Tuple[os.DirEntry, Optional[Counts]]]:
     """A recursive variant of scandir() which also returns the number of files/directories
     within directories.
     If total is True, the numbers will be calculated recursively as well.
     """
 
-    if isinstance(path, PathLike):
-        path = fspath(path)
+    if isinstance(path, os.PathLike):
+        path = os.fspath(path)
 
     entry = DirEntryStub(os.path.basename(path), long_path_support(path))
     return _scandir_counts(entry, files, others, rec, total, onerror)

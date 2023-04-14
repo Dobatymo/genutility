@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, TypeVar, Union
+from typing import AbstractSet, Any, Dict, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -123,7 +123,7 @@ class MalformedFile(ValueError):
     """
 
 
-def assert_choice(name: str, value: Optional[T], choices: Set[T], optional: bool = False) -> None:
+def assert_choice(name: str, value: Optional[T], choices: AbstractSet[T], optional: bool = False) -> None:
     if optional and value is None:
         return
 
@@ -131,14 +131,14 @@ def assert_choice(name: str, value: Optional[T], choices: Set[T], optional: bool
         raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices))))
 
 
-def assert_choices(name: str, values: Optional[Sequence[T]], choices: Set[T], optional: bool = False) -> None:
+def assert_choices(name: str, values: Optional[Sequence[T]], choices: AbstractSet[T], optional: bool = False) -> None:
     if values is None:
         if optional:
             return
         else:
             raise TypeError("`None cannot be passed for `values` when `optional=False`")
 
-    if set(values) - choices:
+    if frozenset(values) - choices:
         raise ValueError("{} must be a subset of {}".format(name, ", ".join(map(str, choices))))
 
 
