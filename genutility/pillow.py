@@ -143,7 +143,7 @@ def _fix_orientation(img: Image.Image, orientation: int) -> Image.Image:
     elif orientation == 8:
         img = img.transpose(Image.Transpose.ROTATE_90)
     else:
-        raise ValueError("Unsupported orientation")
+        raise ValueError(f"Unsupported orientation: {orientation}")
 
     return img
 

@@ -94,7 +94,7 @@ class TracebackExceptionEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, TracebackException):
             return "\n".join(obj.format())
-        return json.JSONEncoder.default(self, obj)
+        return super().default(obj)
 
 
 def read_json_schema(path: PathStr) -> JsonDict:

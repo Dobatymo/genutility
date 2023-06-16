@@ -91,7 +91,7 @@ class fileextensions:
         "divx",
         "ogm",
     )
-    images = ("bmp", "jpg", "jpeg", "png", "gif", "tif", "tiff", "tga")
+    images = ("bmp", "jpg", "jpeg", "png", "gif", "tif", "tiff", "tga", "heif", "heic", "webp", "avif")
 
     archives = ("zip", "rar", "ace", "tar", "tgz", "tbz", "7z", "cab", "dmg", "wim")
     bytecode = ("pyc", "class")

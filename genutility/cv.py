@@ -1,13 +1,12 @@
-import logging
 from typing import TYPE_CHECKING, Iterator, Union
 
 import cv2
 import numpy as np
 
+from videofile import CvVideo
+
 if TYPE_CHECKING:
     import wx  # noqa: F401
-
-logger = logging.getLogger(__name__)
 
 
 def wx_to_cv_image(wximage: "wx.Image") -> np.ndarray:
@@ -22,22 +21,10 @@ def grayscale(cvimg: np.ndarray) -> np.ndarray:
 
 
 def iter_video(input: Union[str, int] = 0, show: bool = False) -> Iterator[np.ndarray]:
-    cap = cv2.VideoCapture(input)
-    logger.debug("Reading video using %s backend", cap.getBackendName())
-
-    try:
-        while True:
-            retval, image = cap.read()
-            if retval:
-                yield image
-            else:
-                break
-
-            if show:
-                cv2.imshow("iter_video", image)
-                if cv2.waitKey(1) & 0xFF == ord("q"):
-                    return
-    finally:
-        cap.release()
+    with CvVideo(input) as video:
         if show:
-            cv2.destroyAllWindows()
+            for time, image in video.show():
+                yield image
+        else:
+            for time, image in video.iterall(native=True):
+                yield image

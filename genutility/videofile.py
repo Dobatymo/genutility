@@ -10,8 +10,6 @@ import numpy as np
 if TYPE_CHECKING:
     from av import VideoFrame
 
-WsgiApp = Any
-
 # if __debug__:
 #     import av
 #     import cv2
@@ -57,11 +55,14 @@ class VideoBase:
             except NoKeyFrame as e:
                 yield offset, e
 
+    def iterall(self, native: bool = False) -> Iterator[Tuple[float, np.ndarray]]:
+        raise NotImplementedError
+
     def save_frame_to_file(self, pos: float, outpath: PathLike) -> None:
         frametime, frame = self._get_frame(int(self.native_duration * pos), native=True)
         self._frame_to_file(frame, outpath)
 
-    def close(self):
+    def close(self) -> None:
         raise NotImplementedError
 
     def __enter__(self):
@@ -87,6 +88,7 @@ class CvVideo(VideoBase):
             path = fspath(path)
 
         self.cap = self.cv2.VideoCapture(path)
+        logger.debug("Reading video using backend: %s", self.cap.getBackendName())
 
         frame_width = int(self.cap.get(self.cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(self.cap.get(self.cv2.CAP_PROP_FRAME_HEIGHT))
@@ -130,6 +132,29 @@ class CvVideo(VideoBase):
         import cv2
 
         return cv2
+
+    def iterall(self, native: bool = False) -> Iterator[Tuple[float, np.ndarray]]:
+        while True:
+            retval, image = self.cap.read()
+            offset = self.cap.get(self.cv2.CAP_PROP_POS_FRAMES)
+            if retval:
+                if not native:
+                    image = self.cv2.cvtColor(image, self.cv2.COLOR_BGR2RGB)
+                yield self.time_to_seconds(offset), image
+            else:
+                break
+
+    def show(self, title: str = "iter_video") -> Iterator[np.ndarray]:
+        """Show video. Quit using key 'q'"""
+
+        try:
+            for time, image in self.iterall(native=True):
+                yield image
+                self.cv2.imshow(title, image)
+                if self.cv2.waitKey(1) & 0xFF == ord("q"):
+                    return
+        finally:
+            self.cv2.destroyAllWindows()
 
     def time_to_seconds(self, offset: int) -> float:
         return offset / self.meta["fps"]
@@ -238,6 +263,14 @@ class AvVideo(VideoBase):
         import av
 
         return av
+
+    def iterall(self, native: bool = False) -> Iterator[Tuple[float, np.ndarray]]:
+        for vframe in self.container.decode(self.vstream):  # can raise
+            if native:
+                frame = vframe
+            else:
+                frame = vframe.to_ndarray(format="rgb24")
+            yield vframe.time, frame
 
     def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
         for i in range(1):  # trying x times to find good frames
