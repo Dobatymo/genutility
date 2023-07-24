@@ -246,9 +246,12 @@ class OptionalWriteOnlyFile:
         else:
             return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close(self) -> None:
         if self.fp:
             self.fp.close()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def write(self, data) -> Optional[int]:
         pass
@@ -284,9 +287,12 @@ class StdoutFile:
     def __enter__(self):
         return self.fp
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close(self) -> None:
         if self.doclose:
             self.fp.close()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 class PathOrBinaryIO:
@@ -301,9 +307,12 @@ class PathOrBinaryIO:
     def __enter__(self) -> IO:
         return self.fp
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close(self) -> None:
         if self.doclose:
             self.fp.close()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 class PathOrTextIO:
@@ -326,9 +335,12 @@ class PathOrTextIO:
     def __enter__(self) -> IO:
         return self.fp
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close(self) -> None:
         if self.doclose:
             self.fp.close()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 class LastLineFile:

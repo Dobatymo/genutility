@@ -298,19 +298,19 @@ def append_to_filename(path: PathType, s: str) -> str:
     return root + s + ext
 
 
-def scandir_error_log(entry: os.DirEntry, exception) -> None:
-    logger.exception("Error in %s", entry.path, exc_info=exception)
+def scandir_error_log(entry: os.DirEntry, exception: Exception) -> None:
+    logger.exception("Error in <%s>", entry.path, exc_info=exception)
 
 
-def scandir_error_log_warning(entry: os.DirEntry, exception) -> None:
-    logger.warning("Error in %s", entry.path, exc_info=exception)
+def scandir_error_log_warning(entry: os.DirEntry, exception: Exception) -> None:
+    logger.warning("Error in <%s>: %s", entry.path, exception)
 
 
-def scandir_error_raise(entry: os.DirEntry, exception) -> None:
+def scandir_error_raise(entry: os.DirEntry, exception: Exception) -> None:
     raise exception
 
 
-def scandir_error_ignore(entry: os.DirEntry, exception) -> None:
+def scandir_error_ignore(entry: os.DirEntry, exception: Exception) -> None:
     pass
 
 

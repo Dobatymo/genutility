@@ -10,8 +10,22 @@ from ..string import surrounding_join
 logger = logging.getLogger(__name__)
 
 
+def force_decode(data: bytes) -> str:
+    try:
+        return data.decode()  # try default encoding
+    except UnicodeDecodeError:
+        try:
+            return data.decode("utf-8")
+        except UnicodeDecodeError:
+            return data.decode("latin1")  # should never fail
+
+
 class RarError(Exception):
-    def __init__(self, msg: str, returncode: Optional[int] = None, cmd: Optional[str] = None, output: str = ""):
+    returncode: int
+    cmd: str
+    output: str
+
+    def __init__(self, msg: str, returncode: int, cmd: str, output: str) -> None:
         Exception.__init__(self, msg)
         self.returncode = returncode
         self.cmd = cmd
@@ -71,7 +85,7 @@ class Rar:
         """level: 0 store, 1 fastest, 2 fast, 3 normal, 4 good, 5 best (default: 3)"""
 
         if level not in range(0, 6) and level is not False:
-            raise RarError("Invalid parameter: Set compression level (0-store...3-default...5-best)")
+            raise ValueError("Invalid parameter: Set compression level (0-store...3-default...5-best)")
         self.options["compression"][0] = level
 
     def set_password(self, password, encrypt_filenames: bool = False) -> None:
@@ -86,7 +100,7 @@ class Rar:
         """rr: recovery record in percent, only 1-10 is valid"""
 
         if rr < 1 or rr > 10:
-            raise RarError("Only 1%-10% valid")
+            raise ValueError("Only 1%-10% valid")
         self.options["recovery"][0] = rr
 
     def add_recovery_volumes(self, rv: int) -> None:
@@ -116,16 +130,15 @@ class Rar:
     def commandline(self, cmd: str) -> None:
         self.cmd = cmd.strip()
 
-    def _execute(self, args: str):
+    def _execute(self, args: str) -> str:
         cmd = f"{self.exe} {args}"
-        logger.debug("CMD: " + cmd)
         try:
             ret = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
-        except UnicodeEncodeError:
-            raise RarError("UnicodeError, Win32Console fault")
         except subprocess.CalledProcessError as e:
-            assert isinstance(e.output, str)
-            raise RarError("Error", e.returncode, e.cmd, e.output)  # should use only stderr
+            output = force_decode(e.output)
+            raise RarError(
+                f"Calling `{e.cmd}` failed with error code {e.returncode}", e.returncode, e.cmd, output
+            )  # should use only stderr
 
         return ret
 

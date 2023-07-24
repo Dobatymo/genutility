@@ -122,10 +122,13 @@ class MeasureTime:
         self.delta = perf_counter() - self.start
 
     def get(self) -> float:
-        if self.delta:
-            return self.delta
-        else:
+        if self.start is None:
+            raise RuntimeError("Context not entered")
+
+        if self.delta is None:
             return perf_counter() - self.start
+
+        return self.delta
 
 
 class TimeIt:

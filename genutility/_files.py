@@ -33,16 +33,16 @@ class BaseDirEntry(os.PathLike):
         return self.entry.inode()
 
     def is_dir(self, follow_symlinks=True) -> bool:
-        return self.entry.is_dir(follow_symlinks)
+        return self.entry.is_dir(follow_symlinks=follow_symlinks)
 
     def is_file(self, follow_symlinks=True) -> bool:
-        return self.entry.is_file(follow_symlinks)
+        return self.entry.is_file(follow_symlinks=follow_symlinks)
 
     def is_symlink(self) -> bool:
         return self.entry.is_symlink()
 
-    def stat(self) -> os.stat_result:
-        return self.entry.stat()
+    def stat(self, follow_symlinks=True) -> os.stat_result:
+        return self.entry.stat(follow_symlinks=follow_symlinks)
 
     def __str__(self) -> str:
         return str(self.entry)
