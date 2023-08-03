@@ -1,10 +1,18 @@
 import codecs
 import logging
+import os.path
+import platform
+import re
 import sqlite3
 from typing import Iterable, List
+from urllib.parse import urlencode
 
+from ._files import to_dos_path
 from .iter import batch, progress
 from .signal import safe_for_loop
+from .string import build_multiple_replace
+
+_is_win = platform.system() == "Windows"
 
 
 def compile_options() -> List[str]:
@@ -94,3 +102,23 @@ def safe_batch_executer(
         safe_for_loop(source, sqlexec)
     except KeyboardInterrupt:
         logging.info("Batch execution safely interrupted")
+
+
+_percent_encode = build_multiple_replace({"%": "%25", "?": "%3f", "#": "%23"})
+
+
+def to_uri(path: str, **params: str) -> str:
+    # https://www.sqlite.org/uri.html#the_uri_path
+
+    query = urlencode(params)
+    if _is_win:
+        path = to_dos_path(path)
+        is_abs = os.path.isabs(path)
+    path = _percent_encode(path)
+    if _is_win:
+        path = re.sub("[\\/]+", "/", path)
+    else:
+        path = re.sub("/+", "/", path)
+    if _is_win and is_abs:
+        path = "/" + path
+    return f"file:{path}?{query}"

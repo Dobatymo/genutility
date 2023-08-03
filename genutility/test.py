@@ -292,9 +292,9 @@ class closeable_tempfile:
             self.f.close()  # close in case user has not closed the file
             remove(self.f.name)
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         try:
-            if type == EOFError:
+            if exc_type == EOFError:
                 sleep(1)  # wait for KeyboardInterrupt which might follow EOFError...
         finally:
             self.f.close()  # close in case user has not closed the file

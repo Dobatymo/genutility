@@ -43,7 +43,7 @@ class EnableAnsi:  # doesn't work for some reason...
     def __enter__(self) -> None:
         return None
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
 

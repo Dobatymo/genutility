@@ -76,9 +76,11 @@ class DeltaTime:
 
 
 class PrintStatementTime:
-    __slots__ = ("tpl", "start")
+    __slots__ = ("tpl", "start", "delta", "interrupted")
     tpl: str
     start: Optional[float]
+    delta: Optional[float]
+    interrupted: Optional[bool]
 
     def __init__(self, tpl: Optional[str] = None) -> None:
         """Times the execution of the code under the context manager and print it afterwards.
@@ -91,35 +93,45 @@ class PrintStatementTime:
         else:
             self.tpl = tpl
         self.start = None
+        self.delta = None
+        self.interrupted = None
 
     def __enter__(self) -> "PrintStatementTime":
         self.start = perf_counter()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> Optional[bool]:
-        delta = perf_counter() - self.start
-        msg = self.tpl.format(delta=delta)
+        self.delta = perf_counter() - self.start
+        msg = self.tpl.format(delta=self.delta)
         if exc_type:
+            self.interrupted = True
             print(msg + " (interrupted)")
         else:
+            self.interrupted = False
             print(msg)
 
 
 class MeasureTime:
-    __slots__ = ("delta", "start")
+    __slots__ = ("delta", "start", "interrupted")
     delta: Optional[float]
     start: Optional[float]
+    interrupted: Optional[bool]
 
     def __init__(self) -> None:
         self.delta = None
         self.start = None
+        self.interrupted = None
 
     def __enter__(self) -> "MeasureTime":
         self.start = perf_counter()
         return self
 
-    def __exit__(self, type, value, traceback) -> Optional[bool]:
+    def __exit__(self, exc_type, exc_value, traceback) -> Optional[bool]:
         self.delta = perf_counter() - self.start
+        if exc_type:
+            self.interrupted = True
+        else:
+            self.interrupted = False
 
     def get(self) -> float:
         if self.start is None:

@@ -5,10 +5,12 @@ from typing import Optional
 class MeasureMemory:
     __slots__ = ("total", "snapshot")
 
+    total: Optional[int]
+
     def __init__(self) -> None:
         tracemalloc.start()
 
-        self.total: Optional[int] = None
+        self.total = None
 
     def _comp(self) -> int:
         snapshot_now = tracemalloc.take_snapshot()
@@ -19,7 +21,7 @@ class MeasureMemory:
         self.snapshot = tracemalloc.take_snapshot()
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.total = self._comp()
 
     def get(self) -> int:

@@ -50,7 +50,7 @@ class HandleKeyboardInterrupt:
             self.signal_received = (sig, frame)
             logger.debug("SIGINT received. Delaying KeyboardInterrupt.")
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         signal.signal(signal.SIGINT, self.old_handler)
         if self.signal_received and self.raise_after:
             self.old_handler(*self.signal_received)
