@@ -1,23 +1,12 @@
 import logging
 import os.path
 import sqlite3
+from collections import UserDict
+from functools import lru_cache
 from itertools import chain, repeat
 from os import fspath
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Collection,
-    Dict,
-    FrozenSet,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-)
+from typing import Any, Callable, Collection, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar
 
 from tls_property import tls_property
 
@@ -25,10 +14,16 @@ from .exceptions import NoResult
 from .filesystem import EntryType, normalize_seps
 from .sql import fetchone, iterfetch
 from .sqlite import quote_identifier
+from .typing import HashableContainer
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+
+class Keys(UserDict):
+    def __hash__(self):
+        return hash(tuple(self))
 
 
 class GenericDb:
@@ -70,7 +65,7 @@ class GenericDb:
 
     @tls_property
     def connection(self):
-        return sqlite3.connect(self.dbpath, check_same_thread=False)
+        return sqlite3.connect(self.dbpath, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 
     @tls_property
     def cursor(self):
@@ -180,7 +175,9 @@ class GenericDb:
         for _mandatory, _derived in zip(mandatory, derived):
             yield self._args(_mandatory, _derived, ignore_null)
 
-    def iter(self, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> Iterator[tuple]:
+    def iter(
+        self, only: HashableContainer[str] = frozenset(), no: HashableContainer[str] = frozenset()
+    ) -> Iterator[tuple]:
         if only and no:
             raise ValueError("Only `only` or `no` can be specified")
 
@@ -203,7 +200,7 @@ class GenericDb:
         else:
             return self._derived
 
-    def _get_fields(self, only: FrozenSet[str], no: FrozenSet[str]) -> List[str]:
+    def _get_fields(self, only: HashableContainer[str], no: HashableContainer[str]) -> List[str]:
         if only and no:
             raise ValueError("Only `only` or `no` can be specified")
 
@@ -217,13 +214,26 @@ class GenericDb:
 
         return fields
 
+    @lru_cache(maxsize=128)
+    def _get_latest_sql(
+        self, derived_keys: Collection[str], ignore_null: bool, only: HashableContainer[str], no: HashableContainer[str]
+    ) -> str:
+        fields = ", ".join(self._get_fields(only, no))
+        _derived = self._filtered_derived(derived_keys, ignore_null)
+        conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
+        latest_col, latest_dir, latest_agg = self.latest_order_by()
+        sql = (
+            f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {latest_col} {latest_dir} LIMIT 1"  # nosec
+        )
+        return sql
+
     def _get_latest(
         self,
         mandatory: Sequence[Any],
         derived: Optional[Dict[str, Any]] = None,
         ignore_null: bool = True,
-        only: FrozenSet[str] = frozenset(),
-        no: FrozenSet[str] = frozenset(),
+        only: HashableContainer[str] = frozenset(),
+        no: HashableContainer[str] = frozenset(),
     ) -> tuple:
         """Retrieve latest row based on mandatory and derived information.
 
@@ -238,19 +248,9 @@ class GenericDb:
         """
 
         derived = derived or {}
-
-        fields = ", ".join(self._get_fields(only, no))
-        _derived = self._filtered_derived(derived, ignore_null)
-        conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
-        latest_col, latest_dir, latest_agg = self.latest_order_by()
-
-        sql = (
-            f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {latest_col} {latest_dir} LIMIT 1"  # nosec
-        )
+        sql = self._get_latest_sql(Keys(derived), ignore_null, only, no)
         args = self._args(mandatory, derived, ignore_null)
-
         self.cursor.execute(sql, args)
-
         return fetchone(self.cursor)
 
     def get_latest_many(
@@ -260,8 +260,8 @@ class GenericDb:
         derived_names: Optional[Tuple[str, ...]] = None,
         derived: Optional[Iterable[Dict[str, Any]]] = None,
         ignore_null: bool = True,
-        only: FrozenSet[str] = frozenset(),
-        no: FrozenSet[str] = frozenset(),
+        only: HashableContainer[str] = frozenset(),
+        no: HashableContainer[str] = frozenset(),
     ) -> Iterator[tuple]:
         """`derived_names` must be equal to the keys of the `derived` dicts"""
 
@@ -361,7 +361,7 @@ class GenericDb:
 class GenericFileDb(GenericDb):
     @classmethod
     def latest_order_by(cls) -> Tuple[str, str, str]:
-        return ["entry_date", "DESC", "max"]
+        return ("entry_date", "DESC", "max")
 
     def get_latest(
         self,
@@ -370,13 +370,15 @@ class GenericFileDb(GenericDb):
         mod_date: int,
         derived: Optional[Dict[str, Any]] = None,
         ignore_null: bool = True,
-        only: FrozenSet[str] = frozenset(),
-        no: FrozenSet[str] = frozenset(),
+        only: HashableContainer[str] = frozenset(),
+        no: HashableContainer[str] = frozenset(),
     ) -> tuple:
         mandatory = (path, filesize, mod_date)
         return self._get_latest(mandatory, derived, ignore_null, only, no)
 
-    def get(self, path: EntryType, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
+    def get(
+        self, path: EntryType, only: HashableContainer[str] = frozenset(), no: HashableContainer[str] = frozenset()
+    ) -> tuple:
         """Retrieves latest row based on mandatory information
         which is solely based on the `path`.
         Use `only`/`no` to include/exclude returned fields.
@@ -421,7 +423,7 @@ class GenericFileDb(GenericDb):
 
     def setdefault(self, path: EntryType, key: str, func: Callable[[], T]) -> T:
         try:
-            (value,) = self.get(path, only={key})
+            (value,) = self.get(path, only=frozenset((key,)))
             logger.debug("Found %s of %s in db: %s", key, path, value)
         except NoResult:
             value = func()
@@ -479,7 +481,42 @@ class FileDbSimple(GenericFileDb):
         ]
 
 
+def is_signed_int_64(num: int) -> bool:
+    return -(2**63) <= num <= 2**63 - 1
+
+
+def unsigned_to_signed_int_64(num: int) -> int:
+    return num - 2**63
+
+
+def signed_to_unsigned_int_64(num: int) -> int:
+    return num + 2**63
+
+
+class Uint64:
+    __slots__ = ("value",)
+
+    def __init__(self, value: int) -> None:
+        self.value = value
+
+    def to_bytes(self):
+        return self.value.to_bytes(length=8, byteorder="big", signed=False)
+
+
+def uint64_to_bytes(uint64: Uint64) -> bytes:
+    return uint64.to_bytes()
+
+
+def uint64_from_bytes(blob: bytes) -> int:
+    return int.from_bytes(blob, byteorder="big", signed=False)
+
+
 class FileDbWithId(GenericFileDb):
+    def __init__(self, dbpath: str, table: str, debug: bool = True, allow_add: bool = True) -> None:
+        GenericFileDb.__init__(self, dbpath, table, debug, allow_add)
+        sqlite3.register_adapter(Uint64, uint64_to_bytes)
+        sqlite3.register_converter("uint64", uint64_from_bytes)
+
     @classmethod
     def primary(cls):
         return []
@@ -494,13 +531,15 @@ class FileDbWithId(GenericFileDb):
     def mandatory(cls):
         return [
             ("path", "VARCHAR(256) NOT NULL PRIMARY KEY", "?"),
-            ("file_id", "INTEGER", "?"),
-            ("device_id", "INTEGER", "?"),
+            ("file_id", "uint64", "?"),
+            ("device_id", "uint64", "?"),
             ("filesize", "INTEGER", "?"),
             ("mod_date", "INTEGER", "?"),
         ]
 
-    def get(self, path: Path, only: FrozenSet[str] = frozenset(), no: FrozenSet[str] = frozenset()) -> tuple:
+    def get(
+        self, path: Path, only: HashableContainer[str] = frozenset(), no: HashableContainer[str] = frozenset()
+    ) -> tuple:
         """Retrieves latest row based on mandatory information
         which is solely based on the `path`.
         Use `only`/`no` to include/exclude returned fields.
@@ -508,7 +547,9 @@ class FileDbWithId(GenericFileDb):
 
         stats = path.stat()
         assert stats.st_ino != 0 and stats.st_dev != 0
-        mandatory = (fspath(path), stats.st_ino, stats.st_dev, stats.st_size, stats.st_mtime_ns)
+        device = Uint64(stats.st_dev).to_bytes()
+        inode = Uint64(stats.st_ino).to_bytes()
+        mandatory = (fspath(path), inode, device, stats.st_size, stats.st_mtime_ns)
         return self._get_latest(mandatory, ignore_null=True, only=only, no=no)
 
     def add(
@@ -521,8 +562,14 @@ class FileDbWithId(GenericFileDb):
 
         derived = derived or {}
         stats = path.stat()
-        assert stats.st_ino != 0 and stats.st_dev != 0
-        mandatory = (fspath(path), stats.st_ino, stats.st_dev, stats.st_size, stats.st_mtime_ns)
+        assert stats.st_ino != 0 and stats.st_dev != 0, stats
+
+        # On windows st_dev and st_ino is unsigned 64 bit int, but sqlite only supports signed 64 bit ints.
+        # I don't know about linux
+        device = Uint64(stats.st_dev)
+        inode = Uint64(stats.st_ino)
+
+        mandatory = (fspath(path), inode, device, stats.st_size, stats.st_mtime_ns)
         self._add_file(mandatory, derived, replace)
         if commit:
             self.commit()

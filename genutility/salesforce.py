@@ -16,7 +16,7 @@ from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceExpiredSession
 
 from .atomic import sopen
-from .iter import progress
+from .callbacks import Progress
 from .json import read_json, write_json
 
 if TYPE_CHECKING:
@@ -234,14 +234,15 @@ class MySalesforce:
             yield {v: row.get(k, "") for k, v in columns.items()}
 
     def soql_to_pandas(
-        self, query_str: str, verbose: bool = False, columns: Optional[Union[SequenceT[str], MappingT[str, str]]] = None
+        self,
+        query_str: str,
+        columns: Optional[Union[SequenceT[str], MappingT[str, str]]] = None,
+        progress: Optional[Progress] = None,
     ) -> "pd.DataFrame":
         import pandas as pd  # noqa: F811
 
-        if verbose:
-            it = progress(self._query_all(query_str, flatten=True))
-        else:
-            it = self._query_all(query_str, flatten=True)
+        progress = progress or Progress()
+        it = progress.track(self._query_all(query_str, flatten=True))
 
         if not columns:
             fieldnames: Optional[Iterable[str]] = None
@@ -261,9 +262,9 @@ class MySalesforce:
         self,
         query_str: str,
         path: str,
-        verbose: bool = False,
         safe: bool = False,
         columns: Optional[Union[SequenceT[str], MappingT[str, str]]] = None,
+        progress: Optional[Progress] = None,
     ) -> int:
         """Run SOQL `query_str` and dump results to csv file `path`.
         Returns the number of exported rows.
@@ -272,10 +273,8 @@ class MySalesforce:
         i = 0
 
         with sopen(path, "wt", encoding="utf-8", newline="", safe=safe) as csvfile:
-            if verbose:
-                it = progress(self._query_all(query_str, flatten=True))
-            else:
-                it = self._query_all(query_str, flatten=True)
+            progress = progress or Progress()
+            it = progress.track(self._query_all(query_str, flatten=True))
 
             if isinstance(columns, Mapping):
                 it = self.dictkeymapper(it, columns)

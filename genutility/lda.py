@@ -1,14 +1,13 @@
 from collections import Counter
 from itertools import chain
 from math import exp, log2
-from sys import stderr
 from typing import Any, Collection, Dict, Iterable, Iterator, List, MutableMapping, Optional, Tuple, Union
 
 import numpy as np
 
+from .callbacks import Progress
 from .datastructures.sparse_matrix import VariableRowMatrix
 from .encoder import BatchLabelEncoder
-from .iter import progress
 from .numpy import batchtopk, categorical
 from .object import cast
 
@@ -99,8 +98,8 @@ class LDABase:
         assert self.nkt.shape == (K, V)
         assert self.nk.shape == (K,)
 
-    def _initialize_topics(self, docs: IterableDocuments, topics: TopicsMapping) -> None:
-        for m, doc in enumerate(progress(docs, file=stderr)):
+    def _initialize_topics(self, docs: IterableDocuments, topics: TopicsMapping, progress: Progress) -> None:
+        for m, doc in enumerate(progress.track(docs)):
             for i, t in enumerate(doc):
                 k = topics[m, i] = self.init_topic()
                 self.add_counts(m, t, k)
@@ -130,8 +129,8 @@ class LDABase:
         probs = self.calc_probs(m, t)  # [K]
         return categorical(probs)
 
-    def _sample_all(self, docs: IterableDocuments, topics: TopicsMapping) -> None:
-        for m, doc in enumerate(progress(docs, file=stderr)):
+    def _sample_all(self, docs: IterableDocuments, topics: TopicsMapping, progress: Progress) -> None:
+        for m, doc in enumerate(progress.track(docs)):
             for i, t in enumerate(doc):
                 k = topics[m, i]
                 self.sub_counts(m, t, k)
@@ -249,7 +248,14 @@ class LDA(LDABase):
     - Integrating Out Multinomial Parameters in Latent Dirichlet Allocation and Naive Bayes for Collapsed Gibbs Sampling (2010)
     """
 
-    def __init__(self, n_topics: int, alpha: float = 0.1, beta: float = 0.01, seed: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        n_topics: int,
+        alpha: float = 0.1,
+        beta: float = 0.01,
+        seed: Optional[int] = None,
+        progress: Optional[Progress] = None,
+    ) -> None:
         LDABase.__init__(self, seed)
 
         self.K = n_topics  # number of topics
@@ -261,6 +267,7 @@ class LDA(LDABase):
         self.docs: List[LDADocument] = []
 
         self.inttype = np.int32
+        self.progress = progress or Progress()
 
     def initialize(self) -> None:
         self.V = self.word_encoder.num_labels
@@ -290,10 +297,10 @@ class LDA(LDABase):
     def initialize_topics(self) -> None:
         self._validate(self.M, self.K, self.V)
 
-        return self._initialize_topics(self.docs, self.topics)
+        return self._initialize_topics(self.docs, self.topics, self.progress)
 
     def sample_all(self) -> None:
-        return self._sample_all(self.docs, self.topics)
+        return self._sample_all(self.docs, self.topics, self.progress)
 
     def metric(self) -> float:
         return self._perplexity(self.docs)
@@ -330,7 +337,14 @@ class LDATermWeight(LDABase):
             - "Assessing topic model relevance: Evaluation and informative priors" (2019)
     """
 
-    def __init__(self, n_topics: int, tws: str = "PMI", alpha: float = 0.1, beta: float = 0.01) -> None:
+    def __init__(
+        self,
+        n_topics: int,
+        tws: str = "PMI",
+        alpha: float = 0.1,
+        beta: float = 0.01,
+        progress: Optional[Progress] = None,
+    ) -> None:
         """tws: Term weighting scheme
         ONE: Consider every term equal (same as standard LDA)
         TF: Term frequency
@@ -360,6 +374,8 @@ class LDATermWeight(LDABase):
 
         self.floattype = np.float32
         self.inttype = np.int32
+
+        self.progress = progress or Progress()
 
     def _one(self, docs: Any) -> np.ndarray:
         """
@@ -469,7 +485,7 @@ class LDATermWeight(LDABase):
     def initialize_topics(self) -> None:
         # self._validate(self.M, self.K, self.V)
 
-        self._initialize_topics(self.docs, self.topics)
+        self._initialize_topics(self.docs, self.topics, self.progress)
 
     def calc_probs(self, m: int, t: int) -> np.ndarray:
         """
@@ -551,7 +567,7 @@ class LDATermWeight(LDABase):
         # self.wk[k] -= self.tw[m, t]
 
     def sample_all(self) -> None:
-        self._sample_all(self.docs, self.topics)
+        self._sample_all(self.docs, self.topics, self.progress)
 
     def metric(self) -> float:
         return self._perplexity(self.docs)

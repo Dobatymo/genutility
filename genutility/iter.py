@@ -95,7 +95,7 @@ def progress(
     length: Optional[int] = None,
     refresh: float = 1,
     end: str = "\r",
-    file: TextIO = sys.stdout,
+    file: Optional[TextIO] = None,
     extra_info_callback: Optional[Callable[[int, Optional[int]], str]] = None,
     disable: Optional[bool] = None,
     delta: Optional[int] = 1,
@@ -103,6 +103,7 @@ def progress(
     """Wraps an iterable `it` to periodically print the progress every `refresh` seconds.
     `length` is the total size of `it`. `len(it)` is used to get the size if set to `None`.
     `refresh` updates the printed output every `refresh` seconds.
+    `file` write to file object, defaults to stdout.
     `delta` specifies the value which is added to the counter every iteration.
             `None` uses `len(elm)` to determine the value. Defaults to 1.
     """
@@ -111,6 +112,8 @@ def progress(
         Use `length_hint(it)` for a guess which might be better than nothing.
         Can return 0.
     """
+
+    file = file or sys.stdout
 
     if delta is not None and delta < 1:
         raise ValueError(f"`delta` must be a integer larger than 1 or `None`, not '{delta}'")
@@ -175,7 +178,7 @@ def progressdata(
     length: Optional[int] = None,
     refresh: float = 1,
     end: str = "\r",
-    file: Optional[TextIO] = sys.stdout,
+    file: Optional[TextIO] = None,
     extra_info_callback: Optional[Callable[[int, Optional[int]], str]] = None,
     disable: Optional[bool] = None,
 ) -> Iterable:
@@ -188,12 +191,13 @@ class Progress:
     because attributes cannot be set on generator objects.
     """
 
-    def __init__(self, obj: Collection, refresh: float = 1) -> None:
+    def __init__(self, obj: Collection, *args, **kwargs) -> None:
         self.obj = obj
-        self.refresh = refresh
+        self.args = args
+        self.kwargs = kwargs
 
     def __iter__(self) -> Iterator:
-        return progress(self.obj, len(self.obj), self.refresh)
+        return progress(self.obj, len(self.obj), *self.args, **self.kwargs)
 
     def __len__(self) -> int:
         """Can raise a TypeError if underlying object does not support `len()`."""

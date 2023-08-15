@@ -1,13 +1,15 @@
-from collections import namedtuple
 from itertools import islice
-from typing import Any, Callable, Collection, Iterable, Iterator, Optional, TextIO, Tuple, Union
+from typing import Any, Callable, Collection, Iterable, Iterator, NamedTuple, Optional, TextIO, Tuple, Union
 
 import numpy as np
 from gensim.models.keyedvectors import KeyedVectors as KeyedVectorsOriginal
 
 from .file import PathOrTextIO
 
-Vocab = namedtuple("Vocab", ["index", "count"])
+
+class Vocab(NamedTuple):
+    index: int
+    count: int
 
 
 class DuplicateEntry(ValueError):

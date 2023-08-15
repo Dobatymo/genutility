@@ -730,8 +730,9 @@ def center_of_mass_2d(arr: np.ndarray, dtype=np.float32) -> np.ndarray:
 
     total = np.sum(arr, axis=(-1, -2))
     grids = np.ogrid[[slice(0, i) for i in arr.shape[-2:]]]
-    results = np.array([np.sum(arr * grid.astype(dtype), axis=(-1, -2)) / total for grid in grids], dtype=dtype).T
-
+    with np.errstate(invalid="ignore"):
+        results = np.array([np.sum(arr * grid.astype(dtype), axis=(-1, -2)) / total for grid in grids], dtype=dtype)
+    results = np.moveaxis(results, 0, -1)
     return results
 
 

@@ -1,10 +1,14 @@
-from typing import Any, Iterable, Iterator, Optional, Sequence, Tuple, Type, TypeVar, Union
+from typing import Any, Container, Hashable, Iterable, Iterator, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Protocol  # typing.Protocol is available in Python 3.8+
 
 ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
 Number = Union[int, float]
 T_co = TypeVar("T_co", covariant=True)
+
+
+class HashableContainer(Protocol[T_co], Hashable, Container[T_co]):
+    pass
 
 
 class SizedIterable(Protocol[T_co]):

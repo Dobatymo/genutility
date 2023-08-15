@@ -6,13 +6,14 @@ from sys import stdout
 from typing import IO, BinaryIO, Callable, Dict, Iterable, Iterator, Optional, TextIO, Tuple, TypeVar, Union, overload
 
 from ._files import PathType, entrysuffix
+from .callbacks import Progress
 from .iter import consume, iter_equal, resizer
 from .math import PosInfInt
 from .ops import logical_implication, logical_xor
 
 Data = TypeVar("Data", str, bytes)
 
-FILE_IO_BUFFER_SIZE = 8 * 1024 * 1024
+FILE_IO_BUFFER_SIZE = 1024 * 1024
 
 
 class Empty(OSError):
@@ -877,29 +878,27 @@ def iter_lines(
     encoding: str = "utf-8",
     errors: str = "strict",
     newline: Optional[str] = None,
-    verbose: bool = False,
+    progress: Optional[Progress] = None,
 ) -> Iterator[str]:
     """Yield lines from text file. Handles compressed files as well.
-    if verbose is True, print a progress bar
+    Use `progress` for progress reporting.
     """
 
     with copen(path, "rt", encoding=encoding, errors=errors, newline=newline) as fr:
-        if verbose:
-            from tqdm import tqdm
-
+        if progress is not None:
             prev_pos = 0
 
             fr.seek(0, os.SEEK_END)
             total = fr.tell()
             fr.seek(0, os.SEEK_SET)
 
-            with tqdm(total=total, leave=False, unit="B", unit_scale=True) as pbar:
+            with progress.task(total=total) as task:
                 while True:  # cannot use `for line in fr` here
                     line = fr.readline()
                     if not line:
                         break
                     cur_pos = fr.tell()
-                    pbar.update(cur_pos - prev_pos)
+                    task.advance(cur_pos - prev_pos)
                     yield line
                     prev_pos = cur_pos
         else:

@@ -100,6 +100,9 @@ def center_of_mass_quadrant(img: np.ndarray) -> int:
     +---+---+
     | 3 | 2 |
     +---+---+
+
+    If the center of mass is exactly in the center or the total mass is 0, it will return quadrant 2,
+    because of *how less* than and *greater than* conditions are used.
     """
 
     if len(img.shape) != 2:

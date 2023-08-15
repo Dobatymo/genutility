@@ -1,4 +1,8 @@
+from typing import Optional
+
 import numpy as np
+
+from .callbacks import Progress
 
 
 class LinearRegression:
@@ -37,13 +41,12 @@ class LinearRegression:
     def epoch(self) -> None:
         self.weights -= self.α * np.matmul(self.X.T, self.predict(self.X) - self.y)  # [K]
 
-    def fit(self, n_iter: int = 100, verbose: bool = False) -> None:
-        for i in range(n_iter):
-            if verbose:
-                print("SGD itertion:", i)
+    def fit(self, n_iter: int = 100, progress: Optional[Progress] = None) -> None:
+        progress = progress or Progress()
+        for i in progress.track(range(n_iter), description="SGD itertion"):
             self.epoch()
 
-    def getParams(self: np.ndarray) -> float:
+    def getParams(self) -> np.ndarray:
         """
         returns: float[B-1]
         """

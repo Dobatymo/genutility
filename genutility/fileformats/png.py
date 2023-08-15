@@ -2,15 +2,12 @@ import logging
 import re
 import zlib
 from struct import pack, unpack
-from typing import TYPE_CHECKING
+from typing import IO, Callable, Iterator, Optional, Tuple
+
+from _hashlib import HASH as Hashobj
 
 from ..exceptions import ParseError
 from ..file import read_or_raise
-
-if TYPE_CHECKING:
-    from typing import IO, Callable, Iterator, Optional, Tuple
-
-    from _hashlib import HASH as Hashobj
 
 png_sig = b"\x89PNG\r\n\x1a\n"
 chunk_type_p = re.compile(rb"^[a-zA-Z]{4}$")

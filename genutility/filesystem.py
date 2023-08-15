@@ -155,6 +155,9 @@ class FileProperties:
     def values(self):
         return attrgetter(*self.__slots__)(self)
 
+    def items(self):
+        return zip(self.keys(), self.values())
+
     def __iter__(self) -> tuple:
         return iter(self.values())
 
@@ -162,7 +165,7 @@ class FileProperties:
         return self.values() == other.values()
 
     def __repr__(self) -> str:
-        args = (f"{k}={v!r}" for k, v in zip(self.keys(), self.values()) if v is not None)
+        args = (f"{k}={v!r}" for k, v in self.items() if v is not None)
         return "FileProperties({})".format(", ".join(args))
 
 
@@ -500,17 +503,29 @@ def scandir_rec_simple(
 
 def scandir_ext(
     path: PathType,
-    extensions: Set[str],
+    include: Optional[Set[str]] = None,
+    exclude: Optional[Set[str]] = None,
     rec: bool = True,
     follow_symlinks: bool = False,
     relative: bool = False,
     errorfunc: Callable = scandir_error_log,
 ) -> Iterator[MyDirEntryT]:
-    for entry in scandir_rec(
+    if (include is not None) and (exclude is not None):
+        raise ValueError("include and exclude cannot be used together")
+
+    it = scandir_rec(
         path, files=True, dirs=False, rec=rec, follow_symlinks=follow_symlinks, relative=relative, errorfunc=errorfunc
-    ):
-        if entrysuffix(entry).lower() in extensions:
-            yield entry
+    )
+    if include is not None:
+        for entry in it:
+            if entrysuffix(entry).lower() in include:
+                yield entry
+    elif exclude is not None:
+        for entry in it:
+            if entrysuffix(entry).lower() not in exclude:
+                yield entry
+    else:
+        yield from it
 
 
 # fixme: benchmark and delete
@@ -733,7 +748,7 @@ def reldirname(path: PathType) -> str:
 def equal_dirs_iter(dir1: PathType, dir2: PathType, follow_symlinks: bool = False) -> Iterator[Tuple[str, str, str]]:
     """Tests if two directories are equal. Doesn't handle links."""
 
-    def entry_path_size(entry):
+    def entry_path_size(entry) -> Tuple[str, int]:
         return entry.path, entry.stat().st_size
 
     files1 = sorted(map(entry_path_size, scandir_rec(dir1, follow_symlinks=follow_symlinks)))  # get rel paths
@@ -753,16 +768,6 @@ def equal_dirs_iter(dir1: PathType, dir2: PathType, follow_symlinks: bool = Fals
 
 def equal_dirs(dir1: PathType, dir2: PathType) -> bool:
     return is_empty(equal_dirs_iter(dir1, dir2))
-
-
-def realpath_win(path: PathType) -> str:
-    """fix for os.path.realpath() which doesn't work under Win7"""
-
-    path = os.path.abspath(path)
-    if islink(path):
-        return os.path.normpath(os.path.join(os.path.dirname(path), os.readlink(path)))
-    else:
-        return path
 
 
 def search(

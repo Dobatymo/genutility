@@ -2,7 +2,7 @@ from typing import Iterator
 
 import numpy as np
 
-from videofile import AvVideo, BadFile  # noqa: F401
+from .videofile import AvVideo, BadFile  # noqa: F401
 
 
 class CorruptFile(Exception):

@@ -160,6 +160,16 @@ def abs_path(path: Path) -> Path:
     return path.resolve()
 
 
+def is_rel_path(path: str) -> str:
+    """Checks if a path is relative"""
+
+    if os.path.isabs(path):
+        msg = f"{path} is absolute"
+        raise ArgumentTypeError(msg)
+
+    return path
+
+
 @arg_to_path
 def is_file(path: Path) -> Path:
     """Checks if a path is an actual file"""

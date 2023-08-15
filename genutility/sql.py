@@ -3,12 +3,12 @@ from datetime import datetime
 from decimal import Decimal
 from itertools import chain, repeat
 from operator import itemgetter
-from typing import Any, Iterator
+from typing import Any, Iterator, Optional
 
+from .callbacks import Progress
 from .dict import mapmap
 from .exceptions import InconsistentState, NoResult
 from .file import copen
-from .iter import progress
 from .sqlite import quote_identifier
 from .string import build_multiple_replace
 from .typing import Connection, Cursor
@@ -122,7 +122,7 @@ def iterfetch(cursor: Cursor, batchsize: int = 1000) -> Iterator[Any]:
 
 
 def export_sql_to_csv(
-    connection: Connection, path: str, query: str, queryargs: tuple = (), verbose: bool = False
+    connection: Connection, path: str, query: str, queryargs: tuple = (), progress: Optional[Progress] = None
 ) -> None:
     """Exports the result of `query` from a SQL database to a csv file `path`.
     `queryargs` will be passed to the query.
@@ -137,12 +137,9 @@ def export_sql_to_csv(
             fw = csv.writer(csvfile)
             fw.writerow(columns)
             fw.writerow(types)
-            if verbose:
-                it = progress(iterfetch(cursor))
-            else:
-                it = iterfetch(cursor)
+            progress = progress or Progress()
 
-            for row in it:
+            for row in progress.track(iterfetch(cursor)):
                 fw.writerow(row)
 
 

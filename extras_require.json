@@ -4,7 +4,6 @@
         "jsonschema",
         "py7zr>=0.20.2",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "aria": [
@@ -13,8 +12,7 @@
     ],
     "asynchronous": [],
     "atomic": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "av": [
         "av>=8.0; python_version>='3.8'",
@@ -37,9 +35,9 @@
         "msgpack>=0.6.0",
         "py7zr>=0.20.2",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
+    "callbacks": [],
     "casedict": [],
     "cholesky": [
         "numba; python_version<'3.11'",
@@ -55,7 +53,6 @@
         "simplejson",
         "sortedcontainers",
         "toml",
-        "tqdm",
         "typing-extensions"
     ],
     "constants_physics": [],
@@ -64,6 +61,7 @@
     "crypto": [],
     "csv": [],
     "cv": [
+        "av>=8.0; python_version>='3.8'",
         "numpy",
         "opencv-python",
         "wxPython>=4"
@@ -86,27 +84,24 @@
     "exceptions": [],
     "factorial": [],
     "file": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "fileformats": [
         "jsonschema",
         "pandas",
         "piexif",
         "py7zr>=0.20.2",
+        "rich",
         "setuptools",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "filesdb": [
         "py7zr>=0.20.2",
-        "tls-property>=1.0.1",
-        "tqdm"
+        "tls-property>=1.0.1"
     ],
     "filesystem": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "fingerprinting": [
         "numpy",
@@ -121,8 +116,7 @@
         "gensim>=4.0.0",
         "keras",
         "numpy",
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "geometry": [],
     "graph": [],
@@ -130,8 +124,7 @@
         "ctypes-windows-sdk>=0.0.10; sys_platform=='win32'"
     ],
     "hash": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "html": [
         "beautifulsoup4"
@@ -142,7 +135,6 @@
         "py7zr>=0.20.2",
         "requests",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "image": [
@@ -156,7 +148,6 @@
         "jsonschema",
         "py7zr>=0.20.2",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "latex": [],
@@ -167,7 +158,6 @@
         "py7zr>=0.20.2",
         "scikit-learn",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "locale": [],
@@ -188,13 +178,11 @@
     ],
     "msgpack": [
         "msgpack>=0.6.0",
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "multihash": [
         "py7zr>=0.20.2",
-        "rhash; sys_platform=='win32'",
-        "tqdm"
+        "rhash; sys_platform=='win32'"
     ],
     "net": [
         "netifaces"
@@ -208,8 +196,7 @@
         "keras",
         "nltk>=3.6.1",
         "numpy",
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "nltk": [
         "nltk>=3.6.1"
@@ -224,7 +211,6 @@
         "jsonschema",
         "py7zr>=0.20.2",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "ops": [],
@@ -250,12 +236,10 @@
         "PyPDF2>=3.0.0",
         "simplejson",
         "tika",
-        "tqdm",
         "typing-extensions"
     ],
     "pickle": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "pillow": [
         "piexif",
@@ -291,10 +275,10 @@
         "requests",
         "simple-salesforce>=1.1.0",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "scene_change_detection": [
+        "av>=8.0; python_version>='3.8'",
         "numpy",
         "opencv-python",
         "wxPython>=4"
@@ -312,8 +296,7 @@
     "set": [],
     "signal": [],
     "sort": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "spark": [
         "pyspark>=3.0.0"
@@ -323,8 +306,7 @@
         "requests"
     ],
     "sql": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "sqlite": [],
     "statistics": [
@@ -340,8 +322,7 @@
         "tensorflow"
     ],
     "test": [
-        "py7zr>=0.20.2",
-        "tqdm"
+        "py7zr>=0.20.2"
     ],
     "tests": [
         "aiohttp>=3.7.4",
@@ -375,7 +356,6 @@
         "tika",
         "tls-property>=1.0.1",
         "toml",
-        "tqdm",
         "typing-extensions",
         "werkzeug>=0.11.11"
     ],
@@ -384,15 +364,13 @@
         "msgpack>=0.6.0",
         "py7zr>=0.20.2",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "text_segmentation": [],
     "text_summarization": [
         "numpy",
         "py7zr>=0.20.2",
-        "spacy",
-        "tqdm"
+        "spacy"
     ],
     "time": [],
     "tls": [
@@ -411,8 +389,10 @@
         "py7zr>=0.20.2",
         "requests",
         "simplejson",
-        "tqdm",
         "typing-extensions"
+    ],
+    "tqdm": [
+        "tqdm"
     ],
     "tree": [],
     "twisted": [
@@ -424,7 +404,6 @@
         "py7zr>=0.20.2",
         "requests",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "typing": [
@@ -435,7 +414,6 @@
         "msgpack>=0.6.0",
         "py7zr>=0.20.2",
         "simplejson",
-        "tqdm",
         "typing-extensions"
     ],
     "unqlite": [],

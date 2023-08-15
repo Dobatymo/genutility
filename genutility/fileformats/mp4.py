@@ -5,7 +5,7 @@ import struct
 import warnings
 from base64 import b64decode
 from collections import namedtuple
-from typing import IO, Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
+from typing import IO, Any, Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, Union
 
 import pkg_resources
 
@@ -66,12 +66,30 @@ def named_batch(entries: Iterable, length: int, named_tuple_cls: object) -> List
     return list(batch(entries, length, named_tuple_cls._make))
 
 
-# names tuples
+# named tuples
 
-SampleToChunkEntry = namedtuple("SampleToChunkEntry", ["first_chunk", "samples_per_chunk", "sample_description_index"])
-CompositionOffsetEntry = namedtuple("CompositionOffsetEntry", ["sample_count", "sample_offset"])
-TimeToSampleEntry = namedtuple("TimeToSampleEntry", ["sample_count", "sample_delta"])
-FilePartitionEntry = namedtuple("FilePartitionEntry", ["block_count", "block_size"])
+
+class SampleToChunkEntry(NamedTuple):
+    first_chunk: int
+    samples_per_chunk: int
+    sample_description_index: int
+
+
+class CompositionOffsetEntry(NamedTuple):
+    sample_count: int
+    sample_offset: int
+
+
+class TimeToSampleEntry(NamedTuple):
+    sample_count: int
+    sample_delta: int
+
+
+class FilePartitionEntry(NamedTuple):
+    block_count: int
+    block_size: int
+
+
 ItemLocationEntryWithIndex = namedtuple(
     "ItemLocationEntryWithIndex", ["extent_index", "extent_offset", "extent_length"]
 )
@@ -637,7 +655,9 @@ if __name__ == "__main__":
 
     from genutility.args import is_dir
     from genutility.filesystem import scandir_ext
-    from genutility.iter import list_except, progress
+    from genutility.iter import list_except
+    from genutility.rich import Progress
+    from rich.progress import Progress as RichProgress
 
     atoms_path = pkg_resources.resource_filename(__package__, "data/mp4-atoms.tsv")
     df = pd.read_csv(atoms_path, sep="\t")
@@ -668,29 +688,31 @@ if __name__ == "__main__":
 
     errors_count = 0
     total_count = 0
-    for path in progress(scandir_ext(args.path, args.extensions, rec=args.recursive)):
-        if args.errors_only:
-            total_count += 1
-            exc, res = list_except(enumerate_atoms(fspath(path), parse_atoms=args.no_parse_atoms))
-            if exc:
-                if args.type is None or (res and res[-1][2] not in args.type):
-                    for depth, pos, type, size, _, _ in res:
-                        print("--" * depth, pos, type, size, file=stderr)
-                    logging.exception("Enumerating atoms of %s failed", path, exc_info=exc)
-                    errors_count += 1
-        else:
-            print(path)
-            for depth, pos, type, size, content, leaf in enumerate_atoms(
-                fspath(path), parse_atoms=args.no_parse_atoms, unparsed_data=unparsed_data
-            ):
-                if args.type and type in args.type:
-                    print("--" * depth, pos, type, size, content, leaf)
-                elif args.search and leaf and args.search in leaf:
-                    print("--" * depth, pos, type, size, content, args.search)
-                else:
-                    leavsize = len(leaf) if leaf else 0
-                    print("--" * depth, pos, type, size, content, leavsize)
-            print()
+    with RichProgress() as progress:
+        p = Progress(progress)
+        for path in p.track(scandir_ext(args.path, args.extensions, rec=args.recursive)):
+            if args.errors_only:
+                total_count += 1
+                exc, res = list_except(enumerate_atoms(fspath(path), parse_atoms=args.no_parse_atoms))
+                if exc:
+                    if args.type is None or (res and res[-1][2] not in args.type):
+                        for depth, pos, type, size, _, _ in res:
+                            print("--" * depth, pos, type, size, file=stderr)
+                        logging.exception("Enumerating atoms of %s failed", path, exc_info=exc)
+                        errors_count += 1
+            else:
+                print(path)
+                for depth, pos, type, size, content, leaf in enumerate_atoms(
+                    fspath(path), parse_atoms=args.no_parse_atoms, unparsed_data=unparsed_data
+                ):
+                    if args.type and type in args.type:
+                        print("--" * depth, pos, type, size, content, leaf)
+                    elif args.search and leaf and args.search in leaf:
+                        print("--" * depth, pos, type, size, content, args.search)
+                    else:
+                        leavsize = len(leaf) if leaf else 0
+                        print("--" * depth, pos, type, size, content, leavsize)
+                print()
 
     if args.errors_only:
         print(f"{errors_count}/{total_count} files failed to parse")

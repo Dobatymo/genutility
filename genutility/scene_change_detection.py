@@ -1,4 +1,4 @@
-from typing import Iterable, Iterator, Union
+from typing import Iterable, Iterator
 
 import numpy as np
 
@@ -39,6 +39,7 @@ def scene_change_detection_block_histogram(images: Iterator[np.ndarray]) -> Iter
         yield diffs
 
 
+"""
 def proc(hist: np.ndarray, lambda_: Union[float, int] = 200):
     delta = 0.5
     DS = np.sqrt(2.0) / 2.0 * np.sum(np.abs(hist - hist.T), axis=(-2, -1))
@@ -46,6 +47,7 @@ def proc(hist: np.ndarray, lambda_: Union[float, int] = 200):
     BC = np.mean(unpack(B, 2, 2), axis=-1) > delta  # noqa
 
     raise RuntimeError("Unfinished")
+"""
 
 
 def test_scene_change_detection_histogram_correlation():

@@ -1,9 +1,16 @@
 import platform
-from collections import namedtuple
+from typing import NamedTuple
 
-_usagetuple = namedtuple("usage", "total used free")
-_volumeinfotuple = namedtuple(
-    "volumeinfo", "VolumeName VolumeSerialNumber MaximumComponentLength FileSystemFlags FileSystemName"
+_usagetuple = NamedTuple("usage", [("total", int), ("used", int), ("free", int)])
+_volumeinfotuple = NamedTuple(
+    "volumeinfo",
+    [
+        ("VolumeName", str),
+        ("VolumeSerialNumber", int),
+        ("MaximumComponentLength", int),
+        ("FileSystemFlags", int),
+        ("FileSystemName", str),
+    ],
 )
 
 

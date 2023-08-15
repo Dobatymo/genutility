@@ -56,8 +56,11 @@ BUILTINS = (
     "zlib",
 )
 
-MANUAL_FIXES = {
-    "genutility.av": ["av"],
+MANUAL_FIXES_REPLACE = {
+    "genutility.av": ["av", "numpy"],
+}
+
+MANUAL_FIXES_ADD = {
     "genutility.bs4": ["bs4"],
     "genutility.flask": ["flask"],
     "genutility.msgpack": ["msgpack"],
@@ -67,6 +70,7 @@ MANUAL_FIXES = {
     "genutility.pandas": ["pandas"],
     "genutility.tensorflow": ["tensorflow"],
     "genutility.toml": ["toml"],
+    "genutility.tqdm": ["tqdm"],
 }
 
 
@@ -78,7 +82,7 @@ def lowercasekey(x):
     return x[0].lower()
 
 
-def main(path: Path):
+def main(path: Path) -> None:
     with path.open("rt", encoding="utf-8") as fr:
         extras: Dict[str, Set[str]] = {}
         module = None
@@ -114,8 +118,17 @@ def main(path: Path):
                 module = ".".join(modname[:2])
                 extras.setdefault(module, set())
 
-        # add imports not detected correctly by findimports
-        for module, deps in MANUAL_FIXES.items():
+        # add replace colissions not detected correctly by findimports
+        for module, deps in MANUAL_FIXES_REPLACE.items():
+            newdeps = set()
+            for dep in deps:
+                requirement = modmap.get(dep, dep)
+                assert requirement
+                newdeps.add(requirement)
+            extras[module] = newdeps
+
+        # when importing genutility modules which collide with other packages, also import them
+        for module, deps in MANUAL_FIXES_ADD.items():
             for dep in deps:
                 requirement = modmap.get(dep, dep)
                 assert requirement

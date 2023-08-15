@@ -6,7 +6,7 @@ from typing import IO, Callable, Iterable, Optional, Union
 
 from _hashlib import HASH as Hashobj
 
-from .file import blockfileiter, iterfilelike, read_file
+from .file import PathType, blockfileiter, iterfilelike, read_file
 
 HashCls = Union[Callable[[], Hashobj], str]
 
@@ -14,7 +14,11 @@ FILE_IO_BUFFER_SIZE = 8 * 1024 * 1024
 
 
 def hash_file(
-    path: str, hashcls: HashCls, chunk_size: int = FILE_IO_BUFFER_SIZE, mode: str = "rb", encoding: Optional[str] = None
+    path: PathType,
+    hashcls: HashCls,
+    chunk_size: int = FILE_IO_BUFFER_SIZE,
+    mode: str = "rb",
+    encoding: Optional[str] = None,
 ) -> Hashobj:
     # fixme: does this even work with `mode="rt"`?
 

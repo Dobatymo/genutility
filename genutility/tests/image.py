@@ -86,6 +86,15 @@ class ImageTest(MyTestCase):
             result = center_of_mass_quadrant(arr)
             self.assertEqual(truth, result)
 
+    @parametrize(
+        ([[0, 0], [0, 0]], 2),
+        ([[1, 1], [1, 1]], 2),
+    )
+    def test_center_of_mass_quadrant_raw(self, arr, truth):
+        arr = np.array(arr)
+        result = center_of_mass_quadrant(arr)
+        self.assertEqual(truth, result)
+
     def test_normalize_image_rotation(self):
         path = "testfiles/quadrant-0.png"
         with Image.open(path) as img:

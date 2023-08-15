@@ -170,7 +170,7 @@ class CvVideo(VideoBase):
         else:
             raise NoGoodFrame("Could not find good frame")
 
-    def _frame_to_file(self, frame: np.ndarray, outpath: PathLike) -> None:
+    def _frame_to_file(self, frame: np.ndarray, outpath: Path) -> None:
         is_success: bool
         im_buf: np.ndarray
 

@@ -273,8 +273,7 @@ def replace_pairs_bytes(s: bytes, items: Dict[bytes, Optional[bytes]]) -> bytes:
 
 
 def replace_pairs_chars(s: str, items: Dict[UnicodeOrdinalT, Optional[UnicodeOrdinalT]]) -> str:
-    table = s.maketrans(items)  # type: ignore # mypy issue #4374
-
+    table = s.maketrans(items)
     return s.translate(table)
 
 

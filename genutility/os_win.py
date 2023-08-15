@@ -64,6 +64,26 @@ def _islink(path: PathType) -> bool:
     return FileAttributes & winnt.FILE_ATTRIBUTE_REPARSE_POINT == winnt.FILE_ATTRIBUTE_REPARSE_POINT
 
 
+def _realpath(path: PathType) -> str:
+    """Partial fix for os.path.realpath() which doesn't work under Win7 for python < 3.8.
+    This fails when it needs to concat a absolute unc path to a relative path. normpath doesn't normalize it then.
+    """
+
+    prefix = "\\\\?\\"
+    _path = os.fspath(path)
+    if _path.startswith(prefix):
+        _path = _path[4:]
+        was_dos_device_path = True
+    else:
+        was_dos_device_path = False
+    _path = os.path.abspath(_path)
+    if _islink(_path):
+        _path = os.path.normpath(os.path.join(os.path.dirname(_path), os.readlink(_path)))
+    if was_dos_device_path:
+        _path = prefix + _path
+    return _path
+
+
 def _get_mount_path(path: str) -> str:
     FileName = LPCWSTR(path)
     BufferLength = 50  # MSDN suggestion

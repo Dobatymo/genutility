@@ -4,11 +4,12 @@ import os.path
 import platform
 import re
 import sqlite3
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 from urllib.parse import urlencode
 
 from ._files import to_dos_path
-from .iter import batch, progress
+from .callbacks import Progress
+from .iter import batch
 from .signal import safe_for_loop
 from .string import build_multiple_replace
 
@@ -47,7 +48,12 @@ def vacuum(db_path: str) -> None:
 
 
 def batch_executer(
-    cursor: sqlite3.Cursor, query_str: str, it: Iterable[tuple], batch_size: int = 10000, exclusive: bool = True
+    cursor: sqlite3.Cursor,
+    query_str: str,
+    it: Iterable[tuple],
+    batch_size: int = 10000,
+    exclusive: bool = True,
+    progress: Optional[Progress] = None,
 ) -> int:
     """Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
     If `exclusive` is True the database will be locked in exclusive mode.
@@ -58,7 +64,8 @@ def batch_executer(
 
     entries = 0
 
-    for queries_batch in batch(progress(it), batch_size):
+    progress = progress or Progress()
+    for queries_batch in batch(progress.track(it), batch_size):
         # need to cache batch data, because if the iterable is exhausted,
         # executemany raises `sqlite3.ProgrammingError`
         data = list(queries_batch)
@@ -72,7 +79,12 @@ def batch_executer(
 
 
 def safe_batch_executer(
-    cursor: sqlite3.Cursor, query_str: str, it: Iterable[tuple], batch_size: int = 10000, exclusive: bool = True
+    cursor: sqlite3.Cursor,
+    query_str: str,
+    it: Iterable[tuple],
+    batch_size: int = 10000,
+    exclusive: bool = True,
+    progress: Optional[Progress] = None,
 ) -> None:
     """Execute `query_str` with parameters from `it` batch-wise with batches of size `batch_size`.
     If `exclusive` is True the database will be locked in exclusive mode.
@@ -85,7 +97,8 @@ def safe_batch_executer(
     if exclusive:
         cursor.execute("PRAGMA locking_mode=EXCLUSIVE")  # might speed things up
 
-    source = batch(progress(it), batch_size)
+    progress = progress or Progress()
+    source = batch(progress.track(it), batch_size)
 
     def sqlexec(queries_batch):
         try:

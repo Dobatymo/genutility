@@ -1,5 +1,6 @@
 import os
 import platform
+import sys
 from pathlib import Path
 from typing import Callable, Union
 
@@ -46,6 +47,11 @@ if system == "Windows":
     from .os_win import _unlock as unlock
     from .os_win import _volume_info_windows as volume_info
 
+    if sys.version_info >= (3, 8):
+        from os.path import realpath
+    else:
+        from .os_win import _realpath as realpath
+
 elif system == "Linux":
     from .os_posix import _disk_usage_posix as disk_usage
     from .os_posix import _get_appdata_dir as get_appdata_dir
@@ -53,7 +59,7 @@ elif system == "Linux":
     from .os_posix import _unlock as unlock
 
     volume_info = _not_available("volume_info")
-    from os.path import islink
+    from os.path import islink, realpath
 
     from .os_posix import _filemanager_cmd_posix as filemanager_cmd
     from .os_posix import _interrupt_posix as interrupt
@@ -67,19 +73,20 @@ elif system == "Darwin":
     from .os_mac import _filemanager_cmd_mac as filemanager_cmd
 
     get_appdata_dir = _not_available("get_appdata_dir")
-    from os.path import islink
+    from os.path import islink, realpath
 
     from .os_posix import _interrupt_posix as interrupt
 
 else:
     lock = _not_available("lock")
     unlock = _not_available("unlock")
-    disk_usage = _not_available("disk_usage")
+    from shutil import disk_usage
+
     volume_info = _not_available("volume_info")
     filemanager_cmd = _not_available("filemanager_cmd")
     get_appdata_dir = _not_available("get_appdata_dir")
-    islink = _not_available("islink")
     interrupt = _not_available("interrupt")
+    from os.path import islink, realpath
 
 lock.__doc__ = """ Locks access to the file (on Posix) or its contents (Windows). """
 unlock.__doc__ = """ Unlocks access to the file. """
@@ -88,6 +95,5 @@ volume_info.__doc__ = """ filesystem and name of the volume """
 filemanager_cmd.__doc__ = """ Returns a shell command that when executed starts the file manager of the OS. """
 get_appdata_dir.__doc__ = """ Returns the roaming appdata directory of the current user. """
 islink.__doc__ = """ islink """
+realpath.__doc__ = """ realpath """
 interrupt.__doc__ = """ interrupt """
-
-from shutil import disk_usage
