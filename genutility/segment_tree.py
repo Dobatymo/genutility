@@ -11,7 +11,7 @@ class SegmentTree:
         self.func = func
         self.initializer = initializer
 
-        self.t = [None] * self.n + arr  # type
+        self.t = [None] * self.n + arr
 
     def build(self) -> None:
         i = self.n - 1

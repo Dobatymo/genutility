@@ -718,7 +718,7 @@ compliant_filename = _get_os_func("compliant_filename")
 compliant_dirname = _get_os_func("compliant_dirname")
 
 
-def compliant_path(path: PurePath, replacement: str = "_", force_system: Optional[str] = None) -> Path:
+def compliant_path(path: PurePath, replacement: str = "_", force_system: Optional[str] = None) -> PurePath:
     if force_system is None:
         _compliant_filename = compliant_filename
         _compliant_dirname = compliant_dirname

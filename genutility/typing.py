@@ -106,31 +106,25 @@ class Cursor(Protocol):
     def close(self) -> None:
         ...
 
-    def execute(self, operation, parameters):
-        # types: (str, Optional[Sequence[Any]]) -> None
+    def execute(self, operation: str, parameters: Optional[Sequence[Any]]) -> None:
         ...
 
-    def executemany(self, operation, seq_of_parameters):
-        # types: (str, Sequence[Sequence[Any]]) -> None
+    def executemany(self, operation: str, seq_of_parameters: Sequence[Sequence[Any]]) -> None:
         ...
 
-    def fetchone(self):
-        # types: () -> Optional[Sequence[Any]]
+    def fetchone(self) -> Optional[Sequence[Any]]:
         ...
 
-    def fetchmany(self, size):
-        # types: (Optional[int], ) -> Sequence[Sequence[Any]]
+    def fetchmany(self, size: Optional[int]) -> Sequence[Sequence[Any]]:
         ...
 
-    def fetchall(self):
-        # types: () -> Sequence[Sequence[Any]]
+    def fetchall(self) -> Sequence[Sequence[Any]]:
         ...
 
     def nextset(self) -> Optional[bool]:
         ...
 
-    def setinputsizes(self, sizes):
-        # types: (Sequence[int], ) -> None
+    def setinputsizes(self, sizes: Sequence[int]) -> None:
         ...
 
     def setoutputsize(self, size: int, column: Optional[int]) -> None:

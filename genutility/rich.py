@@ -18,14 +18,31 @@ from .callbacks import Progress as _Progress
 
 logger = logging.getLogger(__name__)
 
+from string import Formatter
+
+
+class NoneFormatter(Formatter):
+    def __init__(self, default: Any) -> None:
+        self.default = default
+        super().__init__()
+
+    def format_field(self, value, spec):
+        if value is None:
+            value = self.default
+        return super().format_field(value, spec)
+
 
 class DoubleFormatTextColumn(ProgressColumn):
-    def __init__(self, text_format: str = "{task.description}", table_column: Optional[Column] = None) -> None:
+    def __init__(
+        self, text_format: str = "{task.description}", default: Any = 0.0, table_column: Optional[Column] = None
+    ) -> None:
         self.text_format = text_format
+        self.formatter = NoneFormatter(default)
         super().__init__(table_column=table_column or Column(no_wrap=True))
 
     def render(self, task: RichTask) -> Text:
-        return Text(self.text_format.format(task=task).format(task=task))
+        out = self.text_format.format(task=task)
+        return Text(self.formatter.format(out, task=task))
 
 
 def get_double_format_columns() -> List[ProgressColumn]:

@@ -1,98 +1,107 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 'v4.4.0'
-    hooks:
-      - id: check-added-large-files
-      - id: check-case-conflict
-      - id: check-json
-      - id: check-merge-conflict
-      - id: check-symlinks
-      - id: check-toml
-      - id: check-yaml
-      - id: debug-statements
-      - id: detect-private-key
-      - id: end-of-file-fixer
-        exclude: ^testfiles\/
-      - id: mixed-line-ending
-        args: ["--fix=no"]
-      - id: requirements-txt-fixer
-      - id: trailing-whitespace
-        args: ["--markdown-linebreak-ext=md"]
-  - repo: https://github.com/asottile/pyupgrade
-    rev: 'v3.10.1'
-    hooks:
-      - id: pyupgrade
-        args: ["--py37-plus"]
-  - repo: https://github.com/psf/black
-    rev: '23.7.0'
-    hooks:
-      - id: black
-  - repo: https://github.com/PyCQA/isort
-    rev: '5.12.0'
-    hooks:
-      - id: isort
-  - repo: https://github.com/PyCQA/bandit
-    rev: '1.7.5'
-    hooks:
-      - id: bandit
-        args: ['-c', 'pyproject.toml']
-        additional_dependencies: [".[toml]"]
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.5.0'
-    hooks:
-      - id: mypy
-        args: ["--install-types", "--non-interactive", "--show-error-codes"]
-        additional_dependencies:
-          - aiohttp>=3.7.4
-          - aria2p
-          - av>=8.0
-          - beautifulsoup4
-          - bencode.py>=2.0.0
-          - cryptography>=1.5.3
-          - ctypes-windows-sdk>=0.0.7; sys_platform=='win32'
-          - flask>=0.12.3
-          - gensim==4.1.2
-          - hypothesis
-          - jsonschema
-          - lxml
-          - msgpack>=0.6.0
-          - netifaces
-          - networkx
-          - nltk>=3.6.1
-          - numba
-          - numpy
-          - opencv-python
-          - pandas
-          - piexif
-          - pillow
-          - pymediainfo
-          - pymongo
-          - pyOpenSSL>=17.5.0
-          - PyPDF2>=3.0.0
-          - python-pptx
-          - pywin32; sys_platform=='win32' # win32evtlog, winerror
-          - requests
-          - rhash
-          - ruamel.yaml
-          - scipy<1.8.0
-          - simple_salesforce>=1.1.0
-          - simplejson
-          - sortedcontainers
-          - tensorflow
-          - tls-property>=1.0.1
-          - toml
-          - twisted
-          - typing-extensions
-          - unidecode
-          - werkzeug>=0.11.11
-          - wmi; sys_platform=='win32'
-          - wxasync
-          - wxPython>=4
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: check-added-large-files
+  - id: check-case-conflict
+  - id: check-json
+  - id: check-merge-conflict
+  - id: check-symlinks
+  - id: check-toml
+  - id: check-yaml
+  - id: debug-statements
+  - id: detect-private-key
+  - id: end-of-file-fixer
+    exclude: ^testfiles\/
+  - id: mixed-line-ending
+    args: [--fix=no]
+  - id: requirements-txt-fixer
+  - id: trailing-whitespace
+    args: [--markdown-linebreak-ext=md]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.10.0
+  hooks:
+  - id: pretty-format-yaml
+    args: [--autofix]
+- repo: https://github.com/pre-commit/pygrep-hooks
+  rev: v1.10.0
+  hooks:
+  - id: python-use-type-annotations
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.10.1
+  hooks:
+  - id: pyupgrade
+    args: [--py37-plus]
+- repo: https://github.com/psf/black
+  rev: 23.7.0
+  hooks:
+  - id: black
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
+  hooks:
+  - id: isort
+- repo: https://github.com/PyCQA/bandit
+  rev: 1.7.5
+  hooks:
+  - id: bandit
+    args: [-c, pyproject.toml]
+    additional_dependencies: ['.[toml]']
+- repo: https://github.com/pycqa/flake8
+  rev: 6.1.0
+  hooks:
+  - id: flake8
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.5.0
+  hooks:
+  - id: mypy
+    args: [--install-types, --non-interactive, --show-error-codes]
+    additional_dependencies:
+    - aiohttp>=3.7.4
+    - aria2p
+    - av>=8.0
+    - beautifulsoup4
+    - bencode.py>=2.0.0
+    - cryptography>=1.5.3
+    - ctypes-windows-sdk>=0.0.7; sys_platform=='win32'
+    - flask>=0.12.3
+    - gensim==4.1.2
+    - hypothesis
+    - jsonschema
+    - lxml
+    - msgpack>=0.6.0
+    - netifaces
+    - networkx
+    - nltk>=3.6.1
+    - numba
+    - numpy
+    - opencv-python
+    - pandas
+    - piexif
+    - pillow
+    - pymediainfo
+    - pymongo
+    - pyOpenSSL>=17.5.0
+    - PyPDF2>=3.0.0
+    - python-pptx
+    - pywin32; sys_platform=='win32'       # win32evtlog, winerror
+    - requests
+    - rhash
+    - ruamel.yaml
+    - scipy<1.8.0
+    - simple_salesforce>=1.1.0
+    - simplejson
+    - sortedcontainers
+    - tensorflow
+    - tls-property>=1.0.1
+    - toml
+    - twisted
+    - typing-extensions
+    - unidecode
+    - werkzeug>=0.11.11
+    - wmi; sys_platform=='win32'
+    - wxasync
+    - wxPython>=4
+- repo: https://github.com/Yelp/detect-secrets
+  rev: v1.4.0
+  hooks:
+  - id: detect-secrets
