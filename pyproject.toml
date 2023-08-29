@@ -1,6 +1,9 @@
 [build-system]
-requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+  "wheel",
+]
 
 [tool.black]
 line-length = 120
@@ -10,6 +13,13 @@ profile = "black"
 src_paths = ["genutility"]
 line_length = 120
 known_third_party = ["flask", "gensim", "networkx", "nltk", "numba", "numpy", "pandas", "rasa", "scipy", "tensorflow", "toml", "torch", "twisted"]
+
+[tool.coverage.report]
+exclude_lines = [
+	"pragma: no cover",
+	"if __name__ == .__main__.:"
+]
+sort = "Cover"
 
 [tool.mypy]
 allow_redefinition = true
@@ -23,10 +33,3 @@ strict_equality = true
 
 [tool.bandit]
 skips = ["B101"]
-
-[tool.coverage.report]
-exclude_lines = [
-	"pragma: no cover",
-	"if __name__ == .__main__.:"
-]
-sort = "Cover"
