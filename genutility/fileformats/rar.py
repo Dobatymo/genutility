@@ -7,18 +7,9 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
+from ..subprocess import force_decode
 
 logger = logging.getLogger(__name__)
-
-
-def force_decode(data: bytes) -> str:
-    try:
-        return data.decode()  # try default encoding
-    except UnicodeDecodeError:
-        try:
-            return data.decode("utf-8")
-        except UnicodeDecodeError:
-            return data.decode("latin1")  # should never fail
 
 
 class RarError(Exception):

@@ -16,9 +16,12 @@ def multiline_textsize(text: str, ttf: ImageFont, spacing: int = 4) -> Tuple[int
     height = (len(lines) - 1) * spacing
 
     for line in lines:
-        w, h = ttf.getsize(line)
-        width = max(width, w)
-        height = height + h
+        # _, _, w, h = ttf.getbbox(line)
+        left, top, right, bottom = ttf.getbbox(line)
+        # assert left == 0, left
+        # assert top == 0, top
+        width = max(width, right)
+        height = height + bottom
 
     return width, height
 

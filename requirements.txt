@@ -23,7 +23,7 @@ opencv-python
 pandas
 pdfminer
 piexif
-Pillow>=8.1.1
+Pillow>=9.2.0
 py7zr>=0.20.2
 pyarrow
 pymediainfo

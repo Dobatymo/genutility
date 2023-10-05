@@ -6,7 +6,7 @@ from typing import Dict, Set
 
 modmap = {
     "OpenSSL": "pyOpenSSL>=17.5.0",
-    "PIL": "Pillow>=8.1.1",
+    "PIL": "Pillow>=9.2.0",
     "PyPDF2": "PyPDF2>=3.0.0",
     "aiohttp": "aiohttp>=3.7.4",
     "aioresponses": "aioresponses>=0.7.2",

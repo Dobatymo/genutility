@@ -16,7 +16,7 @@ opencv-python
 packaging
 pandas
 pdfminer
-Pillow>=8.1.1
+Pillow>=9.2.0
 py7zr>=0.20.2
 PyPDF2>=3.0.0
 pywin32; sys_platform=='win32'
