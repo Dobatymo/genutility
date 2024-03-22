@@ -8,6 +8,7 @@ gmpy2
 hypothesis
 jsonschema
 keras
+mistune<2
 msgpack>=0.6.0
 nltk>=3.6.1
 numba; python_version<'3.11'

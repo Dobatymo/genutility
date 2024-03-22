@@ -137,7 +137,9 @@ def locale_sorted(seq: Sequence[str], case_insensitive: bool = True, lower_befor
     return sorted(seq, key=key)
 
 
-def build_multiple_replace(d: Mapping[str, str], escape: bool = True) -> Callable[[str], str]:
+def build_multiple_replace(
+    d: Mapping[str, str], escape: bool = True, ignorecase: bool = False, longestfirst: bool = False
+) -> Callable[[str], str]:
     """Returns a callable, which when applied to a string,
     replaces all the keys in `d` with the corresponding values.
     The replacement happens in iteration order of the mapping.
@@ -149,18 +151,57 @@ def build_multiple_replace(d: Mapping[str, str], escape: bool = True) -> Callabl
     else:
         it = d.keys()
 
-    cp = re.compile("(" + "|".join(it) + ")")
+    if longestfirst:
+        it = sorted(it, key=len, reverse=True)
+
+    flags = re.IGNORECASE if ignorecase else 0
+    cp = re.compile("(" + "|".join(it) + ")", flags)
     return partial(cp.sub, lambda m: d[m.group(0)])
 
 
-def multiple_replace(d: Mapping[str, str], s: str) -> str:
+def multiple_replace(d: Mapping[str, str], s: str, ignorecase: bool = False, longestfirst: bool = False) -> str:
     """Uses mapping `d` to replace keys with values in `s`.
     This is a wrapper for `build_multiple_replace`,
     which should be used directly for improved performance
     in case the same `d` is used for multiple `s`.
     """
 
-    f = build_multiple_replace(d)
+    f = build_multiple_replace(d, ignorecase=ignorecase, longestfirst=longestfirst)
+    return f(s)
+
+
+def build_multiple_replace_list(
+    old: Sequence[str], new: str, escape: bool = True, ignorecase: bool = False, longestfirst: bool = False
+) -> Callable[[str], str]:
+    """Returns a callable, which when applied to a string,
+    replaces all the keys in `d` with the corresponding values.
+    The replacement happens in iteration order of the mapping.
+    The complexity then is linear in  the length of the input string.
+    """
+
+    if escape:
+        it: Iterable[str] = map(re.escape, old)
+    else:
+        it = old
+
+    if longestfirst:
+        it = sorted(it, key=len, reverse=True)
+
+    flags = re.IGNORECASE if ignorecase else 0
+    cp = re.compile("(" + "|".join(it) + ")", flags)
+    return partial(cp.sub, new)
+
+
+def multiple_replace_list(
+    old: Sequence[str], new: str, s: str, ignorecase: bool = False, longestfirst: bool = False
+) -> str:
+    """Uses sequence `old` to replace values in `s`.
+    This is a wrapper for `build_multiple_replace_list`,
+    which should be used directly for improved performance
+    in case the same `old` is used for multiple `s`.
+    """
+
+    f = build_multiple_replace_list(old, new, escape=True, ignorecase=ignorecase, longestfirst=longestfirst)
     return f(s)
 
 

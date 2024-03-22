@@ -1,5 +1,4 @@
 class SplitRecursive:
-
     """Fast non-prime-based factorial algorithm.
     Python port of: http://www.luschny.de/math/factorial/java/FactorialSplit.java.html
     """

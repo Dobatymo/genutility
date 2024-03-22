@@ -70,13 +70,11 @@ def write_file(
 
 
 @overload
-def read_or_raise(fin: IO[Data], size: int) -> Data:
-    ...
+def read_or_raise(fin: IO[Data], size: int) -> Data: ...
 
 
 @overload
-def read_or_raise(fin: mmap, size: int) -> bytes:
-    ...
+def read_or_raise(fin: mmap, size: int) -> bytes: ...
 
 
 def read_or_raise(fin, size):
@@ -186,7 +184,6 @@ def copen(
 
 
 class OpenFileAndDeleteOnError:
-
     """Context manager which opens a file using the same arguments as `open`,
     but deletes the file in case an exception occurs after opening.
     """
@@ -554,7 +551,7 @@ def copyfilelike(
     fout: IO,
     amount: Optional[int] = None,
     buffer: int = FILE_IO_BUFFER_SIZE,
-    report: Optional[Callable] = None,
+    report: Optional[Callable[[int, int], None]] = None,
 ) -> int:
     """Read data from `fin` in chunks of size `buffer` and write them to `fout`.
     Optionally limit the amount of data to `amount`. `report` can be a callable which receives

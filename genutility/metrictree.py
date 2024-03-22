@@ -178,7 +178,6 @@ def _partition_generalized_hyperplane(
 
 
 class MTree:
-
     """See: M-tree: An Efficient Access Method for Similarity Search in Metric Spaces (1997)"""
 
     def __init__(
@@ -281,8 +280,7 @@ class MTree:
             for ro in node.objects:
                 if abs(distance_parent_to_value - ro.distance_to_parent) <= radius + ro.covering_radius:
                     if self.distance_func(ro.value, value) <= radius + ro.covering_radius:
-                        for value in self._find(ro.subtree, value, radius):
-                            yield value
+                        yield from self._find(ro.subtree, value, radius)
         else:
             for lo in node.objects:
                 if abs(distance_parent_to_value - lo.distance_to_parent) <= radius:
@@ -301,8 +299,7 @@ class MTree:
         if not isinstance(node, LeafNode):
             for ro in node.objects:
                 if self.distance_func(ro.value, value) <= radius + ro.covering_radius:
-                    for value in self._find(ro.subtree, value, radius):
-                        yield value
+                    yield from self._find(ro.subtree, value, radius)
         else:
             for lo in node.objects:
                 if self.distance_func(lo.value, value) <= radius:

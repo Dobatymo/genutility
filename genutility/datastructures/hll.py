@@ -6,7 +6,6 @@ from genutility.sys import bitness
 
 
 class HyperLogLog:
-
     """A HyperLogLog is a probabilistic data structure. It can approximately calculate the cardinality
     of a set and supports unions with other HLLs. It uses a constant amount of memory.
     """

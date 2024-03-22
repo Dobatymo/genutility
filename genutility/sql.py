@@ -36,7 +36,6 @@ def convert_mysql_to_sqlite(s: str) -> str:
 
 
 class TransactionCursor:
-
     """Cursor context manager which starts a transaction and rolls back in case of error."""
 
     def __init__(self, conn: Connection) -> None:
@@ -55,7 +54,6 @@ class TransactionCursor:
 
 
 class CursorContext:
-
     """Cursor context manager which creates a new cursor and closes it when it leaves the context."""
 
     def __init__(self, conn: Connection) -> None:

@@ -23,8 +23,8 @@ def grayscale(cvimg: np.ndarray) -> np.ndarray:
 def iter_video(input: Union[str, int] = 0, show: bool = False) -> Iterator[np.ndarray]:
     with CvVideo(input) as video:
         if show:
-            for time, image in video.show():
+            for _time, image in video.show():
                 yield image
         else:
-            for time, image in video.iterall(native=True):
+            for _time, image in video.iterall(native=True):
                 yield image

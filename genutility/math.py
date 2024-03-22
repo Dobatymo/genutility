@@ -192,7 +192,6 @@ def relative_luminance(r: float, g: float, b: float) -> float:
 
 
 class _PosInfInt:
-
     """A fancy version of `sys.maxsize`"""
 
     def __lt__(self, rhs) -> bool:
@@ -444,6 +443,34 @@ def sortedsample(n: int, k: int) -> List[int]:
     """Sorted random sample without replacements."""
 
     return sorted(sample(range(n), k))
+
+
+def int2base(x: int, base: int) -> str:
+    """Converts number `x` to its string representation in `base`."""
+
+    import string
+
+    assert base > 1
+    digs = string.digits + string.ascii_letters
+
+    if x < 0:
+        sign = -1
+    elif x == 0:
+        return digs[0]
+    else:
+        sign = 1
+
+    x *= sign
+    digits = []
+
+    while x:
+        digits.append(digs[x % base])
+        x = x // base
+
+    if sign < 0:
+        digits.append("-")
+
+    return "".join(reversed(digits))
 
 
 number_metric = absolute_difference

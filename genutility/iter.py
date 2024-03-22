@@ -186,7 +186,6 @@ def progressdata(
 
 
 class Progress:
-
     """Cannot create a decorator to do this to generic generators,
     because attributes cannot be set on generator objects.
     """
@@ -246,7 +245,10 @@ def asc_peaks(iterable: Iterable[OrderableT]) -> Iterator[OrderableT]:
 
 
 def extrema(
-    iterable: Iterable[OrderableT], first: Set[int] = {1, -1}, last: Set[int] = {1, -1}, derivatives: Set[int] = {1, -1}
+    iterable: Iterable[OrderableT],
+    first: Set[int] = frozenset((1, -1)),
+    last: Set[int] = frozenset((1, -1)),
+    derivatives: Set[int] = frozenset((1, -1)),
 ) -> Iterator[OrderableT]:
     it = iter(iterable)
     try:
@@ -768,7 +770,6 @@ def any_in(it: Iterable[T], container: Container[T]) -> bool:
 
 
 class CountIter:
-
     """Example:
     c = CountIter()
     with open("asd.txt", "rt", encoding="utf-8") as fr:
@@ -933,3 +934,15 @@ def itershuffle(it: Iterable[T], buffer_size: int) -> Iterator[T]:
 def product_map(func: Callable, *parts: Iterable) -> Iterator:
     for pc in product(*parts):
         yield func(*pc)
+
+
+# alias: ilen
+def iter_len(it: Union[Iterable, Collection]) -> int:
+    """Returns the length of iterable `it`.
+    If len() is not supported, the iterable will be consumed completely.
+    """
+
+    try:
+        return len(it)  # type: ignore
+    except TypeError:
+        return sum(1 for _ in it)

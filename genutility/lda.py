@@ -16,6 +16,8 @@ IterableDocuments = Iterable[Collection[int]]
 TopicsMapping = MutableMapping[Tuple[int, int], int]
 Indices = Union[slice, np.ndarray]
 
+_SLICE_NONE = slice(None)
+
 
 def top_topics(
     id2word: Dict[int, str], term_topic_matrix: np.ndarray, num_words: int = 10, decimals: int = 2
@@ -104,7 +106,7 @@ class LDABase:
                 k = topics[m, i] = self.init_topic()
                 self.add_counts(m, t, k)
 
-    def calc_probs(self, m: int, t: int, k_select: Indices = slice(None)) -> np.ndarray:
+    def calc_probs(self, m: int, t: int, k_select: Indices = _SLICE_NONE) -> np.ndarray:
         # notes: np.sum(self.nkt, axis=-1) == self.nk
         # notes: np.sum(self.nmk[m], axis=-1) == self.nm[m]
 
@@ -239,7 +241,6 @@ class LDABase:
 
 
 class LDA(LDABase):
-
     """LDA using collapsed Gibbs sampling
     Based on:
     - https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation
@@ -328,7 +329,6 @@ class LDA(LDABase):
 
 
 class LDATermWeight(LDABase):
-
     """LDA with term weighting
     Based on: "Term Weighting Schemes for Latent Dirichlet Allocation" (2010)
 
@@ -579,7 +579,7 @@ class LDAInfer(LDA):
         self.nk_old = self.nk
         self.docs = []
 
-    def calc_probs(self, m: int, t: int, k_select: Indices = slice(None)) -> np.ndarray:
+    def calc_probs(self, m: int, t: int, k_select: Indices = _SLICE_NONE) -> np.ndarray:
         """
         returns: float[K]
         """

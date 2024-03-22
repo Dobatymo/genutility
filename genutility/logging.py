@@ -22,7 +22,6 @@ def basicConfig(formatter: Optional[Formatter] = None, **kwargs) -> None:
 
 
 class IsoDatetimeFormatter(Formatter):
-
     """Displays the time in ISO 8601 format.
     Instead of passing a formatting string to `datefmt` in the initializer, `sep` and `timespec`
     (see `datetime.datetime.isoformat`) as well as `aslocal` (see genutility.datetime.datetime_from_utc_timestamp`)
@@ -50,7 +49,6 @@ class IsoDatetimeFormatter(Formatter):
 
 
 class OverwriteFormatter(Formatter):
-
     """Usually the default Formatter disallows overwriting of built-in fields
     like filename, funcName, lineno and so on. Here you can specify a mapping
     to set these values anyway.

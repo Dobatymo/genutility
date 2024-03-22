@@ -1,6 +1,7 @@
 """ Scripts using line_profiler.profile can import this to be able to run unmodified
     without the profiler present.
 """
+
 import logging
 
 try:

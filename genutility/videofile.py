@@ -42,6 +42,12 @@ class VideoBase:
     def calculate_offsets(self, time_base: Fraction, duration: int) -> Iterator[int]:
         raise NotImplementedError
 
+    def _frame_range(self, time_base: Fraction, duration: int) -> Iterator[int]:
+        raise NotImplementedError
+
+    def frame_range(self) -> Iterator[int]:
+        return self._frame_range(self.time_base, self.native_duration)
+
     def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
         raise NotImplementedError
 
@@ -116,11 +122,12 @@ class CvVideo(VideoBase):
             raise BadFile(f"Cannot open {path}")
 
         self.native_duration = frame_count  # exclusive
-        self.time_base = Fraction(1, 1)
+        self.time_base = Fraction(1 / fps)
+
         self.meta = {
             "width": frame_width,
             "height": frame_height,
-            "duration": duration,  # duration in seconds
+            "duration": duration,  # container duration in seconds
             "fps": fps,
             "sample_aspect_ratio": pixel_aspect_ratio,
             "display_aspect_ratio": display_aspect_ratio,
@@ -148,7 +155,7 @@ class CvVideo(VideoBase):
         """Show video. Quit using key 'q'"""
 
         try:
-            for time, image in self.iterall(native=True):
+            for _time, image in self.iterall(native=True):
                 yield image
                 self.cv2.imshow(title, image)
                 if self.cv2.waitKey(1) & 0xFF == ord("q"):
@@ -220,8 +227,9 @@ class AvVideo(VideoBase):
         except self.av.error.InvalidDataError:
             raise BadFile(f"Cannot open {path}")
 
-        if self.container.format.name == "matroska,webm":
-            raise BadFile("Matroska files are currently not supported :(")
+        # why was this here in the first place?
+        # if self.container.format.name == "matroska,webm":
+        #     raise BadFile("Matroska files are currently not supported :(")
 
         self.vstream = self.container.streams.video[videostream]
         self.vstream.thread_type = "AUTO"
@@ -237,7 +245,7 @@ class AvVideo(VideoBase):
         self.native_duration = self.vstream.duration  # exclusive
         self.time_base = self.vstream.time_base
 
-        if not self.native_duration:
+        if not self.native_duration:  # if stream duration is not available, use container duration
             self.native_duration = self.container.duration
             self.time_base = Fraction(1, self.av.time_base)
             logger.debug("Using container instead of video stream duration")
@@ -250,7 +258,7 @@ class AvVideo(VideoBase):
         self.meta = {
             "width": vcc["width"],
             "height": vcc["height"],
-            "duration": duration,
+            "duration": duration,  # container duration in seconds
             "fps": vcc["framerate"] or vcc["average_rate"],
             "sample_aspect_ratio": vcc["sample_aspect_ratio"] or Fraction(1, 1),
             "display_aspect_ratio": vcc["display_aspect_ratio"] or Fraction(vcc["width"], vcc["height"]),
@@ -273,10 +281,13 @@ class AvVideo(VideoBase):
             yield vframe.time, frame
 
     def _get_frame(self, offset: int, native: bool = False) -> Tuple[float, np.ndarray]:
-        for i in range(1):  # trying x times to find good frames
+        # if the stream duration could not be read, convert the offset from container time_base to stream time_base
+        offset_in_corrected_time_base = int(offset * self.time_base / self.vstream.time_base)
+
+        for _i in range(1):  # trying x times to find good frames
             try:
                 self.container.seek(
-                    offset, backward=True, any_frame=False, stream=self.vstream
+                    offset_in_corrected_time_base, backward=True, any_frame=False, stream=self.vstream
                 )  # this can silently fail for broken files
             except self.av.error.PermissionError:
                 raise NoKeyFrame(f"Failed to seek to {offset} of {self.container.duration}.")

@@ -2,7 +2,6 @@
     It should avoid any dependencies apart from the standard library.
 """
 
-
 import os
 import os.path
 import re

@@ -41,7 +41,7 @@ def read_dbm_httpcache(
                         data["body"] = brotli.decompress(data["body"])
                         data["headers"][b"Content-Encoding"] = []
                     elif ce:
-                        warnings.warn(f"Unsupported Content-Encoding: {ce}")
+                        warnings.warn(f"Unsupported Content-Encoding: {ce}", stacklevel=2)
 
                 yield hash, time, data
 
@@ -94,5 +94,5 @@ if __name__ == "__main__":
     parser.add_argument("path", help="path to db file")
     args = parser.parse_args()
 
-    for hash, time, data in read_dbm_httpcache(args.path):
+    for _hash, _time, data in read_dbm_httpcache(args.path):
         print(data["url"][-50:], len(data["body"]), data["body"][:30])

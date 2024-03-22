@@ -3,6 +3,7 @@ import json
 import logging
 from io import StringIO
 
+from genutility._file import CloseableNamedTemporaryFile
 from genutility.json import (
     BuiltinRoundtripDecoder,
     BuiltinRoundtripEncoder,
@@ -10,7 +11,7 @@ from genutility.json import (
     json_lines,
     read_json_lines,
 )
-from genutility.test import MyTestCase, closeable_tempfile, parametrize
+from genutility.test import MyTestCase, parametrize
 
 
 class JsonTest(MyTestCase):
@@ -24,7 +25,7 @@ class JsonTest(MyTestCase):
 
     @parametrize(("", tuple()), ('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1])))
     def test_read_json_lines(self, content, truth):
-        with closeable_tempfile(mode="wt", encoding="utf-8") as (f, fname):
+        with CloseableNamedTemporaryFile(mode="wt", encoding="utf-8") as (f, fname):
             f.write(content)
             f.close()  # Windows compatibility, otherwise sharing violation
             result = tuple(read_json_lines(fname))

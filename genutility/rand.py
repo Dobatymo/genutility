@@ -1,4 +1,4 @@
-from random import choice, randrange, sample
+from random import choice, random, randrange, sample
 from typing import Iterator, Sequence, Tuple
 
 
@@ -30,3 +30,12 @@ def randomized(seq: Sequence) -> Sequence:
     """Like `random.shuffle`, but not in-place."""
 
     return sample(seq, len(seq))
+
+
+def prob_false(probability: float) -> bool:
+    """Returns `False` with a probability of `probability`."""
+
+    if probability in (0, 1):
+        return not bool(probability)  # for weird open interval edge cases
+
+    return probability < random()  # random() -> [0.0, 1.0) # nosec

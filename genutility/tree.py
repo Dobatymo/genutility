@@ -5,7 +5,6 @@ from typing import Iterator, List, Optional, Tuple, Union
 
 
 class SequenceTree(MutableMapping):
-
     """SequenceTree is a tree class to store sequences, often called a Trie.
     It implements the MutableMapping interface, so it can be used like a dictionary.
     Compared to a dict, it offers a few advantages however:

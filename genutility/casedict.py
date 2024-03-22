@@ -8,7 +8,6 @@ _sentinel = object()
 
 
 class CaseDict(Generic[T]):
-
     """Saves values for cased strings, but makes them retrievable using the lower cased version
     of the string as well.
     """

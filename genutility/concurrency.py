@@ -5,7 +5,7 @@ import threading
 from collections import deque
 from concurrent.futures._base import FINISHED
 from multiprocessing import Pool
-from queue import Empty, Full, Queue
+from queue import Empty, Queue
 from typing import Any, Callable, Deque, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 from .exceptions import NoResult, assert_choice
@@ -120,7 +120,7 @@ class ThreadPool:
         """
 
         if finishall:
-            for i in range(self.num_threads):
+            for _i in range(self.num_threads):
                 self.tasks.put(None)
         else:
             for w in self.my_worker:
@@ -151,7 +151,7 @@ def gather_all_unsorted(
         threadpool.add_task(i, func, param, *args, **kwargs)
         num_params = i + 1
 
-    for i in range(num_params):
+    for _i in range(num_params):
         yield threadpool.get()
 
 
@@ -229,10 +229,11 @@ class IterWorker(threading.Thread):
     def run(self) -> None:
         while True:
             iter = self.queue.get()
-            if not iter:
+            if iter is None:
                 self.state = self.STATE_STOPPED
                 return
-            self.state = self.STATE_RUNNING
+            if self.state == self.STATE_WAITING:
+                self.state = self.STATE_RUNNING
             try:
                 for __ in iter:
                     if self.state == self.STATE_PAUSING:
@@ -293,10 +294,9 @@ class ProgressWorker(threading.Thread):
     def run(self):
         while self.running:
             self.task = self.tasks.get()
-            if self.task:
-                func, args, kwargs = self.task
-            else:
+            if self.task is None:
                 break
+            func, args, kwargs = self.task
 
             try:
                 result = func(self.report, *args, **kwargs)
@@ -341,7 +341,7 @@ class ProgressThreadPool:
             self.waiting_queue.put(None)
 
     def join(self, timeout: Optional[float] = None) -> bool:
-        """Returns True if all workers very terminated, otherwise False"""
+        """Returns True if all workers were terminated, otherwise False"""
 
         for worker in self.workers:
             worker.join(timeout)
@@ -376,7 +376,8 @@ class ProgressThreadPool:
             self.waiting_queue.unfinished_tasks = 0
 
     def get_waiting(self) -> List[TaskT]:
-        return list(task for task in self.waiting_queue.queue if task)
+        with self.waiting_queue.mutex:
+            return list(task for task in self.waiting_queue.queue if task)
 
     def get_completed(self) -> List[Any]:
         return self.completed
@@ -388,7 +389,7 @@ class ProgressThreadPool:
         return list(task for task in (w.get() for w in self.workers) if task)
 
 
-class BoundedQueue:
+class BoundedIterator:
     # similar: pip install bounded-iterator
 
     """Semaphor bounded queue. Can be used with `multiprocessing.Pool` for example.
@@ -408,6 +409,7 @@ class BoundedQueue:
         self.iterable = it
         self.timeout = timeout
         self.iterator: Optional[Iterator[T]] = None
+        self.stopped = False
 
     def __iter__(self) -> Iterator[T]:
         self.iterator = iter(self.iterable)
@@ -415,15 +417,21 @@ class BoundedQueue:
 
     def __next__(self) -> T:
         if self.iterator is None:
-            raise TypeError
+            raise TypeError("iter not called")
 
-        if not self.semaphore.acquire(timeout=self.timeout):
-            raise Full("BoundedQueue semaphore acquisition timed out")
+        while True:
+            if self.stopped:
+                raise StopIteration("interrupted")
+            if self.semaphore.acquire(timeout=self.timeout):
+                break
 
         return next(self.iterator)
 
     def done(self) -> None:
         self.semaphore.release()
+
+    def stop(self) -> None:
+        self.stopped = True
 
 
 class BufferedIterable(Generic[T]):
@@ -523,9 +531,11 @@ def parallel_map(
         if poolcls is None:
             poolcls = Pool
 
-        q = BoundedQueue(bufsize, it)
+        q = BoundedIterator(bufsize, it, timeout=1)
 
-        with poolcls(workers, _ignore_sigint) as p:
+        initializer = _ignore_sigint if type(poolcls) is Pool else None
+
+        with poolcls(workers, initializer) as p:
             if ordered:
                 process = p.imap
             else:
@@ -539,6 +549,7 @@ def parallel_map(
                 logging.warning("interrupted")
                 # q.timeout = 1  # does this help?
                 q.done()  # the semaphore in the bounded queue might block otherwise
+                q.stop()
                 raise
     else:
         yield from map(func, it)
@@ -583,7 +594,6 @@ def executor_map(
 
 
 class ThreadsafeList(list):  # untested!!!
-
     """This is a list object with context manager to handle locking to perform multiple operations
     on a list in a threadsafe way.
     Example.
@@ -593,7 +603,7 @@ class ThreadsafeList(list):  # untested!!!
             l[0] += 4 # not atomic, thus executed with context manager
     """
 
-    def __init__(self, it):
+    def __init__(self, it) -> None:
         list.__init__(self, it)
         self.lock = threading.Lock()
 

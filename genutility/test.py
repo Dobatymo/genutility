@@ -2,17 +2,14 @@ from collections import defaultdict
 from contextlib import nullcontext
 from difflib import unified_diff
 from functools import wraps
-from itertools import product, zip_longest
-from os import remove
-from tempfile import NamedTemporaryFile
-from time import sleep
+from itertools import chain, product, zip_longest
 from typing import IO, Any, Callable, Collection, DefaultDict, Hashable, Iterable, Mapping, Optional, Tuple, TypeVar
 from unittest import TestCase
 from unittest.result import TestResult
 from unittest.runner import TextTestRunner
 
-from .file import _check_arguments, equal_files
-from .signal import HandleKeyboardInterrupt  # problem here
+from .file import equal_files
+from .iter import progress
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -39,7 +36,7 @@ class MyTestResult(TestResult):
         self.stream = stream
         self.current_test = 0
         self.current_subtest = 0
-        return TestResult.__init__(self, stream, descriptions, verbosity)
+        TestResult.__init__(self, stream, descriptions, verbosity)
 
     def progress(self) -> None:
         self.stream.write(f"Running test #{self.current_test}, subtest #{self.current_subtest}\r")
@@ -119,14 +116,6 @@ def is_equal_unordered(seq_a: Collection, seq_b: Collection) -> bool:
 
 
 class MyTestCase(TestCase):
-    def subTest(self, msg=None, **params):
-        try:
-            func = TestCase.subTest
-        except AttributeError:
-            return anullcontext
-        else:
-            return func(self, msg, **params)
-
     def assertAnd(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
         self.assertTrue(first and second, msg)
 
@@ -250,7 +239,7 @@ def parametrize(*args_list: tuple) -> Callable[[Callable], Callable]:
     return decorator
 
 
-def parametrize_product(*args_list: tuple) -> Callable[[Callable], Callable]:
+def parametrize_product(*args_list: Iterable) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(self):
@@ -264,38 +253,29 @@ def parametrize_product(*args_list: tuple) -> Callable[[Callable], Callable]:
     return decorator
 
 
-def repeat(number: int) -> Callable[[Callable], Callable]:
+def parametrize_starproduct(*args_list: Iterable[Iterable]) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(self):
-            for i in range(number):
-                if func(self) is not None:  # no self.subTest(str(i))
-                    raise AssertionError
+            for args in product(*args_list):
+                combined_args = tuple(chain.from_iterable(args))
+                with self.subTest(str(combined_args)):
+                    if func(self, *combined_args) is not None:
+                        raise AssertionError
 
         return inner
 
     return decorator
 
 
-class closeable_tempfile:
-    Uninterrupted = HandleKeyboardInterrupt()
+def repeat(number: int, verbose: bool = False) -> Callable[[Callable], Callable]:
+    def decorator(func):
+        @wraps(func)
+        def inner(self, *args, **kwargs):
+            for _i in progress(range(number), disable=not verbose):
+                if func(self, *args, **kwargs) is not None:  # no self.subTest(str(i))
+                    raise AssertionError
 
-    def __init__(self, mode="w+b", encoding=None):
-        encoding = _check_arguments(mode, encoding)
-        self.f = NamedTemporaryFile(mode=mode, encoding=encoding, delete=False)
+        return inner
 
-    def __enter__(self):
-        return self.f, self.f.name
-
-    def __exit__2(self, type, value, traceback):
-        with self.Uninterrupted:
-            self.f.close()  # close in case user has not closed the file
-            remove(self.f.name)
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        try:
-            if exc_type == EOFError:
-                sleep(1)  # wait for KeyboardInterrupt which might follow EOFError...
-        finally:
-            self.f.close()  # close in case user has not closed the file
-            remove(self.f.name)
+    return decorator

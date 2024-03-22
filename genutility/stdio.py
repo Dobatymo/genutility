@@ -18,7 +18,6 @@ def print_line(char: str = "-", length: int = _terminal_width, file: Optional[IO
 
 
 class PrintOnError:
-
     """A context manager which can be used to output data
     before an exception is printed by the python runtime.
     """

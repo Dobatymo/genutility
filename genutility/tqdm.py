@@ -51,5 +51,11 @@ class Progress(_Progress):
     def task(self, total: Optional[float] = None, description: Optional[str] = None, **kwargs: Any):
         return Task(total, description, **kwargs)
 
+    def set_prolog(self, prolog: str) -> None:
+        raise NotImplementedError
+
+    def set_epilog(self, epilog: str) -> None:
+        raise NotImplementedError
+
     def print(self, s: str, end="\n") -> None:
         tqdm.write(s, end=end)

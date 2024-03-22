@@ -276,6 +276,10 @@ class URLRequest:
             logger.warning("Connection was reset during download: %s", str(e))
             raise DownloadInterrupted("Connection was reset during download")
 
+        except FileNotFoundError:
+            # can be raised on windows for example when the file path is too long
+            raise
+
         except Exception:
             logger.exception("Downloading failed mid file. Handle.")
             raise

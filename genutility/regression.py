@@ -6,7 +6,6 @@ from .callbacks import Progress
 
 
 class LinearRegression:
-
     """Linear regression optimized by gradient descent."""
 
     def __init__(self, X: np.ndarray, y: np.ndarray, alpha: float = 0.01) -> None:

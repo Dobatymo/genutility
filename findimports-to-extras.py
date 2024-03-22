@@ -38,6 +38,7 @@ modmap = {
     "wmi": "wmi; sys_platform=='win32'",
     "wx": "wxPython>=4",
     "yaml": "ruamel.yaml",
+    "mistune": "mistune<2",
 }
 
 BUILTINS = (

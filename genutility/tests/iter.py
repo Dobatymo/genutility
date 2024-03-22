@@ -35,6 +35,7 @@ from genutility.iter import (
     iter_equal,
     iter_except,
     iter_except_ignore,
+    iter_len,
     iterrandrange,
     itersort,
     last,
@@ -727,6 +728,11 @@ class IterTest(MyTestCase):
     def test_product_map(self, func, a, b, truth):
         result = product_map(func, a, b)
         self.assertIterEqual(truth, result)
+
+    @parametrize((range(0), 0), (range(1), 1), (range(2), 2), ([], 0), ([0], 1), ([0, 1], 2))
+    def test_iter_len(self, obj, truth):
+        result = iter_len(obj)
+        self.assertEqual(truth, result)
 
 
 if __name__ == "__main__":

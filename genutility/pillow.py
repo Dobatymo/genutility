@@ -34,19 +34,19 @@ def exifinfo(image: Image.Image) -> Dict[str, Any]:
     if exifd is None:
         return {}
 
-    for k, v in exifd.items():
+    for k1, v1 in exifd.items():
         try:
-            tag = TAGS[k]
+            tag = TAGS[k1]
             if tag == "GPSInfo":
                 ret[tag] = {}
-                for k, v in v.items():
+                for k2, v2 in v1.items():
                     try:
-                        gpstag = GPSTAGS[k]
-                        ret[tag][gpstag] = v
+                        gpstag = GPSTAGS[k2]
+                        ret[tag][gpstag] = v2
                     except KeyError:
                         pass
             else:
-                ret[tag] = v
+                ret[tag] = v1
         except KeyError:
             pass
 

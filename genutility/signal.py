@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class HandleKeyboardInterrupt:
-
     """Context manager to handle ctrl-c (keyboard interrupts)
 
     with HandleKeyboardInterrupt():

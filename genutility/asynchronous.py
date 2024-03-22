@@ -1,4 +1,3 @@
-import asyncio
 import sys
 from numbers import Number
 from time import time
@@ -38,10 +37,9 @@ class progress_content:
             self.last = self.start = time()
             self.total = 0
 
-        @asyncio.coroutine
-        def __anext__(self):
+        async def __anext__(self):
             try:
-                elm = yield from self.it.__anext__()
+                elm = await self.it.__anext__()
                 self.total += len(elm)
                 current = time()
                 if current - self.last > self.refresh:
@@ -60,6 +58,7 @@ class progress_content:
 
 
 if __name__ == "__main__":
+    import asyncio
 
     class gensync:
         def __init__(self):
@@ -82,24 +81,20 @@ if __name__ == "__main__":
         def __aiter__(self):
             return self
 
-        @asyncio.coroutine
-        def __anext__(self):
+        async def __anext__(self):
             if self.i > 0:
                 self.i -= 1
                 return "asd"
             else:
                 raise StopAsyncIteration
 
-    for i in progress_content(gensync()):
+    for _i in progress_content(gensync()):
         pass
 
     print()
 
-    @asyncio.coroutine
-    async def run():
+    async def main():
         async for i in progress_content(genasync()):
             pass
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run())
-    loop.close()
+    asyncio.run(main())

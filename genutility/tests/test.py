@@ -2,7 +2,8 @@ import os
 import os.path
 import unittest
 
-from genutility.test import MyTestCase, closeable_tempfile, parametrize
+from genutility._file import CloseableNamedTemporaryFile
+from genutility.test import MyTestCase, parametrize
 
 
 class MyTestCaseTest(MyTestCase):
@@ -100,7 +101,7 @@ class TestTest(MyTestCase):
     def test_closeable_tempfile(self):
         name = None
         with self.assertRaises(ValueError):
-            with closeable_tempfile() as (f, name):
+            with CloseableNamedTemporaryFile() as (f, name):
                 name = name
                 raise ValueError
         self.assertFalse(os.path.exists(name))
@@ -108,7 +109,7 @@ class TestTest(MyTestCase):
     def test_closeable_tempfile_eoferror(self):
         name = None
         with self.assertRaises(EOFError):
-            with closeable_tempfile() as (f, name):
+            with CloseableNamedTemporaryFile() as (f, name):
                 name = name
                 raise EOFError
         self.assertFalse(os.path.exists(name))
@@ -117,7 +118,7 @@ class TestTest(MyTestCase):
     def test_closeable_tempfile_ctrlc(self):
         name = None
         with self.assertRaises(KeyboardInterrupt):
-            with closeable_tempfile() as (f, name):
+            with CloseableNamedTemporaryFile() as (f, name):
                 name = name
                 input(
                     "Press ctrl-c to continue"
@@ -126,7 +127,7 @@ class TestTest(MyTestCase):
 
     def test_closeable_tempfile_rw_flush(self):
         truth = b"asd"
-        with closeable_tempfile() as (f, name):
+        with CloseableNamedTemporaryFile() as (f, name):
             f.write(truth)
             f.flush()
             with open(name, "rb") as fr:
@@ -135,7 +136,7 @@ class TestTest(MyTestCase):
 
     def test_closeable_tempfile_rw_close(self):
         truth = b"asd"
-        with closeable_tempfile() as (f, name):
+        with CloseableNamedTemporaryFile() as (f, name):
             f.write(truth)
             f.close()
             with open(name, "rb") as fr:

@@ -7,7 +7,6 @@ WsgiApp = Any
 
 
 class HostDispatcher:
-
     """Dispatch WSGI apps by host.
     app = HostDispatcher({'a.com': app_a, 'b.com': app_b})
     """

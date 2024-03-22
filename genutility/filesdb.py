@@ -63,6 +63,8 @@ class GenericDb:
             else:
                 raise ValueError(f"Database is missing columns: {', '.join(missing_cols)}")
 
+        self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)
+
     @tls_property
     def connection(self):
         return sqlite3.connect(self.dbpath, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
@@ -214,7 +216,6 @@ class GenericDb:
 
         return fields
 
-    @lru_cache(maxsize=128)
     def _get_latest_sql(
         self, derived_keys: Collection[str], ignore_null: bool, only: HashableContainer[str], no: HashableContainer[str]
     ) -> str:

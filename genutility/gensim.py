@@ -21,7 +21,6 @@ def false(x: Any) -> bool:
 
 
 class KeyedVectors(KeyedVectorsOriginal):
-
     """Enhancement of the original `gensim` `KeyedVectors` class. Supports loading of `glove` and
     `muse` word vector files.
     """

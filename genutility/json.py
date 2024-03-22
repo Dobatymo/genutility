@@ -69,7 +69,7 @@ class BuiltinRoundtripEncoder(json.JSONEncoder):
 
 class BuiltinRoundtripDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+        json.JSONDecoder.__init__(self, *args, object_hook=self.object_hook, **kwargs)
 
     def object_hook(self, obj):
         if len(obj) == 1:
@@ -172,7 +172,6 @@ class JsonLoadKwargs(TypedDict):
 
 
 class json_lines:
-
     """Read and write files in the JSON Lines format (http://jsonlines.org)."""
 
     def __init__(
@@ -386,7 +385,6 @@ def key_to_hash(
 
 
 class JsonLinesFormatter(logging.Formatter):
-
     """A JSON Lines formatter for the Python logging library.
     It expects a `dict` as logging message.
     For example:

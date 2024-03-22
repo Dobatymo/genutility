@@ -145,7 +145,7 @@ def hash_raw_png(path: str, hashobj: Hashobj) -> None:
     def filter_chunks(ct: bytes) -> bool:
         return ct in image_chunks
 
-    for length, chunk_type, chunk, crc in iter_png(path, translate=False, verify_crc=False):
+    for length, chunk_type, chunk, _crc in iter_png(path, translate=False, verify_crc=False):
         if filter_chunks(chunk_type):
             hashobj.update(length)
             hashobj.update(chunk_type)

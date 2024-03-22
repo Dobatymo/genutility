@@ -215,7 +215,6 @@ def default_except(
 
 
 class CustomCache:
-
     """Class to build decorator cache function using custom reader and writer functions.
     The cache method ignores all arguments of the decorated function.
 

@@ -29,7 +29,7 @@ class BaseTask:
 
 
 class Task(BaseTask):
-    def __init__(self, total: Optional[float], description: Optional[str] = None) -> None:
+    def __init__(self, total: Optional[float] = None, description: Optional[str] = None) -> None:
         pass
 
     def advance(self, delta: float) -> None:
@@ -56,8 +56,14 @@ class Progress:
     ) -> Iterator[T]:
         return sequence
 
-    def task(self, total: Optional[float], description: Optional[str] = None, **fields: Any):
+    def task(self, total: Optional[float] = None, description: Optional[str] = None, **fields: Any):
         return Task(total, description, **fields)
+
+    def set_prolog(self, prolog: Any) -> None:
+        pass
+
+    def set_epilog(self, epilog: Any) -> None:
+        pass
 
     def print(self, s: str, end="\n") -> None:
         print(s, end=end)

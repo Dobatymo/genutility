@@ -2,12 +2,13 @@ import logging
 import os
 import subprocess  # nosec
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from ..os import CurrentWorkingDirectory
 from ..string import surrounding_join
-from ..subprocess import force_decode
+from ..subprocess import force_decode  # nosec
 
 logger = logging.getLogger(__name__)
 
@@ -24,18 +25,20 @@ class RarError(Exception):
         self.output = output
 
 
-"""WinRAR Exit Codes
-255 	USER BREAK	User stopped the process
-9	CREATE ERROR	Create file error
-8	MEMORY ERROR	Not enough memory for operation
-7	USER ERROR	Command line option error
-6	OPEN ERROR	Open file error
-5	WRITE ERROR	Write to disk error
-4	LOCKED ARCHIVE	Attempt to modify an archive previously locked by the 'k' command
-3	CRC ERROR	A CRC error occurred when unpacking
-2	FATAL ERROR	A fatal error occurred
-1	WARNING	Non fatal error(s) occurred
-0	SUCCESS	Successful operation (User exit)"""
+class WinRarExitCodes(Enum):
+    SUCCESS = 0  # Successful operation
+    WARNING = 1  # Non fatal error(s) occurred
+    FATAL_ERROR = 2  # A fatal error occurred
+    CRC_ERROR = 3  # Invalid checksum, data is damaged
+    LOCKED_ARCHIVE = 4  # Attempt to modify a locked archive
+    WRITE_ERROR = 5  # Write error
+    OPEN_ERROR = 6  # Open file error
+    USER_ERROR = 7  # Wrong command line option
+    MEMORY_ERROR = 8  # Not enough memory
+    CREATE_ERROR = 9  # Create file error
+    NO_FILES = 10  # No files matching the specified mask and options were found
+    BAD_PASS = 11  # Wrong password.
+    USER_BREAK = 255  # User stopped the process
 
 
 @dataclass
@@ -207,9 +210,12 @@ def create_rar_from_folder(
     return True
 
 
+_CWD_PATH = Path(".")
+
+
 def create_rar_from_file(
     path: Path,
-    dest_path: Path = Path("."),
+    dest_path: Path = _CWD_PATH,
     profile_setter_func: Optional[Callable[[Rar], Any]] = None,
     name_transform: Callable = lambda x: x,
 ) -> bool:

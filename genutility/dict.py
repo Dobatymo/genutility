@@ -17,7 +17,7 @@ def flatten(d: Union[Dict[T, U], List[U], Tuple[U, ...]]) -> Iterator[U]:
     if isinstance(d, (list, tuple)):
         yield from d
     elif isinstance(d, dict):
-        for k, val in d.items():
+        for val in d.values():
             yield from flatten(val)
     else:
         raise TypeError(f"Unsupported type: {type(d)}")
@@ -145,7 +145,6 @@ def update(d1: dict, d2: dict) -> None:
 
 
 class keydefaultdict(defaultdict):
-
     """defaultdict which passes a key to the default factory."""
 
     def __missing__(self, key: Hashable) -> Any:
@@ -161,7 +160,6 @@ class KeyExistsError(KeyError):
 
 
 class NoOverwriteDict(UserDict):
-
     """Dictionary which does not allow overwriting existing items."""
 
     def __setitem__(self, key: Hashable, value: Any) -> None:

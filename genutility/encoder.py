@@ -9,7 +9,6 @@ T = TypeVar("T")
 
 
 class GenericLabelEncoder:
-
     """Encodes all hashable objects to integers"""
 
     def __init__(self) -> None:
@@ -50,7 +49,6 @@ class GenericLabelEncoder:
 
 
 class BatchLabelEncoder(Generic[T]):
-
     """Similar to `sklearn.preprocessing.LabelEncoder` but accepts a list of sentences as inputs
     and returns a list of lists of integer labels.
     Warning: Calling `fit` doesn't reset the encoder. To do so call `reset()` explicitly.

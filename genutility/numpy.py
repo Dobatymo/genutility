@@ -216,7 +216,6 @@ def shiftedexp(pvals: np.ndarray) -> np.ndarray:
 
 
 class Sampler:
-
     """Sample from discrete CDF."""
 
     def __init__(self, cdf: np.ndarray) -> None:

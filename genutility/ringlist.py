@@ -1,5 +1,4 @@
 class RingList:
-
     """bad complexity, moves all data if ring is full"""
 
     def __init__(self, length):

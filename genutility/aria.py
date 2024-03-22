@@ -366,7 +366,6 @@ class AriaDownloader:
 
 
 class DownloadManager:
-
     """To use from a single thread.
 
     State transitions:

@@ -1,4 +1,4 @@
-from genutility.markdown import markdown_urls
+from genutility.markdown import markdown2html, markdown2plaintext, markdown_urls
 from genutility.test import MyTestCase, parametrize
 
 
@@ -108,6 +108,67 @@ class MarkdownTest(MyTestCase):
     def test_markdown_urls_2(self, text, truth):
         result = markdown_urls(text)
         self.assertEqual(truth, result)
+
+    def test_markdown2plaintext(self):
+        value = """# heading h1
+
+heading h2
+------------
+
+this is a *paragraph*.
+this is &lt;still&gt; the ~~same~~ **paragraph**.
+
+this is a _new_ __paragraph__.
+
+* Red
+* Green
+
+http://en.wikipedia.org
+[Wikipedia](http://en.wikipedia.org)
+[Wikipedia](http://en.wikipedia.org "wiki text")
+
+"""
+
+        truth = """heading h1
+
+heading h2
+
+this is a paragraph.
+this is <still> the same paragraph.
+
+this is a new paragraph.
+
+Red Green 
+<URL>
+Wikipedia
+wiki text"""  # noqa: W291 # keep the space after Red Green
+
+        result = markdown2plaintext(value)
+        self.assertEqual(result, truth)
+
+    def test_markdown2html(self):
+        value = """1. Harry Potter and the Philosopher's Stone (2001)
+2. Harry Potter and the Chamber of Secrets (2002)
+3. Harry Potter and the Prisoner of Azkaban (2004)
+4. Harry Potter and the Goblet of Fire (2005)
+5. Harry Potter and the Order of the Phoenix (2007)
+6. Harry Potter and the Half-Blood Prince (2009)
+7. Harry Potter and the Deathly Hallows - Part 1 (2010)
+8. Harry Potter and the Deathly Hallows - Part 2 (2011)"""
+
+        truth = """<ol>
+<li>Harry Potter and the Philosopher's Stone (2001)</li>
+<li>Harry Potter and the Chamber of Secrets (2002)</li>
+<li>Harry Potter and the Prisoner of Azkaban (2004)</li>
+<li>Harry Potter and the Goblet of Fire (2005)</li>
+<li>Harry Potter and the Order of the Phoenix (2007)</li>
+<li>Harry Potter and the Half-Blood Prince (2009)</li>
+<li>Harry Potter and the Deathly Hallows - Part 1 (2010)</li>
+<li>Harry Potter and the Deathly Hallows - Part 2 (2011)</li>
+</ol>"""
+
+        result = markdown2html(value)
+        self.assertEqual(result, truth)
 
 
 if __name__ == "__main__":
