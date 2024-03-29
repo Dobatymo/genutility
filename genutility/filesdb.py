@@ -196,11 +196,15 @@ class GenericDb:
         self.cursor.execute(sql)
         return iterfetch(self.cursor)
 
-    def _filtered_derived(self, derived: Collection[str], ignore_null: bool):
-        if ignore_null:
+    def _filtered_derived(self, derived: Collection[str], select: str) -> Iterator[Tuple[str, str, str]]:
+        if select == "null":
+            return ((n, t, v) for n, t, v in self._derived if n not in derived)
+        elif select == "not-null":
             return ((n, t, v) for n, t, v in self._derived if n in derived)
-        else:
+        elif select == "all":
             return self._derived
+        else:
+            raise ValueError("select must be one of: null, not-null, all")
 
     def _get_fields(self, only: HashableContainer[str], no: HashableContainer[str]) -> List[str]:
         if only and no:
@@ -220,7 +224,7 @@ class GenericDb:
         self, derived_keys: Collection[str], ignore_null: bool, only: HashableContainer[str], no: HashableContainer[str]
     ) -> str:
         fields = ", ".join(self._get_fields(only, no))
-        _derived = self._filtered_derived(derived_keys, ignore_null)
+        _derived = self._filtered_derived(derived_keys, "not-null" if ignore_null else "all")
         conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
         latest_col, latest_dir, latest_agg = self.latest_order_by()
         sql = (
@@ -274,7 +278,7 @@ class GenericDb:
         derived_names = derived_names or {}
         derived = derived or {}
 
-        _derived = self._filtered_derived(derived_names, ignore_null)
+        _derived = self._filtered_derived(derived_names, "not-null" if ignore_null else "all")
         affected_fields = [n for n, t, v in chain(self._mandatory, _derived)]
         group_by = ", ".join(affected_fields)
         vars = len(affected_fields)
@@ -304,12 +308,15 @@ class GenericDb:
     def _add_file(self, mandatory: Sequence[Any], derived: Dict[str, Any], replace: bool = True) -> None:
         """Adds a new entry to the database and doesn't check if file
         with the same mandatory fields already exists.
-        However it will replace entries based on PRIMARY KEYs or UNIQUE indices.
-        If `replace` is True the values previously existing in the existing replaced row but not given in `derived` will be overwritten with empty values.
-        If `replace` is False, only the given values will be updated.
+        It will replace or update entries based on matching PRIMARY KEY or UNIQUE field, or else insert them.
+        If `replace` is True the values previously existing in the existing replaced row but not given in `derived`
+        will be overwritten with empty values.
+        If `replace` is False, the given derived values will be updated if all mandatory fields match,
+        and not given ones will keep their original values. If not all of the mandatory fields match,
+        not given derived values will be reset to zero.  This makes sure out-dated values are removed.
         """
 
-        _derived = list(self._filtered_derived(derived, ignore_null=True))
+        _derived = list(self._filtered_derived(derived, "not-null"))
         affected_fields = [n for n, t, v in chain(self._auto, self._mandatory, _derived)]
         fields = ", ".join(affected_fields)
         values = ", ".join(v for n, t, v in chain(self._auto, self._mandatory, _derived))
@@ -317,8 +324,13 @@ class GenericDb:
         if replace:
             sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"
         else:
-            # fixme: this might keep the wrong derived information if the non-primary mandatory data changed
-            update_set = ", ".join(f"{n}=excluded.{n}" for n in affected_fields)
+            condition = " AND ".join(f"{n} IS excluded.{n}" for n, t, v in self._mandatory)
+            set_affected = (f"{n}=excluded.{n}" for n in affected_fields)
+            set_unaffected = (
+                f"{n}=CASE WHEN {condition} THEN {n} ELSE NULL END"
+                for n, t, v in self._filtered_derived(derived, "null")
+            )
+            update_set = ", ".join(chain(set_affected, set_unaffected))
             sql = (
                 f"INSERT INTO {self.table} ({fields}) VALUES ({values}) ON CONFLICT DO UPDATE SET {update_set}"  # nosec
             )
@@ -338,7 +350,7 @@ class GenericDb:
         """
 
         derived = derived or {}
-        _derived = list(self._filtered_derived(derived, ignore_null))
+        _derived = list(self._filtered_derived(derived, "not-null" if ignore_null else "all"))
         fields = ", ".join(n for n, t, v in chain(self._auto, self._mandatory, _derived))
         values = ", ".join(v for n, t, v in chain(self._auto, self._mandatory, _derived))
         conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))

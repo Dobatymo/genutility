@@ -145,7 +145,6 @@ class SimpleDBTest(MyTestCase):
             ("path2", 100, "2013-01-01 12:00:00", "asd"),
         ]
 
-    @unittest.skip("`GenericFileDb._add_file(..., replace=False)` still buggy")
     def test_add_file_upsert_2(self):
         db = Simple(":memory:", "tests")
 
