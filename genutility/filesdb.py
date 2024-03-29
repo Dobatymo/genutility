@@ -268,7 +268,11 @@ class GenericDb:
         only: HashableContainer[str] = frozenset(),
         no: HashableContainer[str] = frozenset(),
     ) -> Iterator[tuple]:
-        """`derived_names` must be equal to the keys of the `derived` dicts"""
+        """Retrieve multiple latest rows based on mandatory and derived information.
+        `derived_names` must be equal to the keys of the `derived` dicts.
+
+        See `_get_latest` for more details.
+        """
 
         # This function creates a join table to match multiple values at once
         # and also allow carrying the input order over to the output.
@@ -296,7 +300,7 @@ class GenericDb:
             ORDER BY c.{self.order_col}  -- order rows according to input order
         """  # nosec
 
-        args = tuple(chain.from_iterable(self._args_many(mandatory, derived)))
+        args = tuple(chain.from_iterable(self._args_many(mandatory, derived, ignore_null)))
 
         self.cursor.execute(sql, args)
 
@@ -304,6 +308,28 @@ class GenericDb:
 
     def _filtered_values_str(self, derived, ignore_null: bool):
         return
+
+    def _add_file_query(self, derived_names: Optional[Tuple[str, ...]] = None, replace: bool = True) -> str:
+        _derived = list(self._filtered_derived(derived_names, "not-null"))
+        affected_fields = [n for n, t, v in chain(self._auto, self._mandatory, _derived)]
+        fields = ", ".join(affected_fields)
+        values = ", ".join(v for n, t, v in chain(self._auto, self._mandatory, _derived))
+
+        if replace:
+            sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"
+        else:
+            condition = " AND ".join(f"{n} IS excluded.{n}" for n, t, v in self._mandatory)
+            set_affected = (f"{n}=excluded.{n}" for n in affected_fields)
+            set_unaffected = (
+                f"{n}=CASE WHEN {condition} THEN {n} ELSE NULL END"
+                for n, t, v in self._filtered_derived(derived_names, "null")
+            )
+            update_set = ", ".join(chain(set_affected, set_unaffected))
+            sql = (
+                f"INSERT INTO {self.table} ({fields}) VALUES ({values}) ON CONFLICT DO UPDATE SET {update_set}"  # nosec
+            )
+
+        return sql
 
     def _add_file(self, mandatory: Sequence[Any], derived: Dict[str, Any], replace: bool = True) -> None:
         """Adds a new entry to the database and doesn't check if file
@@ -316,28 +342,27 @@ class GenericDb:
         not given derived values will be reset to zero.  This makes sure out-dated values are removed.
         """
 
-        _derived = list(self._filtered_derived(derived, "not-null"))
-        affected_fields = [n for n, t, v in chain(self._auto, self._mandatory, _derived)]
-        fields = ", ".join(affected_fields)
-        values = ", ".join(v for n, t, v in chain(self._auto, self._mandatory, _derived))
-
-        if replace:
-            sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"
-        else:
-            condition = " AND ".join(f"{n} IS excluded.{n}" for n, t, v in self._mandatory)
-            set_affected = (f"{n}=excluded.{n}" for n in affected_fields)
-            set_unaffected = (
-                f"{n}=CASE WHEN {condition} THEN {n} ELSE NULL END"
-                for n, t, v in self._filtered_derived(derived, "null")
-            )
-            update_set = ", ".join(chain(set_affected, set_unaffected))
-            sql = (
-                f"INSERT INTO {self.table} ({fields}) VALUES ({values}) ON CONFLICT DO UPDATE SET {update_set}"  # nosec
-            )
-
+        sql = self._add_file_query(derived, replace)
         args = self._args(mandatory, derived, ignore_null=True)
 
         assert self.cursor.execute(sql, args).rowcount == 1
+
+    def _add_file_many(
+        self,
+        mandatory: Iterable[Sequence[Any]],
+        derived_names: Optional[Tuple[str, ...]] = None,
+        derived: Optional[Iterable[Dict[str, Any]]] = None,
+        replace: bool = True,
+    ) -> None:
+        """Replace or upsert multiple files.
+        `derived_names` must be equal to the keys of the `derived` dicts.
+
+        See `_add_file` for more details.
+        """
+
+        sql = self._add_file_query(derived_names, replace)
+        args = self._args_many(mandatory, derived, ignore_null=True)
+        self.cursor.executemany(sql, args)
 
     def _add_file_no_dup(
         self,

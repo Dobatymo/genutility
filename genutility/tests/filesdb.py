@@ -118,6 +118,68 @@ class SimpleDBTest(MyTestCase):
             ("path2", 100, "2013-01-01 12:00:00", None),
         ]
 
+    def test_add_file_replace_batch(self):
+        db = Simple(":memory:", "tests")
+
+        mandatory = [
+            ("path1", 100, "2013-01-01 12:00:00"),
+            ("path2", 100, "2013-01-01 12:00:00"),
+        ]
+        derived = [
+            {"data": "asd"},
+            {"data": "qwe"},
+        ]
+        db._add_file_many(mandatory, ["data"], derived)
+        assert list(db.iter(no=("entry_date",))) == [
+            ("path1", 100, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", "qwe"),
+        ]
+
+        mandatory = [
+            ("path", 100, "2013-01-01 12:00:00"),
+            ("path", 100, "2013-01-01 12:00:00"),
+        ]
+        derived = [
+            {"data": "asd"},
+            {"data": "qwe"},
+        ]
+        db._add_file_many(mandatory, ["data"], derived)
+        assert list(db.iter(no=("entry_date",))) == [
+            ("path1", 100, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", "qwe"),
+            ("path", 100, "2013-01-01 12:00:00", "qwe"),
+        ]
+
+        mandatory = [
+            ("path", 100, "2013-01-01 12:00:00"),
+            ("path", 200, "2013-01-01 12:00:00"),
+        ]
+        derived = [
+            {"data": "qwe"},
+            {"data": "qwe"},
+        ]
+        db._add_file_many(mandatory, ["data"], derived)
+        assert list(db.iter(no=("entry_date",))) == [
+            ("path1", 100, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", "qwe"),
+            ("path", 200, "2013-01-01 12:00:00", "qwe"),
+        ]
+
+        mandatory = [
+            ("path", 200, "2013-01-01 12:00:00"),
+            ("path", 200, "2013-01-01 12:00:00"),
+        ]
+        derived = [
+            {"data": "qwe"},
+            {"data": None},
+        ]
+        db._add_file_many(mandatory, ["data"], derived)
+        assert list(db.iter(no=("entry_date",))) == [
+            ("path1", 100, "2013-01-01 12:00:00", "asd"),
+            ("path2", 100, "2013-01-01 12:00:00", "qwe"),
+            ("path", 200, "2013-01-01 12:00:00", None),
+        ]
+
     def test_add_file_upsert(self):
         db = Simple(":memory:", "tests")
 
@@ -153,6 +215,35 @@ class SimpleDBTest(MyTestCase):
 
         db._add_file(("path", 200, "2013-01-01 12:00:00"), derived={}, replace=False)
         assert list(db.iter(no=("entry_date",))) == [("path", 200, "2013-01-01 12:00:00", None)]
+
+    def test_add_file_upsert_2_batch(self):
+        db = Simple(":memory:", "tests")
+
+        mandatory = [
+            ("path1", 100, "2013-01-01 12:00:00"),
+            ("path2", 100, "2013-01-01 12:00:00"),
+        ]
+        derived = [
+            {"data": "asd"},
+            {"data": "asd"},
+        ]
+        truth = [("path1", 100, "2013-01-01 12:00:00", "asd"), ("path2", 100, "2013-01-01 12:00:00", "asd")]
+        db._add_file_many(mandatory, ["data"], derived, replace=False)
+        result = list(db.iter(no=("entry_date",)))
+        self.assertEqual(truth, result)
+
+        mandatory = [
+            ("path1", 100, "2013-01-01 12:00:00"),
+            ("path2", 200, "2013-01-01 12:00:00"),
+        ]
+        derived = [
+            {},
+            {},
+        ]
+        truth = [("path1", 100, "2013-01-01 12:00:00", "asd"), ("path2", 200, "2013-01-01 12:00:00", None)]
+        db._add_file_many(mandatory, [], derived, replace=False)
+        result = list(db.iter(no=("entry_date",)))
+        self.assertEqual(truth, result)
 
     def test_get_latest_many(self):
         db = Simple(":memory:", "tests")
