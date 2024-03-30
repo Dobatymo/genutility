@@ -135,6 +135,7 @@ def iter_fastresume(path: Path) -> Iterator[FileProperties]:
     it = compress(zip_longest(files, mapped_files), file_priority)
     for file, mapped_file in it:
         if not mapped_file:  # either None from zip_longest, or "" as placeholder in fastresume file
+            assert file.relpath is not None  # for mypy
             file.abspath = long_path_support(fspath(save_path / file.relpath))
         else:
             file.abspath = long_path_support(fspath(save_path / mapped_file))

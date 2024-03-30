@@ -1,4 +1,5 @@
 import unittest
+from sqlite3 import sqlite_version_info
 from time import sleep
 
 from genutility.exceptions import NoResult
@@ -180,6 +181,7 @@ class SimpleDBTest(MyTestCase):
             ("path", 200, "2013-01-01 12:00:00", None),
         ]
 
+    @unittest.skipIf(sqlite_version_info < (3, 35, 0), "SQLite 3.35.0 or higher required")
     def test_add_file_upsert(self):
         db = Simple(":memory:", "tests")
 
@@ -207,6 +209,7 @@ class SimpleDBTest(MyTestCase):
             ("path2", 100, "2013-01-01 12:00:00", "asd"),
         ]
 
+    @unittest.skipIf(sqlite_version_info < (3, 35, 0), "SQLite 3.35.0 or higher required")
     def test_add_file_upsert_2(self):
         db = Simple(":memory:", "tests")
 
@@ -216,6 +219,7 @@ class SimpleDBTest(MyTestCase):
         db._add_file(("path", 200, "2013-01-01 12:00:00"), derived={}, replace=False)
         assert list(db.iter(no=("entry_date",))) == [("path", 200, "2013-01-01 12:00:00", None)]
 
+    @unittest.skipIf(sqlite_version_info < (3, 35, 0), "SQLite 3.35.0 or higher required")
     def test_add_file_upsert_2_batch(self):
         db = Simple(":memory:", "tests")
 

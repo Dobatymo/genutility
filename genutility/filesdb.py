@@ -1,6 +1,7 @@
 import logging
 import os.path
 import sqlite3
+import warnings
 from collections import UserDict
 from functools import lru_cache
 from itertools import chain, repeat
@@ -30,6 +31,13 @@ class GenericDb:
     order_col = "_order"
 
     def __init__(self, dbpath: str, table: str, debug: bool = True, allow_add: bool = True) -> None:
+
+        if sqlite3.sqlite_version_info < (3, 35, 0):
+            warnings.warn(
+                f"SQLite version 3.35.0 or higher required for some features (current version {sqlite3.sqlite_version}). ",
+                stacklevel=2,
+            )
+
         self.table = quote_identifier(table)
         self._primary = self.primary()
         self._auto = self.auto()
@@ -41,6 +49,7 @@ class GenericDb:
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.info("SQLite tracing enabled")
+            sqlite3.enable_callback_tracebacks(True)
             self.connection.set_trace_callback(self.trace)
 
         # verify columns
@@ -63,7 +72,7 @@ class GenericDb:
             else:
                 raise ValueError(f"Database is missing columns: {', '.join(missing_cols)}")
 
-        self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)
+        self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)  # type: ignore[assignment,method-assign]
 
     @tls_property
     def connection(self):
@@ -110,7 +119,7 @@ class GenericDb:
         Used for search queries when given.
         """
 
-        raise NotImplementedError
+        return []
 
     def __enter__(self) -> "GenericDb":
         return self
@@ -196,7 +205,7 @@ class GenericDb:
         self.cursor.execute(sql)
         return iterfetch(self.cursor)
 
-    def _filtered_derived(self, derived: Collection[str], select: str) -> Iterator[Tuple[str, str, str]]:
+    def _filtered_derived(self, derived: Collection[str], select: str) -> Iterable[Tuple[str, str, str]]:
         if select == "null":
             return ((n, t, v) for n, t, v in self._derived if n not in derived)
         elif select == "not-null":
@@ -279,7 +288,7 @@ class GenericDb:
         # Another implementation could use `WHERE (x1 AND y1) OR (x2 AND y2)`,
         # but this way doesn't easily support sorting.
 
-        derived_names = derived_names or {}
+        derived_names = derived_names or ()
         derived = derived or {}
 
         _derived = self._filtered_derived(derived_names, "not-null" if ignore_null else "all")
