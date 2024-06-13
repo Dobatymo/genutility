@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Callable, Collection, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar
 
 from tls_property import tls_property
+from typing_extensions import Self
 
 from .exceptions import NoResult
 from .filesystem import EntryType, normalize_seps
@@ -31,7 +32,6 @@ class GenericDb:
     order_col = "_order"
 
     def __init__(self, dbpath: str, table: str, debug: bool = True, allow_add: bool = True) -> None:
-
         if sqlite3.sqlite_version_info < (3, 35, 0):
             warnings.warn(
                 f"SQLite version 3.35.0 or higher required for some features (current version {sqlite3.sqlite_version}). ",
@@ -55,7 +55,7 @@ class GenericDb:
         # verify columns
         sql = f"SELECT c.name FROM pragma_table_info({self.table}) c"  # nosec
         self.cursor.execute(sql)
-        file_cols = {name for name, in self.cursor.fetchall()}
+        file_cols = {name for (name,) in self.cursor.fetchall()}
         db_cols = {n: t for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived)}
 
         if self.order_col in db_cols:
@@ -121,7 +121,7 @@ class GenericDb:
 
         return []
 
-    def __enter__(self) -> "GenericDb":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:

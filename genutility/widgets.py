@@ -2,6 +2,7 @@ import logging
 from typing import Collection, Dict, List, Optional, Sequence
 
 import wx
+from typing_extensions import Self
 from wx.lib.mixins.listctrl import ColumnSorterMixin
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
         self.insertcount = 0
         self.idtopos = {}
 
-    def GetListCtrl(self) -> "AdvancedListCtrl":
+    def GetListCtrl(self) -> Self:
         return self
 
     def ClearAll(self, clear_columns: bool = True) -> None:

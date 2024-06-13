@@ -1,7 +1,7 @@
 aiohttp>=3.7.4
 aioresponses>=0.7.2
 av>=8.0; python_version>='3.8'
-ctypes-windows-sdk>=0.0.10; sys_platform=='win32'
+ctypes-windows-sdk>=0.0.14; sys_platform=='win32'
 flask>=0.12.3
 gensim>=4.0.0
 gmpy2
@@ -30,5 +30,5 @@ simplejson
 tika
 tls-property>=1.0.1
 toml
-typing-extensions
+typing-extensions>=4.0.0
 werkzeug>=0.11.11

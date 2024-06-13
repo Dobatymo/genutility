@@ -1,5 +1,5 @@
-""" This module is to avoid circular imports.
-    It should avoid any dependencies apart from the standard library.
+"""This module is to avoid circular imports.
+It should avoid any dependencies apart from the standard library.
 """
 
 import os

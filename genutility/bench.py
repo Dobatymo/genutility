@@ -1,6 +1,8 @@
 import tracemalloc
 from typing import Optional
 
+from typing_extensions import Self
+
 
 class MeasureMemory:
     __slots__ = ("total", "snapshot")
@@ -17,7 +19,7 @@ class MeasureMemory:
         stats = snapshot_now.compare_to(self.snapshot, "lineno")
         return sum(stat.size for stat in stats)
 
-    def __enter__(self) -> "MeasureMemory":
+    def __enter__(self) -> Self:
         self.snapshot = tracemalloc.take_snapshot()
         return self
 

@@ -3,6 +3,8 @@ from datetime import timedelta
 from time import perf_counter, sleep
 from typing import Any, Callable, DefaultDict, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
 
+from typing_extensions import Self
+
 T = TypeVar("T")
 
 
@@ -37,7 +39,7 @@ class TakeAtleast:
         self.wait_on_error = wait_on_error
         self.now = None
 
-    def __enter__(self) -> "TakeAtleast":
+    def __enter__(self) -> Self:
         self.now = perf_counter()
         return self
 
@@ -57,7 +59,7 @@ class DeltaTime:
         self.start = None
         self.end = perf_counter()
 
-    def __iter__(self) -> "DeltaTime":
+    def __iter__(self) -> Self:
         return self
 
     def __next__(self) -> float:
@@ -96,7 +98,7 @@ class PrintStatementTime:
         self.delta = None
         self.interrupted = None
 
-    def __enter__(self) -> "PrintStatementTime":
+    def __enter__(self) -> Self:
         self.start = perf_counter()
         return self
 
@@ -122,7 +124,7 @@ class MeasureTime:
         self.start = None
         self.interrupted = None
 
-    def __enter__(self) -> "MeasureTime":
+    def __enter__(self) -> Self:
         self.start = perf_counter()
         return self
 

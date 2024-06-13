@@ -13,6 +13,7 @@ from rich.progress import Task as RichTask
 from rich.progress import TaskID, TimeElapsedColumn
 from rich.table import Column
 from rich.text import Text
+from typing_extensions import Self
 
 from ._files import PathType
 from .callbacks import BaseTask
@@ -77,7 +78,7 @@ class Task(BaseTask):
         description = description or "Working..."
         self.task_id = self.progress.add_task(description, total=total, **fields)
 
-    def __enter__(self) -> BaseTask:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -120,6 +121,19 @@ class Progress(_Progress):
         finally:
             self.progress.remove_task(task_id)
 
+    def track_auto(
+        self,
+        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        description: Optional[str] = None,
+        **fields: Any,
+    ) -> Iterable[ProgressType]:
+        description = description or "Working..."
+        with self.task(description=description, **fields) as task:
+            for completed, item in enumerate(sequence):
+                total = len(sequence)
+                task.update(completed=completed, total=total)
+                yield item
+
     def task(self, total: Optional[float] = None, description: str = "Working...", **fields: Any):
         return Task(self.progress, total, description, **fields)
 
@@ -154,7 +168,13 @@ class Progress(_Progress):
         i.e. not interrupting the progress display.
         """
 
-        self.progress.print(s, end=end)
+        self.progress.print(
+            s,
+            end=end,
+            markup=False,
+            highlight=False,
+            soft_wrap=True,
+        )
 
     def refresh(self) -> None:
         self.progress.refresh()
@@ -215,7 +235,6 @@ class StdoutFile:
         soft_wrap: Optional[bool] = None,
         new_line_start: bool = False,
     ) -> None:
-
         if console is None and path is None:
             raise ValueError("console and path cannot both be None")
 
@@ -251,7 +270,7 @@ class StdoutFile:
 
         self.write = _write
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def close(self) -> None:
@@ -260,6 +279,28 @@ class StdoutFile:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
+
+
+class StdoutFileNoStyle(StdoutFile):
+    def __init__(self, *args, **kwargs) -> None:
+        _kwargs = dict(
+            encoding="utf-8",
+            markup=False,
+            highlight=False,
+            soft_wrap=True,
+        )
+        _kwargs.update(kwargs)
+        super().__init__(*args, **_kwargs)
+
+
+class MarkdownHighlighter:
+    def __call__(self, text: Union[str, Text]) -> Union[Text, Markdown]:
+        if isinstance(text, str):
+            return Markdown(text)
+        elif isinstance(text, Text):
+            return text
+        else:
+            raise TypeError(f"str or Text instance required, not {text!r}")
 
 
 if __name__ == "__main__":

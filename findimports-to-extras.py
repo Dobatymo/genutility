@@ -15,7 +15,7 @@ modmap = {
     "bs4": "beautifulsoup4",
     "cryptography": "cryptography>=1.5.3",
     "cv2": "opencv-python",
-    "cwinsdk": "ctypes-windows-sdk>=0.0.10; sys_platform=='win32'",
+    "cwinsdk": "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'",
     "flask": "flask>=0.12.3",
     "gensim": "gensim>=4.0.0",
     "msgpack": "msgpack>=0.6.0",
@@ -30,7 +30,7 @@ modmap = {
     "simple_salesforce": "simple-salesforce>=1.1.0",
     "sklearn": "scikit-learn",
     "tls_property": "tls-property>=1.0.1",
-    "typing_extensions": "typing-extensions",
+    "typing_extensions": "typing-extensions>=4.0.0",
     "werkzeug": "werkzeug>=0.11.11",
     "win32com": "pywin32; sys_platform=='win32'",
     "win32evtlog": "pywin32; sys_platform=='win32'",
@@ -69,9 +69,11 @@ MANUAL_FIXES_ADD = {
     "genutility.numba": ["numba"],
     "genutility.numpy": ["numpy"],
     "genutility.pandas": ["pandas"],
+    "genutility.rich": ["rich"],
     "genutility.tensorflow": ["tensorflow"],
     "genutility.toml": ["toml"],
     "genutility.tqdm": ["tqdm"],
+    "genutility.twisted": ["twisted"],
 }
 
 

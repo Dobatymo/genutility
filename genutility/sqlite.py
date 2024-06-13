@@ -65,10 +65,9 @@ def batch_executer(
     entries = 0
 
     progress = progress or Progress()
-    for queries_batch in batch(progress.track(it), batch_size):
+    for data in batch(progress.track(it), batch_size, list):
         # need to cache batch data, because if the iterable is exhausted,
         # executemany raises `sqlite3.ProgrammingError`
-        data = list(queries_batch)
         if data:
             cursor.execute("BEGIN TRANSACTION")
             cursor.executemany(query_str, data)

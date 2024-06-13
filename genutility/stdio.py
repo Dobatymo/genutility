@@ -5,6 +5,8 @@ from shutil import get_terminal_size
 from time import sleep
 from typing import IO, Any, Callable, Optional, TypeVar, Union
 
+from typing_extensions import Self
+
 from .typing import ExceptionsType
 
 T = TypeVar("T")
@@ -28,7 +30,7 @@ class PrintOnError:
         self.args = args
         self.kwargs = kwargs
 
-    def __enter__(self) -> "PrintOnError":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

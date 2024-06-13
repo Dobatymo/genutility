@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 from typing import Callable, Union
 
+from typing_extensions import Self
+
 from ._func import rename
 from .os_shared import is_os_64bit  # noqa: F401
 
@@ -22,7 +24,7 @@ class CurrentWorkingDirectory:
     def close(self) -> None:
         os.chdir(self.oldcwd)
 
-    def __enter__(self) -> "CurrentWorkingDirectory":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

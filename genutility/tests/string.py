@@ -141,10 +141,10 @@ class StringTest(MyTestCase):
         ("abc", {"c": "d"}, "abd"),
         ("abc", {"b": "d", "c": None}, "ad"),
         ("abc", {"b": "d", "c": "e"}, "ade"),
-        ("a\u263A", {"a": None}, "\u263A"),
-        ("a\u263A", {"\u263A": None}, "a"),
-        ("a\u263A", {"a": "b"}, "b\u263A"),
-        ("a\u263A", {"\u263A": "\u263B"}, "a\u263B"),
+        ("a\u263a", {"a": None}, "\u263a"),
+        ("a\u263a", {"\u263a": None}, "a"),
+        ("a\u263a", {"a": "b"}, "b\u263a"),
+        ("a\u263a", {"\u263a": "\u263b"}, "a\u263b"),
     )
     def test_replace_pairs_chars(self, s, items, truth):
         result = replace_pairs_chars(s, items)

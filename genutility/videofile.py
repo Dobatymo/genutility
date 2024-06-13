@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterator, Sequence, Tuple, Union
 
 import numpy as np
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     from av import VideoFrame
@@ -71,7 +72,7 @@ class VideoBase:
     def close(self) -> None:
         raise NotImplementedError
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

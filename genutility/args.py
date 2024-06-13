@@ -224,6 +224,23 @@ def empty_dir(dirname: Path) -> Path:
     return dirname
 
 
+@arg_to_path
+def empty_dir_create(dirname: Path) -> Path:
+    """tests if directory is empty"""
+
+    from .iter import is_empty
+
+    if dirname.exists():
+        with os.scandir(dirname) as it:
+            if not is_empty(it):
+                msg = f"directory {dirname} is not empty"
+                raise ArgumentTypeError(msg)
+    else:
+        dirname.mkdir(parents=True)
+
+    return dirname
+
+
 def json_file(path: Union[str, Path]) -> Any:
     from json import JSONDecodeError
 
@@ -233,6 +250,29 @@ def json_file(path: Union[str, Path]) -> Any:
         return read_json(path)
     except JSONDecodeError as e:
         raise ArgumentTypeError(f"JSONDecodeError: {e}")
+
+
+def base64(s: str) -> bytes:
+    """Checks if `s` is a valid base64 and decodes it."""
+    import binascii
+    from base64 import b64decode
+
+    try:
+        return b64decode(s, validate=True)
+    except binascii.Error:
+        msg = f"{s} is not valid base64"
+        raise ArgumentTypeError(msg)
+
+
+def ascii(s: str) -> str:
+    """Checks if `s` is a valid ascii."""
+    try:
+        s.encode("ascii")
+    except UnicodeEncodeError:
+        msg = f"{s} is not valid ascii"
+        raise ArgumentTypeError(msg)
+
+    return s
 
 
 if __name__ == "__main__":

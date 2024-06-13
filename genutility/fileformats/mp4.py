@@ -652,12 +652,12 @@ if __name__ == "__main__":
     from sys import stderr
 
     import pandas as pd
+    from rich.progress import Progress as RichProgress
 
     from genutility.args import is_dir
     from genutility.filesystem import scandir_ext
     from genutility.iter import list_except
     from genutility.rich import Progress
-    from rich.progress import Progress as RichProgress
 
     atoms_path = pkg_resources.resource_filename(__package__, "data/mp4-atoms.tsv")
     df = pd.read_csv(atoms_path, sep="\t")
