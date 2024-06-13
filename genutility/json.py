@@ -9,6 +9,7 @@ from traceback import TracebackException
 from types import ModuleType
 from typing import IO, Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optional, Sequence, Tuple, Type, Union
 
+from typing_extensions import Self  # typing.Self is available in Python 3.11+
 from typing_extensions import TypedDict  # typing.TypedDict is available in Python 3.8+
 
 from .atomic import sopen
@@ -261,7 +262,7 @@ with open("{file}", "r") as fr:
             stream, False, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw
         )
 
-    def __enter__(self) -> "json_lines":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

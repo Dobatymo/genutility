@@ -6,7 +6,7 @@ bencode.py>=2.0.0
 brotli
 certifi
 cryptography>=1.5.3
-ctypes-windows-sdk>=0.0.10; sys_platform=='win32'
+ctypes-windows-sdk>=0.0.14; sys_platform=='win32'
 flask>=0.12.3
 gensim>=4.0.0
 gmpy2
@@ -40,7 +40,7 @@ rhash; sys_platform=='win32'
 rich
 ruamel.yaml
 scikit-learn
-scipy
+scipy<1.13
 setuptools
 simple-salesforce>=1.1.0
 simplejson
@@ -53,7 +53,7 @@ toml
 torch
 tqdm
 twisted
-typing-extensions
+typing-extensions>=4.0.0
 werkzeug>=0.11.11
 wmi; sys_platform=='win32'
 wxasync

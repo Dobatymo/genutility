@@ -5,6 +5,8 @@ from os import PathLike, fdopen, fspath, scandir
 from sys import stdout
 from typing import IO, BinaryIO, Callable, Dict, Iterable, Iterator, Optional, TextIO, Tuple, TypeVar, Union, overload
 
+from typing_extensions import Self
+
 from ._files import PathType, entrysuffix
 from .callbacks import Progress
 from .iter import consume, iter_equal, resizer
@@ -349,7 +351,7 @@ class LastLineFile:
         self.f = open(path, mode)
         self.ll_pos = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -636,11 +638,13 @@ def iterfilelike(
 def blockfileiter(
     path: PathType,
     mode: str = "rb",
+    buffering: int = -1,
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
     start: int = 0,
     amount: Optional[int] = None,
     chunk_size: int = FILE_IO_BUFFER_SIZE,
+    opener=None,
 ) -> Iterator[Union[str, bytes]]:
     """Iterate over file at `path` and yield chunks of size `chunk_size`.
     Optionally limit output to `amount` bytes.
@@ -648,7 +652,7 @@ def blockfileiter(
 
     encoding = _check_arguments(mode, encoding)
 
-    with open(path, mode, encoding=encoding, errors=errors) as fr:
+    with open(path, mode, buffering, encoding, errors=errors, opener=opener) as fr:
         yield from iterfilelike(fr, start, amount, chunk_size)
 
 
@@ -688,6 +692,7 @@ def bufferedfileiter(
     path: PathType,
     chunk_size: int,
     mode: str = "rb",
+    buffering: int = -1,
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
     start: int = 0,
@@ -698,19 +703,19 @@ def bufferedfileiter(
     Yields data chunks of `chunk_size` and optionally limits output to `amount` bytes.
     """
 
-    return resizer(blockfileiter(path, mode, encoding, errors, start, amount, buffer_size), chunk_size)
+    return resizer(blockfileiter(path, mode, buffering, encoding, errors, start, amount, buffer_size), chunk_size)
 
 
 def byte_out(path: PathType, buffer_size: int = FILE_IO_BUFFER_SIZE) -> Iterable[bytes]:
     """Reads file at `path` byte by byte, using a read buffer of size `buffer_size`."""
 
-    return resizer(blockfileiter(path, mode="rb", chunk_size=buffer_size), 1)
+    return resizer(blockfileiter(path, "rb", chunk_size=buffer_size), 1)
 
 
 def consume_file(filename: PathType, buffer_size: int = FILE_IO_BUFFER_SIZE) -> None:
     """reads whole file but ignores content"""
 
-    consume(blockfileiter(filename, mode="rb", chunk_size=buffer_size))
+    consume(blockfileiter(filename, "rb", chunk_size=buffer_size))
 
 
 # was: same_files, textfile_equal: equal_files(*paths, mode="rt")
@@ -727,7 +732,7 @@ def equal_files(
     """
 
     its = tuple(
-        blockfileiter(path, mode=mode, encoding=encoding, errors=errors, amount=amount, chunk_size=chunk_size)
+        blockfileiter(path, mode, encoding=encoding, errors=errors, amount=amount, chunk_size=chunk_size)
         for path in paths
     )
     return iter_equal(*its)

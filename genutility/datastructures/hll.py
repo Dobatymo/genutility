@@ -1,6 +1,8 @@
 from math import log
 from typing import Callable, Hashable, Iterable, List, Optional, Union
 
+from typing_extensions import Self
+
 from genutility.ops import logical_xnor
 from genutility.sys import bitness
 
@@ -100,6 +102,6 @@ class HyperLogLog:
     def __or__(self, other: "HyperLogLog") -> "HyperLogLog":
         return self.union(other)
 
-    def __ror__(self, other: "HyperLogLog") -> "HyperLogLog":
+    def __ror__(self, other: "HyperLogLog") -> Self:
         self.registers = self._merge_registers(other)
         return self

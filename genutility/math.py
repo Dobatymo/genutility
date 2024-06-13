@@ -18,6 +18,8 @@ from typing import (
     TypeVar,
 )
 
+from typing_extensions import Self
+
 from .compat.math import isqrt, prod
 from .exceptions import EmptyIterable
 from .iter import range_count
@@ -206,10 +208,10 @@ class _PosInfInt:
 
         return False
 
-    def __add__(self, rhs) -> "_PosInfInt":
+    def __add__(self, rhs) -> Self:
         return self
 
-    def __sub__(self, rhs) -> "_PosInfInt":
+    def __sub__(self, rhs) -> Self:
         if isinstance(rhs, _PosInfInt):
             raise ArithmeticError("Cannot subtract inf from inf")
 

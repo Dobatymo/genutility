@@ -8,6 +8,8 @@ from multiprocessing import Pool
 from queue import Empty, Queue
 from typing import Any, Callable, Deque, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
+from typing_extensions import Self
+
 from .exceptions import NoResult, assert_choice
 
 T = TypeVar("T")
@@ -607,7 +609,7 @@ class ThreadsafeList(list):  # untested!!!
         list.__init__(self, it)
         self.lock = threading.Lock()
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.lock.acquire()
         return self
 

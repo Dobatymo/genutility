@@ -90,7 +90,8 @@ def upsert(cursor: Cursor, primary: dict, values: dict, table: str) -> bool:
         into_str = ",".join(chain(primary.keys(), values.keys()))
         values_str = ",".join(repeat("?", len(primary) + len(values)))
         cursor.execute(
-            f"INSERT INTO {table} ({into_str}) VALUES ({values_str})", chain(primary.values(), values.values())  # nosec
+            f"INSERT INTO {table} ({into_str}) VALUES ({values_str})",  # nosec
+            chain(primary.values(), values.values()),
         )
         return True
 

@@ -14,6 +14,8 @@ from operator import attrgetter
 from pathlib import Path, PurePath
 from typing import Any, Callable, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
+from typing_extensions import Self
+
 from ._files import BaseDirEntry, MyDirEntryT, PathType, entrysuffix, to_dos_device_path
 from .datetime import datetime_from_utc_timestamp
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
@@ -355,13 +357,15 @@ def _scandir_rec_skippable(
                 elif entry.is_dir(follow_symlinks=follow_symlinks):
                     if not follow_symlinks or prevent_loops_set is not None:
                         is_link = islink(entry)
+
+                    se = MyDirEntry(entry)
+                    yield se
+
                     if (
                         not follow_symlinks and is_link
                     ):  # must be a windows junction since `entry.is_symlink()` returns `False` for junctions
                         continue
 
-                    se = MyDirEntry(entry)
-                    yield se
                     if se.follow and not _is_loop(rootentry, entry, is_link, prevent_loops_set):
                         for e in _scandir_rec_skippable(
                             entry, files, others, follow_symlinks, prevent_loops_set, errorfunc
@@ -394,13 +398,14 @@ def _scandir_rec(
                 elif entry.is_dir(follow_symlinks=follow_symlinks):
                     if not follow_symlinks or prevent_loops_set is not None:
                         is_link = islink(entry)
+
+                    if dirs:
+                        yield entry
+
                     if (
                         not follow_symlinks and is_link
                     ):  # must be a windows junction since `entry.is_symlink()` returns `False` for junctions
                         continue
-
-                    if dirs:
-                        yield entry
 
                     if rec and not _is_loop(rootentry, entry, is_link, prevent_loops_set):
                         for e in _scandir_rec(
@@ -435,6 +440,9 @@ def scandir_rec(
     `files`: Yield files.
     `dirs`: Yield directories.
     `others`: Yield other entries which are neither files nor directories.
+        If follow_symlinks is false, symlinks will be included with others,
+        if follow_symlinks is true, they will be either in files or dirs.
+        Junctions will always be part of dirs.
     `rec`: Recurse into subfolders.
     `follow_symlinks`: Follow symbolic links or directory junctions.
     `prevent_loops`: Directory links can lead to infinite recursion.
@@ -446,6 +454,9 @@ def scandir_rec(
     `allow_skip`: Yield `MyDirEntry` objects which expose a `follow` attribute. If this is set to False for directories,
         they will not be followed.
     `errorfunc`: A callback function to handle errors. By default errors are logged as exceptions and ignored.
+
+
+    CHANGE: previously junctions were not returned at all when follow_symlinks=False,
     """
 
     if not logical_implication(allow_skip, dirs and rec):
@@ -858,7 +869,7 @@ class Counts:
         self.files = 0
         self.others = 0
 
-    def __iadd__(self, other: "Counts") -> "Counts":
+    def __iadd__(self, other: "Counts") -> Self:
         self.dirs += other.dirs
         self.files += other.files
         self.others += other.others
@@ -875,6 +886,7 @@ def _scandir_counts(
     others: bool = True,
     rec: bool = True,
     total: bool = False,
+    follow_symlinks: bool = True,
     errorfunc: Callable = scandir_error_raise,
 ) -> Iterator[Tuple[os.DirEntry, Optional[Counts]]]:
     counts = Counts()
@@ -882,17 +894,19 @@ def _scandir_counts(
     try:
         with os.scandir(rootentry.path) as it:
             for entry in it:
-                if entry.is_dir():
+                if entry.is_dir(follow_symlinks=follow_symlinks):
                     counts.dirs += 1
                     if rec:
-                        for subentry, subcounts in _scandir_counts(entry, files, others, rec, total, errorfunc):
+                        for subentry, subcounts in _scandir_counts(
+                            entry, files, others, rec, total, follow_symlinks, errorfunc
+                        ):
                             yield subentry, subcounts
 
                             if total:
                                 assert subcounts
                                 counts += subcounts
 
-                elif entry.is_file():
+                elif entry.is_file(follow_symlinks=follow_symlinks):
                     counts.files += 1
                     if files:
                         yield entry, None
@@ -914,6 +928,7 @@ def scandir_counts(
     others: bool = True,
     rec: bool = True,
     total: bool = False,
+    follow_symlinks: bool = True,
     onerror: Callable = scandir_error_log,
 ) -> Iterator[Tuple[os.DirEntry, Optional[Counts]]]:
     """A recursive variant of scandir() which also returns the number of files/directories
@@ -925,7 +940,7 @@ def scandir_counts(
         path = os.fspath(path)
 
     entry = DirEntryStub(os.path.basename(path), long_path_support(path))
-    return _scandir_counts(entry, files, others, rec, total, onerror)
+    return _scandir_counts(entry, files, others, rec, total, follow_symlinks, onerror)
 
 
 def shutil_onerror_remove_readonly(func, path, exc_info):

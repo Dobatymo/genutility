@@ -16,7 +16,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
     author="Dobatymo",
     name="genutility",
-    version="0.0.103",
+    version="0.0.104",
     url="https://github.com/Dobatymo/genutility",
     description="A collection of various Python utilities",
     long_description=long_description,
@@ -27,10 +27,10 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Utilities",
     ],
-    packages=["genutility", "genutility.compat", "genutility.fileformats", "genutility.hardware", "genutility.win"],
+    packages=["genutility", "genutility.compat", "genutility.fileformats", "genutility.win"],
     package_data={"genutility": ["py.typed", "data/*.tsv"]},
     python_requires=">=3.7",
-    install_requires=["ctypes-windows-sdk>=0.0.10; sys_platform=='win32'", "typing-extensions"],
+    install_requires=["ctypes-windows-sdk>=0.0.14; sys_platform=='win32'", "typing-extensions>=4.0.0"],
     extras_require=extras_require,
     license_files=["LICENSE"],
 )

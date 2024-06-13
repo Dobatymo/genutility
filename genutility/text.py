@@ -23,18 +23,18 @@ def replace_typographical_punctuation(s: str) -> str:
     """Replaces typographical punctuation with ASCII punctuation."""
 
     d = {
-        "\N{Single Low-9 Quotation Mark}": "'",
-        "\N{Double Low-9 Quotation Mark}": '"',
-        "\N{Left Single Quotation Mark}": "'",
-        "\N{Right Single Quotation Mark}": "'",
-        "\N{Left Double Quotation Mark}": '"',
-        "\N{Right Double Quotation Mark}": '"',
-        "\N{Figure Dash}": "-",
-        "\N{En Dash}": "-",
-        "\N{Em Dash}": "--",
-        "\N{Horizontal Bar}": "--",
-        "\N{Double Low Line}": "_",
-        "\N{Horizontal Ellipsis}": "...",
+        "\N{SINGLE LOW-9 QUOTATION MARK}": "'",
+        "\N{DOUBLE LOW-9 QUOTATION MARK}": '"',
+        "\N{LEFT SINGLE QUOTATION MARK}": "'",
+        "\N{RIGHT SINGLE QUOTATION MARK}": "'",
+        "\N{LEFT DOUBLE QUOTATION MARK}": '"',
+        "\N{RIGHT DOUBLE QUOTATION MARK}": '"',
+        "\N{FIGURE DASH}": "-",
+        "\N{EN DASH}": "-",
+        "\N{EM DASH}": "--",
+        "\N{HORIZONTAL BAR}": "--",
+        "\N{DOUBLE LOW LINE}": "_",
+        "\N{HORIZONTAL ELLIPSIS}": "...",
     }
     return replace_multiple(s, d)
 

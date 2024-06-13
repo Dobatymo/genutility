@@ -9,3 +9,7 @@ The last version which worked with Python 3.6 was `0.0.96`.
 
 ## Install
 `pip install genutility`
+
+## Notes
+
+- currently requires `scipy<1.13` due to a incompatibility in `gensim`.

@@ -1,5 +1,7 @@
 from typing import Any, Iterable, Iterator, Optional, Sequence, TypeVar, Union
 
+from typing_extensions import Self
+
 from tqdm import tqdm
 
 from .callbacks import BaseTask
@@ -13,7 +15,7 @@ class Task(BaseTask):
     def __init__(self, total: Optional[float] = None, description: Optional[float] = None, **kwargs: Any) -> None:
         self.pbar = tqdm(desc=description, total=total, **kwargs)
 
-    def __enter__(self) -> BaseTask:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args):
@@ -28,7 +30,7 @@ class Task(BaseTask):
         completed: Optional[float] = _Default,
         total: Optional[float] = _Default,
         description: Optional[str] = _Default,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         if completed is not _Default:
             self.pbar.n = completed
@@ -44,7 +46,7 @@ class Progress(_Progress):
         sequence: Union[Iterable[T], Sequence[T]],
         total: Optional[float] = None,
         description: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Iterator[T]:
         return tqdm(sequence, description, total, **kwargs)
 

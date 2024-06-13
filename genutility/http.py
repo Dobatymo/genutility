@@ -11,6 +11,8 @@ from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 from urllib import request
 from urllib.error import URLError
 
+from typing_extensions import Self
+
 from .exceptions import DownloadFailed
 from .file import Tell, copyfilelike
 from .filesystem import safe_filename
@@ -22,7 +24,7 @@ if TYPE_CHECKING:
     from http.client import HTTPMessage
     from http.cookiejar import CookieJar
 
-    JsonObject = Union[List[Any], Dict[str, Any]]
+JsonObject = Union[List[Any], Dict[str, Any]]
 
 logger = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 120.0
@@ -178,7 +180,7 @@ class URLRequest:
     def _close(self):  # unused
         self.response.close()
 
-    def __enter__(self) -> "URLRequest":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -209,7 +211,7 @@ class URLRequest:
             except URLError:
                 raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
 
-    def _json(self) -> "JsonObject":
+    def _json(self) -> JsonObject:
         with FileLike(self) as fp:
             try:
                 return json.load(fp)
@@ -302,7 +304,7 @@ class URLRequest:
         finally:
             self.response.close()
 
-    def json(self) -> "JsonObject":
+    def json(self) -> JsonObject:
         try:
             return self._json()
         finally:

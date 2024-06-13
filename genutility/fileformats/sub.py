@@ -1,3 +1,5 @@
+from typing_extensions import Self
+
 from ..exceptions import MalformedFile
 
 
@@ -17,7 +19,7 @@ class Sub:
         self.fp = open(path, mode, encoding)
         self.current_line = 0
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -41,7 +43,7 @@ class Sub:
         except StopIteration:
             return None
 
-    def __iter__(self):
+    def __iter__(self) -> Self:
         return self
 
     def __next__(self):

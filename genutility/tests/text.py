@@ -56,9 +56,9 @@ class TextTest(MyTestCase):
 
     @parametrize(
         ("", ""),
-        ("\N{Horizontal Ellipsis}", "..."),
-        ("asd\N{Horizontal Bar}qwe", "asd--qwe"),
-        ("asd\N{Double Low Line}qwe", "asd_qwe"),
+        ("\N{HORIZONTAL ELLIPSIS}", "..."),
+        ("asd\N{HORIZONTAL BAR}qwe", "asd--qwe"),
+        ("asd\N{DOUBLE LOW LINE}qwe", "asd_qwe"),
     )
     def test_replace_typographical_punctuation(self, s, truth):
         result = replace_typographical_punctuation(s)

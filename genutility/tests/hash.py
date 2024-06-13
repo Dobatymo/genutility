@@ -22,25 +22,18 @@ class HashTest(MyTestCase):
         write_file(data, "testtemp/hash.bin", "wb")
         write_file(bytearray(islice(cycle(data), ed2k_chunksize)), "testtemp/hash-ed2k-chunk.bin", "wb")
 
-    @parametrize(
-        ("testtemp/hash.bin", "4c2750bd"),
-    )
-    def test_crc32_hash_file(self, path, truth):
-        result = crc32_hash_file(path)
-        self.assertEqual(truth, result)
+        write_file(b"", "testtemp/empty.bin", "wb")
 
     @parametrize(
-        ("testtemp/hash.bin", "32d10c7b8cf96570ca04ce37f2a19d84240d3a89"),  # pragma: allowlist secret
+        (crc32_hash_file, "testtemp/empty.bin", "00000000"),
+        (crc32_hash_file, "testtemp/hash.bin", "4c2750bd"),
+        (sha1_hash_file, "testtemp/empty.bin", "da39a3ee5e6b4b0d3255bfef95601890afd80709"),  # pragma: allowlist secret
+        (sha1_hash_file, "testtemp/hash.bin", "32d10c7b8cf96570ca04ce37f2a19d84240d3a89"),  # pragma: allowlist secret
+        (md5_hash_file, "testtemp/empty.bin", "d41d8cd98f00b204e9800998ecf8427e"),  # pragma: allowlist secret
+        (md5_hash_file, "testtemp/hash.bin", "c3fcd3d76192e4007dfb496cca67e13b"),  # pragma: allowlist secret
     )
-    def test_sha1_hash_file(self, path, truth):
-        result = sha1_hash_file(path).hexdigest()
-        self.assertEqual(truth, result)
-
-    @parametrize(
-        ("testtemp/hash.bin", "c3fcd3d76192e4007dfb496cca67e13b"),  # pragma: allowlist secret
-    )
-    def test_md5_hash_file(self, path, truth):
-        result = md5_hash_file(path).hexdigest()
+    def test_hash_file_empty(self, hashfunc, path, truth):
+        result = hashfunc(path).hexdigest()
         self.assertEqual(truth, result)
 
     @skipIf("md4" not in algorithms_available, "hashlib built without md4")

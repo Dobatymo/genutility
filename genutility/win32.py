@@ -6,6 +6,7 @@ from typing import Iterator, List, Tuple
 import win32evtlog
 import winerror
 import wmi
+from typing_extensions import Self
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class Resource:
         else:
             self.wmii = wmi.WMI()
 
-    def __iter__(self) -> "Resource":
+    def __iter__(self) -> Self:
         return self
 
 

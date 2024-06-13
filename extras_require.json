@@ -4,7 +4,7 @@
         "jsonschema",
         "py7zr>=0.20.2",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "aria": [
         "aria2p",
@@ -35,7 +35,7 @@
         "msgpack>=0.6.0",
         "py7zr>=0.20.2",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "callbacks": [],
     "casedict": [],
@@ -53,7 +53,7 @@
         "simplejson",
         "sortedcontainers",
         "toml",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "constants_physics": [],
     "constants_video": [],
@@ -94,7 +94,7 @@
         "rich",
         "setuptools",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "filesdb": [
         "py7zr>=0.20.2",
@@ -120,9 +120,6 @@
     ],
     "geometry": [],
     "graph": [],
-    "hardware": [
-        "ctypes-windows-sdk>=0.0.10; sys_platform=='win32'"
-    ],
     "hash": [
         "py7zr>=0.20.2"
     ],
@@ -135,7 +132,7 @@
         "py7zr>=0.20.2",
         "requests",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "image": [
         "numpy"
@@ -148,7 +145,7 @@
         "jsonschema",
         "py7zr>=0.20.2",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "latex": [],
     "lda": [
@@ -158,7 +155,7 @@
         "py7zr>=0.20.2",
         "scikit-learn",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "locale": [],
     "logging": [],
@@ -213,17 +210,17 @@
         "jsonschema",
         "py7zr>=0.20.2",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "ops": [],
     "os": [
-        "ctypes-windows-sdk>=0.0.10; sys_platform=='win32'"
+        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'"
     ],
     "os_mac": [],
     "os_posix": [],
     "os_shared": [],
     "os_win": [
-        "ctypes-windows-sdk>=0.0.10; sys_platform=='win32'"
+        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'"
     ],
     "pandas": [
         "pandas"
@@ -238,7 +235,7 @@
         "PyPDF2>=3.0.0",
         "simplejson",
         "tika",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "pickle": [
         "py7zr>=0.20.2"
@@ -278,7 +275,7 @@
         "requests",
         "simple-salesforce>=1.1.0",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "scene_change_detection": [
         "av>=8.0; python_version>='3.8'",
@@ -288,7 +285,7 @@
     ],
     "scipy": [
         "numpy",
-        "scipy"
+        "scipy<1.13.0"
     ],
     "scrapy": [
         "brotli"
@@ -332,7 +329,7 @@
         "aiohttp>=3.7.4",
         "aioresponses>=0.7.2",
         "av>=8.0; python_version>='3.8'",
-        "ctypes-windows-sdk>=0.0.10; sys_platform=='win32'",
+        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'",
         "flask>=0.12.3",
         "gensim>=4.0.0",
         "gmpy2",
@@ -361,7 +358,7 @@
         "tika",
         "tls-property>=1.0.1",
         "toml",
-        "typing-extensions",
+        "typing-extensions>=4.0.0",
         "werkzeug>=0.11.11"
     ],
     "text": [
@@ -369,7 +366,7 @@
         "msgpack>=0.6.0",
         "py7zr>=0.20.2",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "text_segmentation": [],
     "text_summarization": [
@@ -394,7 +391,7 @@
         "py7zr>=0.20.2",
         "requests",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "tqdm": [
         "tqdm"
@@ -409,17 +406,17 @@
         "py7zr>=0.20.2",
         "requests",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "typing": [
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "unicode": [
         "jsonschema",
         "msgpack>=0.6.0",
         "py7zr>=0.20.2",
         "simplejson",
-        "typing-extensions"
+        "typing-extensions>=4.0.0"
     ],
     "unqlite": [],
     "url": [],
@@ -432,7 +429,7 @@
         "wxPython>=4"
     ],
     "win": [
-        "ctypes-windows-sdk>=0.0.10; sys_platform=='win32'",
+        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'",
         "pywin32; sys_platform=='win32'"
     ],
     "win32": [

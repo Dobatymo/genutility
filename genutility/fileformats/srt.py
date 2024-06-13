@@ -1,5 +1,7 @@
 import logging
 
+from typing_extensions import Self
+
 from ..exceptions import MalformedFile
 
 REAL_FILM_FPS = 24.0
@@ -63,7 +65,7 @@ class SRTFile:
         self.fp = open(filename, mode, encoding=encoding, errors="replace")
         self.overwrite_index = overwrite_index
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

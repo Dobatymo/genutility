@@ -2,7 +2,7 @@ import hashlib
 import zlib
 from functools import partial
 from pathlib import Path
-from typing import IO, Callable, Iterable, Optional, Union
+from typing import IO, Callable, Optional, Union
 
 from _hashlib import HASH as Hashobj
 
@@ -13,12 +13,53 @@ HashCls = Union[Callable[[], Hashobj], str]
 FILE_IO_BUFFER_SIZE = 8 * 1024 * 1024
 
 
+class HashobjCRC:  # don't inherit from Hashobj (TypeError: cannot create 'HashobjCRC' instances)
+    digest_size = 4
+    name = "crc"
+
+    def __init__(self) -> None:
+        self.prev = 0
+
+    def update(self, data: bytes) -> None:
+        """Update the hash object with the bytes-like object.
+        Repeated calls are equivalent to a single call with the concatenation of all the arguments:
+        m.update(a); m.update(b) is equivalent to m.update(a+b).
+        """
+
+        self.prev = zlib.crc32(data, self.prev)
+
+    def digest(self) -> bytes:
+        """Return the digest of the data passed to the update() method so far.
+        This is a bytes object of size digest_size which may contain bytes in the whole range from 0 to 255.
+        """
+
+        return (self.prev & 0xFFFFFFFF).to_bytes(4, "big", signed=False)
+
+    def hexdigest(self) -> str:
+        """Like digest() except the digest is returned as a string object of double length,
+        containing only hexadecimal digits. This may be used to exchange the value safely in email or other non-binary environments.
+        """
+
+        return self.digest().hex()
+
+    def copy(self) -> "HashobjCRC":
+        """Return a copy (“clone”) of the hash object.
+        This can be used to efficiently compute the digests of data sharing a common initial substring.
+        """
+
+        out = HashobjCRC()
+        out.prev = self.prev
+        return out
+
+
 def hash_file(
     path: PathType,
     hashcls: HashCls,
     chunk_size: int = FILE_IO_BUFFER_SIZE,
     mode: str = "rb",
+    buffering: int = -1,
     encoding: Optional[str] = None,
+    opener=None,
 ) -> Hashobj:
     # fixme: does this even work with `mode="rt"`?
 
@@ -26,7 +67,7 @@ def hash_file(
         m = hashlib.new(hashcls)
     else:
         m = hashcls()
-    for d in blockfileiter(path, mode, encoding, chunk_size=chunk_size):
+    for d in blockfileiter(path, mode, buffering, encoding, chunk_size=chunk_size, opener=opener):
         m.update(d)
     return m
 
@@ -58,29 +99,11 @@ def hash_data(data: bytes, hashcls: HashCls) -> Hashobj:
 md4_hash_data = partial(hash_data, hashcls="md4")
 md5_hash_data = partial(hash_data, hashcls=hashlib.md5)
 sha1_hash_data = partial(hash_data, hashcls=hashlib.sha1)
-
-
-def crc32_hash_iter(it: Iterable[bytes]) -> int:
-    """Create CRC32 hash from bytes takes from `it`."""
-
-    prev = 0
-    for data in it:
-        prev = zlib.crc32(data, prev)
-
-    return prev & 0xFFFFFFFF  # see https://docs.python.org/3/library/zlib.html#zlib.crc32
-
-
-def crc32_hash_file(
-    path: str, chunk_size: int = FILE_IO_BUFFER_SIZE, mode: str = "rb", encoding: Optional[str] = None
-) -> str:
-    """Return crc32 hash of file at `path`."""
-
-    crcint = crc32_hash_iter(blockfileiter(path, mode, encoding, chunk_size=chunk_size))
-    return format(crcint, "08x")
-
+crc_hash_data = partial(hash_data, hashcls=HashobjCRC)
 
 md5_hash_file = partial(hash_file, hashcls=hashlib.md5)
 sha1_hash_file = partial(hash_file, hashcls=hashlib.sha1)
+crc32_hash_file = partial(hash_file, hashcls=HashobjCRC)  # output changed in v0.0.104
 
 
 def hashsum_file_format(hashobj: Hashobj, path: str) -> str:

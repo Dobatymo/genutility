@@ -1,5 +1,7 @@
 from typing import Any, Iterable, Iterator, Optional, Sequence, TypeVar, Union
 
+from typing_extensions import Self
+
 T = TypeVar("T")
 
 
@@ -17,11 +19,11 @@ class BaseTask:
         completed: Optional[float] = _Default,
         total: Optional[float] = _Default,
         description: Optional[str] = _Default,
-        **fields: Any
+        **fields: Any,
     ) -> None:
         raise NotImplementedError
 
-    def __enter__(self) -> "BaseTask":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args):
@@ -41,7 +43,7 @@ class Task(BaseTask):
         completed: Optional[float] = _Default,
         total: Optional[float] = _Default,
         description: Optional[str] = _Default,
-        **fields: Any
+        **fields: Any,
     ):
         pass
 
@@ -52,7 +54,7 @@ class Progress:
         sequence: Union[Iterable[T], Sequence[T]],
         total: Optional[float] = None,
         description: Optional[str] = None,
-        **fields: Any
+        **fields: Any,
     ) -> Iterator[T]:
         return sequence
 

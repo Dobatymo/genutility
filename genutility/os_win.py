@@ -11,11 +11,11 @@ from cwinsdk.shared.ntdef import PWSTR
 from cwinsdk.um import fileapi, winnt
 from cwinsdk.um.combaseapi import CoTaskMemFree
 from cwinsdk.um.consoleapi import ENABLE_VIRTUAL_TERMINAL_PROCESSING, GetConsoleMode, SetConsoleMode
-from cwinsdk.um.KnownFolders import FOLDERID_LocalAppData, FOLDERID_RoamingAppData
+from cwinsdk.um.knownfolders import FOLDERID_LocalAppData, FOLDERID_RoamingAppData
 from cwinsdk.um.minwinbase import LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY, OVERLAPPED
 from cwinsdk.um.processenv import GetStdHandle
-from cwinsdk.um.ShlObj_core import SHGetKnownFolderPath
-from cwinsdk.um.WinBase import STD_OUTPUT_HANDLE
+from cwinsdk.um.shlobj_core import SHGetKnownFolderPath
+from cwinsdk.um.winbase import STD_OUTPUT_HANDLE
 
 from .os_shared import _usagetuple, _volumeinfotuple
 

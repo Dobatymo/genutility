@@ -8,17 +8,49 @@ requires = [
 [tool.black]
 line-length = 120
 
-[tool.ruff.lint]
-ignore = ["E402"]
+[tool.ruff]
+line-length = 120
+
+lint.extend-select = [
+  "B",
+  "I",
+]
+
+lint.ignore = [
+  "B011",
+  "B904",
+  "E402",
+]
 
 [tool.isort]
 profile = "black"
-src_paths = ["genutility"]
+src_paths = [
+  "genutility",
+]
 line_length = 120
-known_third_party = ["flask", "gensim", "networkx", "nltk", "numba", "numpy", "pandas", "rasa", "scipy", "tensorflow", "toml", "torch", "twisted"]
+known_third_party = [
+  "av",
+  "flask",
+  "gensim",
+  "msgpack",
+  "networkx",
+  "nltk",
+  "numba",
+  "numpy",
+  "pandas",
+  "rasa",
+  "rich",
+  "scipy",
+  "scrapy",
+  "tensorflow",
+  "toml",
+  "torch",
+  "twisted",
+  "unqlite",
+]
 
 [tool.pytest.ini_options]
-log_level="DEBUG"
+log_level = "DEBUG"
 testpaths = [
   "genutility/tests",
 ]
@@ -29,7 +61,7 @@ python_files = [
 [tool.coverage.report]
 exclude_lines = [
   "pragma: no cover",
-  "if __name__ == .__main__.:"
+  "if __name__ == .__main__.:",
 ]
 sort = "Cover"
 
@@ -44,4 +76,6 @@ warn_unreachable = true
 strict_equality = true
 
 [tool.bandit]
-skips = ["B101"]
+skips = [
+  "B101",
+]
