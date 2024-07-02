@@ -103,7 +103,7 @@ def make_comparable(d: Any) -> Any:
     elif isinstance(d, dict):
         return make_comparable(list(d.items()))
     else:
-        raise ValueError(f"must be list, tuple or dict, not {type(d)}")
+        raise TypeError(f"must be list, tuple or dict, not {type(d)}")
 
 
 def is_equal_unordered(seq_a: Collection, seq_b: Collection) -> bool:

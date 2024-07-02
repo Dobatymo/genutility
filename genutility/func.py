@@ -142,7 +142,7 @@ def call_repeated(num: int) -> Callable[[Callable], Callable]:
         @wraps(func)
         def inner(*args, **kwargs):
             last = None
-            for i in range(num):
+            for _i in range(num):
                 last = func(*args, **kwargs)
             return last
 

@@ -304,11 +304,17 @@ def append_to_filename(path: PathType, s: str) -> str:
 
 
 def scandir_error_log(entry: os.DirEntry, exception: Exception) -> None:
-    logger.exception("Error in <%s>", entry.path, exc_info=exception)
+    if isinstance(exception, OSError) and exception.filename:
+        logger.exception("Error processing path", exc_info=exception)
+    else:
+        logger.exception("Error in <%s>", entry.path, exc_info=exception)
 
 
 def scandir_error_log_warning(entry: os.DirEntry, exception: Exception) -> None:
-    logger.warning("Error in <%s>: %s", entry.path, exception)
+    if isinstance(exception, OSError) and exception.filename:
+        logger.warning("Error processing path: %s", exception)
+    else:
+        logger.warning("Error in <%s>: %s", entry.path, exception)
 
 
 def scandir_error_raise(entry: os.DirEntry, exception: Exception) -> None:
@@ -848,7 +854,7 @@ def clean_directory_by_extension(path: PathType, ext: str, rec: bool = True, fol
 def iter_links(path: PathType) -> Iterator[str]:
     """Yields all directory symlinks (and junctions on windows)."""
 
-    for dirpath, dirnames, filenames in os.walk(path):
+    for dirpath, dirnames, _filenames in os.walk(path):
         for dirname in dirnames:
             joined = os.path.join(dirpath, dirname)
             if islink(joined):

@@ -12,7 +12,7 @@ class SignalTest(MyTestCase):
 
     @staticmethod
     def busywait():
-        for i in range(10):
+        for _i in range(10):
             time.sleep(0.1)
 
     def call(self, raise_after, a, b, c, d):

@@ -3,7 +3,7 @@ from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIO
 from mmap import mmap
 from os import PathLike, fdopen, fspath, scandir
 from sys import stdout
-from typing import IO, BinaryIO, Callable, Dict, Iterable, Iterator, Optional, TextIO, Tuple, TypeVar, Union, overload
+from typing import IO, Callable, Dict, Iterable, Iterator, Optional, Tuple, TypeVar, Union, overload
 
 from typing_extensions import Self
 
@@ -14,7 +14,11 @@ from .math import PosInfInt
 from .ops import logical_implication, logical_xor
 
 Data = TypeVar("Data", str, bytes)
-
+AnyIoT = Union[BufferedIOBase, RawIOBase, TextIOBase, mmap]  # buffered/unbuffered binary/text
+BufferedIoT = Union[BufferedIOBase, TextIOBase, mmap]
+BufferedBinaryIoT = Union[BufferedIOBase, mmap]
+BinaryIoT = Union[RawIOBase, BufferedIOBase]
+TextIoT = TextIOBase
 FILE_IO_BUFFER_SIZE = 1024 * 1024
 
 
@@ -42,6 +46,11 @@ def _stripmode(mode: str) -> str:
     return "".join(set(mode) - {"t", "b"})
 
 
+def _assert_buffered_seekable_reader(fp: BufferedIoT) -> None:
+    if not fp.readable or not fp.seekable:
+        raise TypeError("fp need to be a buffered, readable and seekable IO type")
+
+
 def read_file(
     path: PathType, mode: str = "b", encoding: Optional[str] = None, errors: Optional[str] = None
 ) -> Union[str, bytes]:
@@ -53,7 +62,7 @@ def read_file(
         mode = "r" + mode
 
     with open(path, mode, encoding=encoding, errors=errors) as fr:
-        return fr.read()
+        return fr.read()  # buffered
 
 
 def write_file(
@@ -68,15 +77,15 @@ def write_file(
     encoding = _check_arguments(mode, encoding)
 
     with open(path, mode, encoding=encoding, errors=errors) as fw:
-        fw.write(data)
+        fw.write(data)  # buffered
 
 
 @overload
-def read_or_raise(fin: IO[Data], size: int) -> Data: ...
+def read_or_raise(fin: BufferedBinaryIoT, size: int) -> bytes: ...
 
 
 @overload
-def read_or_raise(fin: mmap, size: int) -> bytes: ...
+def read_or_raise(fin: TextIoT, size: int) -> str: ...
 
 
 def read_or_raise(fin, size):
@@ -96,7 +105,7 @@ def read_or_raise(fin, size):
 def get_file_range(path: PathType, start: int, size: int) -> bytes:
     with open(path, "rb") as fp:
         fp.seek(start)
-        return fp.read(size)
+        return fp.read(size)  # buffered
 
 
 def truncate_file(path: PathType, size: int) -> None:
@@ -176,7 +185,7 @@ def copen(
 
             return wrap_text(bf, mode, encoding, errors, newline)
 
-    if isinstance(file, TextIOWrapper):
+    if isinstance(file, TextIOBase):
         return file
 
     if hasattr(file, "read") or hasattr(file, "write"):  # file should be in binary mode here
@@ -296,15 +305,15 @@ class StdoutFile:
 
 
 class PathOrBinaryIO:
-    def __init__(self, fname: Union[PathType, BinaryIO], mode: str = "rb", close: bool = False) -> None:
+    def __init__(self, fname: Union[PathType, IO[bytes]], mode: str = "rb", close: bool = False) -> None:
         if isinstance(fname, (RawIOBase, BufferedIOBase)):
             self.doclose: bool = close
-            self.fp: BinaryIO = fname
+            self.fp: IO[bytes] = fname
         else:
             self.doclose = True
             self.fp = copen(fname, mode)
 
-    def __enter__(self) -> IO:
+    def __enter__(self) -> IO[bytes]:
         return self.fp
 
     def close(self) -> None:
@@ -318,7 +327,7 @@ class PathOrBinaryIO:
 class PathOrTextIO:
     def __init__(
         self,
-        fname: Union[PathType, TextIO],
+        fname: Union[PathType, IO[str]],
         mode: str = "rt",
         encoding: str = "utf-8",
         errors: str = "strict",
@@ -327,12 +336,12 @@ class PathOrTextIO:
     ) -> None:
         if isinstance(fname, TextIOBase):
             self.doclose: bool = close
-            self.fp: TextIO = fname
+            self.fp: IO[str] = fname
         else:
             self.doclose = True
             self.fp = copen(fname, mode, encoding=encoding, errors=errors, newline=newline)
 
-    def __enter__(self) -> IO:
+    def __enter__(self) -> IO[str]:
         return self.fp
 
     def close(self) -> None:
@@ -348,7 +357,7 @@ class LastLineFile:
     nl = "\n"
 
     def __init__(self, path, mode="rt+"):
-        self.f = open(path, mode)
+        self.f = open(path, mode)  # buffered
         self.ll_pos = None
 
     def __enter__(self) -> Self:
@@ -405,7 +414,7 @@ class LastLineFile:
 
 
 class Tell:
-    def __init__(self, fp: IO) -> None:
+    def __init__(self, fp: BufferedIoT) -> None:
         try:
             assert not fp.seekable()
         except AttributeError:
@@ -549,15 +558,16 @@ class BufferedTell(response.addinfourl):  # fixme: untested!!!
 
 
 def copyfilelike(
-    fin: IO,
-    fout: IO,
+    fin: AnyIoT,
+    fout: BufferedIoT,
     amount: Optional[int] = None,
     buffer: int = FILE_IO_BUFFER_SIZE,
     report: Optional[Callable[[int, int], None]] = None,
 ) -> int:
-    """Read data from `fin` in chunks of size `buffer` and write them to `fout`.
+    """Read data from `fin` in chunks of size `buffer` (or less) and write them to `fout`.
     Optionally limit the amount of data to `amount`. `report` can be a callable which receives
     the total number of bytes copied and bytes remaining.
+    Input and Output streams but both be either binary or both text.
     see `shutil.copyfileobj`
     """
 
@@ -570,7 +580,7 @@ def copyfilelike(
         if report:
             report(copied, _amount + copied)
 
-        data = fin.read(min(buffer, _amount))
+        data = fin.read(min(buffer, _amount))  # buffered or unbuffered
 
         if not data:
             break
@@ -581,7 +591,7 @@ def copyfilelike(
 
 
 def simple_file_iter(fr: IO[Data], chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[Data]:
-    """Iterate file-like object `fr` and yield chunks of size `chunk_size`."""
+    """Iterate file-like object `fr` and yield chunks of size `chunk_size` (or less in unbuffered mode)."""
 
     assert isinstance(chunk_size, int), "chunk_size needs to be an integer"
 
@@ -594,8 +604,10 @@ def simple_file_iter(fr: IO[Data], chunk_size: int = FILE_IO_BUFFER_SIZE) -> Ite
             break
 
 
-def reversed_file_iter(fp: IO[Data], chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[Data]:
+def reversed_file_iter(fp: BufferedBinaryIoT, chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[bytes]:
     """Generate blocks of file's contents in reverse order."""
+
+    _assert_buffered_seekable_reader(fp)
 
     fp.seek(0, SEEK_END)
     here = fp.tell()
@@ -646,7 +658,7 @@ def blockfileiter(
     chunk_size: int = FILE_IO_BUFFER_SIZE,
     opener=None,
 ) -> Iterator[Union[str, bytes]]:
-    """Iterate over file at `path` and yield chunks of size `chunk_size`.
+    """Iterate over file at `path` and yield chunks of size `chunk_size` (or less in unbuffered mode).
     Optionally limit output to `amount` bytes.
     """
 
@@ -667,21 +679,18 @@ def blockfilesiter(paths: Iterable[PathType], chunk_size: int = FILE_IO_BUFFER_S
     for path in paths:
         with open(path, "rb") as fr:
             if len(chunk) != 0:
-                # print("a")
-                data = fr.read(chunk_size - len(chunk))
+                data = fr.read(chunk_size - len(chunk))  # buffered
                 chunk += data  # fixme: probably slow for lots of small files
 
             if len(chunk) == chunk_size:
-                # print("b")
                 yield chunk
                 chunk = b""
 
             if len(chunk) == 0:
-                # print("c")
-                for data in iterfilelike(fr, chunk_size=chunk_size):  # is chunk overwritten here?
+                for data in iterfilelike(fr, chunk_size=chunk_size):
                     if len(data) == chunk_size:
                         yield data
-                    else:
+                    else:  # must be the last chunk in buffered mode
                         chunk = data
 
     if chunk:
@@ -731,6 +740,7 @@ def equal_files(
     Data can be optionally limited to `amount`.
     """
 
+    # blockfileiter must be used in buffered mode, since the chunks can be of different size
     its = tuple(
         blockfileiter(path, mode, encoding=encoding, errors=errors, amount=amount, chunk_size=chunk_size)
         for path in paths
@@ -738,7 +748,7 @@ def equal_files(
     return iter_equal(*its)
 
 
-def is_all_byte(fr: IO, thebyte: bytes = b"\0", chunk_size: int = FILE_IO_BUFFER_SIZE) -> bool:
+def is_all_byte(fr: BinaryIoT, thebyte: bytes = b"\0", chunk_size: int = FILE_IO_BUFFER_SIZE) -> bool:
     """Test if file-like `fr` consists only of `thebyte` bytes."""
 
     assert isinstance(thebyte, bytes)
@@ -751,7 +761,7 @@ def is_all_byte(fr: IO, thebyte: bytes = b"\0", chunk_size: int = FILE_IO_BUFFER
 
 
 def iter_zip(
-    file: Union[PathType, IO],
+    file: Union[PathType, IO[bytes]],
     mode: str = "rb",
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
@@ -760,7 +770,7 @@ def iter_zip(
 ) -> Iterator[Tuple[str, IO]]:
     """
     Iterate file-pointers to archived files. They are valid for one iteration step each.
-    If `file` is a file-like, it must be seekable.
+    If `file` is a file-like, it must be seekable. It is untested if unbuffered file-likes work.
     """
 
     # from pyzipper import AESZipFile as ZipFile
@@ -777,13 +787,15 @@ def iter_zip(
 
 
 def iter_7zip(
-    file: Union[BinaryIO, PathType],
+    file: Union[PathType, IO[bytes]],
     mode: str = "rb",
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
     newline: Optional[str] = None,
     password: Optional[str] = None,
 ) -> Iterator[Tuple[str, IO]]:
+    """It is untested if unbuffered file-likes work."""
+
     from py7zr import SevenZipFile
 
     encoding = _check_arguments(mode, encoding)
@@ -795,7 +807,7 @@ def iter_7zip(
 
 
 def iter_tar(
-    file: Union[PathType, BinaryIO],
+    file: Union[PathType, IO[bytes]],
     mode: str = "rb",
     encoding: Optional[str] = None,
     errors: Optional[str] = None,
@@ -803,7 +815,7 @@ def iter_tar(
 ) -> Iterator[Tuple[str, IO]]:
     """
     Iterate file-pointers to archived files. They are valid for one iteration step each.
-    With the correct mode, `file` can be a non-seekable file-like.
+    With the correct mode, `file` can be a non-seekable file-like. It is untested if unbuffered file-likes work.
     """
 
     import tarfile

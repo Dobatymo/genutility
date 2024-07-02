@@ -2,12 +2,12 @@ import logging
 import mmap
 import re
 from struct import unpack
-from typing import BinaryIO, Iterator, Optional, Set, Tuple, Union
+from typing import IO, Iterator, Optional, Set, Tuple, Union
 
 from _hashlib import HASH as Hashobj
 
 from ..exceptions import ParseError
-from ..file import read_or_raise
+from ..file import BufferedBinaryIoT, read_or_raise
 from ..string import backslash_escaped_ascii
 
 Segment = Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]
@@ -98,7 +98,7 @@ metadata_segments = {
 } | {f"APP{i}" for i in range(16)}
 
 
-def iter_jpeg_fp(fr: BinaryIO, translate: bool = True) -> Iterator[Segment]:
+def iter_jpeg_fp(fr: IO[bytes], translate: bool = True) -> Iterator[Segment]:
     """Iterate over JPEG file given in binary stream `fr` and yield the segments.
     `translate=False` can be used to reconstruct the file in a bit-identical way.
     See copy_jpeg() for an example.
@@ -190,7 +190,7 @@ def iter_jpeg(path: str, translate: bool = True) -> Iterator[Segment]:
         yield from iter_jpeg_fp(fr, translate=translate)
 
 
-def copy_jpeg_fp(fin: BinaryIO, fout: BinaryIO, ignore_segments: Optional[Set[str]] = None) -> None:
+def copy_jpeg_fp(fin: IO[bytes], fout: BufferedBinaryIoT, ignore_segments: Optional[Set[str]] = None) -> None:
     """Same as `copy_jpeg()` except that it accepts file-like objects."""
 
     ignore_segments = ignore_segments or set()

@@ -33,7 +33,7 @@ def heif_get_exif(path: str) -> bytes:
 
     with open(path, "rb") as fr:
         fr.seek(extent_offset)
-        return fr.read(extent_length)
+        return fr.read(extent_length)  # buffered
 
 
 if __name__ == "__main__":

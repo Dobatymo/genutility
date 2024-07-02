@@ -7,7 +7,7 @@ def deprecated(msg: str, stacklevel: int = 2) -> Callable[[Callable], Callable]:
     def decorator(func):
         @wraps(func)
         def inner(*args, **kwargs):
-            warn(msg, DeprecationWarning, stacklevel)
+            warn(msg, DeprecationWarning, stacklevel)  # noqa: B028
             print("DeprecationWarning:", msg)
             return func(*args, **kwargs)
 

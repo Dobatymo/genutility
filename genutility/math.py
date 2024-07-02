@@ -341,7 +341,7 @@ def byte2size(byte: SupportsFloat, exp: int = 0, base: int = 1024) -> Tuple[floa
     byte = float(byte)
     byte_units = ("Byte", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB")
 
-    for unit in islice(byte_units, exp, None):
+    for unit in islice(byte_units, exp, None):  # noqa: B007
         if byte >= base:
             byte /= base
         else:

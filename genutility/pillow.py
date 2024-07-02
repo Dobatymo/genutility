@@ -98,14 +98,14 @@ def write_text(
     elif isinstance(fontsize, float):
         fontsize = int(img.height * fontsize)
     else:
-        raise ValueError("fontsize must be float or int")
+        raise TypeError("fontsize must be float or int")
 
     if isinstance(padding, tuple):
         pass
     elif isinstance(padding, float):
         padding = int(img.width * padding), int(img.height * padding)
     else:
-        raise ValueError("padding must be float or Tuple[int, int]")
+        raise TypeError("padding must be float or Tuple[int, int]")
 
     font = ImageFont.truetype("arial.ttf", fontsize)
 

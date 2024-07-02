@@ -611,7 +611,9 @@ class StorageMixin:
         MyDeviceIoControl(
             self.handle, winioctl.IOCTL_STORAGE_GET_DEVICE_NUMBER, InBuffer, OutBuffer, timeout_ms=self.timeout_ms
         )
-        return struct2dict(OutBuffer)
+        out = struct2dict(OutBuffer)
+        out["DeviceType"] = DEVICE_TYPE(out["DeviceType"])
+        return out
 
     def read_capacity(self) -> dict:
         """Accepts drive and volume handles, but always returns related drive info.
@@ -685,6 +687,10 @@ class StorageMixin:
             out["SerialNumber"] = cstring(raw, OutBuffer.SerialNumberOffset - offset)
 
         return out
+
+
+class Storage(WindowsHandle, StorageMixin):
+    pass
 
 
 class Volume(WindowsHandle, StorageMixin):

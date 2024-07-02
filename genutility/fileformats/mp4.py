@@ -5,13 +5,13 @@ import struct
 import warnings
 from base64 import b64decode
 from collections import namedtuple
-from typing import IO, Any, Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, Union
 
 import pkg_resources
 
 from ..csv import iter_csv
 from ..exceptions import Break, ParseError
-from ..file import read_or_raise
+from ..file import BufferedBinaryIoT, read_or_raise
 from ..iter import batch
 
 # http://mp4ra.org/#/atoms
@@ -25,7 +25,7 @@ from ..iter import batch
 
 
 class BoxParser:
-    def __init__(self, fin: IO[bytes], size: Optional[int] = None):
+    def __init__(self, fin: BufferedBinaryIoT, size: Optional[int] = None):
         self.fin = fin
         self.size = size
         self.delta = 0
@@ -36,7 +36,7 @@ class BoxParser:
         return ret
 
     @staticmethod
-    def read_c_string(fin: IO[bytes], size: int) -> bytes:
+    def read_c_string(fin: BufferedBinaryIoT, size: int) -> bytes:
         ret: List[bytes] = []
         while len(ret) < size:
             c = fin.read(1)
@@ -98,7 +98,7 @@ ItemLocationEntry = namedtuple("ItemLocationEntry", ["extent_offset", "extent_le
 # atoms
 
 
-def stco(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def stco(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """ChunkOffsetBox"""
 
     assert version == 0, "Version not 0"
@@ -110,7 +110,7 @@ def stco(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"chunk_offsets": chunk_offsets}, p.delta
 
 
-def fpar(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def fpar(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """FilePartitionBox"""
 
     assert version in (0, 1), "Version not 0 or 1"
@@ -152,7 +152,7 @@ def fpar(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     }, p.delta
 
 
-def mfhd(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def mfhd(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """MovieFragmentHeaderBox"""
 
     assert version == 0
@@ -163,7 +163,7 @@ def mfhd(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"sequence_number": sequence_number}, p.delta
 
 
-def co64(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def co64(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0
     p = BoxParser(fin, size)
 
@@ -173,7 +173,7 @@ def co64(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"chunk_offsets": chunk_offsets}, p.delta
 
 
-def prft(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def prft(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
 
     if version == 0:
@@ -210,25 +210,25 @@ def iref_parser(fin, size, version):
     return {"from_item_id": from_item_id, "to_item_ids": to_item_ids}, p.delta
 
 
-def dimg(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def dimg(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Not a fullbox, inherits parent version"""
 
     return iref_parser(fin, size, version)
 
 
-def thmb(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def thmb(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Not a fullbox, inherits parent version"""
 
     return iref_parser(fin, size, version)
 
 
-def cdsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def cdsc(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Not a fullbox, inherits parent version"""
 
     return iref_parser(fin, size, version)
 
 
-def ctts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def ctts(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Composition Time to Sample Box / CompositionOffsetBox"""
     p = BoxParser(fin, size)
 
@@ -244,7 +244,7 @@ def ctts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"composition_offset_entries": named_batch(entries, 2, CompositionOffsetEntry)}, p.delta
 
 
-def stsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def stsc(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Sample To Chunk Box"""
 
     assert version == 0, f"Unsupported version: {version}"
@@ -254,7 +254,7 @@ def stsc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"sample_to_chunk_entries": named_batch(entries, 3, SampleToChunkEntry)}, p.delta
 
 
-def stts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def stts(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """TimeToSampleBox"""
 
     assert version == 0, f"Unsupported version: {version}"
@@ -264,33 +264,33 @@ def stts(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"time_to_samples_entries": named_batch(entries, 2, TimeToSampleEntry)}, p.delta
 
 
-def uuid(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def uuid(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     (uuid,) = p.unpack(">16s", 16)
     return {"uuid": uuid}, p.delta
 
 
-def ftyp(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def ftyp(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     major_brand, minor_version = p.unpack(">4sL", 8)
     return {"major_brand": major_brand, "minor_version": minor_version}, p.delta
 
 
-def stsd(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def stsd(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
     return {"entry_count": entry_count}, p.delta
 
 
-def url(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def url(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     url = p.c_string("utf-8")
     return {"url": url}, p.delta
 
 
-def urn(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def urn(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     urn = p.c_string("utf-8")
@@ -298,13 +298,13 @@ def urn(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, in
     return {"urn": urn, "name": name}, p.delta
 
 
-def dref(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:  # needs to be parsed!!!
+def dref(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:  # needs to be parsed!!!
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
     return {"entry_count": entry_count}, p.delta
 
 
-def iinf(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:  # needs to be parsed!!!
+def iinf(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:  # needs to be parsed!!!
     p = BoxParser(fin, size)
     if version == 0:
         (entry_count,) = p.unpack(">H", 2)
@@ -316,7 +316,7 @@ def iinf(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"entry_count": entry_count}, p.delta
 
 
-def pitm(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def pitm(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     """Primary Item Box"""
 
     p = BoxParser(fin, size)
@@ -330,7 +330,7 @@ def pitm(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"item_ID": item_ID}, p.delta
 
 
-def hdlr(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def hdlr(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     assert version == 0, f"Unsupported version: {version}"
 
     p = BoxParser(fin, size)
@@ -340,7 +340,7 @@ def hdlr(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"handler_type": handler_type, "name": name}, p.delta
 
 
-def tfdt(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def tfdt(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     if version == 0:
         baseMediaDecodeTime = p.unpack(">L", 4)
@@ -350,14 +350,14 @@ def tfdt(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return {"baseMediaDecodeTime": baseMediaDecodeTime}, p.delta
 
 
-def frma(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def frma(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     (data_format,) = p.unpack(">4s", 4)
 
     return {"data_format": data_format}, p.delta
 
 
-def schm(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def schm(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
 
     scheme_type, scheme_version = p.unpack(">4sL", 8)
@@ -369,7 +369,7 @@ def schm(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, i
     return ret, p.delta
 
 
-def infe(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def infe(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     ret = {}
     if version in (0, 1):
@@ -409,7 +409,7 @@ def size_to_format_char(size: int) -> str:
     return {4: "L", 8: "Q"}[size]
 
 
-def iloc(fin: IO[bytes], size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def iloc(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     p = BoxParser(fin, size)
     ret: Dict[str, Any] = {}
 
@@ -534,7 +534,7 @@ atoms = _load_atoms()
 atomcodep = re.compile(rb"[0-9a-zA-Z ]{4}")  # what do the specs say here?
 
 
-def parse_atom(fin: IO[bytes], code: str, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
+def parse_atom(fin: BufferedBinaryIoT, code: str, size: int, version: int, flags: bytes) -> Tuple[dict, int]:
     try:
         func = parsers[code]
         content, delta = func(fin, size, version, flags)
@@ -545,7 +545,7 @@ def parse_atom(fin: IO[bytes], code: str, size: int, version: int, flags: bytes)
     return content, delta
 
 
-def read_atom(fin: IO[bytes], parent_version: Optional[int] = None) -> Tuple[int, str, int, int, int, bytes]:
+def read_atom(fin: BufferedBinaryIoT, parent_version: Optional[int] = None) -> Tuple[int, str, int, int, int, bytes]:
     pos = fin.tell()
 
     p = BoxParser(fin)
@@ -583,7 +583,7 @@ def read_atom(fin: IO[bytes], parent_version: Optional[int] = None) -> Tuple[int
 
 
 def _enum_atoms(
-    fin: IO[bytes],
+    fin: BufferedBinaryIoT,
     total_size: int,
     depth: int,
     parse_atoms: bool = True,

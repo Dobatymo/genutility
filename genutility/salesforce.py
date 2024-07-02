@@ -384,7 +384,7 @@ class LiveAgentBase(Generic[ReturnTGet, ReturnTPost]):
             prechat_details = slots
 
         else:
-            raise ValueError("either prechat_details must be given or slots must be dict or list")
+            raise TypeError("either prechat_details must be given or slots must be dict or list")
 
         return prechat_details
 

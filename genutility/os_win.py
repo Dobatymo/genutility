@@ -1,8 +1,9 @@
 import logging
 import os
 import signal
-from ctypes import WinError, byref, c_wchar_p, cast, create_unicode_buffer, memset, sizeof
+from ctypes import byref, c_wchar_p, cast, create_unicode_buffer, memset, sizeof
 from ctypes.wintypes import DWORD, HANDLE, LPCWSTR, ULARGE_INTEGER
+from enum import IntFlag
 from msvcrt import get_osfhandle
 from typing import IO, Union
 
@@ -20,6 +21,31 @@ from cwinsdk.um.winbase import STD_OUTPUT_HANDLE
 from .os_shared import _usagetuple, _volumeinfotuple
 
 PathType = Union[str, os.PathLike]
+
+
+class FileAttributes(IntFlag):
+    READONLY = winnt.FILE_ATTRIBUTE_READONLY
+    HIDDEN = winnt.FILE_ATTRIBUTE_HIDDEN
+    SYSTEM = winnt.FILE_ATTRIBUTE_SYSTEM
+    DIRECTORY = winnt.FILE_ATTRIBUTE_DIRECTORY
+    ARCHIVE = winnt.FILE_ATTRIBUTE_ARCHIVE
+    DEVICE = winnt.FILE_ATTRIBUTE_DEVICE
+    NORMAL = winnt.FILE_ATTRIBUTE_NORMAL
+    TEMPORARY = winnt.FILE_ATTRIBUTE_TEMPORARY
+    SPARSE_FILE = winnt.FILE_ATTRIBUTE_SPARSE_FILE
+    REPARSE_POINT = winnt.FILE_ATTRIBUTE_REPARSE_POINT
+    COMPRESSED = winnt.FILE_ATTRIBUTE_COMPRESSED
+    OFFLINE = winnt.FILE_ATTRIBUTE_OFFLINE
+    NOT_CONTENT_INDEXED = winnt.FILE_ATTRIBUTE_NOT_CONTENT_INDEXED
+    ENCRYPTED = winnt.FILE_ATTRIBUTE_ENCRYPTED
+    INTEGRITY_STREAM = winnt.FILE_ATTRIBUTE_INTEGRITY_STREAM
+    VIRTUAL = winnt.FILE_ATTRIBUTE_VIRTUAL
+    NO_SCRUB_DATA = winnt.FILE_ATTRIBUTE_NO_SCRUB_DATA
+    EA = winnt.FILE_ATTRIBUTE_EA
+    PINNED = winnt.FILE_ATTRIBUTE_PINNED
+    UNPINNED = winnt.FILE_ATTRIBUTE_UNPINNED
+    RECALL_ON_OPEN = winnt.FILE_ATTRIBUTE_RECALL_ON_OPEN
+    RECALL_ON_DATA_ACCESS = winnt.FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS
 
 
 def get_stdout_handle() -> HANDLE:
@@ -47,6 +73,10 @@ class EnableAnsi:  # doesn't work for some reason...
         self.close()
 
 
+def _file_attributes(path: str) -> FileAttributes:
+    return FileAttributes(fileapi.GetFileAttributesW(path))
+
+
 def _islink(path: PathType) -> bool:
     """Tests if `path` refers to a symlink or a junction.
     - Python >= 3.2 `os.path.islink()` only supports symlinks, not junctions.
@@ -56,12 +86,10 @@ def _islink(path: PathType) -> bool:
 
     # this can be replaced with a os.stat() based implementation for Python 3.8+
 
-    FileName = os.fspath(path)
-    FileAttributes = fileapi.GetFileAttributesW(FileName)
+    filename = os.fspath(path)
+    attributes = fileapi.GetFileAttributesW(filename)
 
-    if FileAttributes == fileapi.INVALID_FILE_ATTRIBUTES:
-        raise WinError()
-    return FileAttributes & winnt.FILE_ATTRIBUTE_REPARSE_POINT == winnt.FILE_ATTRIBUTE_REPARSE_POINT
+    return attributes & winnt.FILE_ATTRIBUTE_REPARSE_POINT == winnt.FILE_ATTRIBUTE_REPARSE_POINT
 
 
 def _realpath(path: PathType) -> str:

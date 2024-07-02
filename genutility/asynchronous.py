@@ -94,7 +94,7 @@ if __name__ == "__main__":
     print()
 
     async def main():
-        async for i in progress_content(genasync()):
+        async for _i in progress_content(genasync()):
             pass
 
     asyncio.run(main())

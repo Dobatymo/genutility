@@ -89,7 +89,7 @@ class StringTest(MyTestCase):
             (False, False): ["A", "Aa", "B", "BC", "C", "a", "aA", "aB", "aa", "ab", "b", "c"],
         }
 
-        for i in range(10):
+        for _i in range(10):
             shuffle(seq)
             for (ci, lbu), truth in truths.items():
                 a = locale_sorted(seq, ci, lbu)

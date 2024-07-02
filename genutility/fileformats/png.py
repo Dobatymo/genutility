@@ -2,12 +2,12 @@ import logging
 import re
 import zlib
 from struct import pack, unpack
-from typing import IO, Callable, Iterator, Optional, Tuple
+from typing import Callable, Iterator, Optional, Tuple
 
 from _hashlib import HASH as Hashobj
 
 from ..exceptions import ParseError
-from ..file import read_or_raise
+from ..file import BufferedBinaryIoT, read_or_raise
 
 png_sig = b"\x89PNG\r\n\x1a\n"
 chunk_type_p = re.compile(rb"^[a-zA-Z]{4}$")
@@ -51,7 +51,7 @@ def binary2png(binary: bytes, width: int, height: int) -> bytes:
     return png_sig + IHDR(width, height) + IDAT(binary) + IEND()
 
 
-def iter_png_fp(stream: IO[bytes], translate: bool = True, verify_crc: bool = True) -> Iterator[tuple]:
+def iter_png_fp(stream: BufferedBinaryIoT, translate: bool = True, verify_crc: bool = True) -> Iterator[tuple]:
     """Parses PNG / APNG files."""
 
     signature = read_or_raise(stream, 8)
@@ -111,7 +111,10 @@ def iter_png(path: str, translate: bool = True, verify_crc: bool = True) -> Iter
 
 
 def copy_png_fp(
-    fin: IO[bytes], fout: IO[bytes], filter_chunks: Optional[Callable[[bytes], bool]] = None, verify_crc: bool = False
+    fin: BufferedBinaryIoT,
+    fout: BufferedBinaryIoT,
+    filter_chunks: Optional[Callable[[bytes], bool]] = None,
+    verify_crc: bool = False,
 ) -> None:
     """Same as `copy_png()` except that it accepts file-like objects."""
 
