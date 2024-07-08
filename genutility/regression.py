@@ -42,7 +42,7 @@ class LinearRegression:
 
     def fit(self, n_iter: int = 100, progress: Optional[Progress] = None) -> None:
         progress = progress or Progress()
-        for i in progress.track(range(n_iter), description="SGD itertion"):
+        for _i in progress.track(range(n_iter), description="SGD itertion"):
             self.epoch()
 
     def getParams(self) -> np.ndarray:

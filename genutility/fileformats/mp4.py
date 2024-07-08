@@ -5,7 +5,8 @@ import struct
 import warnings
 from base64 import b64decode
 from collections import namedtuple
-from typing import Any, Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Collection, Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, Union
 
 import pkg_resources
 
@@ -654,7 +655,6 @@ if __name__ == "__main__":
     import pandas as pd
     from rich.progress import Progress as RichProgress
 
-    from genutility.args import is_dir
     from genutility.filesystem import scandir_ext
     from genutility.iter import list_except
     from genutility.rich import Progress
@@ -667,7 +667,7 @@ if __name__ == "__main__":
         return s.encode("ascii")
 
     parser = ArgumentParser()
-    parser.add_argument("path", type=is_dir)
+    parser.add_argument("path", type=Path, help="Input file or directory")
     parser.add_argument("-e", "--errors-only", action="store_true")
     parser.add_argument("-r", "--recursive", action="store_true")
     parser.add_argument(
@@ -684,35 +684,53 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
 
-    unparsed_data = args.search or args.type
+    def print_atoms(path: Path, parse_atoms: bool, only_type: Collection[str], search: bytes) -> None:
+        unparsed_data = search or only_type
 
-    errors_count = 0
-    total_count = 0
+        for depth, pos, type, size, content, leaf in enumerate_atoms(
+            fspath(path), parse_atoms=parse_atoms, unparsed_data=unparsed_data
+        ):
+            if only_type and type in only_type:
+                print("--" * depth, pos, type, size, content, leaf)
+            elif search and leaf and search in leaf:
+                print("--" * depth, pos, type, size, content, search)
+            else:
+                leavsize = len(leaf) if leaf else 0
+                print("--" * depth, pos, type, size, content, leavsize)
+
+    def print_atoms_error_only(path: Path, parse_atoms: bool, only_type: Collection[str]) -> bool:
+        exc, res = list_except(enumerate_atoms(fspath(path), parse_atoms=parse_atoms))
+        if exc:
+            if only_type is None or (res and res[-1][2] not in only_type):
+                for depth, pos, type, size, _, _ in res:
+                    print("--" * depth, pos, type, size, file=stderr)
+                logging.exception("Enumerating atoms of %s failed", path, exc_info=exc)
+                return True
+        return False
+
     with RichProgress() as progress:
         p = Progress(progress)
-        for path in p.track(scandir_ext(args.path, args.extensions, rec=args.recursive)):
-            if args.errors_only:
-                total_count += 1
-                exc, res = list_except(enumerate_atoms(fspath(path), parse_atoms=args.no_parse_atoms))
-                if exc:
-                    if args.type is None or (res and res[-1][2] not in args.type):
-                        for depth, pos, type, size, _, _ in res:
-                            print("--" * depth, pos, type, size, file=stderr)
-                        logging.exception("Enumerating atoms of %s failed", path, exc_info=exc)
-                        errors_count += 1
-            else:
-                print(path)
-                for depth, pos, type, size, content, leaf in enumerate_atoms(
-                    fspath(path), parse_atoms=args.no_parse_atoms, unparsed_data=unparsed_data
-                ):
-                    if args.type and type in args.type:
-                        print("--" * depth, pos, type, size, content, leaf)
-                    elif args.search and leaf and args.search in leaf:
-                        print("--" * depth, pos, type, size, content, args.search)
-                    else:
-                        leavsize = len(leaf) if leaf else 0
-                        print("--" * depth, pos, type, size, content, leavsize)
-                print()
 
-    if args.errors_only:
-        print(f"{errors_count}/{total_count} files failed to parse")
+        if args.path.is_file():
+            if args.errors_only:
+                print_atoms_error_only(args.path, args.no_parse_atoms, args.type)
+            else:
+                print_atoms(args.path, args.no_parse_atoms, args.type, args.search)
+
+        elif args.path.is_dir():
+            errors_count = 0
+            total_count = 0
+            for path in p.track(scandir_ext(args.path, args.extensions, rec=args.recursive)):
+                if args.errors_only:
+                    total_count += 1
+                    errors_count += int(print_atoms_error_only(path, args.no_parse_atoms, args.type))
+                else:
+                    print(path)
+                    print_atoms(path, args.no_parse_atoms, args.type, args.search)
+                    print()
+
+            if args.errors_only:
+                print(f"{errors_count}/{total_count} files failed to parse")
+
+        else:
+            assert False

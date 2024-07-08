@@ -1,19 +1,18 @@
 {
     "algorithms": [],
+    "archive": [
+        "py7zr>=0.20.2"
+    ],
     "args": [
         "jsonschema",
-        "py7zr>=0.20.2",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "aria": [
         "aria2p",
         "requests"
     ],
     "asynchronous": [],
-    "atomic": [
-        "py7zr>=0.20.2"
-    ],
+    "atomic": [],
     "av": [
         "av>=8.0; python_version>='3.8'",
         "numpy"
@@ -33,9 +32,7 @@
     "cache": [
         "jsonschema",
         "msgpack>=0.6.0",
-        "py7zr>=0.20.2",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "callbacks": [],
     "casedict": [],
@@ -49,11 +46,9 @@
     "concurrency": [],
     "config": [
         "jsonschema",
-        "py7zr>=0.20.2",
         "simplejson",
         "sortedcontainers",
-        "toml",
-        "typing-extensions>=4.0.0"
+        "toml"
     ],
     "constants_physics": [],
     "constants_video": [],
@@ -83,26 +78,19 @@
     "error": [],
     "exceptions": [],
     "factorial": [],
-    "file": [
-        "py7zr>=0.20.2"
-    ],
+    "file": [],
     "fileformats": [
         "jsonschema",
         "pandas",
         "piexif",
-        "py7zr>=0.20.2",
         "rich",
         "setuptools",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "filesdb": [
-        "py7zr>=0.20.2",
         "tls-property>=1.0.1"
     ],
-    "filesystem": [
-        "py7zr>=0.20.2"
-    ],
+    "filesystem": [],
     "fingerprinting": [
         "numpy",
         "Pillow>=9.2.0"
@@ -115,24 +103,19 @@
     "gensim": [
         "gensim>=4.0.0",
         "keras",
-        "numpy",
-        "py7zr>=0.20.2"
+        "numpy"
     ],
     "geometry": [],
     "graph": [],
-    "hash": [
-        "py7zr>=0.20.2"
-    ],
+    "hash": [],
     "html": [
         "beautifulsoup4"
     ],
     "http": [
         "certifi",
         "jsonschema",
-        "py7zr>=0.20.2",
         "requests",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "image": [
         "numpy"
@@ -143,19 +126,15 @@
     "iter": [],
     "json": [
         "jsonschema",
-        "py7zr>=0.20.2",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "latex": [],
     "lda": [
         "jsonschema",
         "nltk>=3.6.1",
         "numpy",
-        "py7zr>=0.20.2",
         "scikit-learn",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "locale": [],
     "logging": [],
@@ -176,11 +155,9 @@
         "pymongo"
     ],
     "msgpack": [
-        "msgpack>=0.6.0",
-        "py7zr>=0.20.2"
+        "msgpack>=0.6.0"
     ],
     "multihash": [
-        "py7zr>=0.20.2",
         "rhash; sys_platform=='win32'"
     ],
     "net": [
@@ -194,8 +171,7 @@
         "gensim>=4.0.0",
         "keras",
         "nltk>=3.6.1",
-        "numpy",
-        "py7zr>=0.20.2"
+        "numpy"
     ],
     "nltk": [
         "nltk>=3.6.1"
@@ -208,20 +184,14 @@
     ],
     "object": [
         "jsonschema",
-        "py7zr>=0.20.2",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "ops": [],
-    "os": [
-        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'"
-    ],
+    "os": [],
     "os_mac": [],
     "os_posix": [],
     "os_shared": [],
-    "os_win": [
-        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'"
-    ],
+    "os_win": [],
     "pandas": [
         "pandas"
     ],
@@ -231,15 +201,11 @@
     "pdf": [
         "jsonschema",
         "pdfminer",
-        "py7zr>=0.20.2",
         "PyPDF2>=3.0.0",
         "simplejson",
-        "tika",
-        "typing-extensions>=4.0.0"
+        "tika"
     ],
-    "pickle": [
-        "py7zr>=0.20.2"
-    ],
+    "pickle": [],
     "pillow": [
         "piexif",
         "Pillow>=9.2.0"
@@ -263,7 +229,6 @@
         "scikit-learn"
     ],
     "rich": [
-        "py7zr>=0.20.2",
         "rich"
     ],
     "ringlist": [],
@@ -271,11 +236,9 @@
         "aiohttp>=3.7.4",
         "jsonschema",
         "pandas",
-        "py7zr>=0.20.2",
         "requests",
         "simple-salesforce>=1.1.0",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "scene_change_detection": [
         "av>=8.0; python_version>='3.8'",
@@ -285,7 +248,7 @@
     ],
     "scipy": [
         "numpy",
-        "scipy<1.13.0"
+        "scipy<1.13"
     ],
     "scrapy": [
         "brotli"
@@ -295,9 +258,7 @@
     "sequence": [],
     "set": [],
     "signal": [],
-    "sort": [
-        "py7zr>=0.20.2"
-    ],
+    "sort": [],
     "spark": [
         "pyspark>=3.0.0"
     ],
@@ -305,9 +266,7 @@
         "pandas",
         "requests"
     ],
-    "sql": [
-        "py7zr>=0.20.2"
-    ],
+    "sql": [],
     "sqlite": [],
     "statistics": [
         "gmpy2"
@@ -322,14 +281,11 @@
     "tensorflow": [
         "tensorflow"
     ],
-    "test": [
-        "py7zr>=0.20.2"
-    ],
+    "test": [],
     "tests": [
         "aiohttp>=3.7.4",
         "aioresponses>=0.7.2",
         "av>=8.0; python_version>='3.8'",
-        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'",
         "flask>=0.12.3",
         "gensim>=4.0.0",
         "gmpy2",
@@ -346,32 +302,28 @@
         "pandas",
         "pdfminer",
         "Pillow>=9.2.0",
-        "py7zr>=0.20.2",
         "PyPDF2>=3.0.0",
         "pywin32; sys_platform=='win32'",
         "requests",
         "requests-mock",
         "ruamel.yaml",
+        "scipy<1.13",
         "setuptools",
         "simple-salesforce>=1.1.0",
         "simplejson",
         "tika",
         "tls-property>=1.0.1",
         "toml",
-        "typing-extensions>=4.0.0",
         "werkzeug>=0.11.11"
     ],
     "text": [
         "jsonschema",
         "msgpack>=0.6.0",
-        "py7zr>=0.20.2",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "text_segmentation": [],
     "text_summarization": [
         "numpy",
-        "py7zr>=0.20.2",
         "spacy"
     ],
     "time": [],
@@ -388,10 +340,8 @@
     "torrent": [
         "bencode.py>=2.0.0",
         "jsonschema",
-        "py7zr>=0.20.2",
         "requests",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "tqdm": [
         "tqdm"
@@ -403,20 +353,14 @@
     "twitch": [
         "certifi",
         "jsonschema",
-        "py7zr>=0.20.2",
         "requests",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
-    "typing": [
-        "typing-extensions>=4.0.0"
-    ],
+    "typing": [],
     "unicode": [
         "jsonschema",
         "msgpack>=0.6.0",
-        "py7zr>=0.20.2",
-        "simplejson",
-        "typing-extensions>=4.0.0"
+        "simplejson"
     ],
     "unqlite": [],
     "url": [],
@@ -429,7 +373,6 @@
         "wxPython>=4"
     ],
     "win": [
-        "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'",
         "pywin32; sys_platform=='win32'"
     ],
     "win32": [

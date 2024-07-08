@@ -8,6 +8,9 @@ from setuptools import setup
 with open("README.md", encoding="utf-8") as fr:
     long_description = fr.read()
 
+with open("install_requires.json", encoding="utf-8") as fr:
+    install_requires = json.load(fr)
+
 with open("extras_require.json", encoding="utf-8") as fr:
     extras_require = json.load(fr)
 
@@ -16,7 +19,7 @@ extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values()))
 setup(
     author="Dobatymo",
     name="genutility",
-    version="0.0.104",
+    version="0.0.105",
     url="https://github.com/Dobatymo/genutility",
     description="A collection of various Python utilities",
     long_description=long_description,
@@ -30,7 +33,7 @@ setup(
     packages=["genutility", "genutility.compat", "genutility.fileformats", "genutility.win"],
     package_data={"genutility": ["py.typed", "data/*.tsv"]},
     python_requires=">=3.7",
-    install_requires=["ctypes-windows-sdk>=0.0.14; sys_platform=='win32'", "typing-extensions>=4.0.0"],
+    install_requires=install_requires,
     extras_require=extras_require,
     license_files=["LICENSE"],
 )

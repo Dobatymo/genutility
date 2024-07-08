@@ -4,6 +4,8 @@ from itertools import chain
 from pathlib import Path
 from typing import Dict, Set
 
+global_modules = ["typing_extensions", "cwinsdk"]
+
 modmap = {
     "OpenSSL": "pyOpenSSL>=17.5.0",
     "PIL": "Pillow>=9.2.0",
@@ -27,6 +29,7 @@ modmap = {
     "pyspark": "pyspark>=3.0.0",
     "requests_mock": "requests-mock",
     "rhash": "rhash; sys_platform=='win32'",
+    "scipy": "scipy<1.13",  # for gensim
     "simple_salesforce": "simple-salesforce>=1.1.0",
     "sklearn": "scikit-learn",
     "tls_property": "tls-property>=1.0.1",
@@ -86,6 +89,11 @@ def lowercasekey(x):
 
 
 def main(path: Path) -> None:
+    install = sorted((modmap.get(modname, modname) for modname in global_modules), key=lowercase)
+
+    with open("install_requires.json", "w", encoding="utf-8") as fw:
+        json.dump(install, fw, indent="    ")
+
     with path.open("rt", encoding="utf-8") as fr:
         extras: Dict[str, Set[str]] = {}
         module = None
@@ -106,9 +114,10 @@ def main(path: Path) -> None:
                         assert internal, modname
                         extras[module].add(internal)
                 elif modname[0] not in BUILTINS:
-                    requirement = modmap.get(modname[0], modname[0])
-                    assert requirement, modname
-                    extras[module].add(requirement)
+                    if modname[0] not in global_modules:
+                        requirement = modmap.get(modname[0], modname[0])
+                        assert requirement, modname
+                        extras[module].add(requirement)
             else:
                 if not line:
                     continue
@@ -121,7 +130,7 @@ def main(path: Path) -> None:
                 module = ".".join(modname[:2])
                 extras.setdefault(module, set())
 
-        # add replace colissions not detected correctly by findimports
+        # add replace collisions not detected correctly by findimports
         for module, deps in MANUAL_FIXES_REPLACE.items():
             newdeps = set()
             for dep in deps:
@@ -171,9 +180,9 @@ def main(path: Path) -> None:
         with open("extras_require.json", "w", encoding="utf-8") as fw:
             json.dump(extras, fw, indent="    ")
 
-        requirements_test = extras.pop("tests", [])
+        requirements_test = sorted(extras.pop("tests", []) + install, key=lowercase)
 
-        requirements = sorted(set(chain.from_iterable(extras.values())), key=lowercase)
+        requirements = sorted(set(chain.from_iterable(extras.values())) | set(install), key=lowercase)
         with open("requirements.txt", "w", encoding="utf-8") as fw:
             for package in requirements:
                 fw.write(package + "\n")

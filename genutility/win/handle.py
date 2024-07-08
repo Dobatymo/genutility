@@ -13,7 +13,7 @@ from cwinsdk.um.handleapi import CloseHandle
 from cwinsdk.um.winnt import GENERIC_READ, GENERIC_WRITE
 from typing_extensions import Self
 
-_mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "w+": GENERIC_READ | GENERIC_WRITE}
+_mode2access = {"": 0, "r": GENERIC_READ, "w": GENERIC_WRITE, "r+": GENERIC_READ | GENERIC_WRITE}
 
 
 class FileSystem(IntFlag):

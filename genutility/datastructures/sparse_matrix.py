@@ -38,7 +38,7 @@ class VariableRowMatrix(MutableMapping[Tuple[int, int], T]):
 
     def __iter__(self) -> Iterator[Tuple[int, int]]:
         for r, row in enumerate(self.lol):
-            for c, value in enumerate(row):
+            for c, _value in enumerate(row):
                 yield (r, c)
 
     def items(self) -> VariableRowMatrixItems[T]:

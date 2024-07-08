@@ -1,0 +1,4 @@
+[
+    "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'",
+    "typing-extensions>=4.0.0"
+]

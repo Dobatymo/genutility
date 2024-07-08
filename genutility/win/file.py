@@ -120,7 +120,7 @@ def is_open_for_write(path: str) -> bool:
 
 
 def set_compression(path: str, compressed: bool) -> None:
-    with WindowsFile.from_path(path, mode="w+") as wf:
+    with WindowsFile.from_path(path, mode="r+") as wf:
         wf.set_compression(compressed)
 
 
