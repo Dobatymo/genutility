@@ -17,7 +17,7 @@ modmap = {
     "bs4": "beautifulsoup4",
     "cryptography": "cryptography>=1.5.3",
     "cv2": "opencv-python",
-    "cwinsdk": "ctypes-windows-sdk>=0.0.14; sys_platform=='win32'",
+    "cwinsdk": "ctypes-windows-sdk>=0.0.15; sys_platform=='win32'",
     "flask": "flask>=0.12.3",
     "gensim": "gensim>=4.0.0",
     "msgpack": "msgpack>=0.6.0",

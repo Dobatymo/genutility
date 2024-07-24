@@ -20,7 +20,7 @@ repos:
     exclude: ^genutility\/tests\/markdown\.py$
     args: [--markdown-linebreak-ext=md]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.13.0
+  rev: v2.14.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix]
@@ -65,7 +65,7 @@ repos:
   rev: v1.10.1
   hooks:
   - id: mypy
-    args: [--install-types, --non-interactive, --show-error-codes]
+    args: [--install-types, --non-interactive, --show-error-codes, --show-traceback]
     additional_dependencies:
     - aiohttp==3.8.6
     - aria2p==0.11.3
@@ -73,7 +73,7 @@ repos:
     - beautifulsoup4==4.12.3
     - bencode.py==4.0.0
     - cryptography==42.0.8
-    - ctypes-windows-sdk==0.0.14; sys_platform=='win32'
+    - ctypes-windows-sdk==0.0.15; sys_platform=='win32'
     - Flask==2.2.5
     - gensim==4.1.2
     - gmpy2==2.1.5

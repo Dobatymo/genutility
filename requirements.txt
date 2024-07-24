@@ -6,7 +6,7 @@ bencode.py>=2.0.0
 brotli
 certifi
 cryptography>=1.5.3
-ctypes-windows-sdk>=0.0.14; sys_platform=='win32'
+ctypes-windows-sdk>=0.0.15; sys_platform=='win32'
 flask>=0.12.3
 gensim>=4.0.0
 gmpy2

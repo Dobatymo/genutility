@@ -1,1 +1,2 @@
 include extras_require.json
+include install_requires.json

@@ -4,7 +4,7 @@ from errno import EACCES
 
 from cwinsdk.um.fileapi import INVALID_FILE_SIZE, CreateFileW, GetCompressedFileSizeW
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
-from cwinsdk.um.WinBase import GetFileInformationByHandleEx, OpenFileById
+from cwinsdk.um.winbase import GetFileInformationByHandleEx, OpenFileById
 from cwinsdk.um.winioctl import FSCTL_SET_COMPRESSION
 from cwinsdk.um.winnt import COMPRESSION_FORMAT_DEFAULT, COMPRESSION_FORMAT_NONE, FILE_SHARE_READ, FILE_SHARE_WRITE
 from cwinsdk.windows import ERROR_SHARING_VIOLATION  # structs; enums
