@@ -341,6 +341,9 @@ with open("{file}", "r") as fr:
         if self.doclose:
             self.f.close()
 
+    def flush(self) -> None:
+        self.f.flush()
+
 
 def read_json_lines(
     file: PathStr, cls: Optional[Type[json.JSONDecoder]] = None, object_hook: Optional[Callable] = None

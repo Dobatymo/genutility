@@ -53,7 +53,7 @@ def multi_hash_file(path, hash_types, base=None, mode="rb", encoding=None, error
     flags = basedict.get(base, 0)
 
     hasher = rhash.RHash(reduce(bit_or, hashlist))
-    for data in blockfileiter(path, mode, encoding, errors, chunk_size=chunk_size):
+    for data in blockfileiter(path, mode, encoding=encoding, errors=errors, chunk_size=chunk_size):
         hasher.update(data)
     hasher.finish()
     return tuple(hasher._print(i, flags) for i in hashlist)

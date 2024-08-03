@@ -2,6 +2,7 @@ import os.path
 from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from mmap import mmap
 from os import PathLike, fdopen
+from pathlib import Path
 from sys import stdout
 from typing import IO, Callable, Iterable, Iterator, Optional, TypeVar, Union, overload
 
@@ -191,7 +192,10 @@ def copen(
     if hasattr(file, "read") or hasattr(file, "write"):  # file should be in binary mode here
         return wrap_text(file, mode, encoding, errors, newline)
 
-    return open(file, mode, encoding=encoding, errors=errors, newline=newline)
+    if isinstance(file, Path):
+        return file.open(mode, encoding=encoding, errors=errors, newline=newline)
+    else:
+        return open(file, mode, encoding=encoding, errors=errors, newline=newline)
 
 
 class OpenFileAndDeleteOnError:

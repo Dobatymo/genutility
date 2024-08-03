@@ -101,13 +101,25 @@ def between(start: float, stop: float) -> Callable[[str], float]:
 
 
 def suffix(s: str) -> str:
-    """Checks if `s` is a valid suffix."""
+    """Checks if `s` is a valid suffix with a leading dot."""
 
-    if not s.startswith("."):
+    if len(s) <= 1 or not s.startswith("."):
         msg = f"{s} is not a valid suffix. It must start with a dot."
         raise ArgumentTypeError(msg)
 
     return s
+
+
+def suffix_raw(s: str) -> str:
+    """Checks if `s` is a valid suffix which starts with a dot,
+    but returns it without the dot.
+    """
+
+    if len(s) <= 1 or not s.startswith("."):
+        msg = f"{s} is not a valid suffix. It must start with a dot."
+        raise ArgumentTypeError(msg)
+
+    return s[1:]
 
 
 def lowercase(s: str) -> str:
@@ -118,6 +130,10 @@ def lowercase(s: str) -> str:
 
 def suffix_lower(s: str) -> str:
     return lowercase(suffix(s))
+
+
+def suffix_lower_raw(s: str) -> str:
+    return lowercase(suffix_raw(s))
 
 
 @arg_to_path

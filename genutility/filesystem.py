@@ -502,6 +502,28 @@ def scandir_rec(
         return map(modpathrelative, it)
 
 
+def filter_recall(recall: bool = False) -> Callable[[MyDirEntryT], bool]:
+    """Returns a functions to use with filter, which takes a direntry and returns False
+    when `recall` is False and the file is only available online For example using OneDrive.
+    """
+
+    if os.name == "nt" and not recall:
+        from .os_win import FileAttributes
+
+        def inner(entry: MyDirEntryT) -> bool:
+            if FileAttributes.RECALL_ON_DATA_ACCESS in FileAttributes(entry.stat().st_file_attributes):
+                logger.info("Skipping online-only file `%s`", entry.path)
+                return False
+            return True
+
+    else:
+
+        def inner(entry: MyDirEntryT) -> bool:
+            return True
+
+    return inner
+
+
 def scandir_rec_simple(
     path: str,
     files: bool = True,
