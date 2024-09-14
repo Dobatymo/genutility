@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Iterator, Union
 import cv2
 import numpy as np
 
-from videofile import CvVideo
+from .videofile import CvVideo
 
 if TYPE_CHECKING:
     import wx  # noqa: F401

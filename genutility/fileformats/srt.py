@@ -1,8 +1,10 @@
 import logging
+from typing import Callable, Iterable, Iterator, List, Tuple
 
 from typing_extensions import Self
 
 from ..exceptions import MalformedFile
+from ..file import PathType
 
 REAL_FILM_FPS = 24.0
 NTSC_PROG_FPS = 24000.0 / 1001
@@ -13,24 +15,24 @@ PAL_VIDEO_FPS = 30.0
 DEFAULT_ENCODING = "utf-8-sig"
 
 
-def ntsc_to_pal(num):
+def ntsc_to_pal(num) -> float:
     return num * NTSC_PROG_FPS / PAL_PROG_FPS
 
 
-def pal_to_ntsc(num):
+def pal_to_ntsc(num) -> float:
     return num * PAL_PROG_FPS / NTSC_PROG_FPS
 
 
-def film_to_ntsc(num):
+def film_to_ntsc(num) -> float:
     return num * REAL_FILM_FPS / NTSC_PROG_FPS
 
 
-def to_msec(string):
-    h, m, s, ms = (int(i) for i in string.replace(",", ":").replace(".", ":").split(":"))
+def to_msec(s: str) -> int:
+    h, m, s, ms = (int(i) for i in s.replace(",", ":").replace(".", ":").split(":"))
     return (h * 60 * 60 + m * 60 + s) * 1000 + ms
 
 
-def to_srt_time(t):
+def to_srt_time(t: int) -> str:
     r, ms = divmod(t, 1000)
     r, s = divmod(r, 60)
     h, m = divmod(r, 60)
@@ -38,19 +40,19 @@ def to_srt_time(t):
 
 
 class Subtitle:
-    def __init__(self):
+    def __init__(self) -> None:
         self.num = 0
         self.start = 0
         self.end = 0
-        self.lines = []
+        self.lines: List[str] = []
 
-    def get_times(self):
+    def get_times(self) -> Tuple[str, str]:
         return to_srt_time(self.start), to_srt_time(self.end)
 
-    def set_times(self, start, end):
+    def set_times(self, start: str, end: str) -> None:
         self.start, self.end = to_msec(start), to_msec(end)
 
-    def append(self, line):
+    def append(self, line: str) -> None:
         self.lines.append(line)
 
 
@@ -58,7 +60,9 @@ class SRTFile:
     nl = "\n"
     sep = " --> "
 
-    def __init__(self, filename, mode="r", encoding=DEFAULT_ENCODING, overwrite_index=False):
+    def __init__(
+        self, filename: PathType, mode: str = "r", encoding: str = DEFAULT_ENCODING, overwrite_index: bool = False
+    ) -> None:
         self.state = 0
         self.linenum = 0
         self.sub_num = 0
@@ -71,10 +75,10 @@ class SRTFile:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def close(self):
+    def close(self) -> None:
         self.fp.close()
 
-    def write_subtitle(self, subtitle):
+    def write_subtitle(self, subtitle: Subtitle) -> None:
         start, end = subtitle.get_times()
         if self.overwrite_index:
             self.fp.write(str(self.sub_num) + self.nl)
@@ -87,31 +91,31 @@ class SRTFile:
         self.fp.write(self.nl)
         self.sub_num += 1
 
-    def read_line(self):
+    def read_line(self) -> None:
         self.linenum += 1
         line = next(self.fp).rstrip()
 
-        if self.state == 0:
-            try:
+        try:
+            if self.state == 0:
                 self.sub.num = int(line)
-            except ValueError:
-                raise MalformedFile(f"Error in line {self.linenum}: srt malformed: {line}")
-            self.state = 1
-        elif self.state == 1:
-            start, end = line.split(self.sep)
-            self.sub.set_times(start, end)
-            self.state = 2
-        elif self.state == 2:
-            if line == "":
-                self.state = 0
-            else:
-                self.sub.append(line)
+                self.state = 1
+            elif self.state == 1:
+                start, end = line.split(self.sep)
+                self.sub.set_times(start, end)
+                self.state = 2
+            elif self.state == 2:
+                if line == "":
+                    self.state = 0
+                else:
+                    self.sub.append(line)
+        except ValueError:
+            raise MalformedFile(f"Error in line {self.linenum}: srt malformed: {line!r}")
 
-    def read_subtitle(self):
+    def read_subtitle(self) -> Subtitle:
         self.sub = Subtitle()
         self.read_line()
         while self.state != 0:
-            self.read_line()  # can throw, and leave incomplete subtitle in buffer (eg. if file doesnt end in newline)
+            self.read_line()  # can throw, and leave incomplete subtitle in buffer (eg. if file doesn't end in newline)
         return self.sub
 
     def __iter__(self):
@@ -120,19 +124,21 @@ class SRTFile:
         else:
             raise ValueError("I/O operation on closed file.")
 
-    def __next__(self):
+    def __next__(self) -> Subtitle:
         return self.read_subtitle()
 
 
-def transform(infile, outfile, callback, encoding=DEFAULT_ENCODING):
+def transform(
+    infile: PathType, outfile: PathType, callback: Callable[[Subtitle], Subtitle], encoding: str = DEFAULT_ENCODING
+) -> None:
     with SRTFile(infile, "r", encoding) as fi, SRTFile(outfile, "w", encoding) as fo:
         for subtitle in fi:
             subtitle = callback(subtitle)
             fo.write_subtitle(subtitle)
 
 
-def merge(srtlines, lim):
-    ret = []
+def merge(srtlines: Iterable[str], lim: str) -> List[str]:
+    ret: List[str] = []
     for line in srtlines:
         if line.startswith(lim):
             ret.append(line[len(lim) :])
@@ -144,10 +150,10 @@ def merge(srtlines, lim):
     return ret
 
 
-def srt2txt(srt_fp):
+def srt2txt(srt_fp) -> Iterator[str]:
     lim = "- "
     pos = 0
-    lines = []
+    lines: List[str] = []
 
     while True:
         if pos >= len(lines):
@@ -159,7 +165,7 @@ def srt2txt(srt_fp):
         yield ret
 
 
-def compare_srt_and_txt(srt_file, txt_file):
+def compare_srt_and_txt(srt_file, txt_file) -> Iterator[Tuple[str, str]]:
     with SRTFile(srt_file, "r", encoding="utf-8-sig") as srt, open(txt_file, encoding="utf-8-sig") as txt:
         srtiter = srt2txt(srt)
 

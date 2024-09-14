@@ -139,8 +139,8 @@ class Rar:
     def commandline(self, cmd: str) -> None:
         self.cmd = cmd.strip()
 
-    def _execute(self, args: str) -> str:
-        cmd = f"{self.exe} {args}"
+    def _execute(self, args: List[str]) -> str:
+        cmd = [self.exe, *args]
         try:
             ret = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
         except subprocess.CalledProcessError as e:
@@ -152,10 +152,7 @@ class Rar:
         return force_decode(ret)
 
     def test(self, password: str = "-") -> None:  # nosec
-        self._execute(f't -p{password} "{self.archive}"')
-
-    def get_files_str(self) -> str:
-        return surrounding_join(" ", self.filelist, '"', '"')
+        self._execute(["t", f"-p{password}", self.archive])
 
     def get_flag_str(self) -> str:
         return surrounding_join(" ", [value.name for value in self.flags.values() if value.value is True], "-", "")
@@ -166,7 +163,7 @@ class Rar:
         )
 
     def _get_args(self, command: str) -> str:
-        return f'{command} {self.get_flag_str()} {self.get_options_str()} {self.cmd} "{self.archive}" {self.get_files_str()}'
+        return [command, self.get_flag_str(), self.get_options_str(), self.cmd, self.archive, *self.filelist]
 
     def create(self) -> None:
         self._execute(self._get_args("a"))

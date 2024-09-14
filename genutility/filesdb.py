@@ -1,13 +1,13 @@
 import logging
+import os
 import os.path
 import sqlite3
 import warnings
 from collections import UserDict
 from functools import lru_cache
 from itertools import chain, repeat
-from os import fspath
 from pathlib import Path
-from typing import Any, Callable, Collection, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar
+from typing import Any, Callable, Collection, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar, Union
 
 from tls_property import tls_property
 from typing_extensions import Self
@@ -31,7 +31,7 @@ class Keys(UserDict):
 class GenericDb:
     order_col = "_order"
 
-    def __init__(self, dbpath: str, table: str, debug: bool = True, allow_add: bool = True) -> None:
+    def __init__(self, dbpath: Union[str, os.PathLike], table: str, debug: bool = True, allow_add: bool = True) -> None:
         if sqlite3.sqlite_version_info < (3, 35, 0):
             warnings.warn(
                 f"SQLite version 3.35.0 or higher required for some features (current version {sqlite3.sqlite_version}). ",
@@ -76,6 +76,8 @@ class GenericDb:
 
     @tls_property
     def connection(self):
+        if os.fspath(self.dbpath) != ":memory:" and not Path(self.dbpath).is_file():
+            raise FileNotFoundError(self.dbpath)
         return sqlite3.connect(self.dbpath, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 
     @tls_property
@@ -432,7 +434,7 @@ class GenericFileDb(GenericDb):
         """
 
         stats = path.stat()
-        return self.get_latest(fspath(path), stats.st_size, stats.st_mtime_ns, ignore_null=True, only=only, no=no)
+        return self.get_latest(os.fspath(path), stats.st_size, stats.st_mtime_ns, ignore_null=True, only=only, no=no)
 
     def add(
         self, path: EntryType, derived: Optional[Dict[str, Any]] = None, commit: bool = True, replace: bool = True
@@ -444,7 +446,7 @@ class GenericFileDb(GenericDb):
 
         derived = derived or {}
         stats = path.stat()
-        mandatory = (fspath(path), stats.st_size, stats.st_mtime_ns)
+        mandatory = (os.fspath(path), stats.st_size, stats.st_mtime_ns)
         self._add_file(mandatory, derived, replace)
         if commit:
             self.commit()
@@ -559,7 +561,7 @@ def uint64_from_bytes(blob: bytes) -> int:
 
 
 class FileDbWithId(GenericFileDb):
-    def __init__(self, dbpath: str, table: str, debug: bool = True, allow_add: bool = True) -> None:
+    def __init__(self, dbpath: Union[str, os.PathLike], table: str, debug: bool = True, allow_add: bool = True) -> None:
         GenericFileDb.__init__(self, dbpath, table, debug, allow_add)
         sqlite3.register_adapter(Uint64, uint64_to_bytes)
         sqlite3.register_converter("uint64", uint64_from_bytes)
@@ -596,7 +598,7 @@ class FileDbWithId(GenericFileDb):
         assert stats.st_ino != 0 and stats.st_dev != 0
         device = Uint64(stats.st_dev).to_bytes()
         inode = Uint64(stats.st_ino).to_bytes()
-        mandatory = (fspath(path), inode, device, stats.st_size, stats.st_mtime_ns)
+        mandatory = (os.fspath(path), inode, device, stats.st_size, stats.st_mtime_ns)
         return self._get_latest(mandatory, ignore_null=True, only=only, no=no)
 
     def add(
@@ -616,7 +618,7 @@ class FileDbWithId(GenericFileDb):
         device = Uint64(stats.st_dev)
         inode = Uint64(stats.st_ino)
 
-        mandatory = (fspath(path), inode, device, stats.st_size, stats.st_mtime_ns)
+        mandatory = (os.fspath(path), inode, device, stats.st_size, stats.st_mtime_ns)
         self._add_file(mandatory, derived, replace)
         if commit:
             self.commit()

@@ -1,7 +1,7 @@
 aiohttp>=3.7.4
 aioresponses>=0.7.2
 av>=8.0; python_version>='3.8'
-ctypes-windows-sdk>=0.0.14; sys_platform=='win32'
+ctypes-windows-sdk>=0.0.15; sys_platform=='win32'
 flask>=0.12.3
 gensim>=4.0.0
 gmpy2
@@ -18,7 +18,7 @@ packaging
 pandas
 pdfminer
 Pillow>=9.2.0
-PyPDF2>=3.0.0
+pypdf>=3.1.0
 pywin32; sys_platform=='win32'
 requests
 requests-mock

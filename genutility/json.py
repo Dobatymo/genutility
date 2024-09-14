@@ -15,6 +15,7 @@ from typing_extensions import TypedDict  # typing.TypedDict is available in Pyth
 from .atomic import sopen
 from .datetime import datetime_from_utc_timestamp_ms, now
 from .file import copen
+from .string import truncate
 
 PathStr = Union[Path, str]
 JsonDict = Dict[str, Any]
@@ -286,7 +287,7 @@ with open("{file}", "r") as fr:
 
         except json.JSONDecodeError as e:
             e.lineno = linenum
-            logger.error("JSON Lines parse error in line %s: '%r'", linenum, line)
+            logger.error("JSON Lines parse error in line %s: %r", linenum, truncate(line, 100))
             raise
 
     def __iter__(self) -> Iterator:

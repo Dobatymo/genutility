@@ -3,7 +3,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Iterator, Optional, Union
 
-from PyPDF2 import PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter
 
 PathType = Union[PathLike, str]
 

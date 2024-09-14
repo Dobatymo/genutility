@@ -39,7 +39,14 @@ jobs:
       run: |
         python -m pip install -U pip wheel
         python -m pip install -r requirements-test.txt
+    - name: Install dependencies
+      if: matrix.python-version == '3.7'
+      run: |
         python -m nltk.downloader punkt
+    - name: Install dependencies
+      if: matrix.python-version != '3.7'
+      run: |
+        python -m nltk.downloader punkt_tab
     - name: Run tests
       run: |
         python -OO -m unittest discover -v genutility.tests "*.py"
@@ -55,8 +62,8 @@ jobs:
         python-version: 3.8
     - name: Build dists
       run: |
-        python -m pip install wheel
-        python setup.py sdist bdist_wheel
+        python -m pip install wheel build
+        python -m build
     - name: Publish a Python distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

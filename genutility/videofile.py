@@ -95,6 +95,8 @@ class CvVideo(VideoBase):
             path = fspath(path)
 
         self.cap = self.cv2.VideoCapture(path)
+        if not self.cap.isOpened():
+            raise ValueError("Could not open file")
         logger.debug("Reading video using backend: %s", self.cap.getBackendName())
 
         frame_width = int(self.cap.get(self.cv2.CAP_PROP_FRAME_WIDTH))
@@ -208,7 +210,6 @@ class AvVideo(VideoBase):
         "encoded_frame_count",
         "format",
         "framerate",
-        "gop_size",
         "has_b_frames",
         "height",
         "pix_fmt",
@@ -217,7 +218,7 @@ class AvVideo(VideoBase):
         "width",
     ]
 
-    def __init__(self, path: PathLike, videostream: int = 0) -> None:
+    def __init__(self, path: Union[str, PathLike], videostream: int = 0) -> None:
         self.av = self.import_backend()
 
         if isinstance(path, PathLike):
