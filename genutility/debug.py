@@ -1,7 +1,12 @@
 import logging
 from collections import defaultdict
 from functools import wraps
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Iterable, Optional, TypeVar
+
+from typing_extensions import ParamSpec
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
 def printr(*objs: Any, end: str = "\n", depth: int = 0) -> None:
@@ -105,13 +110,13 @@ def args_str(args: tuple, kwargs: dict, maxlen: Optional[int] = 20, app: str = "
             return ""
 
 
-def log_call(s: str) -> Callable:
+def log_call(s: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Decorator to log function calls using template string `s`.
     Available format fields are: 'name', 'args' and 'kwargs'.
     """
 
-    def dec(func: Callable) -> Callable:
-        def inner(*args, **kwargs):
+    def dec(func: Callable[P, T]) -> Callable[P, T]:
+        def inner(*args: P.args, **kwargs: P.kwargs) -> T:
             logging.debug(s.format(name=func.__name__, args=args, kwargs=kwargs))
             return func(*args, **kwargs)
 
@@ -120,11 +125,11 @@ def log_call(s: str) -> Callable:
     return dec
 
 
-def log_wrap_call(func: Callable) -> Callable:
+def log_wrap_call(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator which logs all calls to `func` with all arguments."""
 
     @wraps(func)
-    def inner(*args, **kwargs):
+    def inner(*args: P.args, **kwargs: P.kwargs) -> T:
         logging.debug("START %s(%s)", func.__name__, args_str(args, kwargs))
 
         try:
@@ -139,11 +144,11 @@ def log_wrap_call(func: Callable) -> Callable:
     return inner
 
 
-def log_methodcall(func: Callable) -> Callable:
+def log_methodcall(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator to log method calls with arguments."""
 
     @wraps(func)
-    def inner(self, *args, **kwargs):
+    def inner(self, *args: P.args, **kwargs: P.kwargs) -> T:
         classname = self.__class__.__name__
         # classname = type(self).__name__ ?
         logging.debug("%s.%s(%s)", classname, func.__name__, args_str(args, kwargs))
@@ -152,11 +157,11 @@ def log_methodcall(func: Callable) -> Callable:
     return inner
 
 
-def log_methodcall_result(func: Callable) -> Callable:
+def log_methodcall_result(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator to log method calls with arguments and results."""
 
     @wraps(func)
-    def inner(self, *args, **kwargs):
+    def inner(self, *args: P.args, **kwargs: P.kwargs) -> T:
         classname = self.__class__.__name__
         # classname = type(self).__name__ ?
         logging.debug("%s.%s(%s)", classname, func.__name__, args_str(args, kwargs))

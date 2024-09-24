@@ -1,11 +1,12 @@
 from collections import defaultdict
 from datetime import timedelta
 from time import perf_counter, sleep
-from typing import Any, Callable, DefaultDict, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
+from typing import Callable, DefaultDict, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
 
-from typing_extensions import Self
+from typing_extensions import ParamSpec, Self
 
 T = TypeVar("T")
+P = ParamSpec("P")
 
 
 def iter_timer(it: Iterator[T]) -> Iterator[Tuple[T, float]]:
@@ -150,7 +151,7 @@ class TimeIt:
         self.results: DefaultDict[Hashable, List[float]] = defaultdict(list)
         self.starts: Dict[Hashable, DeltaTime] = {}
 
-    def __call__(self, key: Hashable, func: Callable[..., T], *args: Any, **kwargs: Any) -> T:
+    def __call__(self, key: Hashable, func: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
         with MeasureTime() as t:
             ret = func(*args, **kwargs)
         self.results[key].append(t.get())

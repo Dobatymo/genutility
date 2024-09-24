@@ -6,6 +6,8 @@ from sys import stdout
 from time import sleep
 from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, TextIO, TypeVar, Union
 
+from typing_extensions import ParamSpec
+
 from ._func import rename, renameobj  # noqa: F401
 from .iter import nonstriter, retrier
 from .typing import ExceptionsType
@@ -13,6 +15,7 @@ from .typing import ExceptionsType
 T = TypeVar("T")
 U = TypeVar("U")
 It = TypeVar("It", bound=Iterable)
+P = ParamSpec("P")
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +133,7 @@ def recmap(func: Callable, iterable: Iterable[Any]) -> list:
     return outermap(list, deepmap(func, iterable))
 
 
-def call_repeated(num: int) -> Callable[[Callable], Callable]:
+def call_repeated(num: int) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Function decorator to call decorated function `num` times with the same arguments.
     Returns the results of the last call.
     """
@@ -138,9 +141,9 @@ def call_repeated(num: int) -> Callable[[Callable], Callable]:
     if num < 1:
         raise ValueError("num must be larger than 0")
 
-    def dec(func):
+    def dec(func: Callable[P, T]) -> Callable[P, T]:
         @wraps(func)
-        def inner(*args, **kwargs):
+        def inner(*args: P.args, **kwargs: P.kwargs) -> T:
             last = None
             for _i in range(num):
                 last = func(*args, **kwargs)
@@ -151,11 +154,11 @@ def call_repeated(num: int) -> Callable[[Callable], Callable]:
     return dec
 
 
-def print_return_type(func: Callable, file: TextIO = stdout) -> Callable:
+def print_return_type(func: Callable[P, T], file: TextIO = stdout) -> Callable[P, T]:
     """Wraps function to print the return type after calling."""
 
     @wraps(func)
-    def inner(*args, **kwargs):
+    def inner(*args: P.args, **kwargs: P.kwargs) -> T:
         ret = func(*args, **kwargs)
         print(type(ret), file=file)
         return ret
@@ -204,7 +207,7 @@ def retry(
 
 
 def default_except(
-    exceptions: ExceptionsType, default: T, func: Callable[..., U], *args: Any, **kwargs: Any
+    exceptions: ExceptionsType, default: T, func: Callable[P, U], *args: P.args, **kwargs: P.kwargs
 ) -> Union[T, U]:
     """Call `func(*args, **kwargs)` and turn `exceptions` into `default`."""
 
@@ -232,14 +235,14 @@ class CustomCache:
     b = func(2) # cache loaded, b == 1
     """
 
-    def __init__(self, reader: Callable, writer: Callable) -> None:
+    def __init__(self, reader: Callable[[str], T], writer: Callable[[T, str], None]) -> None:
         self.reader = reader
         self.writer = writer
 
-    def cache(self, path: str) -> Callable:
-        def dec(func: Callable) -> Callable:
+    def cache(self, path: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
+        def dec(func: Callable[P, T]) -> Callable[P, T]:
             @wraps(func)
-            def inner(*args: Any, **kwargs: Any) -> Any:
+            def inner(*args: P.args, **kwargs: P.kwargs) -> T:
                 if os.path.exists(path):
                     logger.debug("Loading object from cache %s", path)
                     return self.reader(path)
@@ -255,7 +258,7 @@ class CustomCache:
 
 
 class RunScheduled:
-    def __init__(self, delta: timedelta, func: Callable):
+    def __init__(self, delta: timedelta, func: Callable) -> None:
         self.delta = delta
         self.func = func
         self.lastrun: Optional[datetime] = None

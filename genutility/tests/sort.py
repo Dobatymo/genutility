@@ -71,7 +71,7 @@ class SortTest(MyTestCase):
     def test_external_sort(self):
         seq = list(map(str, range(10)))
 
-        for i, max_lines in product(range(5), range(10)):
+        for _i, max_lines in product(range(5), range(10)):
             input = randomized(seq)
             result = external_sort(input, "testtemp/external_sort_{}.gz", "t", int, max_lines)
             self.assertIterEqual(sorted(input), result, f"Failed for {input}, {max_lines}")

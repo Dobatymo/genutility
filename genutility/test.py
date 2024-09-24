@@ -8,12 +8,14 @@ from unittest import TestCase
 from unittest.result import TestResult
 from unittest.runner import TextTestRunner
 
+from typing_extensions import ParamSpec
+
 from .file import equal_files
 from .iter import progress
 
 T = TypeVar("T")
 U = TypeVar("U")
-
+P = ParamSpec("P")
 
 anullcontext = nullcontext()
 
@@ -268,10 +270,10 @@ def parametrize_starproduct(*args_list: Iterable[Iterable]) -> Callable[[Callabl
     return decorator
 
 
-def repeat(number: int, verbose: bool = False) -> Callable[[Callable], Callable]:
-    def decorator(func):
+def repeat(number: int, verbose: bool = False) -> Callable[[Callable[P, Any]], Callable[P, None]]:
+    def decorator(func: Callable[P, Any]) -> Callable[P, None]:
         @wraps(func)
-        def inner(self, *args, **kwargs):
+        def inner(self, *args: P.args, **kwargs: P.kwargs) -> None:
             for _i in progress(range(number), disable=not verbose):
                 if func(self, *args, **kwargs) is not None:  # no self.subTest(str(i))
                     raise AssertionError

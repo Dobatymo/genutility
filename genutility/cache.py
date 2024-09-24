@@ -4,12 +4,17 @@ import os.path
 from datetime import timedelta
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TypeVar
+
+from typing_extensions import ParamSpec
 
 from .datetime import now
 from .filesystem import mdatetime
 from .object import args_to_key
 from .time import MeasureTime
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +33,7 @@ def cache(
     return_cached: bool = False,
     file_ext: Optional[str] = None,
     cached_only: bool = False,
-) -> Callable[[Callable], Callable]:
+) -> Callable[[Callable[P, T]], Callable[P, Any]]:
     """Decorator to cache function calls. Doesn't take function arguments into regard.
     It's using `pickle` to deserialize the data. So don't use it with untrusted inputs.
 
@@ -100,9 +105,9 @@ def cache(
     else:
         _duration = duration
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[P, T]) -> Callable[P, Any]:
         @wraps(func)
-        def inner(*args: Any, **kwargs: Any) -> Any:
+        def inner(*args: P.args, **kwargs: P.kwargs) -> Any:
             strpath = os.fspath(path).format_map(_serializer_kwargs)
 
             if not ignoreargs:
