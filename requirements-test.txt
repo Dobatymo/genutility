@@ -6,6 +6,7 @@ flask>=0.12.3
 gensim>=4.0.0
 gmpy2
 hypothesis
+importlib-metadata
 jsonschema
 keras
 mistune<2
