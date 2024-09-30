@@ -1,4 +1,4 @@
-from typing import Any, Container, Hashable, Iterable, Iterator, Optional, Sequence, Tuple, Type, TypeVar, Union
+from typing import Any, Container, Hashable, Iterable, Optional, Sequence, Sized, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Protocol  # typing.Protocol is available in Python 3.8+
 
@@ -11,10 +11,8 @@ class HashableContainer(Protocol[T_co], Hashable, Container[T_co]):
     pass
 
 
-class SizedIterable(Protocol[T_co]):
-    def __len__(self) -> int: ...
-
-    def __iter__(self) -> Iterator[T_co]: ...
+class SizedIterable(Protocol[T_co], Sized, Iterable[T_co]):
+    pass
 
 
 class Comparable(Protocol):

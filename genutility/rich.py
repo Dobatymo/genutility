@@ -1,10 +1,12 @@
 import logging
+import re
 import sys
 from string import Formatter
 from traceback import format_exception
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Union
+from typing import IO, Any, Callable, Dict, Iterable, List, Optional, Sequence, Union
 
 from rich.console import Console, Group, JustifyMethod, OverflowMethod, Style
+from rich.highlighter import Highlighter
 from rich.markdown import Markdown
 from rich.progress import BarColumn
 from rich.progress import Progress as _RichProgress
@@ -19,6 +21,7 @@ from ._files import PathType
 from .callbacks import BaseTask
 from .callbacks import Progress as _Progress
 from .file import copen
+from .typing import SizedIterable
 
 logger = logging.getLogger(__name__)
 
@@ -78,11 +81,18 @@ class Task(BaseTask):
         description = description or "Working..."
         self.task_id = self.progress.add_task(description, total=total, **fields)
 
+    @property
+    def description(self) -> str:
+        return self.progress._tasks[self.task_id].description
+
+    def remove(self) -> None:
+        self.progress.remove_task(self.task_id)
+
     def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.progress.remove_task(self.task_id)
+        self.remove()
 
     def advance(self, delta: float) -> None:
         self.progress.advance(self.task_id, advance=delta)
@@ -112,6 +122,7 @@ class Progress(_Progress):
         sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
         total: Optional[float] = None,
         description: Optional[str] = None,
+        transient: bool = False,
         **fields: Any,
     ) -> Iterable[ProgressType]:
         description = description or "Working..."
@@ -119,11 +130,12 @@ class Progress(_Progress):
         try:
             yield from self.progress.track(sequence, task_id=task_id)
         finally:
-            self.progress.remove_task(task_id)
+            if transient:
+                self.progress.remove_task(task_id)
 
     def track_auto(
         self,
-        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        sequence: SizedIterable[ProgressType],
         description: Optional[str] = None,
         **fields: Any,
     ) -> Iterable[ProgressType]:
@@ -213,6 +225,7 @@ class RichAriaProgress:
 
 
 class StdoutFile:
+
     def __init__(
         self,
         console: Optional[Console] = None,
@@ -241,13 +254,16 @@ class StdoutFile:
         assert mode in ("wt", "at", "xt")
         encoding = encoding or "utf-8"
 
-        if path:
-            self.fp = copen(path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel)
+        if path is not None:
+            self.fp: Optional[IO] = copen(
+                path, mode, encoding=encoding, errors=errors, newline=newline, compresslevel=compresslevel
+            )
 
             def _write(text: str) -> None:
                 self.fp.write(text)
 
         else:
+            assert console is not None  ## for mypy
             self.fp = None
 
             def _write(text: str) -> None:
@@ -293,7 +309,7 @@ class StdoutFileNoStyle(StdoutFile):
         super().__init__(*args, **_kwargs)
 
 
-class MarkdownHighlighter:
+class MarkdownHighlighter(Highlighter):
     def __call__(self, text: Union[str, Text]) -> Union[Text, Markdown]:
         if isinstance(text, str):
             return Markdown(text)
@@ -301,6 +317,38 @@ class MarkdownHighlighter:
             return text
         else:
             raise TypeError(f"str or Text instance required, not {text!r}")
+
+    def highlight(self, text: Text) -> None:
+        """Not called"""
+
+
+class StripAnsiHighlighter(Highlighter):
+    # https://stackoverflow.com/a/14693789
+    ansi_escape = re.compile(
+        r"""
+        \x1B  # ESC
+        (?:   # 7-bit C1 Fe (except CSI)
+            [@-Z\\-_]
+        |     # or [ for CSI, followed by a control sequence
+            \[
+            [0-?]*  # Parameter bytes
+            [ -/]*  # Intermediate bytes
+            [@-~]   # Final byte
+        )
+    """,
+        re.VERBOSE,
+    )
+
+    def __call__(self, text: Union[str, Text]) -> Text:
+        if isinstance(text, str):
+            return Text(self.ansi_escape.sub("", text))
+        elif isinstance(text, Text):
+            return text
+        else:
+            raise TypeError(f"str or Text instance required, not {text!r}")
+
+    def highlight(self, text: Text) -> None:
+        """Not called"""
 
 
 if __name__ == "__main__":
