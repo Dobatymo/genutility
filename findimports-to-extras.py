@@ -9,7 +9,7 @@ global_modules = ["typing_extensions", "cwinsdk"]
 modmap = {
     "OpenSSL": "pyOpenSSL>=17.5.0",
     "PIL": "Pillow>=9.2.0",
-    "pypdf": "pypdf>=3.1.0",
+    "pypdf": "pypdf>=3.1.0,!=5.0.0",
     "aiohttp": "aiohttp>=3.7.4",
     "aioresponses": "aioresponses>=0.7.2",
     "av": "av>=8.0; python_version>='3.8'",

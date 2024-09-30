@@ -30,7 +30,7 @@ pyarrow
 pymediainfo
 pymongo
 pyOpenSSL>=17.5.0
-pypdf>=3.1.0
+pypdf>=3.1.0,!=5.0.0
 pyspark>=3.0.0
 python-pptx
 pywin32; sys_platform=='win32'
