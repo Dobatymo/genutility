@@ -1,8 +1,8 @@
-from os import PathLike, entrysuffix, fspath, scandir, wrap_text
+from os import PathLike, fspath, scandir
 from typing import IO, Callable, Dict, Iterator, Optional, Tuple, Union
 
-from ._files import PathType
-from .file import _check_arguments, _stripmode, copen
+from ._files import PathType, entrysuffix
+from .file import _check_arguments, _stripmode, copen, wrap_text
 
 
 def iter_zip(
