@@ -139,7 +139,7 @@ def fpar(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple
     elif version == 1:
         (entry_count,) = p.unpack(">L", 4)
 
-    entries = p.unpack(f">{'HL'*entry_count}", entry_count * 6)
+    entries = p.unpack(f">{'HL' * entry_count}", entry_count * 6)
     return {
         "item_ID": item_ID,
         "packet_payload_size": packet_payload_size,
@@ -236,9 +236,9 @@ def ctts(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple
     (entry_count,) = p.unpack(">L", 4)
 
     if version == 0:
-        entries = p.unpack(f">{entry_count*2}L", entry_count * 2 * 4)
+        entries = p.unpack(f">{entry_count * 2}L", entry_count * 2 * 4)
     elif version == 1:
-        entries = p.unpack(f">{'Ll'*entry_count}", entry_count * 2 * 4)
+        entries = p.unpack(f">{'Ll' * entry_count}", entry_count * 2 * 4)
     else:
         assert False, f"Unsupported version: {version}"
 
@@ -251,7 +251,7 @@ def stsc(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple
     assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
-    entries = p.unpack(f">{entry_count*3}L", entry_count * 3 * 4)
+    entries = p.unpack(f">{entry_count * 3}L", entry_count * 3 * 4)
     return {"sample_to_chunk_entries": named_batch(entries, 3, SampleToChunkEntry)}, p.delta
 
 
@@ -261,7 +261,7 @@ def stts(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple
     assert version == 0, f"Unsupported version: {version}"
     p = BoxParser(fin, size)
     (entry_count,) = p.unpack(">L", 4)
-    entries = p.unpack(f">{entry_count*2}L", entry_count * 2 * 4)
+    entries = p.unpack(f">{entry_count * 2}L", entry_count * 2 * 4)
     return {"time_to_samples_entries": named_batch(entries, 2, TimeToSampleEntry)}, p.delta
 
 
@@ -432,7 +432,7 @@ def iloc(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple
 
     ret["items"] = []
 
-    for i in range(item_count):
+    for _i in range(item_count):
         if version < 2:
             (item_ID,) = p.unpack(">H", 2)
         elif version == 2:
@@ -456,12 +456,12 @@ def iloc(fin: BufferedBinaryIoT, size: int, version: int, flags: bytes) -> Tuple
                 size_to_format_char(index_size) + size_to_format_char(offset_size) + size_to_format_char(length_size)
             )
             entries = p.unpack(
-                f">{'{fmt_chars}'*extent_count}", (index_size + offset_size + length_size) * extent_count
+                f">{'{fmt_chars}' * extent_count}", (index_size + offset_size + length_size) * extent_count
             )
             entries = named_batch(entries, 3, ItemLocationEntryWithIndex)
         else:
             fmt_chars = size_to_format_char(offset_size) + size_to_format_char(length_size)
-            entries = p.unpack(f">{fmt_chars*extent_count}", (offset_size + length_size) * extent_count)
+            entries = p.unpack(f">{fmt_chars * extent_count}", (offset_size + length_size) * extent_count)
             entries = named_batch(entries, 2, ItemLocationEntry)
 
         ret["items"].append(

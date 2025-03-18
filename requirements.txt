@@ -25,6 +25,7 @@ pandas
 pdfminer
 piexif
 Pillow>=9.2.0
+polars>=1.18; python_version>='3.9'
 py7zr>=0.20.2
 pyarrow
 pymediainfo
@@ -41,6 +42,7 @@ rich
 ruamel.yaml
 scikit-learn
 scipy<1.13
+scrapy
 setuptools
 simple-salesforce>=1.1.0
 simplejson
@@ -54,6 +56,7 @@ torch
 tqdm
 twisted
 typing-extensions>=4.0.0
+unqlite
 werkzeug>=0.11.11
 wmi; sys_platform=='win32'
 wxasync

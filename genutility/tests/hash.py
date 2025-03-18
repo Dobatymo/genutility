@@ -1,4 +1,4 @@
-from hashlib import algorithms_available
+import hashlib
 from itertools import cycle, islice
 from pathlib import Path
 from unittest import skipIf
@@ -13,6 +13,15 @@ from genutility.hash import (
     sha1_hash_file,
 )
 from genutility.test import MyTestCase, parametrize
+
+try:
+    # `"md4" not in hashlib.algorithms_available` seems not to work very consistently
+    # https://github.com/python/cpython/issues/91257
+    hashlib.new("md4")  # nosec: B324
+except ValueError:
+    MD4_NOT_AVAILABLE = True
+else:
+    MD4_NOT_AVAILABLE = False
 
 
 class HashTest(MyTestCase):
@@ -36,7 +45,7 @@ class HashTest(MyTestCase):
         result = hashfunc(path).hexdigest()
         self.assertEqual(truth, result)
 
-    @skipIf("md4" not in algorithms_available, "hashlib built without md4")
+    @skipIf(MD4_NOT_AVAILABLE, "hashlib built without md4")
     @parametrize(
         (Path("testtemp/hash.bin"), "d79e1c308aa5bbcdeea8ed63df412da9"),  # pragma: allowlist secret
     )
@@ -47,7 +56,7 @@ class HashTest(MyTestCase):
         result = ed2k_hash_file_v2(path)
         self.assertEqual(truth, result)
 
-    @skipIf("md4" not in algorithms_available, "hashlib built without md4")
+    @skipIf(MD4_NOT_AVAILABLE, "hashlib built without md4")
     @parametrize(
         (Path("testtemp/hash-ed2k-chunk.bin"), "5971de2e3a4dd3f2ed548da9c87c4491"),  # pragma: allowlist secret
     )
@@ -55,7 +64,7 @@ class HashTest(MyTestCase):
         result = ed2k_hash_file_v1(path)
         self.assertEqual(truth, result)
 
-    @skipIf("md4" not in algorithms_available, "hashlib built without md4")
+    @skipIf(MD4_NOT_AVAILABLE, "hashlib built without md4")
     @parametrize(
         (Path("testtemp/hash-ed2k-chunk.bin"), "621ed031c896a06e0dbc2c83df1ff9ea"),  # pragma: allowlist secret
     )

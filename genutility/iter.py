@@ -150,7 +150,7 @@ def progress(
                     extra = extra_info_callback(total, length)
                     extra = f" [{extra}]"
                 print(
-                    f"{total}{lstr}, running for {int(duration)} seconds ({total/duration:0.2e}/s){extra}.",
+                    f"{total}{lstr}, running for {int(duration)} seconds ({total / duration:0.2e}/s){extra}.",
                     end="\r",
                     file=file,
                 )
@@ -158,7 +158,7 @@ def progress(
         duration = last - start
         if duration > 0:
             print(
-                f"Unsafely aborted after reading {total}{lstr} in {int(duration)} seconds ({total/duration:0.2e}/s).",
+                f"Unsafely aborted after reading {total}{lstr} in {int(duration)} seconds ({total / duration:0.2e}/s).",
                 end=end,
                 file=file,
             )
@@ -168,7 +168,7 @@ def progress(
     else:
         duration = last - start
         if duration > 0:
-            print(f"Finished {total} in {int(duration)} seconds ({total/duration:0.2e}/s).", end=end, file=file)
+            print(f"Finished {total} in {int(duration)} seconds ({total / duration:0.2e}/s).", end=end, file=file)
         else:
             print(f"Finished {total} in {int(duration)} seconds.", end=end, file=file)
 

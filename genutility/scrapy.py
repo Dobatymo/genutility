@@ -61,7 +61,7 @@ def print_progress(spider: scrapy.Spider) -> None:
 
     out = (
         f"{deltaseconds} requests: {requests:07d}, queue: {queue:07d}, items: {items:07d}, files: {files:07d}"
-        f", warn/err: {warnings:05d}/{errors:05d}, cache: {cachehit:07d}/{cachehit+cachemiss:07d}"
+        f", warn/err: {warnings:05d}/{errors:05d}, cache: {cachehit:07d}/{cachehit + cachemiss:07d}"
     )
     print_terminal_progress_line(out)
 

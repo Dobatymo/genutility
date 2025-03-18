@@ -12,6 +12,8 @@ def iter_zip(
     errors: Optional[str] = None,
     newline: Optional[str] = None,
     password: Optional[bytes] = None,
+    sort: bool = False,
+    sort_key: Optional[Callable] = None,
 ) -> Iterator[Tuple[str, IO]]:
     """
     Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -25,7 +27,11 @@ def iter_zip(
     newmode = _stripmode(mode)
 
     with ZipFile(file, newmode) as zf:
-        for zi in zf.infolist():
+        il = zf.infolist()
+        if sort:
+            il = sorted(il, key=sort_key)
+
+        for zi in il:
             if not zi.is_dir():
                 with zf.open(zi, newmode, password) as bf:
                     yield zi.filename, wrap_text(bf, mode, encoding, errors, newline)

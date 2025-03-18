@@ -4,6 +4,17 @@ requires = [
   "setuptools",
 ]
 
+[project]
+requires-python = ">=3.7"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+]
+
 [tool.black]
 line-length = 120
 
@@ -37,6 +48,7 @@ known_third_party = [
   "numba",
   "numpy",
   "pandas",
+  "polars",
   "rasa",
   "rich",
   "scipy",

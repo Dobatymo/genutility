@@ -46,7 +46,7 @@ class progress_content:
                     self.last = current
                     duration = current - self.start
                     print(
-                        f"{self.total}{self.lstr}, running for {int(duration)} seconds ({self.total/duration:0.2e}/s).",
+                        f"{self.total}{self.lstr}, running for {int(duration)} seconds ({self.total / duration:0.2e}/s).",
                         end="\r",
                         file=self.file,
                     )

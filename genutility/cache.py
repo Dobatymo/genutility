@@ -42,6 +42,7 @@ def cache(
     `duration`: maximum age of cache
     `generator`: set to True to store the results of generator objects
     `protocol`: pickle protocol version
+    `file_ext`: File extension to use for cache files. Should start with `.`.
 
     If `ignoreargs` is True, the cache won't take function arguments into regard.
             The path will be interpreted as template string to a file instead of a directory.
@@ -63,6 +64,7 @@ def cache(
         read_file = pickle.read_pickle
         key_to_hash = pickle.key_to_hash
         _hash_sep: Any = None
+        _file_ext = file_ext or ".p"
 
     elif serializer == "msgpack":
         from . import msgpack
@@ -75,6 +77,7 @@ def cache(
         read_file = msgpack.read_msgpack
         key_to_hash = msgpack.key_to_hash
         _hash_sep = None
+        _file_ext = file_ext or ".msgpack"
 
     elif serializer == "json":
         from . import json
@@ -87,6 +90,7 @@ def cache(
         read_file = json.read_json
         key_to_hash = json.key_to_hash
         _hash_sep = {}
+        _file_ext = file_ext or ".json"
 
     else:
         raise ValueError(f"Invalid serializer: {serializer}")
@@ -113,8 +117,6 @@ def cache(
             if not ignoreargs:
                 if ignore_first_arg:
                     args = args[1:]
-
-                _file_ext = file_ext or ".p"
 
                 if keyfunc is None:
                     hashstr = key_to_hash(args_to_key(args, kwargs, _hash_sep), **_pure_serializer_kwargs)

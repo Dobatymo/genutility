@@ -225,7 +225,6 @@ class RichAriaProgress:
 
 
 class StdoutFile:
-
     def __init__(
         self,
         console: Optional[Console] = None,

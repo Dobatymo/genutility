@@ -3,10 +3,7 @@
     "archive": [
         "py7zr>=0.20.2"
     ],
-    "args": [
-        "jsonschema",
-        "simplejson"
-    ],
+    "args": [],
     "aria": [
         "aria2p",
         "requests"
@@ -46,7 +43,6 @@
     "concurrency": [],
     "config": [
         "jsonschema",
-        "simplejson",
         "sortedcontainers",
         "toml"
     ],
@@ -80,12 +76,10 @@
     "factorial": [],
     "file": [],
     "fileformats": [
-        "jsonschema",
         "pandas",
         "piexif",
         "rich",
-        "setuptools",
-        "simplejson"
+        "setuptools"
     ],
     "filesdb": [
         "tls-property>=1.0.1"
@@ -113,9 +107,7 @@
     ],
     "http": [
         "certifi",
-        "jsonschema",
-        "requests",
-        "simplejson"
+        "requests"
     ],
     "image": [
         "numpy"
@@ -199,16 +191,18 @@
         "pyarrow"
     ],
     "pdf": [
-        "jsonschema",
         "pdfminer",
         "pypdf>=3.1.0,!=5.0.0",
-        "simplejson",
         "tika"
     ],
     "pickle": [],
     "pillow": [
         "piexif",
         "Pillow>=9.2.0"
+    ],
+    "polars": [
+        "numpy",
+        "polars>=1.18; python_version>='3.9'"
     ],
     "powerpoint": [
         "python-pptx"
@@ -234,11 +228,9 @@
     "ringlist": [],
     "salesforce": [
         "aiohttp>=3.7.4",
-        "jsonschema",
         "pandas",
         "requests",
-        "simple-salesforce>=1.1.0",
-        "simplejson"
+        "simple-salesforce>=1.1.0"
     ],
     "scene_change_detection": [
         "av>=8.0; python_version>='3.8'",
@@ -251,7 +243,8 @@
         "scipy<1.13"
     ],
     "scrapy": [
-        "brotli"
+        "brotli",
+        "scrapy"
     ],
     "search": [],
     "segment_tree": [],
@@ -290,6 +283,7 @@
         "gensim>=4.0.0",
         "gmpy2",
         "hypothesis",
+        "importlib-metadata>=1.4",
         "jsonschema",
         "keras",
         "mistune<2",
@@ -302,6 +296,7 @@
         "pandas",
         "pdfminer",
         "Pillow>=9.2.0",
+        "polars>=1.18; python_version>='3.9'",
         "pypdf>=3.1.0,!=5.0.0",
         "pywin32; sys_platform=='win32'",
         "requests",
@@ -350,19 +345,16 @@
     "twisted": [
         "twisted"
     ],
-    "twitch": [
-        "certifi",
-        "jsonschema",
-        "requests",
-        "simplejson"
-    ],
+    "twitch": [],
     "typing": [],
     "unicode": [
         "jsonschema",
         "msgpack>=0.6.0",
         "simplejson"
     ],
-    "unqlite": [],
+    "unqlite": [
+        "unqlite"
+    ],
     "url": [],
     "videofile": [
         "av>=8.0; python_version>='3.8'",

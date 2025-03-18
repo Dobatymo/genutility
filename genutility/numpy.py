@@ -1,5 +1,5 @@
 from math import exp, sqrt
-from typing import Any, Callable, Dict, Generic, Iterator, Optional, Sequence, Tuple, TypeVar
+from typing import Any, Callable, Dict, Generic, Iterator, Optional, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
 
@@ -765,4 +765,94 @@ def image_grid(images: np.ndarray, nrow: int = 8, fill_value=(0, 0, 0)) -> np.nd
         col = i % cols
         out[h * row : h * (row + 1), w * col : w * (col + 1), :] = images[i]
 
+    return out
+
+
+def limit_balanced(arr: np.ndarray, total: int) -> np.ndarray:
+    """Use a list of counts `arr`, return a new list where the total count is `total` (if possible),
+    in such a way that the selection is as balanced as possible.
+    """
+
+    assert len(arr.shape) == 1
+
+    indices = np.argsort(arr)
+    values = arr[indices]
+    remaining_total = total
+    remaining_cats = len(arr)
+    balanced: list[int] = []
+    for value in values:
+        n_chose = remaining_total // remaining_cats
+        if value >= n_chose:
+            balanced.append(n_chose)
+            remaining_total -= n_chose
+        else:
+            balanced.append(value)
+            remaining_total -= value
+        remaining_cats -= 1
+
+    out = np.array(balanced)
+    inverse_indices = np.argsort(indices)
+    restored_out = out[inverse_indices]
+
+    assert arr.shape == out.shape
+    assert np.all(restored_out <= arr)
+    assert np.sum(restored_out) == min(total, np.sum(arr))
+    return restored_out
+
+
+def indind(absolute: Union[slice, np.ndarray], relative: np.ndarray) -> np.ndarray:
+    if isinstance(absolute, slice):
+        assert absolute == slice(None)
+        return relative
+    else:
+        return absolute[relative]
+
+
+def _arg_sample_balanced(
+    arr: np.ndarray,
+    indices: Union[slice, np.ndarray],
+    total: int,
+    dim: int,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    subarray = arr[indices, dim]
+    values, counts = np.unique(subarray, return_counts=True)
+    n_chose_arr = limit_balanced(counts, total)
+
+    out = []
+
+    if dim == arr.shape[1] - 1:
+        # last column, actually select values
+        for v, subtotal in zip(values, n_chose_arr):
+            (ind,) = np.nonzero(subarray == v)
+            if len(ind) != subtotal:
+                ind = rng.choice(ind, subtotal, replace=False)
+            out.append(indind(indices, ind))
+    else:
+        # recurse into other columns
+        for v, subtotal in zip(values, n_chose_arr):
+            (ind,) = np.nonzero(subarray == v)
+            out.append(_arg_sample_balanced(arr, indind(indices, ind), subtotal, dim + 1, rng))
+
+    return np.concatenate(out)
+
+
+def arg_sample_balanced(arr: np.ndarray, total: int, seed: int = 0) -> np.ndarray:
+    """Select a `total` number of samples from `arr` and return the indices.
+    `arr` needs to be a 2-dimensional array where the first dimension are the samples
+    and the second one categorical columns. These categories are used to sample in a way,
+    so that the result is a balanced as possible, with using additional columns with decreasing priority.
+    The output are the indices used to select the samples. They are in no specific order.
+    To select without reordering, sort the output.
+    """
+
+    if len(arr.shape) != 2 or arr.shape[0] < 1 or arr.shape[1] < 1:
+        raise ValueError("array must be 2-dimensional with at least one element in each dimension")
+
+    dim = 0
+    rng = np.random.default_rng(seed=seed)
+
+    out = _arg_sample_balanced(arr, slice(None), total, dim, rng)
+    assert len(out) == min(total, len(arr))
+    assert len(np.unique(out)) == len(out)
     return out

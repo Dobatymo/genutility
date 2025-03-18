@@ -4,6 +4,7 @@ import numpy as np
 from genutility.benchmarks.numpy import bincount_batch_2
 from genutility.math import shannon_entropy as shannon_entropy_python
 from genutility.numpy import (
+    arg_sample_balanced,
     batch_inner,
     batch_outer,
     batch_vTAv,
@@ -18,6 +19,7 @@ from genutility.numpy import (
     image_grid,
     is_rgb,
     is_square,
+    limit_balanced,
     logtrace,
     remove_color,
     rgb_to_hsi,
@@ -604,6 +606,100 @@ class NumpyTest(MyTestCase):
 
         with self.assertRaises(ValueError):
             histogram_correlation(np.array([1]), np.array([1]))
+
+    def test_limit_balanced(self):
+        np.testing.assert_array_equal(limit_balanced(np.array([]), 3), np.array([]))
+        np.testing.assert_array_equal(limit_balanced(np.array([1, 2, 3]), 0), np.array([0, 0, 0]))
+        np.testing.assert_array_equal(limit_balanced(np.array([1, 10, 10]), 3), np.array([1, 1, 1]))
+        np.testing.assert_array_equal(limit_balanced(np.array([1, 10, 10]), 5), np.array([1, 2, 2]))
+        np.testing.assert_array_equal(limit_balanced(np.array([10, 1, 10]), 3), np.array([1, 1, 1]))
+        np.testing.assert_array_equal(limit_balanced(np.array([10, 1, 10]), 5), np.array([2, 1, 2]))
+        np.testing.assert_array_equal(limit_balanced(np.array([10, 10, 1]), 3), np.array([1, 1, 1]))
+        np.testing.assert_array_equal(limit_balanced(np.array([10, 10, 1]), 5), np.array([2, 2, 1]))
+
+    def test_arg_sample_balanced(self):
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[0]]), 3), np.array([0]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1], [2], [3]]), 3), np.array([0, 1, 2]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1], [1], [1]]), 3), np.array([0, 1, 2]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1], [2], [2]]), 3), np.array([0, 1, 2]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1], [2], [3]]), 5), np.array([0, 1, 2]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1, 0], [2, 0], [3, 0]]), 3), np.array([0, 1, 2]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1, 0], [1, 0], [1, 0]]), 3), np.array([0, 1, 2]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1, 0], [2, 0], [2, 0]]), 3), np.array([0, 1, 2]))
+        np.testing.assert_array_equal(arg_sample_balanced(np.array([[1, 1], [2, 2], [3, 3]]), 3), np.array([0, 1, 2]))
+
+        y = np.array([[0], [0], [0], [0], [0], [1], [1], [1], [1], [1]])
+        np.testing.assert_array_equal(arg_sample_balanced(y, 10), np.arange(10))
+
+        y = np.array([[0, 0], [0, 0], [0, 1], [0, 1], [0, 1], [1, 0], [1, 0], [1, 1], [1, 1], [1, 1]])
+        np.testing.assert_array_equal(arg_sample_balanced(y, 10), np.arange(10))
+
+        y = np.array(
+            [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 1, 0],
+                [0, 1, 1],
+                [0, 1, 1],
+                [1, 0, 0],
+                [1, 0, 0],
+                [1, 1, 0],
+                [1, 1, 1],
+                [1, 1, 1],
+            ]
+        )
+        np.testing.assert_array_equal(arg_sample_balanced(y, 10), np.arange(10))
+
+        y_int = np.array(
+            [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 1, 0],
+                [0, 1, 1],
+                [0, 1, 1],
+                [1, 0, 0],
+                [1, 0, 0],
+                [1, 1, 0],
+                [1, 1, 1],
+                [1, 1, 1],
+            ]
+        )
+        np.testing.assert_array_equal(arg_sample_balanced(y_int, 6), np.array([1, 2, 4, 6, 7, 8]))
+
+        y_str = np.array(
+            [
+                ["0", "0", "0"],
+                ["0", "0", "0"],
+                ["0", "1", "0"],
+                ["0", "1", "1"],
+                ["0", "1", "1"],
+                ["1", "0", "0"],
+                ["1", "0", "0"],
+                ["1", "1", "0"],
+                ["1", "1", "1"],
+                ["1", "1", "1"],
+            ]
+        )
+        np.testing.assert_array_equal(arg_sample_balanced(y_str, 6), np.array([1, 2, 4, 6, 7, 8]))
+
+        y = np.array(
+            [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 1],
+                [0, 1, 1],
+                [1, 0, 0],
+                [1, 1, 0],
+                [1, 1, 0],
+                [1, 1, 1],
+                [1, 1, 1],
+            ]
+        )
+        np.testing.assert_array_equal(arg_sample_balanced(y, 4), np.array([2, 4, 5, 9]))
+
+        df = np.array([["a", "a"], ["b", "b"], ["c", "c"], ["a", "a"], ["b", "b"], ["c", "c"]], dtype="<U1")
+        np.testing.assert_array_equal(arg_sample_balanced(df, 4), np.array([3, 4, 2, 5]))
 
 
 if __name__ == "__main__":

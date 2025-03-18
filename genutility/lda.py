@@ -202,7 +202,7 @@ class LDABase:
         denom = 0
 
         for m, doc in enumerate(docs):
-            for i, t in enumerate(doc):
+            for _i, t in enumerate(doc):
                 num += np.log(np.inner(φ[:, t], θ[m]))
             denom += len(doc)
 
@@ -427,7 +427,7 @@ class LDATermWeight(LDABase):
 
         for m, doc in enumerate(docs):
             doc_counts = Counter(doc)
-            for i, t in enumerate(doc):
+            for _i, t in enumerate(doc):
                 tw[m, t] = -log2(doc_counts[t] / all_counts[t])
 
         np.clip(tw, 0.0, None, out=tw)
@@ -631,7 +631,7 @@ def test_ldatw_20():
 if __name__ == "__main__":
     from genutility.time import PrintStatementTime
 
-    for i in range(3):
+    for _i in range(3):
         with PrintStatementTime():
             test_lda_20()
             # test_ldatw_20()

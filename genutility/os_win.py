@@ -162,7 +162,7 @@ def _get_appdata_dir(roaming: bool = False) -> str:
     try:
         result = SHGetKnownFolderPath(rfid, Flags, Token, byref(Path))
     except OSError:
-        logging.error(f"SHGetKnownFolderPath result: {result & 0xffffffff:X}")
+        logging.error(f"SHGetKnownFolderPath result: {result & 0xFFFFFFFF:X}")
         raise
 
     ret = cast(Path, c_wchar_p).value

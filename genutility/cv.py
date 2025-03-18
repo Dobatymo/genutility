@@ -1,3 +1,4 @@
+from os import PathLike
 from typing import TYPE_CHECKING, Iterator, Union
 
 import cv2
@@ -20,7 +21,7 @@ def grayscale(cvimg: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(cvimg, cv2.COLOR_RGB2GRAY)
 
 
-def iter_video(input: Union[str, int] = 0, show: bool = False) -> Iterator[np.ndarray]:
+def iter_video(input: Union[str, PathLike, int] = 0, show: bool = False) -> Iterator[np.ndarray]:
     with CvVideo(input) as video:
         if show:
             for _time, image in video.show():
