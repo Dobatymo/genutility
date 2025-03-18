@@ -5,15 +5,29 @@ requires = [
 ]
 
 [project]
+name = "genutility"
+version = "0.0.109"
+description = "A collection of various Python utilities"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [ { name = "Dobatymo" } ]
 requires-python = ">=3.7"
 classifiers = [
+  "License :: OSI Approved :: ISC License (ISCL)",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Topic :: Utilities",
 ]
+dynamic = [
+  "dependencies",
+  "optional-dependencies",
+]
+urls.Homepage = "https://github.com/Dobatymo/genutility"
 
 [tool.black]
 line-length = 120
