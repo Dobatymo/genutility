@@ -6,7 +6,7 @@ requires = [
 
 [project]
 name = "genutility"
-version = "0.0.109"
+version = "0.0.110"
 description = "A collection of various Python utilities"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -34,12 +34,10 @@ line-length = 120
 
 [tool.ruff]
 line-length = 120
-
 lint.extend-select = [
   "B",
   "I",
 ]
-
 lint.ignore = [
   "B011",
   "B904",
