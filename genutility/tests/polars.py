@@ -11,6 +11,7 @@ except PackageNotFoundError:
     OLD_POLARS = True
 else:
     import polars as pl
+
     from genutility.polars import pl_index
 
 from genutility.test import MyTestCase
