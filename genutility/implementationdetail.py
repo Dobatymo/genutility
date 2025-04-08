@@ -23,4 +23,6 @@ def caller_file(depth: int = 1) -> Path:
 
 
 def caller_sourcefile(depth: int = 1) -> Path:
-    return Path(getsourcefile(_getframe(depth))).resolve().parent
+    sourcefile = getsourcefile(_getframe(depth))
+    assert sourcefile is not None
+    return Path(sourcefile).resolve().parent

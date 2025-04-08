@@ -76,7 +76,7 @@ class GenericDb:
 
     @tls_property
     def connection(self):
-        if os.fspath(self.dbpath) != ":memory:" and not Path(self.dbpath).is_file():
+        if os.fspath(self.dbpath) != ":memory:" and not Path(self.dbpath).parent.is_dir():
             raise FileNotFoundError(self.dbpath)
         return sqlite3.connect(self.dbpath, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 

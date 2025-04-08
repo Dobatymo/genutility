@@ -29,7 +29,10 @@ def multiline_textsize(text: str, ttf: ImageFont, spacing: int = 4) -> Tuple[int
 def exifinfo(image: Image.Image) -> Dict[str, Any]:
     ret: Dict[str, Any] = {}
 
-    exifd = image._getexif()
+    try:
+        exifd = image._getexif()
+    except AttributeError:
+        return {}
 
     if exifd is None:
         return {}

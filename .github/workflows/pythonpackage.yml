@@ -48,8 +48,11 @@ jobs:
       run: |
         python -m nltk.downloader punkt_tab
     - name: Run tests
+      env:
+        HF_EVALUATE_OFFLINE: '1'
       run: |
         python -OO -m unittest discover -v genutility.tests "*.py"
+        python -O -m unittest discover -v genutility.tests "huggingface.py"
 
   deploy:
     needs: test

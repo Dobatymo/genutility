@@ -2,6 +2,8 @@ aiohttp>=3.7.4
 aioresponses>=0.7.2
 av>=8.0; python_version>='3.8'
 ctypes-windows-sdk>=0.0.15; sys_platform=='win32'
+datasets
+evaluate
 flask>=0.12.3
 gensim>=4.0.0
 gmpy2
@@ -25,6 +27,7 @@ pywin32; sys_platform=='win32'
 requests
 requests-mock
 ruamel.yaml
+scikit-learn
 scipy<1.13
 setuptools
 simple-salesforce>=1.1.0
