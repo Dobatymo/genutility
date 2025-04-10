@@ -768,6 +768,12 @@ def compliant_path(path: PurePath, replacement: str = "_", force_system: Optiona
     fn_func = partial(_compliant_dirname, replacement=replacement)
 
     if bool(path.drive) or bool(path.root):  # is_absolute() doesn't do the right thing here
+        if path.drive:
+            m = re.match(r"(?i)^(\\\\\?\\)?([a-z]:|[^:]+)$", path.drive)
+            if m is None:
+                raise ValueError(f"Invalid Windows drive: {path.drive}")  # for python>=3.12
+            if path.drive.startswith("\\\\?\\") and not path.root:
+                raise ValueError("DOS Device paths cannot be relative")  # for python<3.12
         parts = chain(path.parts[0:1], map(fn_func, path.parts[1:-1]))
     else:
         parts = map(fn_func, path.parts[:-1])
