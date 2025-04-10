@@ -12,6 +12,7 @@ from typing_extensions import ParamSpec
 
 from .file import equal_files
 from .iter import progress
+from .typing import ExceptionsType
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -277,6 +278,20 @@ def repeat(number: int, verbose: bool = False) -> Callable[[Callable[P, Any]], C
             for _i in progress(range(number), disable=not verbose):
                 if func(self, *args, **kwargs) is not None:  # no self.subTest(str(i))
                     raise AssertionError
+
+        return inner
+
+    return decorator
+
+
+def skip_on_exception(exceptions: ExceptionsType) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    def decorator(func: Callable[P, T]) -> Callable[P, T]:
+        @wraps(func)
+        def inner(self, *args: P.args, **kwargs: P.kwargs) -> T:
+            try:
+                return func(self, *args, **kwargs)
+            except exceptions as e:
+                self.skipTest(f"Skipping: {type(e).__name__}")
 
         return inner
 

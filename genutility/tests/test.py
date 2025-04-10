@@ -1,9 +1,9 @@
 import os
 import os.path
-import unittest
+from unittest import SkipTest, skipIf
 
 from genutility._file import CloseableNamedTemporaryFile
-from genutility.test import MyTestCase, parametrize
+from genutility.test import MyTestCase, parametrize, skip_on_exception
 
 
 class MyTestCaseTest(MyTestCase):
@@ -114,7 +114,7 @@ class TestTest(MyTestCase):
                 raise EOFError
         self.assertFalse(os.path.exists(name))
 
-    @unittest.skipIf(not os.environ.get("INTERACTIVE"), "non-interactive mode")
+    @skipIf(not os.environ.get("INTERACTIVE"), "non-interactive mode")
     def test_closeable_tempfile_ctrlc(self):
         name = None
         with self.assertRaises(KeyboardInterrupt):
@@ -142,6 +142,21 @@ class TestTest(MyTestCase):
             with open(name, "rb") as fr:
                 self.assertEqual(truth, fr.read())
         self.assertFalse(os.path.exists(name))
+
+    def test_skip_on_exception(self):
+        truth = 0
+
+        @skip_on_exception(RuntimeError)
+        def func(self, error: bool):
+            if error:
+                raise RuntimeError
+            else:
+                return truth
+
+        self.assertEqual(truth, func(self, False))
+
+        with self.assertRaises(SkipTest):
+            func(self, True)
 
 
 if __name__ == "__main__":
