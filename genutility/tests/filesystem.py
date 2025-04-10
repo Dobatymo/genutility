@@ -58,26 +58,36 @@ class FilesystemTest(MyTestCase):
         ("???", "___"),
         ("C:/asd", "C:/asd"),
         ("C:/???", "C:/___"),
-        ("0:/asd", "0_/asd"),
         ("XX:/asd", "XX_/asd"),
         ("C:asd", "C:asd"),
         ("C:???", "C:___"),
-        ("0:asd", "0_asd"),
         ("XX:asd", "XX_asd"),
         ("./asd", "asd"),
         ("./???", "___"),
         ("/asd", "/asd"),
         ("/???", "/___"),
         (r"\\?\C:/asd", r"\\?\C:/asd"),
-        (r"\\?\0:/asd", r"\\?\0_/asd"),
-        (r"\\?\XX:/asd", r"\\?\XX_/asd"),
         (r"\\?\C:/???", r"\\?\C:/___"),
-        (r"\\?\C:asd", r"\\?\C:asd"),  # these are technically not allowed
-        (r"\\?\C:???", r"\\?\C:___"),  # these are technically not allowed
     )
     def test_compliant_path_windows(self, path, truth):
         result = compliant_path(PureWindowsPath(path), force_system="Windows")
         self.assertEqual(PureWindowsPath(truth), result)
+
+    @parametrize(
+        ("0:/asd", "0_/asd"),
+        ("0:asd", "0_asd"),
+        (r"\\?\0:/asd", r"\\?\0_/asd"),
+        (r"\\?\XX:/asd", r"\\?\XX_/asd"),
+        (r"\\?\C:asd", r"\\?\C_asd"),
+        (r"\\?\C:???", r"\\?\C____"),
+    )
+    def test_compliant_path_windows_drive(self, path, truth):
+        # these paths are not allowed by windows, but parsed ok by python 3.12+
+        try:
+            result = compliant_path(PureWindowsPath(path), force_system="Windows")
+            self.assertEqual(PureWindowsPath(truth), result)
+        except ValueError:
+            pass
 
     def test_scandir_rec(self):
         base = ["joined.pdf", "quadrant-0.png", "quadrant-1.png", "quadrant-2.png", "quadrant-3.png"]
