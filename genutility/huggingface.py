@@ -25,8 +25,17 @@ class Accuracy(evaluate.Metric):
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html"],
         )
 
-    def _compute(self, predictions, references, normalize=True, sample_weight=None, average: Any = None):
-        """average is ignored"""
+    def _compute(
+        self,
+        predictions,
+        references,
+        normalize=True,
+        sample_weight=None,
+        pos_label: Any = None,
+        average: Any = None,
+        zero_division: Any = None,
+    ):
+        """pos_label, average and zero_division are ignored"""
 
         return {
             "accuracy": float(accuracy_score(references, predictions, normalize=normalize, sample_weight=sample_weight))
