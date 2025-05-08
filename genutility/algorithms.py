@@ -1,6 +1,8 @@
 from typing import Callable, MutableSequence, Optional, TypeVar
 
-T = TypeVar("T")
+from .typing import Orderable
+
+OrderableT = TypeVar("OrderableT", bound=Orderable)
 
 
 def _insertion(seq: MutableSequence, cmp_: Callable, left: int, right: int, gap: int) -> None:
@@ -18,7 +20,7 @@ def _insertion(seq: MutableSequence, cmp_: Callable, left: int, right: int, gap:
 GROUP_SIZE = 5
 
 
-def cmp(x: T, y: T) -> int:
+def cmp(x: OrderableT, y: OrderableT) -> int:
     """
     Return negative if x<y, zero if x==y, positive if x>y.
     """

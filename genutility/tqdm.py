@@ -1,4 +1,4 @@
-from typing import Any, Iterable, Iterator, Optional, Sequence, TypeVar, Union
+from typing import Any, Iterable, Iterator, Optional, Sequence, Type, TypeVar, Union
 
 from typing_extensions import Self
 
@@ -12,7 +12,7 @@ T = TypeVar("T")
 
 
 class Task(BaseTask):
-    def __init__(self, total: Optional[float] = None, description: Optional[float] = None, **kwargs: Any) -> None:
+    def __init__(self, total: Optional[float] = None, description: Optional[str] = None, **kwargs: Any) -> None:
         self.pbar = tqdm(desc=description, total=total, **kwargs)
 
     def __enter__(self) -> Self:
@@ -27,9 +27,9 @@ class Task(BaseTask):
     def update(
         self,
         *,
-        completed: Optional[float] = _Default,
-        total: Optional[float] = _Default,
-        description: Optional[str] = _Default,
+        completed: Union[Optional[float], Type[_Default]] = _Default,
+        total: Union[Optional[float], Type[_Default]] = _Default,
+        description: Union[Optional[str], Type[_Default]] = _Default,
         **kwargs: Any,
     ) -> None:
         if completed is not _Default:
@@ -48,9 +48,9 @@ class Progress(_Progress):
         description: Optional[str] = None,
         **kwargs: Any,
     ) -> Iterator[T]:
-        return tqdm(sequence, description, total, **kwargs)
+        yield from tqdm(sequence, description, total, **kwargs)
 
-    def task(self, total: Optional[float] = None, description: Optional[str] = None, **kwargs: Any):
+    def task(self, total: Optional[float] = None, description: Optional[str] = None, **kwargs: Any) -> BaseTask:
         return Task(total, description, **kwargs)
 
     def set_prolog(self, prolog: str) -> None:

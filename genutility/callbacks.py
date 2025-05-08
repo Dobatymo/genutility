@@ -1,10 +1,11 @@
-from typing import Any, Iterable, Iterator, Optional, Sequence, TypeVar, Union
+from typing import Any, Iterable, Iterator, Optional, Sequence, Type, TypeVar, Union, final
 
 from typing_extensions import Self
 
 T = TypeVar("T")
 
 
+@final
 class _Default:
     pass
 
@@ -16,9 +17,9 @@ class BaseTask:
     def update(
         self,
         *,
-        completed: Optional[float] = _Default,
-        total: Optional[float] = _Default,
-        description: Optional[str] = _Default,
+        completed: Union[Optional[float], Type[_Default]] = _Default,
+        total: Union[Optional[float], Type[_Default]] = _Default,
+        description: Union[Optional[str], Type[_Default]] = _Default,
         **fields: Any,
     ) -> None:
         raise NotImplementedError
@@ -26,7 +27,7 @@ class BaseTask:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type, exc_value, traceback):
         pass
 
 
@@ -40,9 +41,9 @@ class Task(BaseTask):
     def update(
         self,
         *,
-        completed: Optional[float] = _Default,
-        total: Optional[float] = _Default,
-        description: Optional[str] = _Default,
+        completed: Union[Optional[float], Type[_Default]] = _Default,
+        total: Union[Optional[float], Type[_Default]] = _Default,
+        description: Union[Optional[str], Type[_Default]] = _Default,
         **fields: Any,
     ):
         pass
@@ -56,9 +57,9 @@ class Progress:
         description: Optional[str] = None,
         **fields: Any,
     ) -> Iterator[T]:
-        return sequence
+        yield from sequence
 
-    def task(self, total: Optional[float] = None, description: Optional[str] = None, **fields: Any):
+    def task(self, total: Optional[float] = None, description: Optional[str] = None, **fields: Any) -> BaseTask:
         return Task(total, description, **fields)
 
     def set_prolog(self, prolog: Any) -> None:

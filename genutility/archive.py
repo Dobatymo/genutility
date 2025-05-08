@@ -1,8 +1,14 @@
+from builtins import open as builtin_open
 from os import PathLike, fspath, scandir
-from typing import IO, Callable, Dict, Iterator, Optional, Tuple, Union
+from typing import IO, TYPE_CHECKING, Callable, Dict, Iterator, Optional, Tuple, Union
 
 from ._files import PathType, entrysuffix
 from .file import _check_arguments, _stripmode, copen, wrap_text
+
+if TYPE_CHECKING:
+    from zipfile import ZipInfo
+
+    from _typeshed import SupportsRichComparison
 
 
 def iter_zip(
@@ -13,7 +19,7 @@ def iter_zip(
     newline: Optional[str] = None,
     password: Optional[bytes] = None,
     sort: bool = False,
-    sort_key: Optional[Callable] = None,
+    sort_key: Optional[Callable[[ZipInfo], SupportsRichComparison]] = None,
 ) -> Iterator[Tuple[str, IO]]:
     """
     Iterate file-pointers to archived files. They are valid for one iteration step each.
@@ -25,6 +31,9 @@ def iter_zip(
 
     encoding = _check_arguments(mode, encoding)
     newmode = _stripmode(mode)
+
+    if sort and sort_key is None:
+        raise ValueError("sort_key is required when sort=True")
 
     with ZipFile(file, newmode) as zf:
         il = zf.infolist()
@@ -121,6 +130,8 @@ def iter_dir(
 
     if archives:
         open = copen
+    else:
+        open = builtin_open
 
     with scandir(path) as scan:
         for entry in scan:

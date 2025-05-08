@@ -1,11 +1,11 @@
 import sys
 from collections.abc import Mapping, Sequence
 from time import sleep
-from typing import Any, Callable, Dict, Iterator, List
+from typing import Any, Callable, Dict, Iterable, Iterator, List
 from typing import Mapping as MappingT
 from typing import Optional
 from typing import Sequence as SequenceT
-from typing import Set, TextIO, Tuple, Union
+from typing import Set, TextIO, Tuple, TypedDict, Union
 
 from aria2p import Client
 from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_TIMEOUT, ClientException
@@ -15,6 +15,14 @@ from .dict import update
 from .exceptions import DownloadFailed, ExternalProcedureUnavailable, InconsistentState, WouldBlockForever, assert_type
 
 CallbackFuncT = Callable[[Dict[str, Any]], None]
+
+
+class AriaEntry(TypedDict):
+    gid: str
+    status: str
+    errorMessage: str
+    errorCode: int
+    files: List[dict]
 
 
 def aria_bool(value: Optional[bool]) -> Optional[str]:
@@ -114,7 +122,7 @@ class AriaDownloader:
         for gid in self.gids:
             self.query("unpause", gid)
 
-    def _entries(self, entries: Dict[str, Any]) -> Dict[str, Any]:
+    def _entries(self, entries: Iterable[AriaEntry]) -> Dict[str, AriaEntry]:
         return {entry["gid"]: entry for entry in entries if entry["gid"] in self.gids}
 
     def managed_downloads(self) -> int:

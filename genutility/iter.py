@@ -75,7 +75,7 @@ def repeatfunc(func: Callable[..., T], times: Optional[int] = None, *args: Any) 
     return starmap(func, repeat(args, times))
 
 
-def _lstr(it: Iterable, length: Optional[int] = None) -> Tuple[Optional[int], str]:
+def _lstr(it: Any, length: Optional[int] = None) -> Tuple[Optional[int], str]:
     if length is None:
         try:
             length = len(it)  # type: ignore[arg-type]
@@ -91,7 +91,7 @@ def _lstr(it: Iterable, length: Optional[int] = None) -> Tuple[Optional[int], st
 
 
 def progress(
-    it: Union[Iterable, Collection],
+    it: Union[Iterable[T], Collection[T]],
     length: Optional[int] = None,
     refresh: float = 1,
     end: str = "\r",
@@ -99,7 +99,7 @@ def progress(
     extra_info_callback: Optional[Callable[[int, Optional[int]], str]] = None,
     disable: Optional[bool] = None,
     delta: Optional[int] = 1,
-) -> Iterator:
+) -> Iterator[T]:
     """Wraps an iterable `it` to periodically print the progress every `refresh` seconds.
     `length` is the total size of `it`. `len(it)` is used to get the size if set to `None`.
     `refresh` updates the printed output every `refresh` seconds.
@@ -174,14 +174,14 @@ def progress(
 
 
 def progressdata(
-    it: Union[Iterable, Collection],
+    it: Union[Iterable[T], Collection[T]],
     length: Optional[int] = None,
     refresh: float = 1,
     end: str = "\r",
     file: Optional[TextIO] = None,
     extra_info_callback: Optional[Callable[[int, Optional[int]], str]] = None,
     disable: Optional[bool] = None,
-) -> Iterable:
+) -> Iterator[T]:
     return progress(it, length, refresh, end, file, extra_info_callback, disable, None)
 
 

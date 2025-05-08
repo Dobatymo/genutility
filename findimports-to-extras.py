@@ -164,9 +164,9 @@ def main(path: Path) -> None:
                 extras[k] = new_dep
 
         # sort dependencies
-        extras = {k: sorted(v, key=lowercase) for k, v in sorted(extras.items(), key=lowercasekey)}
+        sorted_extras = {k: sorted(v, key=lowercase) for k, v in sorted(extras.items(), key=lowercasekey)}
 
-        for k, vals in extras.items():
+        for k, vals in sorted_extras.items():
             if not k.startswith("genutility."):
                 raise ValueError(f"{k} is not part of genutility")
 
@@ -178,14 +178,14 @@ def main(path: Path) -> None:
                 if v.startswith("genutility."):
                     raise ValueError(f"Recursive solver failed for {k}: {vals}")
 
-        extras = {k[11:]: v for k, v in extras.items() if not k.startswith("genutility._")}
+        sorted_extras = {k[11:]: v for k, v in sorted_extras.items() if not k.startswith("genutility._")}
 
         with open("extras_require.json", "w", encoding="utf-8") as fw:
-            json.dump(extras, fw, indent="    ")
+            json.dump(sorted_extras, fw, indent="    ")
 
-        requirements_test = sorted(extras.pop("tests", []) + install, key=lowercase)
+        requirements_test = sorted(sorted_extras.pop("tests", []) + install, key=lowercase)
 
-        requirements = sorted(set(chain.from_iterable(extras.values())) | set(install), key=lowercase)
+        requirements = sorted(set(chain.from_iterable(sorted_extras.values())) | set(install), key=lowercase)
         with open("requirements.txt", "w", encoding="utf-8") as fw:
             for package in requirements:
                 fw.write(package + "\n")

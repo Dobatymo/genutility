@@ -3,7 +3,7 @@ import re
 import sys
 from string import Formatter
 from traceback import format_exception
-from typing import IO, Any, Callable, Dict, Iterable, List, Optional, Sequence, Union
+from typing import IO, Any, Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Type, Union
 
 from rich.console import Console, Group, JustifyMethod, OverflowMethod, Style
 from rich.highlighter import Highlighter
@@ -20,6 +20,7 @@ from typing_extensions import Self
 from ._files import PathType
 from .callbacks import BaseTask
 from .callbacks import Progress as _Progress
+from .callbacks import _Default
 from .file import copen
 from .typing import SizedIterable
 
@@ -31,10 +32,10 @@ class NoneFormatter(Formatter):
         self.default = default
         super().__init__()
 
-    def format_field(self, value, spec):
+    def format_field(self, value, format_spec):
         if value is None:
             value = self.default
-        return super().format_field(value, spec)
+        return super().format_field(value, format_spec)
 
 
 class DoubleFormatTextColumn(ProgressColumn):
@@ -100,11 +101,14 @@ class Task(BaseTask):
     def update(
         self,
         *,
-        completed: Optional[float] = None,
-        total: Optional[float] = None,
-        description: Optional[str] = None,
+        completed: Union[Optional[float], Type[_Default]] = None,
+        total: Union[Optional[float], Type[_Default]] = None,
+        description: Union[Optional[str], Type[_Default]] = None,
         **fields: Any,
     ) -> None:
+        assert completed is not _Default
+        assert total is not _Default
+        assert description is not _Default
         self.progress.update(self.task_id, completed=completed, total=total, description=description, **fields)
 
 
@@ -124,7 +128,7 @@ class Progress(_Progress):
         description: Optional[str] = None,
         transient: bool = False,
         **fields: Any,
-    ) -> Iterable[ProgressType]:
+    ) -> Iterator[ProgressType]:
         description = description or "Working..."
         task_id = self.progress.add_task(description, total=total, **fields)
         try:
@@ -146,7 +150,8 @@ class Progress(_Progress):
                 task.update(completed=completed, total=total)
                 yield item
 
-    def task(self, total: Optional[float] = None, description: str = "Working...", **fields: Any):
+    def task(self, total: Optional[float] = None, description: Optional[str] = "Working...", **fields: Any):
+        assert description is not None
         return Task(self.progress, total, description, **fields)
 
     def get_renderable(self) -> RenderableType:
@@ -259,6 +264,7 @@ class StdoutFile:
             )
 
             def _write(text: str) -> None:
+                assert self.fp is not None  # for mypy
                 self.fp.write(text)
 
         else:

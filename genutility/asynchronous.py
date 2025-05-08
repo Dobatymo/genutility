@@ -1,17 +1,21 @@
 import sys
-from numbers import Number
+from collections.abc import AsyncIterator, Sized
 from time import time
-from typing import Iterable, Optional, Sequence, TextIO, Union
+from typing import Generic, Iterable, Iterator, Optional, Sequence, TextIO, TypeVar, Union
+
+from typing_extensions import Self
 
 from .iter import _lstr, progressdata
 
+SizedT = TypeVar("SizedT", bound=Sized)
 
-class progress_content:
+
+class progress_content(Generic[SizedT]):
     def __init__(
         self,
-        it: Union[Iterable, Sequence],
+        it: Union[Iterable[SizedT], Sequence[SizedT], AsyncIterator[SizedT]],
         length: Optional[int] = None,
-        refresh: Number = 1,
+        refresh: Union[int, float] = 1,
         file: Optional[TextIO] = sys.stdout,
     ) -> None:
         self.it = it
@@ -19,16 +23,18 @@ class progress_content:
         self.refresh = refresh
         self.file = file
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[SizedT]:
+        assert not isinstance(self.it, AsyncIterator)
         return progressdata(self.it, self.length, self.refresh, file=self.file)
 
-    def __aiter__(self):
+    def __aiter__(self) -> AsyncIterator[SizedT]:
+        assert isinstance(self.it, AsyncIterator)
         return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
 
     class AsyncIterProgress:
         def __init__(
-            self, it: Union[Iterable, Sequence], length: Optional[int], refresh: Number, file: Optional[TextIO]
-        ):
+            self, it: AsyncIterator[SizedT], length: Optional[int], refresh: Union[int, float], file: Optional[TextIO]
+        ) -> None:
             self.it = it.__aiter__()
             self.refresh = refresh
             self.file = file
@@ -37,7 +43,10 @@ class progress_content:
             self.last = self.start = time()
             self.total = 0
 
-        async def __anext__(self):
+        def __aiter__(self) -> Self:
+            return self
+
+        async def __anext__(self) -> SizedT:
             try:
                 elm = await self.it.__anext__()
                 self.total += len(elm)

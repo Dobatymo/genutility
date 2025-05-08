@@ -39,6 +39,12 @@ def is_a_directory_error(*args):
     return OSError(errno.EISDIR, strerror(errno.EISDIR), *args)
 
 
+def directory_not_empty_error(*args):
+    """return OSError"""
+
+    return OSError(errno.ENOTEMPTY, strerror(errno.ENOTEMPTY), *args)
+
+
 class StatResult(NamedTuple):
     st_mode: int
     st_ino: int
@@ -299,3 +305,34 @@ class MemoryPath(MemoryPurePath):
 
     def hardlink_to(self, target: str) -> None:
         raise NotImplementedError
+
+    # Renaming and deleting
+
+    def rename(self, target: str) -> Self:
+        raise NotImplementedError
+
+    def replace(self, target: str) -> Self:
+        raise NotImplementedError
+
+    def unlink(self, missing_ok: bool = False) -> None:
+        if self._children is not None:
+            raise is_a_directory_error(str(self))
+
+        if self._data is None:
+            if missing_ok:
+                return
+            raise file_not_found_error(str(self))
+
+        self._data = None
+
+    def rmdir(self) -> None:
+        if self._data is not None:
+            raise not_a_directory_error(str(self))
+
+        if self._children is None:
+            raise file_not_found_error(str(self))
+
+        if self._children:
+            raise directory_not_empty_error(str(self))
+
+        self._children = None
