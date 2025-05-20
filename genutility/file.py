@@ -623,7 +623,7 @@ def reversed_file_iter(fp: BufferedBinaryIoT, chunk_size: int = FILE_IO_BUFFER_S
 
 
 def limited_file_iter(fr: IO[Data], amount: int, chunk_size: int = FILE_IO_BUFFER_SIZE) -> Iterator[Data]:
-    """Iterate file-like object `fr` and yield chunks of size `chunk_size`.
+    """Iterate file-like object `fr` and yield chunks of size `chunk_size` (or less in unbuffered mode).
     Limit output to `amount` bytes.
     """
 
@@ -637,8 +637,8 @@ def limited_file_iter(fr: IO[Data], amount: int, chunk_size: int = FILE_IO_BUFFE
 
 def iterfilelike(
     fr: IO[Data], start: int = 0, amount: Optional[int] = None, chunk_size: int = FILE_IO_BUFFER_SIZE
-) -> Iterable[Data]:
-    """Iterate file-like object `fr` and yield chunks of size `chunk_size`.
+) -> Iterator[Data]:
+    """Iterate file-like object `fr` and yield chunks of size `chunk_size` (or less in unbuffered mode).
     Starts reading at `start` and optionally limit output to `amount` bytes.
     """
 

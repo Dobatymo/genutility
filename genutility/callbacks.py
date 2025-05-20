@@ -1,6 +1,6 @@
-from typing import Any, Iterable, Iterator, Optional, Sequence, Type, TypeVar, Union, final
+from typing import Any, Iterable, Iterator, Optional, Sequence, Type, TypeVar, Union
 
-from typing_extensions import Self
+from typing_extensions import Self, final
 
 T = TypeVar("T")
 
