@@ -68,5 +68,5 @@ class Progress:
     def set_epilog(self, epilog: Any) -> None:
         pass
 
-    def print(self, s: str, end="\n") -> None:
+    def print(self, s: str, end="\n", **fields: Any) -> None:
         print(s, end=end)

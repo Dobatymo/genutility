@@ -6,7 +6,7 @@ requires = [
 
 [project]
 name = "genutility"
-version = "0.0.114"
+version = "0.0.115"
 description = "A collection of various Python utilities"
 readme = "README.md"
 license = { file = "LICENSE" }

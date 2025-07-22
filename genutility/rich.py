@@ -179,7 +179,7 @@ class Progress(_Progress):
 
         self.epilog = epilog
 
-    def print(self, s: str, end="\n") -> None:
+    def print(self, s: str, end="\n", **fields: Any) -> None:
         """Print a renderable to the console. It will not be part of the live/progress display,
         but printed to the normal console display. It will be done safely,
         i.e. not interrupting the progress display.
@@ -188,9 +188,9 @@ class Progress(_Progress):
         self.progress.print(
             s,
             end=end,
-            markup=False,
-            highlight=False,
-            soft_wrap=True,
+            markup=fields.get("markup", False),
+            highlight=fields.get("highlight", False),
+            soft_wrap=fields.get("soft_wrap", True),
         )
 
     def refresh(self) -> None:

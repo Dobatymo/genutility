@@ -5,9 +5,62 @@ It should avoid any dependencies apart from the standard library.
 import os
 import os.path
 import re
-from typing import Union
+from typing import Optional, Union
+
+from .typing import DirEntryProtocol
 
 PathType = Union[str, os.PathLike]
+
+
+class _DirEntry(os.PathLike):
+    __slots__ = ("entry",)
+
+    def __init__(
+        self,
+        name: str,
+        path: Optional[str] = None,
+        inode: Optional[int] = None,
+        is_dir: Optional[bool] = None,
+        is_file: Optional[bool] = None,
+        is_symlink: Optional[bool] = None,
+        stat: Optional[os.stat_result] = None,
+    ) -> None:
+        self.name = name
+        self.path = name if path is None else path
+        self._inode = inode
+        self._is_dir = is_dir
+        self._is_file = is_file
+        self._is_symlink = is_symlink
+        self._stat = stat
+
+    def inode(self) -> int:
+        assert self._inode is not None
+        return self._inode
+
+    def is_dir(self, follow_symlinks: bool = True) -> bool:
+        assert self._is_dir is not None
+        return self._is_dir
+
+    def is_file(self, follow_symlinks: bool = True) -> bool:
+        assert self._is_file is not None
+        return self._is_file
+
+    def is_symlink(self) -> bool:
+        assert self._is_symlink is not None
+        return self._is_symlink
+
+    def stat(self, follow_symlinks: bool = True) -> os.stat_result:
+        assert self._stat is not None
+        return self._stat
+
+    def __str__(self) -> str:
+        return f"<_DirEntry {self.name!r}>"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def __fspath__(self) -> str:
+        return self.path
 
 
 class BaseDirEntry(os.PathLike):
@@ -17,7 +70,7 @@ class BaseDirEntry(os.PathLike):
         so use this wrapper class instead.
     """
 
-    def __init__(self, entry: os.DirEntry) -> None:
+    def __init__(self, entry: DirEntryProtocol) -> None:
         self.entry = entry
 
     @property

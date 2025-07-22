@@ -116,12 +116,14 @@ def cache(
 
             if not ignoreargs:
                 if ignore_first_arg:
-                    args = args[1:]
+                    hash_args = args[1:]
+                else:
+                    hash_args = args
 
                 if keyfunc is None:
-                    hashstr = key_to_hash(args_to_key(args, kwargs, _hash_sep), **_pure_serializer_kwargs)
+                    hashstr = key_to_hash(args_to_key(hash_args, kwargs, _hash_sep), **_pure_serializer_kwargs)
                 else:
-                    hashstr = keyfunc(args, kwargs)
+                    hashstr = keyfunc(hash_args, kwargs)
                 fullpath = os.path.join(strpath, hashstr + _file_ext)
             else:
                 if keyfunc or file_ext:

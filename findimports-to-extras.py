@@ -61,6 +61,7 @@ BUILTINS = (
     "unittest",
     "urllib",
     "zlib",
+    "_typeshed",
 )
 
 MANUAL_FIXES_REPLACE = {

@@ -63,8 +63,8 @@ class Progress(_Progress):
     def set_epilog(self, epilog: str) -> None:
         raise NotImplementedError
 
-    def print(self, s: str, end="\n") -> None:
-        tqdm.write(s, end=end)
+    def print(self, s: str, end="\n", **kwargs: Any) -> None:
+        tqdm.write(s, end=end, nolock=kwargs.get("nolock", False))
 
 
 class TqdmProcess:

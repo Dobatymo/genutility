@@ -6,7 +6,7 @@ from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from functools import wraps
 from os import makedirs
 from pathlib import Path
-from typing import Any, Callable, Union
+from typing import Any, Callable, Optional, Union
 
 
 def get_args(argparser: ArgumentParser) -> Namespace:
@@ -289,6 +289,24 @@ def ascii(s: str) -> str:
         raise ArgumentTypeError(msg)
 
     return s
+
+
+def make_arg_type(pattern: str, msg: str, *, group: Optional[int] = None, flags: int = 0) -> Callable:
+    import re
+
+    p = re.compile(pattern, flags)
+
+    def inner(s: str) -> str:
+        m = p.search(s)
+        if m is None:
+            raise ArgumentTypeError(msg)
+
+        if group is None:
+            return s
+        else:
+            return m.group(group)
+
+    return inner
 
 
 if __name__ == "__main__":
