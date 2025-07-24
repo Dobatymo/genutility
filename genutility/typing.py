@@ -1,7 +1,8 @@
 import os
-from typing import Any, Container, Hashable, Iterable, Optional, Sequence, Sized, Tuple, Type, TypeVar, Union
+from typing import Any, Container, Hashable, Iterable, List, Optional, Sequence, Sized, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Protocol  # typing.Protocol is available in Python 3.8+
+from typing_extensions import TypeGuard  # typing.Protocol is available in Python 3.10+
 
 ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
 Number = Union[int, float]
@@ -119,3 +120,11 @@ class DirEntryProtocol(Protocol):
     def is_file(self, *, follow_symlinks: bool = True) -> bool: ...
     def is_symlink(self) -> bool: ...
     def stat(self, *, follow_symlinks: bool = True) -> os.stat_result: ...
+
+
+def is_list_of_str(obj: Any) -> TypeGuard[List[str]]:
+    return isinstance(obj, list) and all(isinstance(i, str) for i in obj)
+
+
+def is_list_of_int(obj: Any) -> TypeGuard[List[int]]:
+    return isinstance(obj, list) and all(isinstance(i, int) for i in obj)

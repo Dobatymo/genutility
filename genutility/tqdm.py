@@ -16,8 +16,11 @@ T = TypeVar("T")
 
 
 class Task(BaseTask):
-    def __init__(self, total: Optional[float] = None, description: Optional[str] = None, **kwargs: Any) -> None:
-        self.pbar = tqdm(desc=description, total=total, **kwargs)
+    def __init__(
+        self, total: Optional[float] = None, description: Optional[str] = None, transient: bool = False, **fields: Any
+    ) -> None:
+        leave = not transient
+        self.pbar = tqdm(desc=description, total=total, leave=leave, **fields)
 
     def __enter__(self) -> Self:
         return self
@@ -34,7 +37,7 @@ class Task(BaseTask):
         completed: Union[Optional[float], Type[_Default]] = _Default,
         total: Union[Optional[float], Type[_Default]] = _Default,
         description: Union[Optional[str], Type[_Default]] = _Default,
-        **kwargs: Any,
+        **fields: Any,
     ) -> None:
         if completed is not _Default:
             self.pbar.n = completed
@@ -50,12 +53,16 @@ class Progress(_Progress):
         sequence: Union[Iterable[T], Sequence[T]],
         total: Optional[float] = None,
         description: Optional[str] = None,
-        **kwargs: Any,
+        transient: bool = False,
+        **fields: Any,
     ) -> Iterator[T]:
-        yield from tqdm(sequence, description, total, **kwargs)
+        leave = not transient
+        yield from tqdm(sequence, description, total, leave, **fields)
 
-    def task(self, total: Optional[float] = None, description: Optional[str] = None, **kwargs: Any) -> BaseTask:
-        return Task(total, description, **kwargs)
+    def task(
+        self, total: Optional[float] = None, description: Optional[str] = None, transient: bool = False, **fields: Any
+    ) -> BaseTask:
+        return Task(total, description, transient, **fields)
 
     def set_prolog(self, prolog: str) -> None:
         raise NotImplementedError
@@ -63,8 +70,8 @@ class Progress(_Progress):
     def set_epilog(self, epilog: str) -> None:
         raise NotImplementedError
 
-    def print(self, s: str, end="\n", **kwargs: Any) -> None:
-        tqdm.write(s, end=end, nolock=kwargs.get("nolock", False))
+    def print(self, s: str, end="\n", **fields: Any) -> None:
+        tqdm.write(s, end=end, nolock=fields.get("nolock", False))
 
 
 class TqdmProcess:
@@ -77,7 +84,7 @@ class TqdmProcess:
         iterable: Optional[Iterable] = None,
         desc: Optional[str] = None,
         total: Union[int, float, None] = None,
-        leave: bool = True,
+        transient: bool = False,
         file: Optional[TextIO] = None,
         ncols: Optional[int] = None,
         mininterval: float = 0.1,
@@ -85,6 +92,7 @@ class TqdmProcess:
         with self.lock:
             position = self.pids.setdefault(os.getpid(), len(self.pids))
 
+        leave = not transient
         yield from tqdm(iterable, desc, total, leave, file, ncols, mininterval, position=position)
 
     def write(self, s: str, file=None, end="\n", nolock=False) -> None:

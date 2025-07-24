@@ -76,10 +76,8 @@ MANUAL_FIXES_ADD = {
     "genutility.numba": ["numba"],
     "genutility.numpy": ["numpy"],
     "genutility.pandas": ["pandas"],
-    "genutility.rich": ["rich"],
     "genutility.tensorflow": ["tensorflow"],
     "genutility.toml": ["toml"],
-    "genutility.tqdm": ["tqdm"],
     "genutility.twisted": ["twisted"],
 }
 

@@ -76,18 +76,25 @@ def install_markdown_excepthook(console: Optional[Console] = None) -> Callable:
 
 class Task(BaseTask):
     def __init__(
-        self, progress: _RichProgress, total: Optional[float] = None, description: Optional[str] = None, **fields: Any
+        self,
+        progress: _RichProgress,
+        total: Optional[float] = None,
+        description: Optional[str] = None,
+        transient: bool = False,
+        **fields: Any,
     ) -> None:
         self.progress = progress
         description = description or "Working..."
         self.task_id = self.progress.add_task(description, total=total, **fields)
+        self.transient = transient
 
     @property
     def description(self) -> str:
         return self.progress._tasks[self.task_id].description
 
     def remove(self) -> None:
-        self.progress.remove_task(self.task_id)
+        if self.transient:
+            self.progress.remove_task(self.task_id)
 
     def __enter__(self) -> Self:
         return self
@@ -141,18 +148,25 @@ class Progress(_Progress):
         self,
         sequence: SizedIterable[ProgressType],
         description: Optional[str] = None,
+        transient: bool = False,
         **fields: Any,
     ) -> Iterable[ProgressType]:
         description = description or "Working..."
-        with self.task(description=description, **fields) as task:
+        with self.task(description=description, transient=transient, **fields) as task:
             for completed, item in enumerate(sequence):
                 total = len(sequence)
                 task.update(completed=completed, total=total)
                 yield item
 
-    def task(self, total: Optional[float] = None, description: Optional[str] = "Working...", **fields: Any):
+    def task(
+        self,
+        total: Optional[float] = None,
+        description: Optional[str] = "Working...",
+        transient: bool = False,
+        **fields: Any,
+    ):
         assert description is not None
-        return Task(self.progress, total, description, **fields)
+        return Task(self.progress, total, description, transient, **fields)
 
     def get_renderable(self) -> RenderableType:
         renderables = []

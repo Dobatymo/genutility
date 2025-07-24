@@ -658,7 +658,9 @@ def split(it: Iterable[T], size: int) -> Sequence[Iterable[T]]:
 
 
 def no_dupes(*its: Iterable[T]) -> Iterator[T]:
-    """Merge `its` and removes all duplicates while preserving order."""
+    """Merge `its` and removes all duplicates while preserving order.
+    Alternatives names: ordered_unique
+    """
 
     seen: Set[T] = set()
 
@@ -946,3 +948,15 @@ def iter_len(it: Union[Iterable, Collection]) -> int:
         return len(it)  # type: ignore
     except TypeError:
         return sum(1 for _ in it)
+
+
+class IterableWithLength(Generic[T]):
+    def __init__(self, iterable: Iterable[T], length: int) -> None:
+        self._iterable = iterable
+        self._length = length
+
+    def __iter__(self) -> Iterator[T]:
+        return iter(self._iterable)
+
+    def __len__(self) -> int:
+        return self._length

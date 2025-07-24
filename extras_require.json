@@ -257,6 +257,10 @@
     "sequence": [],
     "set": [],
     "signal": [],
+    "sklearn": [
+        "numpy",
+        "scikit-learn"
+    ],
     "sort": [],
     "spark": [
         "pyspark>=3.0.0"

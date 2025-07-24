@@ -32,7 +32,9 @@ class BaseTask:
 
 
 class Task(BaseTask):
-    def __init__(self, total: Optional[float] = None, description: Optional[str] = None) -> None:
+    def __init__(
+        self, total: Optional[float] = None, description: Optional[str] = None, transient: bool = False, **fields: Any
+    ) -> None:
         pass
 
     def advance(self, delta: float) -> None:
@@ -55,12 +57,15 @@ class Progress:
         sequence: Union[Iterable[T], Sequence[T]],
         total: Optional[float] = None,
         description: Optional[str] = None,
+        transient: bool = False,
         **fields: Any,
     ) -> Iterator[T]:
         yield from sequence
 
-    def task(self, total: Optional[float] = None, description: Optional[str] = None, **fields: Any) -> BaseTask:
-        return Task(total, description, **fields)
+    def task(
+        self, total: Optional[float] = None, description: Optional[str] = None, transient: bool = False, **fields: Any
+    ) -> BaseTask:
+        return Task(total, description, transient, **fields)
 
     def set_prolog(self, prolog: Any) -> None:
         pass

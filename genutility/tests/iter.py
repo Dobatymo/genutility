@@ -8,6 +8,7 @@ from hypothesis import given, strategies
 
 from genutility.iter import (
     EmptyIterable,
+    IterableWithLength,
     IteratorExhausted,
     advance,
     all_equal,
@@ -733,6 +734,14 @@ class IterTest(MyTestCase):
     def test_iter_len(self, obj, truth):
         result = iter_len(obj)
         self.assertEqual(truth, result)
+
+    def test_IterableWithLength(self):
+        truth_list = [1, 2]
+        truth_len = len(truth_list)
+
+        it = IterableWithLength(truth_list, truth_len)
+        self.assertEqual(truth_len, len(it))
+        self.assertEqual(truth_list, list(it))
 
 
 if __name__ == "__main__":
