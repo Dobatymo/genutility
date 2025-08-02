@@ -19,7 +19,7 @@ def iter_zip(
     newline: Optional[str] = None,
     password: Optional[bytes] = None,
     sort: bool = False,
-    sort_key: Optional[Callable[[ZipInfo], SupportsRichComparison]] = None,
+    sort_key: Optional[Callable[["ZipInfo"], "SupportsRichComparison"]] = None,
 ) -> Iterator[Tuple[str, IO]]:
     """
     Iterate file-pointers to archived files. They are valid for one iteration step each.

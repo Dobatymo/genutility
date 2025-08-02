@@ -1,3 +1,4 @@
+import pickle  # nosec: B403
 import unittest
 from sqlite3 import sqlite_version_info
 from time import sleep
@@ -33,6 +34,13 @@ class History2(FileDbHistory):
 
 
 class SimpleDBTest(MyTestCase):
+    def test_pickle(self):
+        db = Simple(":memory:", "tests")
+        data = pickle.dumps(db)
+        db2 = pickle.loads(data)  # nosec: B301
+        assert db._get_latest_sql.cache_info().currsize == 0
+        assert db2._get_latest_sql.cache_info().currsize == 0
+
     def test_a(self):
         db = Simple(":memory:", "tests")
 

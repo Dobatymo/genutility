@@ -74,6 +74,15 @@ class GenericDb:
 
         self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)  # type: ignore[assignment,method-assign]
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["_get_latest_sql"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)
+
     @tls_property
     def connection(self):
         if os.fspath(self.dbpath) != ":memory:" and not Path(self.dbpath).parent.is_dir():
