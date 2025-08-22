@@ -12,6 +12,7 @@ from genutility.numpy import (
     bincount_batch,
     center_of_mass_2d,
     decompress,
+    fill_gaps,
     hamming_dist,
     hamming_dist_packed,
     hamming_dist_packed_chunked,
@@ -22,6 +23,7 @@ from genutility.numpy import (
     limit_balanced,
     logtrace,
     remove_color,
+    remove_spikes,
     rgb_to_hsi,
     sequence_mask,
     shannon_entropy,
@@ -700,6 +702,124 @@ class NumpyTest(MyTestCase):
 
         df = np.array([["a", "a"], ["b", "b"], ["c", "c"], ["a", "a"], ["b", "b"], ["c", "c"]], dtype="<U1")
         np.testing.assert_array_equal(arg_sample_balanced(df, 4), np.array([3, 4, 2, 5]))
+
+    def test_fill_gaps(self):
+        from scipy.ndimage import binary_hit_or_miss
+
+        x1 = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0], dtype=np.uint8)
+        x2 = np.array([1, 1, 0, 1, 1, 0, 0, 1, 0, 0], dtype=np.uint8)
+        x3 = np.array([1, 1, 0, 1, 1, 0, 1, 1], dtype=np.uint8)
+
+        # size==2
+        truth1 = x1
+        truth2 = np.array([1, 1, 1, 1, 1, 0, 0, 1, 0, 0], dtype=np.uint8)
+        truth3 = np.array([1, 1, 1, 1, 1, 1, 1, 1], dtype=np.uint8)
+
+        x1c = x1.copy()
+        fill_gaps(x1c, size=2)
+        assert np.array_equal(x1c, truth1)
+
+        x2c = x2.copy()
+        fill_gaps(x2c, size=2)
+        assert np.array_equal(x2c, truth2)
+
+        x3c = x3.copy()
+        fill_gaps(x3c, size=2)
+        assert np.array_equal(x3c, truth3)
+
+        result = binary_hit_or_miss(x1, np.array([1, 1, 0, 1, 1]))
+        assert np.array_equal(truth1, x1 ^ result), (truth1, x1, result)
+
+        result = binary_hit_or_miss(x2, np.array([1, 1, 0, 1, 1]))
+        assert np.array_equal(truth2, x2 ^ result), (truth2, x2, result)
+
+        result = binary_hit_or_miss(x3, np.array([1, 1, 0, 1, 1]))
+        assert np.array_equal(truth3, x3 ^ result), (truth3, x3, result)
+
+        # size==0
+        truth1 = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=np.uint8)
+        truth2 = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=np.uint8)
+        truth3 = np.array([1, 1, 1, 1, 1, 1, 1, 1], dtype=np.uint8)
+
+        x1c = x1.copy()
+        fill_gaps(x1c, size=0)
+        assert np.array_equal(x1c, truth1)
+
+        x2c = x2.copy()
+        fill_gaps(x2c, size=0)
+        assert np.array_equal(x2c, truth2)
+
+        x3c = x3.copy()
+        fill_gaps(x3c, size=0)
+        assert np.array_equal(x3c, truth3)
+
+        result = binary_hit_or_miss(x1, np.array([0]))
+        assert np.array_equal(truth1, x1 ^ result), (truth1, x1, result)
+
+        result = binary_hit_or_miss(x2, np.array([0]))
+        assert np.array_equal(truth2, x2 ^ result), (truth2, x2, result)
+
+        result = binary_hit_or_miss(x3, np.array([0]))
+        assert np.array_equal(truth3, x3 ^ result), (truth3, x3, result)
+
+    def test_remove_spikes(self):
+        from scipy.ndimage import binary_hit_or_miss
+
+        x1 = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0], dtype=np.uint8)
+        x2 = np.array([1, 1, 0, 1, 1, 0, 0, 1, 0, 0], dtype=np.uint8)
+        x3 = np.array([0, 0, 1, 0, 0, 1, 0, 0], dtype=np.uint8)
+
+        # size==2
+        truth1 = x1
+        truth2 = np.array([1, 1, 0, 1, 1, 0, 0, 0, 0, 0], dtype=np.uint8)
+        truth3 = np.array([0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+
+        x1c = x1.copy()
+        remove_spikes(x1c, size=2)
+        assert np.array_equal(x1c, truth1)
+
+        x2c = x2.copy()
+        remove_spikes(x2c, size=2)
+        assert np.array_equal(x2c, truth2)
+
+        x3c = x3.copy()
+        remove_spikes(x3c, size=2)
+        assert np.array_equal(x3c, truth3)
+
+        result = binary_hit_or_miss(x1, np.array([0, 0, 1, 0, 0]))
+        assert np.array_equal(truth1, x1 ^ result), (truth1, x1, result)
+
+        result = binary_hit_or_miss(x2, np.array([0, 0, 1, 0, 0]))
+        assert np.array_equal(truth2, x2 ^ result), (truth2, x2, result)
+
+        result = binary_hit_or_miss(x3, np.array([0, 0, 1, 0, 0]))
+        assert np.array_equal(truth3, x3 ^ result), (truth3, x3, result)
+
+        # size==0
+        truth1 = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+        truth2 = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+        truth3 = np.array([0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+
+        x1c = x1.copy()
+        remove_spikes(x1c, size=0)
+        assert np.array_equal(x1c, truth1)
+
+        x2c = x2.copy()
+        remove_spikes(x2c, size=0)
+        assert np.array_equal(x2c, truth2)
+
+        x3c = x3.copy()
+        remove_spikes(x3c, size=0)
+        assert np.array_equal(x3c, truth3)
+
+        result = binary_hit_or_miss(x1, np.array([1]))
+        assert np.array_equal(truth1, x1 ^ result), (truth1, x1, result)
+
+        result = binary_hit_or_miss(x2, np.array([1]))
+        assert np.array_equal(truth2, x2 ^ result), (truth2, x2, result)
+
+        result = binary_hit_or_miss(x3, np.array([1]))
+        assert np.array_equal(truth3, x3 ^ result), (truth3, x3, result)
 
 
 if __name__ == "__main__":

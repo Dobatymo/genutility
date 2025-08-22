@@ -2,6 +2,7 @@ from math import exp, sqrt
 from typing import Any, Callable, Dict, Generic, Iterator, Optional, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
 
 # from .numba import opjit
 
@@ -856,3 +857,47 @@ def arg_sample_balanced(arr: np.ndarray, total: int, seed: int = 0) -> np.ndarra
     assert len(out) == min(total, len(arr))
     assert len(np.unique(out)) == len(out)
     return out
+
+
+def fill_gaps(arr: np.ndarray, size: int = 2, axis: int = -1) -> np.ndarray:
+    """
+    In-place morphological 1d denoising (closing). fills gaps in binary sequences ie. 11011 -> 11111.
+    """
+
+    # 0 0 -> 0
+    # 0 1 -> 1
+    # 1 0 -> 1
+    # 1 1 -> impossible
+    # operator -> "l or r" (1), or "l xor r" (0)
+
+    pattern = np.ones(2 * size + 1, dtype=np.uint8)
+    pattern[size] = 0
+    windows = sliding_window_view(arr, 2 * size + 1)
+    matches = np.all(windows == pattern, axis=axis)
+    if size == 0:
+        end = None
+    else:
+        end = -size
+    arr[size:end] = matches | arr[size:end]
+
+
+def remove_spikes(arr: np.ndarray, size: int = 2, axis: int = -1) -> np.ndarray:
+    """
+    In-place morphological 1d denoising (opening). removes peaks in binary sequences ie. 00100 -> 00000.
+    """
+
+    # 0 0 -> 0
+    # 0 1 -> impossible
+    # 1 0 -> 1
+    # 1 1 -> 0
+    # operator -> " l and not r" (0), or "l xor r" (1)
+
+    pattern = np.zeros(2 * size + 1, dtype=np.uint8)
+    pattern[size] = 1
+    windows = sliding_window_view(arr, 2 * size + 1)
+    matches = np.all(windows == pattern, axis=axis)
+    if size == 0:
+        end = None
+    else:
+        end = -size
+    arr[size:end] = matches ^ arr[size:end]

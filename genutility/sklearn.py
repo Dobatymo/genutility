@@ -10,7 +10,6 @@ def train_test_split_indices(
     train_size: Optional[Union[int, float]] = None,
     random_state: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
-
     sss = StratifiedShuffleSplit(test_size=test_size, train_size=train_size, random_state=random_state)
     X = np.zeros(len(y))
 

@@ -21,6 +21,15 @@ class FuncTest(MyTestCase):
         self.assertEqual(truth, result)
 
     @parametrize(
+        ((lambda x, y: x + y + "c",), ("a", "b"), "abc"),
+        ((lambda x: x + "d", lambda x, y: x + y + "c"), ("a", "b"), "abcd"),
+        ((lambda x: x + "e", lambda x: x + "d", lambda x, y: x + y + "c"), ("a", "b"), "abcde"),
+    )
+    def test_compose_2(self, funcs, inputs, truth):
+        result = compose(*funcs)(*inputs)
+        self.assertEqual(truth, result)
+
+    @parametrize(
         ((), (), ()),
         ((lambda x: x + 1,), (0,), (1,)),
         ((lambda x: x + 1, lambda x: x + 2, lambda x: x + 3), (1, 2, 3), (2, 4, 6)),

@@ -45,10 +45,10 @@ def partial_decorator(*args: Any, **kwargs: Any) -> Callable:
     return decorator
 
 
-def compose_two(f: Callable[[Any], Any], g: Callable[[Any], Any]) -> Callable[[Any], Any]:
+def compose_two(f: Callable[[T], U], g: Callable[..., T]) -> Callable[..., U]:
     """compose_two(f, g) -> lambda x: f(g(x))"""
 
-    return lambda x: f(g(x))
+    return lambda *args, **kwargs: f(g(*args, **kwargs))
 
 
 def compose(*functions: Callable[[Any], Any]) -> Callable[[Any], Any]:
@@ -56,7 +56,7 @@ def compose(*functions: Callable[[Any], Any]) -> Callable[[Any], Any]:
     see: Function composition
     """
 
-    return reduce(compose_two, functions, identity)
+    return reduce(compose_two, functions)
 
 
 def apply(f: Callable[[T], U], x: T) -> U:  # *args, **kwargs
