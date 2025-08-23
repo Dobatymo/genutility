@@ -145,8 +145,10 @@ class CvVideo(VideoBase):
 
     def iterall(self, native: bool = False) -> Iterator[Tuple[float, np.ndarray]]:
         while True:
+            # CAP_PROP_POS_FRAMES gives the index of the next frame to read
+            # so get() before read() (also in python it's a float although it should be a int)
+            offset = int(self.cap.get(self.cv2.CAP_PROP_POS_FRAMES))
             retval, image = self.cap.read()
-            offset = self.cap.get(self.cv2.CAP_PROP_POS_FRAMES)
             if retval:
                 if not native:
                     image = self.cv2.cvtColor(image, self.cv2.COLOR_BGR2RGB)
