@@ -94,11 +94,11 @@ sort = "Cover"
 allow_redefinition = true
 ignore_missing_imports = true
 no_implicit_optional = true
+strict_equality = true
 warn_redundant_casts = true
 warn_unused_configs = true
 warn_unused_ignores = true
 warn_unreachable = true
-strict_equality = true
 
 [tool.bandit]
 skips = [

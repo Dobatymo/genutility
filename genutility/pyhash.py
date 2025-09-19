@@ -9,7 +9,7 @@ def _to_pysigned(x: int, bits: int) -> int:
 
 
 def py2_hash_ucs_4(data: Union[str, bytes], bits: int = 64) -> int:
-    """ Calculate the non-randomized Python `hash()` as used in Python 2.
+    """Calculate the non-randomized Python `hash()` as used in Python 2.
     Both 32-bit and 64-bit hashes are supported.
 
     On Windows, Python 2 64-bit builds still use 32-bits hashes,

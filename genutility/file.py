@@ -122,6 +122,10 @@ def wrap_text(bf, mode, encoding, errors, newline):
     return bf
 
 
+def will_compress(suffix: str) -> bool:
+    return suffix in (".gz", ".bz2", ".zip")
+
+
 def copen(
     file: Union[PathType, IO, int],
     mode: str = "rt",
@@ -158,12 +162,18 @@ def copen(
     if isinstance(file, (str, PathLike)):
         ext = os.path.splitext(file)[1].lower()
     elif isinstance(file, int):
-        file = fdopen(file, mode, encoding=encoding, errors=errors, newline=newline)
         ext = ext and ext.lower()
+        if handle_archives and will_compress(ext):
+            newmode = "b" + _stripmode(mode)
+            file = fdopen(file, newmode)  # force binary
+        else:
+            file = fdopen(file, mode, encoding=encoding, errors=errors, newline=newline)
     else:
         ext = ext and ext.lower()
 
     if handle_archives:
+        # fixme: if file is a file-like object, it needs to be in binary mode here
+
         if ext == ".gz":
             import gzip
 

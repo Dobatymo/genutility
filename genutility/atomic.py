@@ -20,12 +20,12 @@ class TransactionalCreateFile:
         prefix: str = "tmp",
         handle_archives: bool = True,
     ) -> None:
-        is_text = "t" in mode
-
         self.path = fspath(path)
         suffix = os.path.splitext(self.path)[1].lower()
         curdir = os.path.dirname(self.path)
-        fd, self.tmppath = mkstemp(suffix, prefix, curdir, is_text)
+        fd, self.tmppath = mkstemp(
+            suffix, prefix, curdir, text=False
+        )  # files are usually always opened with O_BINARY in cpython
         self.fp = copen(
             fd, mode, encoding=encoding, errors=errors, newline=newline, ext=suffix, handle_archives=handle_archives
         )
