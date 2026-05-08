@@ -684,8 +684,11 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
 
+    if not args.path.exists():
+        raise FileNotFoundError(fspath(args.path))
+
     def print_atoms(path: Path, parse_atoms: bool, only_type: Collection[str], search: bytes) -> None:
-        unparsed_data = search or only_type
+        unparsed_data = bool(search) or bool(only_type)
 
         for depth, pos, type, size, content, leaf in enumerate_atoms(
             fspath(path), parse_atoms=parse_atoms, unparsed_data=unparsed_data
@@ -733,4 +736,4 @@ if __name__ == "__main__":
                 print(f"{errors_count}/{total_count} files failed to parse")
 
         else:
-            assert False
+            assert False, "Not file or directory"

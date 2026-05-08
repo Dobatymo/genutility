@@ -1,7 +1,8 @@
 import os.path
 from os import PathLike, fspath, remove, replace
 from tempfile import mkstemp
-from typing import IO, ContextManager, Optional, Union
+from types import TracebackType
+from typing import IO, ContextManager, Optional, Type, Union
 
 from .file import copen
 
@@ -41,7 +42,12 @@ class TransactionalCreateFile:
     def __enter__(self) -> IO:
         return self.fp
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         # at this point the original file is unmodified and the new file exists as tempfile on disk (or in buffer on windows)
         if exc_type:
             self.rollback()

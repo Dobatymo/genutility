@@ -1,10 +1,12 @@
+import os
 import os.path
-from io import SEEK_END, SEEK_SET, BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
+from io import BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from mmap import mmap
-from os import PathLike, fdopen
+from os import SEEK_END, SEEK_SET
 from pathlib import Path
 from sys import stdout
-from typing import IO, Callable, Iterable, Iterator, Optional, TypeVar, Union, overload
+from types import TracebackType
+from typing import IO, Callable, Iterable, Iterator, Optional, Type, TypeVar, Union, overload
 
 from typing_extensions import Self
 
@@ -159,15 +161,15 @@ def copen(
     if archive_file is not None and handle_archives is False:
         raise ValueError("handle_archives must be True to allow archive_file to be used")
 
-    if isinstance(file, (str, PathLike)):
+    if isinstance(file, (str, os.PathLike)):
         ext = os.path.splitext(file)[1].lower()
     elif isinstance(file, int):
         ext = ext and ext.lower()
         if handle_archives and will_compress(ext):
             newmode = "b" + _stripmode(mode)
-            file = fdopen(file, newmode)  # force binary
+            file = os.fdopen(file, newmode)  # force binary
         else:
-            file = fdopen(file, mode, encoding=encoding, errors=errors, newline=newline)
+            file = os.fdopen(file, mode, encoding=encoding, errors=errors, newline=newline)
     else:
         ext = ext and ext.lower()
 
@@ -236,7 +238,13 @@ class OpenFileAndDeleteOnError:
         self.fp = copen(self.file, self.mode, None, self.encoding, self.errors, self.newline, self.compresslevel)
         return self.fp
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        assert self.fp is not None
         self.fp.close()
         if exc_type:
             # fixme: race condition
@@ -273,14 +281,21 @@ class OptionalWriteOnlyFile:
         if self.fp:
             self.fp.close()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def write(self, data) -> Optional[int]:
         pass
 
-    def seek(self, offset: int, whence: int = 0) -> int:
-        pass
+    def seek(self, offset: int, whence: int = SEEK_SET) -> int:
+        if whence == SEEK_SET:
+            return offset
+        raise OSError("Only absolute seeks are supported")
 
 
 class StdoutFile:
@@ -314,7 +329,12 @@ class StdoutFile:
         if self.doclose:
             self.fp.close()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
 
@@ -334,7 +354,12 @@ class PathOrBinaryIO:
         if self.doclose:
             self.fp.close()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
 
@@ -362,7 +387,12 @@ class PathOrTextIO:
         if self.doclose:
             self.fp.close()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
 
@@ -377,7 +407,12 @@ class LastLineFile:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def close(self):
@@ -481,7 +516,7 @@ class Tell:
     def writelines(self, lines):  # fixme: should this be added to _pos?
         return self._fp.writelines(lines)
 
-    def seek(self, offset, whence=SEEK_SET):
+    def seek(self, offset: int, whence: int = SEEK_SET) -> int:
         raise OSError("Stream is not seekable")
 
     def tell(self):
@@ -789,9 +824,9 @@ def iter_lines(
         if progress is not None:
             prev_pos = 0
 
-            fr.seek(0, os.SEEK_END)
+            fr.seek(0, SEEK_END)
             total = fr.tell()
-            fr.seek(0, os.SEEK_SET)
+            fr.seek(0, SEEK_SET)
 
             with progress.task(total=total) as task:
                 while True:  # cannot use `for line in fr` here

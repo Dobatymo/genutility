@@ -7,7 +7,22 @@ from collections import UserDict
 from functools import lru_cache
 from itertools import chain, repeat
 from pathlib import Path
-from typing import Any, Callable, Collection, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar, Union
+from types import TracebackType
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from tls_property import tls_property
 from typing_extensions import Self
@@ -135,7 +150,12 @@ class GenericDb:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def __len__(self) -> int:

@@ -6,7 +6,7 @@ requires = [
 
 [project]
 name = "genutility"
-version = "0.0.119"
+version = "0.0.120"
 description = "A collection of various Python utilities"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -99,6 +99,7 @@ warn_redundant_casts = true
 warn_unused_configs = true
 warn_unused_ignores = true
 warn_unreachable = true
+exclude = [ '.venv' ]
 
 [tool.bandit]
 skips = [

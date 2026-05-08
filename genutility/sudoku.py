@@ -185,7 +185,7 @@ class SudokuBruteforce(Sudoku):
             raise ValueError("Invalid strategy")
 
         i = 0
-        backtrack: Tuple[int, T] = []
+        backtrack: List[Tuple[int, T]] = []
         backtracks = 0
         steps = 0
 

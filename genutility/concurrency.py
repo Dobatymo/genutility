@@ -6,7 +6,23 @@ from collections import deque
 from concurrent.futures._base import FINISHED
 from multiprocessing import Pool
 from queue import Empty, Queue
-from typing import Any, Callable, Deque, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from types import TracebackType
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import Self
 
@@ -613,7 +629,12 @@ class ThreadsafeList(list):  # untested!!!
         self.lock.acquire()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.lock.release()
 
 

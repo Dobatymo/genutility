@@ -1,3 +1,6 @@
+from types import TracebackType
+from typing import Optional, Type
+
 from typing_extensions import Self
 
 from ..exceptions import MalformedFile
@@ -22,7 +25,12 @@ class Sub:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def _readline(self):

@@ -2,6 +2,7 @@ import os
 from multiprocessing import Manager, RLock
 from multiprocessing.synchronize import RLock as RLockT
 from threading import Lock
+from types import TracebackType
 from typing import Any, Iterable, Iterator, MutableMapping, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Self
@@ -25,7 +26,12 @@ class Task(BaseTask):
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *args):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.pbar.close()
 
     def advance(self, delta: float) -> None:
@@ -117,5 +123,10 @@ class TqdmMultiprocessing:
         pids = manager.dict()
         return TqdmProcess(lock, pids)
 
-    def __exit__(self, *args):
-        self.manager.__exit__(*args)
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.manager.__exit__(exc_type, exc_value, traceback)
