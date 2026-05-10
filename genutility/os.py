@@ -1,6 +1,5 @@
 import os
 import platform
-import sys
 from pathlib import Path
 from typing import Callable, Union
 
@@ -40,6 +39,8 @@ def _not_available(func_name: str) -> Callable:
 
 
 if system == "Windows":
+    from os.path import realpath
+
     from .os_win import _disk_usage_windows as disk_usage
     from .os_win import _filemanager_cmd_windows as filemanager_cmd
     from .os_win import _get_appdata_dir as get_appdata_dir
@@ -48,11 +49,6 @@ if system == "Windows":
     from .os_win import _lock as lock
     from .os_win import _unlock as unlock
     from .os_win import _volume_info_windows as volume_info
-
-    if sys.version_info >= (3, 8):
-        from os.path import realpath
-    else:
-        from .os_win import _realpath as realpath
 
 elif system == "Linux":
     from .os_posix import _disk_usage_posix as disk_usage

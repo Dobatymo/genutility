@@ -209,7 +209,6 @@ class AvVideo(VideoBase):
         "coded_height",
         "coded_width",
         "display_aspect_ratio",
-        "encoded_frame_count",
         "format",
         "framerate",
         "has_b_frames",
@@ -245,6 +244,9 @@ class AvVideo(VideoBase):
         del vcc["format"]
 
         vcc["average_rate"] = getattr(self.vstream, "average_rate", None)  # for av>=10.0.0
+        vcc["encoded_frame_count"] = getattr(
+            self.vstream.codec_context, "encoded_frame_count", None
+        )  # it was removed in av==17.0.1
 
         self.native_duration = self.vstream.duration  # exclusive
         self.time_base = self.vstream.time_base

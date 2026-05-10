@@ -1,6 +1,10 @@
-import pkg_resources
+import json
 
-from genutility.json import read_json
+try:
+    from importlib.resources import files
+except ImportError:
+    from importlib_resources import files
+
 from genutility.sudoku import SudokuBruteforce, is_valid_solution
 from genutility.test import MyTestCase
 
@@ -29,7 +33,7 @@ class SudokuTest(MyTestCase):
         self.assertFalse(result)
 
     def test_sudoku_bruteforce(self):
-        sudokus = read_json(pkg_resources.resource_filename("genutility", "data/sudokus.json"))
+        sudokus = json.loads(files("genutility").joinpath("data", "sudokus.json").read_text(encoding="utf-8"))
         sym_set = set(sudokus["symbols"])
         sym_free = sudokus["free"]
 

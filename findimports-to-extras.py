@@ -23,7 +23,6 @@ modmap = {
     "msgpack": "msgpack>=0.6.0",
     "nltk": "nltk>=3.6.1",
     "numba": "numba; python_version<'3.11'",
-    "pkg_resources": "setuptools",
     "pptx": "python-pptx",
     "py7zr": "py7zr>=0.20.2",
     "pyspark": "pyspark>=3.0.0",
@@ -45,6 +44,7 @@ modmap = {
     "mistune": "mistune<2",
     "polars": "polars>=1.18; python_version>='3.9'",
     "importlib_metadata": "importlib-metadata>=1.4",
+    "importlib_resources": "importlib-resources>=5; python_version<'3.9'",
 }
 
 BUILTINS = (

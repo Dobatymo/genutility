@@ -8,7 +8,10 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, Collection, Dict, Iterable, Iterator, List, NamedTuple, Optional, Tuple, Union
 
-import pkg_resources
+try:
+    from importlib.resources import as_file, files
+except ImportError:
+    from importlib_resources import as_file, files
 
 from ..csv import iter_csv
 from ..exceptions import Break, ParseError
@@ -513,20 +516,20 @@ versions = {
     "fecr": (0, 1),
 }
 
+_ATOMS_RESOURCE = files(__package__).joinpath("data", "mp4-atoms.tsv")
+
 
 def _load_atoms() -> Dict[str, Tuple[str, str, str]]:
-    package_name = __package__ or "genutility"
-    atoms_path = pkg_resources.resource_filename(package_name, "data/mp4-atoms.tsv")
-
     out: Dict[str, Tuple[str, str, str]] = {}
 
-    try:
-        for fourcc, type, boxtype, description, _ in iter_csv(atoms_path, delimiter="\t", skip=1):
-            assert fourcc not in out, f"Invalid fourcc: {fourcc}"
-            out[fourcc] = (type, boxtype, description)
-    except ValueError:
-        logging.exception("Failed to parse atoms file at line %s", len(out) + 1)
-        raise
+    with as_file(_ATOMS_RESOURCE) as atoms_path:
+        try:
+            for fourcc, type, boxtype, description, _ in iter_csv(os.fspath(atoms_path), delimiter="\t", skip=1):
+                assert fourcc not in out, f"Invalid fourcc: {fourcc}"
+                out[fourcc] = (type, boxtype, description)
+        except ValueError:
+            logging.exception("Failed to parse atoms file at line %s", len(out) + 1)
+            raise
 
     return out
 
@@ -659,9 +662,9 @@ if __name__ == "__main__":
     from genutility.iter import list_except
     from genutility.rich import Progress
 
-    atoms_path = pkg_resources.resource_filename(__package__, "data/mp4-atoms.tsv")
-    df = pd.read_csv(atoms_path, sep="\t")
-    df.sort_values("fourcc").to_csv(atoms_path + ".new", sep="\t", index=False)
+    with as_file(_ATOMS_RESOURCE) as atoms_path:
+        df = pd.read_csv(atoms_path, sep="\t")
+        df.sort_values("fourcc").to_csv(f"{atoms_path}.new", sep="\t", index=False)
 
     def bytes_from_ascii(s):
         return s.encode("ascii")
