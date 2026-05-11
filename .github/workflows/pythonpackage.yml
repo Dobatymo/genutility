@@ -11,8 +11,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: 3.8
     - name: Install dependencies
@@ -33,9 +35,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -43,7 +47,6 @@ jobs:
         python -m pip install -U pip wheel
         python -m pip install -r requirements-test.txt
     - name: Install dependencies
-      if: matrix.python-version != '3.7'
       run: |
         python -m nltk.downloader punkt_tab
     - name: Run tests
@@ -57,10 +60,13 @@ jobs:
     needs: test
     runs-on: ubuntu-22.04
     if: github.ref == 'refs/heads/master'
-
+    permissions:
+      id-token: write
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: 3.8
     - name: Build dists
@@ -68,7 +74,6 @@ jobs:
         python -m pip install wheel build
         python -m build
     - name: Publish a Python distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
       with:
         user: __token__
-        password: ${{ secrets.pypi_password }}
