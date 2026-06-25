@@ -844,16 +844,16 @@ class CachedIterable(Generic[T]):
         self.done = False
         self.vals: List[T] = []
 
-    def __iter__(self) -> Iterator[T]:
-        if self.done:
-            return iter(self.vals)
-        return chain(self.vals, self._gen_iter())
-
     def _gen_iter(self) -> Iterator[T]:
         for val in self.iterable:
             self.vals.append(val)
             yield val
         self.done = True
+
+    def __iter__(self) -> Iterator[T]:
+        if self.done:
+            return iter(self.vals)
+        return chain(self.vals, self._gen_iter())
 
 
 def find_majority_element(it: Iterable[T]) -> Optional[T]:

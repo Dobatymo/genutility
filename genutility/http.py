@@ -180,12 +180,6 @@ class URLRequest:
     def _close(self):  # unused
         self.response.close()
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
-        self.response.close()
-
     def _content_length(self) -> Optional[int]:
         try:
             content_length = self.headers["Content-Length"]
@@ -323,6 +317,12 @@ class URLRequest:
             return self._download(basepath, filename, fn_prio, overwrite, suffix, report)
         finally:
             self.response.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.response.close()
 
 
 if __name__ == "__main__":

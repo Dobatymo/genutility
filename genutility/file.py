@@ -271,23 +271,9 @@ class OptionalWriteOnlyFile:
         else:
             self.fp = None
 
-    def __enter__(self):
-        if self.fp:
-            return self.fp
-        else:
-            return self
-
     def close(self) -> None:
         if self.fp:
             self.fp.close()
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
 
     def write(self, data) -> Optional[int]:
         pass
@@ -296,6 +282,20 @@ class OptionalWriteOnlyFile:
         if whence == SEEK_SET:
             return offset
         raise OSError("Only absolute seeks are supported")
+
+    def __enter__(self):
+        if self.fp:
+            return self.fp
+        else:
+            return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.close()
 
 
 class StdoutFile:
@@ -322,12 +322,12 @@ class StdoutFile:
             else:
                 raise ValueError(f"Explicit text or binary mode required: {mode}")
 
-    def __enter__(self):
-        return self.fp
-
     def close(self) -> None:
         if self.doclose:
             self.fp.close()
+
+    def __enter__(self):
+        return self.fp
 
     def __exit__(
         self,
@@ -347,12 +347,12 @@ class PathOrBinaryIO:
             self.doclose = True
             self.fp = copen(fname, mode)
 
-    def __enter__(self) -> IO[bytes]:
-        return self.fp
-
     def close(self) -> None:
         if self.doclose:
             self.fp.close()
+
+    def __enter__(self) -> IO[bytes]:
+        return self.fp
 
     def __exit__(
         self,
@@ -380,12 +380,12 @@ class PathOrTextIO:
             self.doclose = True
             self.fp = copen(fname, mode, encoding=encoding, errors=errors, newline=newline)
 
-    def __enter__(self) -> IO[str]:
-        return self.fp
-
     def close(self) -> None:
         if self.doclose:
             self.fp.close()
+
+    def __enter__(self) -> IO[str]:
+        return self.fp
 
     def __exit__(
         self,
@@ -404,25 +404,8 @@ class LastLineFile:
         self.f = open(path, mode)  # buffered
         self.ll_pos = None
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
-
     def close(self):
         self.f.close()
-
-    def _seek_to_last_line(self):
-        if self.ll_pos is None:
-            self.ll_pos = self._get_last_line_pos()
-
-        self.f.seek(self.ll_pos, SEEK_SET)
 
     def _get_last_line_pos(self):
         self.f.seek(0, SEEK_END)
@@ -439,6 +422,12 @@ class LastLineFile:
                     break
             pos = seek_next
         return ret_pos
+
+    def _seek_to_last_line(self):
+        if self.ll_pos is None:
+            self.ll_pos = self._get_last_line_pos()
+
+        self.f.seek(self.ll_pos, SEEK_SET)
 
     def _validate(self, s):
         if self.nl in s:
@@ -460,6 +449,17 @@ class LastLineFile:
         ret = self.f.write(s)
         self.f.truncate()
         return ret
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.close()
 
 
 class Tell:

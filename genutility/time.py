@@ -60,9 +60,6 @@ class DeltaTime:
         self.start = None
         self.end = perf_counter()
 
-    def __iter__(self) -> Self:
-        return self
-
     def __next__(self) -> float:
         self.start, self.end = self.end, perf_counter()
         return self.end - self.start
@@ -76,6 +73,9 @@ class DeltaTime:
     def get_reset(self) -> float:
         self.start, self.end = self.end, perf_counter()
         return self.end - self.start
+
+    def __iter__(self) -> Self:
+        return self
 
 
 class PrintStatementTime:
@@ -125,6 +125,15 @@ class MeasureTime:
         self.start = None
         self.interrupted = None
 
+    def get(self) -> float:
+        if self.start is None:
+            raise RuntimeError("Context not entered")
+
+        if self.delta is None:
+            return perf_counter() - self.start
+
+        return self.delta
+
     def __enter__(self) -> Self:
         self.start = perf_counter()
         return self
@@ -136,26 +145,11 @@ class MeasureTime:
         else:
             self.interrupted = False
 
-    def get(self) -> float:
-        if self.start is None:
-            raise RuntimeError("Context not entered")
-
-        if self.delta is None:
-            return perf_counter() - self.start
-
-        return self.delta
-
 
 class TimeIt:
     def __init__(self) -> None:
         self.results: DefaultDict[Hashable, List[float]] = defaultdict(list)
         self.starts: Dict[Hashable, DeltaTime] = {}
-
-    def __call__(self, key: Hashable, func: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
-        with MeasureTime() as t:
-            ret = func(*args, **kwargs)
-        self.results[key].append(t.get())
-        return ret
 
     def start(self, key: Hashable) -> None:
         self.starts[key] = DeltaTime()
@@ -168,3 +162,9 @@ class TimeIt:
 
     def length(self, key: Hashable) -> int:
         return len(self.results[key])
+
+    def __call__(self, key: Hashable, func: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
+        with MeasureTime() as t:
+            ret = func(*args, **kwargs)
+        self.results[key].append(t.get())
+        return ret

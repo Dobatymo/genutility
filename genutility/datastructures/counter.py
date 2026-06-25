@@ -6,16 +6,6 @@ H2 = TypeVar("H2", bound=Hashable)
 
 
 class MultiCounter(Generic[H1, H2]):
-    def __init__(self, transform: Optional[Callable[[H2], H2]] = None):
-        self.counts: DefaultDict[H1, Dict[H2, int]] = defaultdict(dict)
-        self.transform = transform
-
-        if transform:
-            self.add = self._add_transform
-            self.update = self._update_transform
-        else:
-            self.add = self._add
-            self.update = self._update
 
     def _add(self, name: H1, item: H2) -> None:
         self.counts[name][item] = self.counts[name].get(item, 0)
@@ -35,6 +25,17 @@ class MultiCounter(Generic[H1, H2]):
         for name, item in it:
             item = func(item)
             _counts[name][item] = _counts[name].get(item, 0)
+
+    def __init__(self, transform: Optional[Callable[[H2], H2]] = None):
+        self.counts: DefaultDict[H1, Dict[H2, int]] = defaultdict(dict)
+        self.transform = transform
+
+        if transform:
+            self.add = self._add_transform
+            self.update = self._update_transform
+        else:
+            self.add = self._add
+            self.update = self._update
 
     def items(self) -> ItemsView[H1, Dict[H2, int]]:
         return self.counts.items()

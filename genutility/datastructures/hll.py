@@ -72,6 +72,16 @@ class HyperLogLog:
             for value in other:
                 self.add(value)
 
+    def clear(self) -> None:
+        self.registers = [0] * self.m
+
+    def union(self, other: "HyperLogLog") -> "HyperLogLog":
+        registers = self._merge_registers(other)
+
+        hll = HyperLogLog(self.b, self.hash, self.width)
+        hll.registers = registers
+        return hll
+
     def __len__(self) -> int:
         DV_est = self.alpha * self.m**2 * 1 / sum(2 ** (-r) for r in self.registers)
 
@@ -88,16 +98,6 @@ class HyperLogLog:
             DV = -self.maxsize * log(1 - DV_est / self.maxsize)
 
         return int(DV)
-
-    def clear(self) -> None:
-        self.registers = [0] * self.m
-
-    def union(self, other: "HyperLogLog") -> "HyperLogLog":
-        registers = self._merge_registers(other)
-
-        hll = HyperLogLog(self.b, self.hash, self.width)
-        hll.registers = registers
-        return hll
 
     def __or__(self, other: "HyperLogLog") -> "HyperLogLog":
         return self.union(other)

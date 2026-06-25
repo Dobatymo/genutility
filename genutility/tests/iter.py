@@ -70,12 +70,6 @@ nulllogger.addHandler(logging.NullHandler())
 
 
 class IteratorWithException:
-    def __init__(self):
-        self.ret = [lambda: 1, lambda: 1 / 0, lambda: 2]
-        self.pos = 0
-
-    def __iter__(self):
-        return self
 
     def __next__(self):
         try:
@@ -88,6 +82,13 @@ class IteratorWithException:
             self.pos += 1
 
     next = __next__
+
+    def __init__(self):
+        self.ret = [lambda: 1, lambda: 1 / 0, lambda: 2]
+        self.pos = 0
+
+    def __iter__(self):
+        return self
 
 
 def GeneratorWithException():

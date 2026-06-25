@@ -429,10 +429,6 @@ class BoundedIterator:
         self.iterator: Optional[Iterator[T]] = None
         self.stopped = False
 
-    def __iter__(self) -> Iterator[T]:
-        self.iterator = iter(self.iterable)
-        return self
-
     def __next__(self) -> T:
         if self.iterator is None:
             raise TypeError("iter not called")
@@ -451,6 +447,10 @@ class BoundedIterator:
     def stop(self) -> None:
         self.stopped = True
 
+    def __iter__(self) -> Iterator[T]:
+        self.iterator = iter(self.iterable)
+        return self
+
 
 class BufferedIterable(Generic[T]):
     def __init__(self, it: Iterable[T], bufsize: int):
@@ -458,10 +458,6 @@ class BufferedIterable(Generic[T]):
         self.iterator = None
         self.buffer: Deque[T] = deque([])
         self.bufsize = bufsize
-
-    def __iter__(self) -> Iterator[T]:
-        self.iterator = iter(self.iterable)
-        return self
 
     def __next__(self) -> T:
         if self.iterator is None:
@@ -479,6 +475,10 @@ class BufferedIterable(Generic[T]):
         except IndexError:
             raise StopIteration
 
+    def __iter__(self) -> Iterator[T]:
+        self.iterator = iter(self.iterable)
+        return self
+
 
 class CompletedFutures:
     def __init__(self, it: Iterable[concurrent.futures.Future], bufsize: int, timeout=None):
@@ -487,10 +487,6 @@ class CompletedFutures:
         self.futures: Set[concurrent.futures.Future] = set()
         self.bufsize = bufsize
         self.timeout = timeout
-
-    def __iter__(self) -> Iterator[concurrent.futures.Future]:
-        self.iterator = iter(self.iterable)
-        return self
 
     def __next__(self) -> concurrent.futures.Future:
         if self.iterator is None:
@@ -516,6 +512,10 @@ class CompletedFutures:
     def cancel_pending(self):
         for future in self.futures:
             future.cancel()
+
+    def __iter__(self) -> Iterator[concurrent.futures.Future]:
+        self.iterator = iter(self.iterable)
+        return self
 
 
 def _ignore_sigint() -> None:

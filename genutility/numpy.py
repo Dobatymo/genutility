@@ -223,12 +223,6 @@ class Sampler:
         self.cdf = cdf
         self.psum = cdf[-1]
 
-    def __call__(self) -> int:
-        """Sample one."""
-
-        rand = np.random.uniform(0, self.psum)
-        return np.searchsorted(self.cdf, rand, side="right")
-
     def sample(self, n: int) -> np.ndarray:
         """Sample `n`."""
 
@@ -238,6 +232,12 @@ class Sampler:
     def pdf(self, n: int, minlength: Optional[int] = None) -> np.ndarray:
         out = np.bincount(self.sample(n), minlength=minlength)
         return out / n
+
+    def __call__(self) -> int:
+        """Sample one."""
+
+        rand = np.random.uniform(0, self.psum)
+        return np.searchsorted(self.cdf, rand, side="right")
 
 
 def sample_probabilities(pvals: np.ndarray) -> Callable[[], int]:
@@ -256,6 +256,14 @@ class UnboundedSparseMatrix(Generic[T]):
         self.cols = 0
         self.rows = 0
 
+    def todense(self) -> np.ndarray:
+        ret = np.zeros((self.cols, self.rows), dtype=self.dtype)
+
+        for slice, value in self.m.items():
+            ret[slice] = value
+
+        return ret
+
     def __getitem__(self, slice: Tuple[int, int]) -> T:
         return self.m.get(slice, self.zero)
 
@@ -264,14 +272,6 @@ class UnboundedSparseMatrix(Generic[T]):
         self.cols = max(self.cols, c + 1)
         self.rows = max(self.rows, r + 1)
         self.m[slice] = value
-
-    def todense(self) -> np.ndarray:
-        ret = np.zeros((self.cols, self.rows), dtype=self.dtype)
-
-        for slice, value in self.m.items():
-            ret[slice] = value
-
-        return ret
 
 
 def normalize(pvals: np.ndarray) -> np.ndarray:

@@ -15,14 +15,14 @@ class LazyStringList:
     def __getitem__(self, idx: int) -> str:
         return str(idx)
 
-    def __len__(self) -> int:
-        return self.length
-
     def __iter__(self) -> Iterator[str]:
         return map(str, range(self.length))
 
     def __contains__(self, idx: int) -> bool:
         return 0 <= idx < self.length
+
+    def __len__(self) -> int:
+        return self.length
 
 
 def pop_many(seq: MutableSequence[T], func: Callable) -> Iterator[T]:

@@ -19,19 +19,8 @@ class Sub:
     sep = "|"
 
     def __init__(self, path, mode="r", encoding="utf-8-sig"):
-        self.fp = open(path, mode, encoding)
+        self.fp = open(path, mode, encoding=encoding)
         self.current_line = 0
-
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
 
     def _readline(self):
         line = next(self.fp).rstrip()
@@ -51,9 +40,6 @@ class Sub:
         except StopIteration:
             return None
 
-    def __iter__(self) -> Self:
-        return self
-
     def __next__(self):
         return self._readline()
 
@@ -62,3 +48,17 @@ class Sub:
 
     def close(self):
         self.fp.close()
+
+    def __iter__(self) -> Self:
+        return self
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.close()

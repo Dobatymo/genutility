@@ -19,13 +19,6 @@ class MeasureMemory:
         stats = snapshot_now.compare_to(self.snapshot, "lineno")
         return sum(stat.size for stat in stats)
 
-    def __enter__(self) -> Self:
-        self.snapshot = tracemalloc.take_snapshot()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.total = self._comp()
-
     def get(self) -> int:
         if self.total:
             return self.total
@@ -39,3 +32,10 @@ class MeasureMemory:
             total = self._comp()
 
         print(f"{name} uses {total / 1024 / 1024:.3f} MiB of memory")
+
+    def __enter__(self) -> Self:
+        self.snapshot = tracemalloc.take_snapshot()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.total = self._comp()

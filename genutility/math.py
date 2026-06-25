@@ -196,18 +196,6 @@ def relative_luminance(r: float, g: float, b: float) -> float:
 class _PosInfInt:
     """A fancy version of `sys.maxsize`"""
 
-    def __lt__(self, rhs) -> bool:
-        return False
-
-    def __gt__(self, rhs) -> bool:
-        return True
-
-    def __eq__(self, rhs) -> bool:
-        if isinstance(rhs, _PosInfInt):
-            raise ArithmeticError("Cannot compare inf with inf")
-
-        return False
-
     def __add__(self, rhs) -> Self:
         return self
 
@@ -217,10 +205,22 @@ class _PosInfInt:
 
         return self
 
-    def __str__(self) -> str:
-        return "PosInfInt"
+    def __lt__(self, rhs) -> bool:
+        return False
+
+    def __eq__(self, rhs) -> bool:
+        if isinstance(rhs, _PosInfInt):
+            raise ArithmeticError("Cannot compare inf with inf")
+
+        return False
+
+    def __gt__(self, rhs) -> bool:
+        return True
 
     def __repr__(self) -> str:
+        return "PosInfInt"
+
+    def __str__(self) -> str:
         return "PosInfInt"
 
 

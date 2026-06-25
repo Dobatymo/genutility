@@ -13,13 +13,13 @@ class VariableRowMatrixItems(AbstractSet[Tuple[Tuple[int, int], T]]):
             for c, value in enumerate(row):
                 yield (r, c), value
 
-    def __len__(self) -> int:
-        return sum(len(row) for row in self.vrm.lol)
-
     def __contains__(self, key: object) -> bool:
         (i, j), value = cast(Tuple[Tuple[int, int], T], key)
 
         return self.vrm.lol[i][j] == value
+
+    def __len__(self) -> int:
+        return sum(len(row) for row in self.vrm.lol)
 
 
 class VariableRowMatrix(MutableMapping[Tuple[int, int], T]):
@@ -33,16 +33,12 @@ class VariableRowMatrix(MutableMapping[Tuple[int, int], T]):
         m.lol = lol
         return m
 
-    def __len__(self) -> int:
-        return len(self.lol)
-
-    def __iter__(self) -> Iterator[Tuple[int, int]]:
-        for r, row in enumerate(self.lol):
-            for c, _value in enumerate(row):
-                yield (r, c)
-
     def items(self) -> VariableRowMatrixItems[T]:
         return VariableRowMatrixItems(self)
+
+    def __getitem__(self, key: Tuple[int, int]) -> T:
+        i, j = key
+        return self.lol[i][j]
 
     def __setitem__(self, key: Tuple[int, int], value: T) -> None:
         i, j = key
@@ -68,6 +64,10 @@ class VariableRowMatrix(MutableMapping[Tuple[int, int], T]):
         i, j = key
         self.lol[i][j] = self.default
 
-    def __getitem__(self, key: Tuple[int, int]) -> T:
-        i, j = key
-        return self.lol[i][j]
+    def __iter__(self) -> Iterator[Tuple[int, int]]:
+        for r, row in enumerate(self.lol):
+            for c, _value in enumerate(row):
+                yield (r, c)
+
+    def __len__(self) -> int:
+        return len(self.lol)

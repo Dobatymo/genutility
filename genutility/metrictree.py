@@ -12,12 +12,12 @@ class RoutingObject:
         self.distance_to_parent: Optional[float] = None
         self.covering_radius: Optional[float] = None
 
-    def __repr__(self) -> str:
-        return f"RoutingObject({self.value}, radius={self.covering_radius}, tree={self.subtree})"
-
     def set_subtree(self, node) -> None:
         self.subtree = node
         node.parent_object = self
+
+    def __repr__(self) -> str:
+        return f"RoutingObject({self.value}, radius={self.covering_radius}, tree={self.subtree})"
 
 
 class LeafObject:
@@ -26,11 +26,11 @@ class LeafObject:
 
         self.distance_to_parent: Optional[float] = None
 
-    def __repr__(self):
-        return f"LeafObject({self.value})"
-
     def to_routing_object(self):
         return RoutingObject(self.value)
+
+    def __repr__(self):
+        return f"LeafObject({self.value})"
 
 
 def isid(obj):
@@ -201,9 +201,6 @@ class MTree:
             "generalized-hyperplane": _partition_generalized_hyperplane,
         }[partition or "generalized-hyperplane"]
 
-    def __repr__(self):
-        return f"<MTree: {self.root!r}>"
-
     def _keys(self, node):
         if isinstance(node, InternalNode):
             for ro in node.objects:
@@ -304,6 +301,9 @@ class MTree:
             for lo in node.objects:
                 if self.distance_func(lo.value, value) <= radius:
                     yield lo.value
+
+    def __repr__(self):
+        return f"<MTree: {self.root!r}>"
 
 
 def len_dist(s1, s2):

@@ -16,13 +16,6 @@ class CaseDict(Generic[T]):
         self.d: Dict[str, T] = {}
         self.casemap: DefaultDict[str, Set[str]] = defaultdict(set)
 
-    def __len__(self) -> int:
-        return len(self.d)
-
-    def __setitem__(self, k: str, v: T) -> None:
-        self.d[k] = v
-        self.casemap[k.lower()].add(k)
-
     def keys(self) -> Iterable[str]:
         return self.d.keys()
 
@@ -35,9 +28,6 @@ class CaseDict(Generic[T]):
     def items(self) -> Iterable[Tuple[str, T]]:
         return self.d.items()
 
-    def __getitem__(self, k: str) -> T:
-        return self.d[k]
-
     def igetitem(self, k: str) -> Dict[str, T]:
         results = self.casemap.get(k.lower())
         if results:
@@ -45,18 +35,8 @@ class CaseDict(Generic[T]):
 
         raise KeyError(k)
 
-    def __contains__(self, k: str) -> bool:
-        return k in self.d
-
     def icontains(self, k: str) -> bool:
         return k.lower() in self.casemap
-
-    def __delitem__(self, k: str) -> None:
-        del self.d[k]
-        s = self.casemap[k.lower()]
-        s.remove(k)
-        if not s:
-            del self.casemap[k.lower()]
 
     def idelitem(self, k: str) -> None:
         results = self.casemap.pop(k.lower())  # raise KeyError if it doesn't exist
@@ -85,3 +65,23 @@ class CaseDict(Generic[T]):
         if default is _sentinel:
             default = set()
         return self.casemap.get(k.lower(), default)
+
+    def __getitem__(self, k: str) -> T:
+        return self.d[k]
+
+    def __setitem__(self, k: str, v: T) -> None:
+        self.d[k] = v
+        self.casemap[k.lower()].add(k)
+
+    def __delitem__(self, k: str) -> None:
+        del self.d[k]
+        s = self.casemap[k.lower()]
+        s.remove(k)
+        if not s:
+            del self.casemap[k.lower()]
+
+    def __contains__(self, k: str) -> bool:
+        return k in self.d
+
+    def __len__(self) -> int:
+        return len(self.d)

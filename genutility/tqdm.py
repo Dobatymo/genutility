@@ -23,17 +23,6 @@ class Task(BaseTask):
         leave = not transient
         self.pbar = tqdm(desc=description, total=total, leave=leave, **fields)
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.pbar.close()
-
     def advance(self, delta: float) -> None:
         self.pbar.update(n=delta)
 
@@ -51,6 +40,17 @@ class Task(BaseTask):
             self.pbar.total = total
         if description is not _Default:
             self.pbar.set_description(description)
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.pbar.close()
 
 
 class Progress(_Progress):

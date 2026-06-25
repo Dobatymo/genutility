@@ -263,12 +263,6 @@ with open("{file}", "r") as fr:
             stream, False, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw
         )
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
-
     def iterrange(self, start: int = 0, stop: Optional[int] = None) -> Iterator:
         try:
             import simplejson as sjson
@@ -289,9 +283,6 @@ with open("{file}", "r") as fr:
             e.lineno = linenum
             logger.error("JSON Lines parse error in line %s: %r", linenum, truncate(line, 100))
             raise
-
-    def __iter__(self) -> Iterator:
-        return self.iterrange()
 
     def write(
         self,
@@ -344,6 +335,15 @@ with open("{file}", "r") as fr:
 
     def flush(self) -> None:
         self.f.flush()
+
+    def __iter__(self) -> Iterator:
+        return self.iterrange()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 def read_json_lines(

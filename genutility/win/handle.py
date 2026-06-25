@@ -76,13 +76,6 @@ class WindowsHandle:
     def close(self) -> None:
         CloseHandle(self.handle)
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        if self.doclose:
-            self.close()
-
     def filesize(self) -> int:
         FileSize = LARGE_INTEGER()
         fileapi.GetFileSizeEx(self.handle, byref(FileSize))
@@ -133,3 +126,10 @@ class WindowsHandle:
             wdm.FS_INFORMATION_CLASS.FileFsFullSizeInformation,
         )
         return struct2dict(FsInformation)
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.doclose:
+            self.close()

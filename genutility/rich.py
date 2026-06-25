@@ -96,12 +96,6 @@ class Task(BaseTask):
         if self.transient:
             self.progress.remove_task(self.task_id)
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.remove()
-
     def advance(self, delta: float) -> None:
         self.progress.advance(self.task_id, advance=delta)
 
@@ -117,6 +111,12 @@ class Task(BaseTask):
         assert total is not _Default
         assert description is not _Default
         self.progress.update(self.task_id, completed=completed, total=total, description=description, **fields)
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.remove()
 
 
 class Progress(_Progress):
@@ -305,12 +305,12 @@ class StdoutFile:
 
         self.write = _write
 
-    def __enter__(self) -> Self:
-        return self
-
     def close(self) -> None:
         if self.fp is not None:
             self.fp.close()
+
+    def __enter__(self) -> Self:
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
@@ -329,6 +329,10 @@ class StdoutFileNoStyle(StdoutFile):
 
 
 class MarkdownHighlighter(Highlighter):
+
+    def highlight(self, text: Text) -> None:
+        """Not called"""
+
     def __call__(self, text: Union[str, Text]) -> Union[Text, Markdown]:
         if isinstance(text, str):
             return Markdown(text)
@@ -336,9 +340,6 @@ class MarkdownHighlighter(Highlighter):
             return text
         else:
             raise TypeError(f"str or Text instance required, not {text!r}")
-
-    def highlight(self, text: Text) -> None:
-        """Not called"""
 
 
 class StripAnsiHighlighter(Highlighter):
@@ -358,6 +359,9 @@ class StripAnsiHighlighter(Highlighter):
         re.VERBOSE,
     )
 
+    def highlight(self, text: Text) -> None:
+        """Not called"""
+
     def __call__(self, text: Union[str, Text]) -> Text:
         if isinstance(text, str):
             return Text(self.ansi_escape.sub("", text))
@@ -365,9 +369,6 @@ class StripAnsiHighlighter(Highlighter):
             return text
         else:
             raise TypeError(f"str or Text instance required, not {text!r}")
-
-    def highlight(self, text: Text) -> None:
-        """Not called"""
 
 
 if __name__ == "__main__":

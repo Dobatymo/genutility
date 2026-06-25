@@ -50,12 +50,12 @@ class Sudoku(Generic[T]):
             if i % self.outer_square_size == 0:
                 print()
 
+    def _solve(self, strategy: Optional[str] = None) -> Collection[T]:
+        raise NotImplementedError
+
     def solve(self, strategy: Optional[str] = None) -> Collection[T]:
         self.square = self.init_board(self.square)
         return self._solve(strategy)
-
-    def _solve(self, strategy: Optional[str] = None) -> Collection[T]:
-        raise NotImplementedError
 
 
 class SudokuRulebased(Sudoku):

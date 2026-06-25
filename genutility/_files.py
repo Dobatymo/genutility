@@ -53,25 +53,25 @@ class _DirEntry(os.PathLike):
         assert self._stat is not None
         return self._stat
 
-    def __str__(self) -> str:
-        return f"<_DirEntry {self.name!r}>"
+    def __fspath__(self) -> str:
+        return self.path
 
     def __repr__(self) -> str:
         return str(self)
 
-    def __fspath__(self) -> str:
-        return self.path
+    def __str__(self) -> str:
+        return f"<_DirEntry {self.name!r}>"
 
 
 class BaseDirEntry(os.PathLike):
     __slots__ = ("entry",)
 
+    def __init__(self, entry: DirEntryProtocol) -> None:
+        self.entry = entry
+
     """ You cannot inherit from `os.DirEntry` (type 'nt.DirEntry' is not an acceptable base type),
         so use this wrapper class instead.
     """
-
-    def __init__(self, entry: DirEntryProtocol) -> None:
-        self.entry = entry
 
     @property
     def name(self) -> str:
@@ -96,14 +96,14 @@ class BaseDirEntry(os.PathLike):
     def stat(self, follow_symlinks=True) -> os.stat_result:
         return self.entry.stat(follow_symlinks=follow_symlinks)
 
-    def __str__(self) -> str:
-        return str(self.entry)
+    def __fspath__(self) -> str:
+        return os.fspath(self.entry)
 
     def __repr__(self) -> str:
         return repr(self.entry)
 
-    def __fspath__(self) -> str:
-        return os.fspath(self.entry)
+    def __str__(self) -> str:
+        return str(self.entry)
 
 
 MyDirEntryT = Union[os.DirEntry, BaseDirEntry]

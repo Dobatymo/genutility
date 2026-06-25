@@ -46,6 +46,42 @@ class Keys(UserDict):
 class GenericDb:
     order_col = "_order"
 
+    def _filtered_derived(self, derived: Collection[str], select: str) -> Iterable[Tuple[str, str, str]]:
+        if select == "null":
+            return ((n, t, v) for n, t, v in self._derived if n not in derived)
+        elif select == "not-null":
+            return ((n, t, v) for n, t, v in self._derived if n in derived)
+        elif select == "all":
+            return self._derived
+        else:
+            raise ValueError("select must be one of: null, not-null, all")
+
+    def _get_fields(self, only: HashableContainer[str], no: HashableContainer[str]) -> List[str]:
+        if only and no:
+            raise ValueError("Only `only` or `no` can be specified")
+
+        if only:
+            fields = [n for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived) if n in only]
+        else:
+            fields = [n for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived) if n not in no]
+
+        if not fields:
+            raise ValueError("No output fields selected")
+
+        return fields
+
+    def _get_latest_sql(
+        self, derived_keys: Collection[str], ignore_null: bool, only: HashableContainer[str], no: HashableContainer[str]
+    ) -> str:
+        fields = ", ".join(self._get_fields(only, no))
+        _derived = self._filtered_derived(derived_keys, "not-null" if ignore_null else "all")
+        conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
+        latest_col, latest_dir, latest_agg = self.latest_order_by()
+        sql = (
+            f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {latest_col} {latest_dir} LIMIT 1"  # nosec
+        )
+        return sql
+
     def __init__(self, dbpath: Union[str, os.PathLike], table: str, debug: bool = True, allow_add: bool = True) -> None:
         if sqlite3.sqlite_version_info < (3, 35, 0):
             warnings.warn(
@@ -88,15 +124,6 @@ class GenericDb:
                 raise ValueError(f"Database is missing columns: {', '.join(missing_cols)}")
 
         self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)  # type: ignore[assignment,method-assign]
-
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        del state["_get_latest_sql"]
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)
 
     @tls_property
     def connection(self):
@@ -146,29 +173,6 @@ class GenericDb:
         """
 
         return []
-
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
-
-    def __len__(self) -> int:
-        sql = f"SELECT count(*) FROM {self.table}"  # nosec
-        self.cursor.execute(sql)
-        (result,) = fetchone(self.cursor)
-        return result
-
-    def __bool__(self) -> bool:
-        sql = f"SELECT EXISTS (SELECT 1 FROM {self.table})"  # nosec
-        self.cursor.execute(sql)
-        (result,) = fetchone(self.cursor)
-        return result == 1
 
     def close(self) -> None:
         """Only closes connections and cursors opened in the current thread"""
@@ -235,42 +239,6 @@ class GenericDb:
         sql = f"SELECT {fields} FROM {self.table}"  # nosec
         self.cursor.execute(sql)
         return iterfetch(self.cursor)
-
-    def _filtered_derived(self, derived: Collection[str], select: str) -> Iterable[Tuple[str, str, str]]:
-        if select == "null":
-            return ((n, t, v) for n, t, v in self._derived if n not in derived)
-        elif select == "not-null":
-            return ((n, t, v) for n, t, v in self._derived if n in derived)
-        elif select == "all":
-            return self._derived
-        else:
-            raise ValueError("select must be one of: null, not-null, all")
-
-    def _get_fields(self, only: HashableContainer[str], no: HashableContainer[str]) -> List[str]:
-        if only and no:
-            raise ValueError("Only `only` or `no` can be specified")
-
-        if only:
-            fields = [n for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived) if n in only]
-        else:
-            fields = [n for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived) if n not in no]
-
-        if not fields:
-            raise ValueError("No output fields selected")
-
-        return fields
-
-    def _get_latest_sql(
-        self, derived_keys: Collection[str], ignore_null: bool, only: HashableContainer[str], no: HashableContainer[str]
-    ) -> str:
-        fields = ", ".join(self._get_fields(only, no))
-        _derived = self._filtered_derived(derived_keys, "not-null" if ignore_null else "all")
-        conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
-        latest_col, latest_dir, latest_agg = self.latest_order_by()
-        sql = (
-            f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {latest_col} {latest_dir} LIMIT 1"  # nosec
-        )
-        return sql
 
     def _get_latest(
         self,
@@ -434,6 +402,38 @@ class GenericDb:
             self._add_file(mandatory, derived)
             return True
         """
+
+    def __len__(self) -> int:
+        sql = f"SELECT count(*) FROM {self.table}"  # nosec
+        self.cursor.execute(sql)
+        (result,) = fetchone(self.cursor)
+        return result
+
+    def __bool__(self) -> bool:
+        sql = f"SELECT EXISTS (SELECT 1 FROM {self.table})"  # nosec
+        self.cursor.execute(sql)
+        (result,) = fetchone(self.cursor)
+        return result == 1
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.close()
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["_get_latest_sql"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._get_latest_sql = lru_cache(maxsize=128)(self._get_latest_sql)
 
 
 class GenericFileDb(GenericDb):

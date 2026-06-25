@@ -21,9 +21,6 @@ class DownloadTask:
         self.dt_started: Optional[datetime] = None
         self.dt_finished = now()
 
-    def __hash__(self):
-        return hash((self.url, self.path))
-
     def start(self) -> None:
         logger.info("starting download")
         self.dt_started = now()
@@ -31,6 +28,9 @@ class DownloadTask:
     def done(self) -> None:
         logger.info("finished download")
         self.dt_finished = now()
+
+    def __hash__(self):
+        return hash((self.url, self.path))
 
 
 class DownloadManager:

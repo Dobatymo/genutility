@@ -11,25 +11,6 @@ SizedT = TypeVar("SizedT", bound=Sized)
 
 
 class progress_content(Generic[SizedT]):
-    def __init__(
-        self,
-        it: Union[Iterable[SizedT], Sequence[SizedT], AsyncIterator[SizedT]],
-        length: Optional[int] = None,
-        refresh: Union[int, float] = 1,
-        file: Optional[TextIO] = sys.stdout,
-    ) -> None:
-        self.it = it
-        self.length = length
-        self.refresh = refresh
-        self.file = file
-
-    def __iter__(self) -> Iterator[SizedT]:
-        assert not isinstance(self.it, AsyncIterator)
-        return progressdata(self.it, self.length, self.refresh, file=self.file)
-
-    def __aiter__(self) -> AsyncIterator[SizedT]:
-        assert isinstance(self.it, AsyncIterator)
-        return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
 
     class AsyncIterProgress:
         def __init__(
@@ -64,6 +45,26 @@ class progress_content(Generic[SizedT]):
             except StopAsyncIteration:
                 print(f"Finished {self.total} in {int(self.last - self.start)} seconds.", end="\r", file=self.file)
                 raise StopAsyncIteration
+
+    def __init__(
+        self,
+        it: Union[Iterable[SizedT], Sequence[SizedT], AsyncIterator[SizedT]],
+        length: Optional[int] = None,
+        refresh: Union[int, float] = 1,
+        file: Optional[TextIO] = sys.stdout,
+    ) -> None:
+        self.it = it
+        self.length = length
+        self.refresh = refresh
+        self.file = file
+
+    def __iter__(self) -> Iterator[SizedT]:
+        assert not isinstance(self.it, AsyncIterator)
+        return progressdata(self.it, self.length, self.refresh, file=self.file)
+
+    def __aiter__(self) -> AsyncIterator[SizedT]:
+        assert isinstance(self.it, AsyncIterator)
+        return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
 
 
 if __name__ == "__main__":

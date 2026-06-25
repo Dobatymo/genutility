@@ -48,26 +48,6 @@ class SequenceTree(MutableMapping):
         seqtree.root = tree
         return seqtree
 
-    def __contains__(self, keys: IterableT[Hashable]) -> bool:
-        try:
-            self[keys]
-            return True
-        except KeyError:
-            return False
-
-    def __getitem__(self, keys: IterableT[Hashable]) -> Any:
-        node = self.root
-        for word in keys:
-            node = node[word]
-        return node[self.endkey]
-
-    def __setitem__(self, keys: IterableT[Hashable], value: Any) -> None:
-        node = self.root
-        for key in keys:
-            node = node.setdefault(key, {})
-
-        node[self.endkey] = value
-
     def set(self, keys: IterableT[Hashable], value: Any) -> bool:
         """Same as `__setitem__`, except it returns `True` if the key wasn't used before."""
 
@@ -81,12 +61,6 @@ class SequenceTree(MutableMapping):
         else:
             node[self.endkey] = value
             return True
-
-    def __delitem__(self, keys: IterableT[Hashable]) -> None:
-        node = self.root
-        for key in keys:
-            node = node[key]
-        del node[self.endkey]
 
     def _copy(self, node: dict) -> dict:
         ret = {}
@@ -104,27 +78,6 @@ class SequenceTree(MutableMapping):
 
         tree = self._copy(self.root)
         return self.fromtree(tree, self.endkey)
-
-    def __iter__(self) -> Iterator:
-        return iter(self.keys())
-
-    def __eq__(self, rhs: object) -> bool:
-        if isinstance(rhs, SequenceTree):
-            return self.root == rhs.root and self.endkey == rhs.endkey
-        else:
-            return False
-
-    def __ne__(self, rhs: object) -> bool:
-        if isinstance(rhs, SequenceTree):
-            return self.root != rhs.root or self.endkey != rhs.endkey
-        else:
-            return False
-
-    def __str__(self) -> str:
-        return str(self.root)
-
-    def __len__(self):
-        raise NotImplementedError("use slower SequenceTree.calc_leaves()")
 
     def pop(self, keys: IterableT[Hashable]) -> Any:
         node = self.root
@@ -298,3 +251,50 @@ class SequenceTree(MutableMapping):
 
     def calc_leaves(self) -> int:
         return self._calc_leaves(self.root)
+
+    def __getitem__(self, keys: IterableT[Hashable]) -> Any:
+        node = self.root
+        for word in keys:
+            node = node[word]
+        return node[self.endkey]
+
+    def __setitem__(self, keys: IterableT[Hashable], value: Any) -> None:
+        node = self.root
+        for key in keys:
+            node = node.setdefault(key, {})
+
+        node[self.endkey] = value
+
+    def __delitem__(self, keys: IterableT[Hashable]) -> None:
+        node = self.root
+        for key in keys:
+            node = node[key]
+        del node[self.endkey]
+
+    def __iter__(self) -> Iterator:
+        return iter(self.keys())
+
+    def __contains__(self, keys: IterableT[Hashable]) -> bool:
+        try:
+            self[keys]
+            return True
+        except KeyError:
+            return False
+
+    def __len__(self):
+        raise NotImplementedError("use slower SequenceTree.calc_leaves()")
+
+    def __eq__(self, rhs: object) -> bool:
+        if isinstance(rhs, SequenceTree):
+            return self.root == rhs.root and self.endkey == rhs.endkey
+        else:
+            return False
+
+    def __ne__(self, rhs: object) -> bool:
+        if isinstance(rhs, SequenceTree):
+            return self.root != rhs.root or self.endkey != rhs.endkey
+        else:
+            return False
+
+    def __str__(self) -> str:
+        return str(self.root)

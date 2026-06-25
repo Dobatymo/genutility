@@ -34,12 +34,6 @@ class HandleKeyboardInterrupt:
         self.init_raise_after = raise_after
         self.init_delay = delay
 
-    def __enter__(self) -> None:
-        self.raise_after = self.init_raise_after  # pylint: disable=attribute-defined-outside-init
-        self.delay = self.init_delay  # pylint: disable=attribute-defined-outside-init
-        self.signal_received: Optional[tuple] = None
-        self.old_handler = signal.signal(signal.SIGINT, self.handler)
-
     def handler(self, sig: signal.Signals, frame: FrameType) -> None:
         if self.delay == 0:
             self.raise_after = False
@@ -48,6 +42,12 @@ class HandleKeyboardInterrupt:
             self.delay -= 1
             self.signal_received = (sig, frame)
             logger.debug("SIGINT received. Delaying KeyboardInterrupt.")
+
+    def __enter__(self) -> None:
+        self.raise_after = self.init_raise_after  # pylint: disable=attribute-defined-outside-init
+        self.delay = self.init_delay  # pylint: disable=attribute-defined-outside-init
+        self.signal_received: Optional[tuple] = None
+        self.old_handler = signal.signal(signal.SIGINT, self.handler)
 
     def __exit__(self, exc_type, exc_value, traceback):
         signal.signal(signal.SIGINT, self.old_handler)

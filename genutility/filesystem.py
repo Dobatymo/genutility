@@ -251,6 +251,13 @@ def rename(old: PathType, new: PathType) -> None:
     os.renames(old, new)  # fixme: don't use rename*s*
 
 
+def make_writeable(path: PathType, stats: Optional[os.stat_result] = None) -> None:
+    """set owner write flag"""
+    if not stats:
+        stats = os.stat(path)
+    os.chmod(path, stat.S_IMODE(stats.st_mode) | stat.S_IWRITE)
+
+
 def copy_file_generator(
     source: PathType, dest: PathType, buffer_size: int = FILE_IO_BUFFER_SIZE, overwrite_readonly: bool = False
 ) -> Iterator[None]:
@@ -618,13 +625,6 @@ def make_readonly(path: PathType, stats: Optional[os.stat_result] = None) -> Non
     os.chmod(path, stat.S_IMODE(stats.st_mode) & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
 
 
-def make_writeable(path: PathType, stats: Optional[os.stat_result] = None) -> None:
-    """set owner write flag"""
-    if not stats:
-        stats = os.stat(path)
-    os.chmod(path, stat.S_IMODE(stats.st_mode) | stat.S_IWRITE)
-
-
 def is_writeable(stats: os.stat_result) -> bool:
     return stats.st_mode & stat.S_IWRITE != 0
 
@@ -903,15 +903,15 @@ class Counts:
         self.files = 0
         self.others = 0
 
+    def null(self) -> bool:
+        return self.dirs == 0 and self.files == 0 and self.others == 0
+
     def __iadd__(self, other: "Counts") -> Self:
         self.dirs += other.dirs
         self.files += other.files
         self.others += other.others
 
         return self
-
-    def null(self) -> bool:
-        return self.dirs == 0 and self.files == 0 and self.others == 0
 
 
 def _scandir_counts(

@@ -162,16 +162,16 @@ class KeyExistsError(KeyError):
 class NoOverwriteDict(UserDict):
     """Dictionary which does not allow overwriting existing items."""
 
-    def __setitem__(self, key: Hashable, value: Any) -> None:
-        if key in self.data:
-            raise KeyExistsError(repr(key))
-        self.data[key] = value
-
     def overwrite(self, key: Hashable, value: Any) -> None:
         self.data[key] = value
 
     def dict(self):
         return self.data
+
+    def __setitem__(self, key: Hashable, value: Any) -> None:
+        if key in self.data:
+            raise KeyExistsError(repr(key))
+        self.data[key] = value
 
 
 def _merge_schema(d1: dict, d2: dict) -> None:

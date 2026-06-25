@@ -59,12 +59,6 @@ class OptionalValue(Generic[T]):
     def __init__(self, value: T) -> None:
         self.value = value
 
-    def __repr__(self) -> str:
-        return "<Optional " + repr(self.value) + ">"
-
-    def __eq__(self, other: "OptionalValue[T]") -> bool:
-        return self.value == other.value
-
     def __lt__(self, other: "OptionalValue[T]") -> bool:
         a = self.value
         b = other.value
@@ -80,6 +74,12 @@ class OptionalValue(Generic[T]):
             b = tuple(map(OptionalValue, b))
 
         return a < b
+
+    def __eq__(self, other: "OptionalValue[T]") -> bool:
+        return self.value == other.value
+
+    def __repr__(self) -> str:
+        return "<Optional " + repr(self.value) + ">"
 
 
 def sorted_index(it: IterableT[T], reverse: bool = False) -> Iterator[Tuple[T, int]]:

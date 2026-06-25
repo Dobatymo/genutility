@@ -337,46 +337,6 @@ class LDATermWeight(LDABase):
             - "Assessing topic model relevance: Evaluation and informative priors" (2019)
     """
 
-    def __init__(
-        self,
-        n_topics: int,
-        tws: str = "PMI",
-        alpha: float = 0.1,
-        beta: float = 0.01,
-        progress: Optional[Progress] = None,
-    ) -> None:
-        """tws: Term weighting scheme
-        ONE: Consider every term equal (same as standard LDA)
-        TF: Term frequency
-        IDF: Inverse Document Frequency term weighting.
-                Thus, a term occurring at almost every document has very low weighting and a term occurring at a few document has high weighting.
-        PMI: Pointwise Mutual Information term weighting (default)
-        """
-
-        LDABase.__init__(self)
-
-        self.K = n_topics  # number of topics
-
-        self.alpha = alpha
-        self.beta = beta
-
-        self.word_encoder: BatchLabelEncoder[str] = BatchLabelEncoder(tokenizer="nltk")
-        self.docs: List[LDADocument] = []
-
-        self.create_term_weights = {
-            "ONE": self._one,
-            "TF": self._tf,
-            "IDF": self._idf,
-            "TFIDF": self._tfidf,
-            "PMI": self._pmi,
-            "RAND": self._rand,
-        }[tws]
-
-        self.floattype = np.float32
-        self.inttype = np.int32
-
-        self.progress = progress or Progress()
-
     def _one(self, docs: Any) -> np.ndarray:
         """
         returns: int[M, V]
@@ -439,6 +399,46 @@ class LDATermWeight(LDABase):
         """
 
         return np.random.uniform(0, 1, (self.M, self.V)).astype(self.floattype)
+
+    def __init__(
+        self,
+        n_topics: int,
+        tws: str = "PMI",
+        alpha: float = 0.1,
+        beta: float = 0.01,
+        progress: Optional[Progress] = None,
+    ) -> None:
+        """tws: Term weighting scheme
+        ONE: Consider every term equal (same as standard LDA)
+        TF: Term frequency
+        IDF: Inverse Document Frequency term weighting.
+                Thus, a term occurring at almost every document has very low weighting and a term occurring at a few document has high weighting.
+        PMI: Pointwise Mutual Information term weighting (default)
+        """
+
+        LDABase.__init__(self)
+
+        self.K = n_topics  # number of topics
+
+        self.alpha = alpha
+        self.beta = beta
+
+        self.word_encoder: BatchLabelEncoder[str] = BatchLabelEncoder(tokenizer="nltk")
+        self.docs: List[LDADocument] = []
+
+        self.create_term_weights = {
+            "ONE": self._one,
+            "TF": self._tf,
+            "IDF": self._idf,
+            "TFIDF": self._tfidf,
+            "PMI": self._pmi,
+            "RAND": self._rand,
+        }[tws]
+
+        self.floattype = np.float32
+        self.inttype = np.int32
+
+        self.progress = progress or Progress()
 
     def initialize(self) -> None:
         self.V = self.word_encoder.num_labels

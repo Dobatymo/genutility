@@ -9,6 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
+    def _init(self):
+        self.rows = 0
+        self.itemDataMap = {}
+        self.insertcount = 0
+        self.idtopos = {}
+
     # wx.LC_SORT_* breaks idtopos
     def __init__(self, *args, **kwargs):
         wx.ListCtrl.__init__(self, *args, **kwargs)
@@ -18,12 +24,6 @@ class AdvancedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
         # self.Bind(wx.EVT_LIST_DELETE_ITEM, self.OnDeleteItem)
         # self.Bind(wx.EVT_LIST_INSERT_ITEM, self.OnInsertItem)
-
-    def _init(self):
-        self.rows = 0
-        self.itemDataMap = {}
-        self.insertcount = 0
-        self.idtopos = {}
 
     def GetListCtrl(self) -> Self:
         return self

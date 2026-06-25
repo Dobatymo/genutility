@@ -70,17 +70,6 @@ class SRTFile:
         self.fp = open(filename, mode, encoding=encoding, errors="replace")
         self.overwrite_index = overwrite_index
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
-
     def close(self) -> None:
         self.fp.close()
 
@@ -124,14 +113,25 @@ class SRTFile:
             self.read_line()  # can throw, and leave incomplete subtitle in buffer (eg. if file doesn't end in newline)
         return self.sub
 
+    def __next__(self) -> Subtitle:
+        return self.read_subtitle()
+
     def __iter__(self):
         if self.fp:
             return self
         else:
             raise ValueError("I/O operation on closed file.")
 
-    def __next__(self) -> Subtitle:
-        return self.read_subtitle()
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.close()
 
 
 def transform(
