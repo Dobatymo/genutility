@@ -146,6 +146,22 @@ wiki text"""  # noqa: W291 # keep the space after Red Green
         result = markdown2plaintext(value)
         self.assertEqual(result, truth)
 
+    def test_markdown2plaintext_autolinks(self):
+        self.assertEqual(
+            markdown2plaintext("http://example.com <http://example.com> <a@example.com>"), "<URL> <URL> <EMAIL>"
+        )
+        self.assertEqual(markdown2plaintext("<a@-example.com> <a@example-.com>"), "<a@-example.com> <a@example-.com>")
+
+    def test_markdown2plaintext_link_text(self):
+        self.assertEqual(markdown2plaintext("[http://example.com](http://example.com)"), "http://example.com")
+        self.assertEqual(markdown2plaintext("[a@example.com](mailto:a@example.com)"), "a@example.com")
+
+    def test_markdown2plaintext_superscript(self):
+        self.assertEqual(markdown2plaintext("2^10^"), "210")
+
+    def test_markdown2plaintext_table(self):
+        self.assertEqual(markdown2plaintext("| H |\n| - |\n| x |"), "x")
+
     def test_markdown2html(self):
         value = """1. Harry Potter and the Philosopher's Stone (2001)
 2. Harry Potter and the Chamber of Secrets (2002)
@@ -169,6 +185,28 @@ wiki text"""  # noqa: W291 # keep the space after Red Green
 
         result = markdown2html(value)
         self.assertEqual(result, truth)
+
+    def test_markdown2html_superscript(self):
+        self.assertEqual(markdown2html("2^10^"), "2<sup>10</sup>")
+
+    def test_markdown2html_plugins(self):
+        self.assertEqual(markdown2html("https://example.com"), '<a href="https://example.com">https://example.com</a>')
+        self.assertEqual(markdown2html("~~gone~~"), "<del>gone</del>")
+        self.assertEqual(
+            markdown2html("| H |\n| - |\n| x |"),
+            """<table>
+<thead>
+<tr>
+  <th>H</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>x</td>
+</tr>
+</tbody>
+</table>""",
+        )
 
 
 if __name__ == "__main__":

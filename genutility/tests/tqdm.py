@@ -1,15 +1,9 @@
-from unittest import SkipTest
-
 from genutility.test import MyTestCase
+from genutility.tqdm import Progress
 
 
 class TqdmTest(MyTestCase):
     def test_progress(self):
-        try:
-            from genutility.tqdm import Progress
-        except ModuleNotFoundError as e:
-            raise SkipTest(str(e))
-
         progress = Progress()
         self.assertEqual([1, 2], list(progress.track([1, 2], transient=True, disable=True)))
         with progress.task(total=1, transient=True, disable=True) as task:

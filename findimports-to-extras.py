@@ -41,7 +41,7 @@ modmap = {
     "wx": "wxPython>=4",
     "yaml": "ruamel.yaml",
     "ruamel": "ruamel.yaml",
-    "mistune": "mistune<2",
+    "mistune": "mistune>=3.2.1",
     "polars": "polars>=1.18; python_version>='3.9'",
     "importlib_metadata": "importlib-metadata>=1.4",
     "importlib_resources": "importlib-resources>=5; python_version<'3.9'",

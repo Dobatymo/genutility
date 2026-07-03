@@ -1,6 +1,7 @@
 import re
 
 import mistune
+from mistune.inline_parser import AUTO_EMAIL
 
 _markdown_newline_pat = re.compile(r"[^\n]\n[^\n]")
 
@@ -38,111 +39,111 @@ def markdown_urls(s: str, ignore_trailing_dot: bool = True) -> str:
     return _markdown_urls_pat.sub(markdown_dotfix, s)
 
 
-class PlaintextRenderer(mistune.Renderer):
-    """Mistune renderer to strip all markdown formatting and only return plaintext."""
+def _parse_auto_link(inline, m, state):
+    text = m.group(0)
+    if state.in_link:
+        inline.process_text(text, state)
+    else:
+        state.append_token({"type": "auto_link", "raw": text[1:-1] if text.startswith("<") else text})
+    return m.end()
 
-    def block_code(self, code, lang=None):
-        return code
 
-    def block_quote(self, text):
-        return text
+def _parse_auto_email(inline, m, state):
+    text = m.group(0)
+    if state.in_link:
+        inline.process_text(text, state)
+    else:
+        state.append_token({"type": "auto_email", "raw": text[1:-1]})
+    return m.end()
 
-    def block_html(self, html):
-        return html
 
-    def header(self, text, level, raw=None):
-        return text + "\n\n"
+def _plaintext_links(md):
+    md.inline.register("auto_link", None, _parse_auto_link)
+    # Mistune's AUTO_EMAIL is the HTML Standard valid e-mail address regex:
+    # https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+    md.inline.register("auto_email", AUTO_EMAIL, _parse_auto_email)
+    md.inline.register("url_link", None, _parse_auto_link)
 
-    def hrule(self):
-        return "\n"
 
-    def list(self, body, ordered=True):
-        return body + "\n"
+_MARKDOWN_PLUGINS = ("strikethrough", "superscript", "table", "url")
 
-    def list_item(self, text):
-        return text + " "
 
-    def paragraph(self, text):
-        return text + "\n\n"
+class PlaintextRenderer(mistune.BaseRenderer):
+    """Render Markdown tokens to plain text.
 
-    def table(self, header, body):
-        return body
+    This is lossy: it removes Markdown syntax, prefers link/image titles when
+    present, replaces URL/email autolinks with "<URL>"/"<EMAIL>", skips table
+    headers, and keeps the contents of superscript spans.
+    """
 
-    def table_row(self, content):
-        return content
+    _raw_tokens = {"block_code", "block_html", "codespan", "inline_html", "text"}
+    _children_tokens = {
+        "block_quote",
+        "block_text",
+        "emphasis",
+        "strikethrough",
+        "strong",
+        "superscript",
+        "table",
+        "table_body",
+        "table_cell",
+        "table_row",
+    }
+    _newline_tokens = {"linebreak", "softbreak", "thematic_break"}
 
-    def table_cell(self, content, **flags):
-        return content
+    def render_token(self, token, state):
+        token_type = token["type"]
 
-    # superscript is not supported!?
-
-    def autolink(self, link, is_email=False):
-        if is_email:
-            return "<EMAIL>"
-        else:
+        if token_type in self._raw_tokens:
+            return token.get("raw", "")
+        if token_type in self._children_tokens:
+            return self.render_tokens(token["children"], state)
+        if token_type in self._newline_tokens:
+            return "\n"
+        if token_type in {"heading", "paragraph"}:
+            return self.render_tokens(token["children"], state) + "\n\n"
+        if token_type == "list":  # nosec B105
+            return self.render_tokens(token["children"], state) + "\n"
+        if token_type == "list_item":  # nosec B105
+            return self.render_tokens(token["children"], state) + " "
+        if token_type == "table_head":  # nosec B105
+            return ""
+        if token_type == "auto_link":  # nosec B105
             return "<URL>"
+        if token_type == "auto_email":  # nosec B105
+            return "<EMAIL>"
+        if token_type in {"image", "link"}:
+            attrs = token.get("attrs") or {}
+            return attrs.get("title") or self.render_tokens(token["children"], state)
+        if token_type == "blank_line":  # nosec B105
+            return ""
 
-    def codespan(self, text):
-        return text
-
-    def double_emphasis(self, text):
-        return text
-
-    def emphasis(self, text):
-        return text
-
-    def image(self, src, title, text):
-        # text: alt attribute
-
-        if title:
-            return title
-        return text
-
-    def linebreak(self):
-        return "\n"
-
-    def newline(self):
-        return "\n"
-
-    def link(self, link, title, text):
-        # link: href attribute
-        if title:
-            return title
-        return text
-
-    def strikethrough(self, text):
-        return text
-
-    def text(self, text):
-        return text
-
-    def inline_html(self, html):
-        return html
-
-    def escape(self, text):
-        return text
+        raise AttributeError(f'No renderer "{token_type}"')
 
 
 def unescape(s: str) -> str:
     return s.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
 
-md_text = mistune.Markdown(renderer=PlaintextRenderer())
+md_text = mistune.create_markdown(
+    renderer=PlaintextRenderer(),
+    plugins=(*_MARKDOWN_PLUGINS, _plaintext_links),
+)
 
 
 def markdown2plaintext(s: str) -> str:
     """Converts markdown to plaintext."""
 
-    return md_text.render(unescape(s)).strip()
+    return md_text(unescape(s)).strip()
 
 
-md_html = mistune.Markdown(renderer=mistune.Renderer())
+md_html = mistune.create_markdown(renderer="html", plugins=_MARKDOWN_PLUGINS)
 
 
 def markdown2html(s: str) -> str:
     """Converts markdown to HTML and strips surrounding <p> tags."""
 
-    html = md_html.render(s).strip()
+    html = md_html(s).strip()
     if html.count("<p>") == 1 and html.count("</p>") == 1:
         return html[3:-4]  # assume p tags wrap everything
     else:

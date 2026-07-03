@@ -16,7 +16,7 @@ importlib-resources>=5; python_version<'3.9'
 jsonschema
 keras
 lxml
-mistune<2
+mistune>=3.2.1
 msgpack>=0.6.0
 netifaces
 networkx

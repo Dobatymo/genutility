@@ -1,6 +1,7 @@
 aiohttp>=3.7.4,<3.14
 aioresponses>=0.7.2,<0.7.9
 av>=8.0; python_version>='3.8'
+certifi
 ctypes-windows-sdk>=0.0.15; sys_platform=='win32'
 datasets
 evaluate
@@ -12,7 +13,7 @@ importlib-metadata>=1.4
 importlib-resources>=5; python_version<'3.9'
 jsonschema
 keras
-mistune<2
+mistune>=3.2.1
 msgpack>=0.6.0
 nltk>=3.6.1
 numba; python_version<'3.11'
@@ -21,12 +22,15 @@ opencv-python
 packaging
 pandas
 pdfminer
+piexif
 Pillow>=9.2.0
 polars>=1.18; python_version>='3.9'
+py7zr>=0.20.2
 pypdf>=3.1.0,!=5.0.0
 pywin32; sys_platform=='win32'
 requests
 requests-mock
+rich
 ruamel.yaml
 scikit-learn
 scipy<1.13
@@ -35,5 +39,6 @@ simplejson
 tika
 tls-property>=1.0.1
 toml
+tqdm
 typing-extensions>=4.0.0
 werkzeug>=0.11.11
