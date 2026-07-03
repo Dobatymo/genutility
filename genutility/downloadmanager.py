@@ -35,9 +35,8 @@ class DownloadTask:
 
 class DownloadManager:
     def __init__(self, concurrent_downloads: int = 3) -> None:
-        self.loop = asyncio.get_event_loop()
         self.timeout = aiohttp.ClientTimeout(total=None, sock_read=60)
-        self.session = aiohttp.ClientSession(loop=self.loop, timeout=self.timeout, auto_decompress=False)
+        self.session = aiohttp.ClientSession(timeout=self.timeout, auto_decompress=False)
         self.concurrent_downloads = concurrent_downloads
         # self.sem = asyncio.Semaphore(1000)
         self.chunksize = 1024 * 1024  # file write buffer
@@ -76,7 +75,6 @@ class DownloadManager:
             except IndexError:
                 if not self.active:
                     logger.info("all done")
-                    # self.loop.stop()
                     # task = asyncio.ensure_future(self._close())
 
         return None
@@ -182,10 +180,4 @@ if __name__ == "__main__":
         app.SetTopWindow(frame)
         await app.MainLoop()
 
-    loop = asyncio.events.new_event_loop()
-    try:
-        asyncio.events.set_event_loop(loop)
-        loop.run_until_complete(main())
-    finally:
-        asyncio.events.set_event_loop(None)
-        loop.close()
+    asyncio.run(main())
