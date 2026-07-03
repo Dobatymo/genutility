@@ -1,4 +1,4 @@
-aiohttp>=3.7.4
+aiohttp>=3.7.4,<3.14
 aria2p
 av>=8.0; python_version>='3.8'
 beautifulsoup4

@@ -1,5 +1,5 @@
-aiohttp>=3.7.4
-aioresponses>=0.7.2
+aiohttp>=3.7.4,<3.14
+aioresponses>=0.7.2,<0.7.9
 av>=8.0; python_version>='3.8'
 ctypes-windows-sdk>=0.0.15; sys_platform=='win32'
 datasets

@@ -63,7 +63,7 @@
     "debug": [],
     "dict": [],
     "downloadmanager": [
-        "aiohttp>=3.7.4",
+        "aiohttp>=3.7.4,<3.14",
         "wxasync",
         "wxPython>=4"
     ],
@@ -216,7 +216,7 @@
     "profile": [],
     "rand": [],
     "rasa": [
-        "aiohttp>=3.7.4",
+        "aiohttp>=3.7.4,<3.14",
         "requests",
         "ruamel.yaml"
     ],
@@ -233,7 +233,7 @@
     ],
     "ringlist": [],
     "salesforce": [
-        "aiohttp>=3.7.4",
+        "aiohttp>=3.7.4,<3.14",
         "pandas",
         "requests",
         "simple-salesforce>=1.1.0"
@@ -286,8 +286,8 @@
     ],
     "test": [],
     "tests": [
-        "aiohttp>=3.7.4",
-        "aioresponses>=0.7.2",
+        "aiohttp>=3.7.4,<3.14",
+        "aioresponses>=0.7.2,<0.7.9",
         "av>=8.0; python_version>='3.8'",
         "datasets",
         "evaluate",

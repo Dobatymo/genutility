@@ -10,8 +10,8 @@ modmap = {
     "OpenSSL": "pyOpenSSL>=17.5.0",
     "PIL": "Pillow>=9.2.0",
     "pypdf": "pypdf>=3.1.0,!=5.0.0",
-    "aiohttp": "aiohttp>=3.7.4",
-    "aioresponses": "aioresponses>=0.7.2",
+    "aiohttp": "aiohttp>=3.7.4,<3.14",
+    "aioresponses": "aioresponses>=0.7.2,<0.7.9",
     "av": "av>=8.0; python_version>='3.8'",
     "bencodepy": "bencode.py>=2.0.0",
     "bs4": "beautifulsoup4",
@@ -95,6 +95,7 @@ def main(path: Path) -> None:
 
     with open("install_requires.json", "w", encoding="utf-8") as fw:
         json.dump(install, fw, indent="    ")
+        fw.write("\n")
 
     with path.open("rt", encoding="utf-8") as fr:
         extras: Dict[str, Set[str]] = {}
@@ -181,6 +182,7 @@ def main(path: Path) -> None:
 
         with open("extras_require.json", "w", encoding="utf-8") as fw:
             json.dump(sorted_extras, fw, indent="    ")
+            fw.write("\n")
 
         requirements_test = sorted(sorted_extras.pop("tests", []) + install, key=lowercase)
 

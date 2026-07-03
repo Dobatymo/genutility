@@ -60,6 +60,10 @@ def get_default_waiting_callback(file: TextIO = sys.stdout) -> CallbackFuncT:
 
 
 class AriaDownloader:
+    """Download manager which uses aria2 instance to actually download the files.
+    Tries to respect other users of the same instance and doesn't interfere with them.
+    """
+
     default_global_options = {
         "max-concurrent-downloads": 5,
         "remote-time": True,
@@ -72,10 +76,6 @@ class AriaDownloader:
     }
 
     max_num_results = 100
-
-    """ Download manager which uses aria2 instance to actually download the files.
-        Tries to respect other users of the same instance and doesn't interfere with them.
-    """
 
     def __init__(  # nosec
         self,
