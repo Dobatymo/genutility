@@ -20,7 +20,7 @@ from .callbacks import Progress
 from .json import read_json, write_json
 
 if TYPE_CHECKING:
-    import pandas as pd  # noqa: F401
+    import pandas as pd
 
 JsonDict = Dict[str, Any]
 ReturnTGet = TypeVar("ReturnTGet")
@@ -239,7 +239,7 @@ class MySalesforce:
         columns: Optional[Union[SequenceT[str], MappingT[str, str]]] = None,
         progress: Optional[Progress] = None,
     ) -> "pd.DataFrame":
-        import pandas as pd  # noqa: F811
+        import pandas as pd
 
         progress = progress or Progress()
         it = progress.track(self._query_all(query_str, flatten=True))

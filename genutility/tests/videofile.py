@@ -8,7 +8,7 @@ from genutility.test import MyTestCase, parametrize
 from genutility.videofile import AvVideo, CvVideo
 
 try:
-    import av  # noqa: F401
+    import av
 
     av_available = True
 except ImportError:

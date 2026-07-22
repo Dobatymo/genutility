@@ -4,7 +4,7 @@ requires = [ "setuptools>=61" ]
 
 [project]
 name = "genutility"
-version = "0.0.120"
+version = "0.0.121"
 description = "A collection of various Python utilities"
 readme = "README.md"
 license = { file = "LICENSE" }

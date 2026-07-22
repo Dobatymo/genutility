@@ -1039,6 +1039,7 @@ def find_volumes() -> Iterator[str]:
 
     try:
         handle = FindFirstVolumeW(VolumeName, BufferLength)
+        yield VolumeName.value
     except OSError as e:
         if e.winerror == winerror.ERROR_NO_MORE_FILES:
             return

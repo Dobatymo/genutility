@@ -138,8 +138,14 @@ class Progress(_Progress):
     ) -> Iterator[ProgressType]:
         description = description or "Working..."
         task_id = self.progress.add_task(description, total=total, **fields)
+        completed = 0
+
         try:
-            yield from self.progress.track(sequence, task_id=task_id)
+            for item in self.progress.track(sequence, task_id=task_id):
+                yield item
+                completed += 1
+            if total is None:
+                self.progress.update(task_id, total=completed)
         finally:
             if transient:
                 self.progress.remove_task(task_id)

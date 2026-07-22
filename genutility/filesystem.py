@@ -406,29 +406,34 @@ def _scandir_rec(
     try:
         with os.scandir(rootentry.path) as it:
             for entry in it:
-                if files and entry.is_file(follow_symlinks=follow_symlinks):
-                    yield entry
-                elif entry.is_dir(follow_symlinks=follow_symlinks):
-                    if not follow_symlinks or prevent_loops_set is not None:
-                        is_link = islink(entry)
-
-                    if dirs:
+                try:
+                    if files and entry.is_file(follow_symlinks=follow_symlinks):
                         yield entry
+                    elif entry.is_dir(follow_symlinks=follow_symlinks):
+                        if not follow_symlinks or prevent_loops_set is not None:
+                            is_link = islink(entry)
 
-                    if (
-                        not follow_symlinks and is_link
-                    ):  # must be a windows junction since `entry.is_symlink()` returns `False` for junctions
-                        continue
+                        if dirs:
+                            yield entry
 
-                    if rec and not _is_loop(rootentry, entry, is_link, prevent_loops_set):
-                        for e in _scandir_rec(
-                            entry, files, dirs, others, rec, follow_symlinks, prevent_loops_set, errorfunc
-                        ):
-                            yield e
-                else:
-                    if others:
-                        yield entry
+                        if (
+                            not follow_symlinks and is_link
+                        ):  # must be a windows junction since `entry.is_symlink()` returns `False` for junctions
+                            continue
+
+                        if rec and not _is_loop(rootentry, entry, is_link, prevent_loops_set):
+                            for e in _scandir_rec(
+                                entry, files, dirs, others, rec, follow_symlinks, prevent_loops_set, errorfunc
+                            ):
+                                yield e
+                    else:
+                        if others:
+                            yield entry
+                except OSError as e:
+                    # this can be caused by islink for example
+                    errorfunc(rootentry, e)
     except OSError as e:
+        # this can either be caused by the scandir call or by the iteration
         errorfunc(rootentry, e)
 
 

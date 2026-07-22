@@ -7,7 +7,7 @@ import numpy as np
 from .videofile import CvVideo
 
 if TYPE_CHECKING:
-    import wx  # noqa: F401
+    import wx
 
 
 def wx_to_cv_image(wximage: "wx.Image") -> np.ndarray:
