@@ -3,7 +3,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 from types import TracebackType
 from typing import Optional, Type
 
-from genutility.filesystem import append_to_filename, compliant_path, scandir_rec
+from genutility.filesystem import append_to_filename, compliant_path, scandir_rec, scandir_rec_simple
 from genutility.test import MyTestCase, parametrize
 
 
@@ -112,6 +112,12 @@ class FilesystemTest(MyTestCase):
 
         results = list(entry.name for entry in scandir_rec("testfiles", rec=False))
         self.assertUnorderedSeqEqual(base, results)
+
+    def test_scandir_rec_simple_path(self):
+        results = list(entry.name for entry in scandir_rec_simple(Path("testfiles"), rec=False))
+        self.assertUnorderedSeqEqual(
+            ["joined.pdf", "quadrant-0.png", "quadrant-1.png", "quadrant-2.png", "quadrant-3.png"], results
+        )
 
     def test_scandir_rec_links(self):
         base = Path("testtemp/scandir")

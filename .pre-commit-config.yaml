@@ -24,9 +24,10 @@ repos:
   - id: pretty-format-yaml
     args: [--autofix]
 - repo: https://github.com/tox-dev/pyproject-fmt
-  rev: 2.2.4
+  rev: v2.25.1
   hooks:
   - id: pyproject-fmt
+    language_version: python3.13
 - repo: https://github.com/pre-commit/pygrep-hooks
   rev: v1.10.0
   hooks:

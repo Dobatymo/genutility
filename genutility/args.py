@@ -3,7 +3,9 @@ import os.path
 import shlex
 import sys
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
+from codecs import lookup
 from functools import wraps
+from math import isfinite
 from os import makedirs
 from pathlib import Path
 from typing import Any, Callable, Optional, Union
@@ -49,7 +51,88 @@ def arg_to_path(func: Callable[[Path], Path]) -> Callable:
     return inner
 
 
-def multiple_of(divisor: int) -> Callable[[str], int]:
+def int_at_least(minimum: int) -> Callable[[str], int]:
+    from builtins import int as builtin_int
+
+    def int(s: str) -> builtin_int:  # see: multiple_of()
+        number = builtin_int(s)
+
+        if number < minimum:
+            raise ArgumentTypeError(f"{s} is less than {minimum}")
+
+        return number
+
+    return int
+
+
+non_negative_int = int_at_least(0)
+positive_int = int_at_least(1)
+
+_BYTE_SIZE_SUFFIXES = "KMGTPEZY"
+
+
+def _byte_size(s: str, base: int) -> int:
+    suffix = s[-1:]
+    if suffix in _BYTE_SIZE_SUFFIXES:
+        number = s[:-1]
+        exponent = _BYTE_SIZE_SUFFIXES.index(suffix) + 1
+    else:
+        number = s
+        exponent = 0
+
+    if not number.isascii() or not number.isdecimal():
+        raise ArgumentTypeError(
+            f"{s!r} is not an unsigned integer byte size with an optional K/M/G/T/P/E/Z/Y suffix (base {base})"
+        )
+
+    return int(number) * base**exponent
+
+
+def byte_size_si(s: str) -> int:
+    return _byte_size(s, 1000)
+
+
+def byte_size_iec(s: str) -> int:
+    return _byte_size(s, 1024)
+
+
+def finite_float(s: str) -> float:
+    number = float(s)
+
+    if not isfinite(number):
+        raise ArgumentTypeError(f"{s} is not finite")
+
+    return number
+
+
+def non_negative_float(s: str) -> float:
+    number = finite_float(s)
+
+    if number < 0:
+        raise ArgumentTypeError(f"{s} is negative")
+
+    return number
+
+
+def positive_float(s: str) -> float:
+    number = finite_float(s)
+
+    if number <= 0:
+        raise ArgumentTypeError(f"{s} is not positive")
+
+    return number
+
+
+def encoding_name(s: str) -> str:
+    try:
+        lookup(s)
+    except LookupError as e:
+        raise ArgumentTypeError(f"{s} is not a valid encoding") from e
+
+    return s
+
+
+def multiple_of(divisor: int, *, minimum: Optional[int] = None) -> Callable[[str], int]:
     from builtins import int as builtin_int
 
     """ This function is called 'int' so that argparse can show a nicer error message
@@ -57,8 +140,14 @@ def multiple_of(divisor: int) -> Callable[[str], int]:
         error: argument --multiple: invalid int value: 'a'
     """
 
+    if divisor == 0:
+        raise ValueError("divisor cannot be zero")
+
     def int(s: str) -> builtin_int:
         number = builtin_int(s)
+
+        if minimum is not None and number < minimum:
+            raise ArgumentTypeError(f"{s} is less than {minimum}")
 
         if number % divisor != 0:
             msg = f"{s} is not clearly divisible by {divisor}"
@@ -270,14 +359,41 @@ def json_file(path: Union[str, Path]) -> Any:
 
 def base64(s: str) -> bytes:
     """Checks if `s` is a valid base64 and decodes it."""
-    import binascii
     from base64 import b64decode
 
     try:
         return b64decode(s, validate=True)
-    except binascii.Error:
+    except ValueError:
         msg = f"{s} is not valid base64"
-        raise ArgumentTypeError(msg)
+        raise ArgumentTypeError(msg) from None
+
+
+def base32(s: str) -> bytes:
+    """Checks if `s` is valid base32 and decodes it, accepting lowercase input."""
+    from base64 import b32decode
+
+    try:
+        return b32decode(s, casefold=True)
+    except ValueError:
+        msg = f"{s} is not valid base32"
+        raise ArgumentTypeError(msg) from None
+
+
+def hex_bytes(length: int) -> Callable[[str], bytes]:
+    """Returns an argument type for exactly `length` bytes encoded as hexadecimal."""
+    from builtins import bytes as builtin_bytes
+    from string import hexdigits
+
+    if length < 0:
+        raise ValueError("length cannot be negative")
+
+    def bytes(s: str) -> builtin_bytes:
+        if len(s) != length * 2 or not s.isascii() or not all(c in hexdigits for c in s):
+            raise ArgumentTypeError(f"value must contain exactly {length * 2} hexadecimal digits")
+
+        return builtin_bytes.fromhex(s)
+
+    return bytes
 
 
 def ascii(s: str) -> str:

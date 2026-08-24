@@ -447,11 +447,13 @@ class DownloadManager:
 if __name__ == "__main__":
     from argparse import ArgumentParser
 
+    from genutility.args import positive_int
+
     parser = ArgumentParser()
     parser.add_argument("action", choices=("download", "remove"))
     parser.add_argument("--uris", metavar="URI", nargs="+", default=[], help="URLs to download")
     parser.add_argument("--outpath", default=".", help="Output directory")
-    parser.add_argument("--max", default=2, type=int, help="Maximum concurrent downloads")
+    parser.add_argument("--max", default=2, type=positive_int, help="Maximum concurrent downloads")
     parser.add_argument("--gids", metavar="GID", nargs="+", default=[], help="GIDs")
     args = parser.parse_args()
 

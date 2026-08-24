@@ -44,7 +44,9 @@ rhash; sys_platform=='win32'
 rich
 ruamel.yaml
 scikit-learn
-scipy<1.13
+scipy<1.11; python_version<'3.9'
+scipy<1.13; python_version>='3.9' and python_version<'3.13'
+scipy>=1.14.1; python_version>='3.13'
 scrapy
 simple-salesforce>=1.1.0
 simplejson

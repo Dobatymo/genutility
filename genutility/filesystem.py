@@ -537,7 +537,7 @@ def filter_recall(recall: bool = False) -> Callable[[MyDirEntryT], bool]:
 
 
 def scandir_rec_simple(
-    path: str,
+    path: PathType,
     files: bool = True,
     dirs: bool = False,
     others: bool = False,
@@ -546,6 +546,9 @@ def scandir_rec_simple(
     prevent_loops: bool = True,
     errorfunc: Callable[[MyDirEntryT, Exception], None] = scandir_error_log_warning,
 ) -> Iterator[os.DirEntry]:
+    if isinstance(path, os.PathLike):
+        path = os.fspath(path)
+
     entry = DirEntryStub(os.path.basename(path), path)
     prevent_loops_set: Optional[Set[str]] = set() if prevent_loops else None
 

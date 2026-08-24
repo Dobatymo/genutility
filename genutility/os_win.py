@@ -1,6 +1,7 @@
 import logging
 import os
 import signal
+import stat
 from ctypes import byref, c_wchar_p, cast, create_unicode_buffer, memset, sizeof
 from ctypes.wintypes import DWORD, HANDLE, LPCWSTR, ULARGE_INTEGER
 from enum import IntFlag
@@ -78,18 +79,9 @@ def _file_attributes(path: str) -> FileAttributes:
 
 
 def _islink(path: PathType) -> bool:
-    """Tests if `path` refers to a symlink or a junction.
-    - Python >= 3.2 `os.path.islink()` only supports symlinks, not junctions.
-    - Python < 3.2 `os.path.islink()` always returns `False` on Windows.
-    This function works in all cases.
-    """
+    """Tests if `path` refers to a symlink, junction, or other reparse point."""
 
-    # this can be replaced with a os.stat() based implementation for Python 3.8+
-
-    filename = os.fspath(path)
-    attributes = fileapi.GetFileAttributesW(filename)
-
-    return attributes & winnt.FILE_ATTRIBUTE_REPARSE_POINT == winnt.FILE_ATTRIBUTE_REPARSE_POINT
+    return bool(os.stat(path, follow_symlinks=False).st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT)
 
 
 def _get_mount_path(path: str) -> str:

@@ -1305,8 +1305,10 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     from pprint import pprint
 
+    from genutility.args import non_negative_int
+
     parser = ArgumentParser()
-    parser.add_argument("driveindex", type=int)
+    parser.add_argument("driveindex", type=non_negative_int)
     args = parser.parse_args()
 
     try:

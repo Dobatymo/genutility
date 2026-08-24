@@ -160,10 +160,12 @@ class KeyedVectors(KeyedVectorsOriginal):
 if __name__ == "__main__":
     import argparse
 
+    from genutility.args import positive_int
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--glove-file")
     parser.add_argument("--muse-file")
-    parser.add_argument("--dimensions", type=int, default=300)
+    parser.add_argument("--dimensions", type=positive_int, default=300)
     args = parser.parse_args()
 
     if args.glove_file:

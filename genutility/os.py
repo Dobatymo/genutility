@@ -1,5 +1,6 @@
 import os
 import platform
+from os.path import realpath  # noqa: F401
 from pathlib import Path
 from typing import Callable, Union
 
@@ -39,8 +40,6 @@ def _not_available(func_name: str) -> Callable:
 
 
 if system == "Windows":
-    from os.path import realpath
-
     from .os_win import _disk_usage_windows as disk_usage
     from .os_win import _filemanager_cmd_windows as filemanager_cmd
     from .os_win import _get_appdata_dir as get_appdata_dir
@@ -57,7 +56,7 @@ elif system == "Linux":
     from .os_posix import _unlock as unlock
 
     volume_info = _not_available("volume_info")
-    from os.path import islink, realpath
+    from os.path import islink
 
     from .os_posix import _filemanager_cmd_posix as filemanager_cmd
     from .os_posix import _interrupt_posix as interrupt
@@ -71,7 +70,7 @@ elif system == "Darwin":
     from .os_mac import _filemanager_cmd_mac as filemanager_cmd
 
     get_appdata_dir = _not_available("get_appdata_dir")
-    from os.path import islink, realpath
+    from os.path import islink
 
     from .os_posix import _interrupt_posix as interrupt
 
@@ -84,7 +83,7 @@ else:
     filemanager_cmd = _not_available("filemanager_cmd")
     get_appdata_dir = _not_available("get_appdata_dir")
     interrupt = _not_available("interrupt")
-    from os.path import islink, realpath
+    from os.path import islink
 
 lock.__doc__ = """ Locks access to the file (on Posix) or its contents (Windows). """
 unlock.__doc__ = """ Unlocks access to the file. """
@@ -93,5 +92,4 @@ volume_info.__doc__ = """ filesystem and name of the volume """
 filemanager_cmd.__doc__ = """ Returns a shell command that when executed starts the file manager of the OS. """
 get_appdata_dir.__doc__ = """ Returns the roaming appdata directory of the current user. """
 islink.__doc__ = """ islink """
-realpath.__doc__ = """ realpath """
 interrupt.__doc__ = """ interrupt """

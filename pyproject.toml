@@ -1,10 +1,10 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [ "setuptools>=61" ]
+requires = [ "setuptools>=66.1" ]
 
 [project]
 name = "genutility"
-version = "0.0.121"
+version = "0.0.122"
 description = "A collection of various Python utilities"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -19,6 +19,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Utilities",
 ]
 dynamic = [
@@ -35,18 +36,19 @@ line-length = 120
 lint.extend-select = [
   "B",
   "I",
+  "S",
+  "UP",
 ]
 lint.ignore = [
   "B011",
   "B904",
   "E402",
+  "S101",
 ]
+lint.pyupgrade.keep-runtime-typing = true
 
 [tool.isort]
 profile = "black"
-src_paths = [
-  "genutility",
-]
 line_length = 120
 known_third_party = [
   "av",
@@ -70,35 +72,38 @@ known_third_party = [
   "twisted",
   "unqlite",
 ]
-
-[tool.pytest.ini_options]
-log_level = "DEBUG"
-testpaths = [
-  "genutility/tests",
+src_paths = [
+  "genutility",
 ]
-python_files = [
-  "*.py",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-  "pragma: no cover",
-  "if __name__ == .__main__.:",
-]
-sort = "Cover"
-
-[tool.mypy]
-allow_redefinition = true
-ignore_missing_imports = true
-no_implicit_optional = true
-strict_equality = true
-warn_redundant_casts = true
-warn_unused_configs = true
-warn_unused_ignores = true
-warn_unreachable = true
-exclude = [ '.venv' ]
 
 [tool.bandit]
 skips = [
   "B101",
 ]
+
+[tool.mypy]
+exclude = [ ".venv" ]
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+allow_redefinition = true
+strict_equality = true
+warn_unused_configs = true
+no_implicit_optional = true
+
+[tool.pytest]
+ini_options.testpaths = [
+  "genutility/tests",
+]
+ini_options.python_files = [
+  "*.py",
+]
+ini_options.log_level = "DEBUG"
+
+[tool.coverage]
+report.exclude_lines = [
+  "if __name__ == .__main__.:",
+  "pragma: no cover",
+]
+report.sort = "Cover"

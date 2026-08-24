@@ -28,7 +28,7 @@ modmap = {
     "pyspark": "pyspark>=3.0.0",
     "requests_mock": "requests-mock",
     "rhash": "rhash; sys_platform=='win32'",
-    "scipy": "scipy<1.13",  # for gensim
+    "scipy": "scipy<1.11; python_version<'3.9'",
     "simple_salesforce": "simple-salesforce>=1.1.0",
     "sklearn": "scikit-learn",
     "tls_property": "tls-property>=1.0.1",
@@ -76,7 +76,15 @@ MANUAL_FIXES_ADD = {
     "genutility.numba": ["numba"],
     "genutility.numpy": ["numpy"],
     "genutility.pandas": ["pandas"],
+    "genutility.scipy": [
+        "scipy<1.13; python_version>='3.9' and python_version<'3.13'",  # for gensim
+        "scipy>=1.14.1; python_version>='3.13'",
+    ],
     "genutility.tensorflow": ["tensorflow"],
+    "genutility.tests": [
+        "scipy<1.13; python_version>='3.9' and python_version<'3.13'",  # for gensim
+        "scipy>=1.14.1; python_version>='3.13'",
+    ],
     "genutility.toml": ["toml"],
     "genutility.twisted": ["twisted"],
 }
@@ -166,9 +174,11 @@ def main(path: Path) -> None:
         # sort dependencies
         sorted_extras = {k: sorted(v, key=lowercase) for k, v in sorted(extras.items(), key=lowercasekey)}
 
+        sorted_extras.pop("genutility")
+
         for k, vals in sorted_extras.items():
             if not k.startswith("genutility."):
-                raise ValueError(f"{k} is not part of genutility")
+                raise ValueError(f"{k} is not part of genutility ({vals})")
 
             if k.startswith("_"):
                 if vals:

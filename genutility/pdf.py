@@ -83,12 +83,12 @@ def read_pdf(path: str, engine: str = "pdfminer") -> str:
 if __name__ == "__main__":
     from argparse import ArgumentParser
 
-    from genutility.args import is_dir
+    from genutility.args import is_dir, multiple_of
 
     parser = ArgumentParser(description="Merge pdf files in directory into one file.")
     parser.add_argument("dir", type=is_dir, help="input directory")
     parser.add_argument("out", type=Path, help="output file path")
-    parser.add_argument("--rotate", type=int, help="Rotate in 90 degree increments")
+    parser.add_argument("--rotate", type=multiple_of(90), help="Rotate in 90 degree increments")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing output files")
     parser.add_argument("--password", type=str, help="Input file password")
     args = parser.parse_args()

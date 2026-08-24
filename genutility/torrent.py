@@ -266,6 +266,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     from pprint import pprint
 
+    from genutility.args import positive_int
     from genutility.object import compress as _compress
 
     DEFAULT_ANNOUNCE = "udp://tracker.opentrackr.org:1337/announce"
@@ -276,7 +277,7 @@ if __name__ == "__main__":
     parser.add_argument("action", choices=("read", "create"))
     parser.add_argument("--in-path", type=Path)
     parser.add_argument("--out-path", type=Path)
-    parser.add_argument("--piece-size", type=int, default=DEFAULT_PIECE_LENGTH)
+    parser.add_argument("--piece-size", type=positive_int, default=DEFAULT_PIECE_LENGTH)
     parser.add_argument("--announce", default=DEFAULT_ANNOUNCE)
     parser.add_argument("--sort", default=DEFAULT_SORT, choices=("name", "size", "unordered"))
     args = parser.parse_args()
