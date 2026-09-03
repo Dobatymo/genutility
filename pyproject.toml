@@ -4,7 +4,7 @@ requires = [ "setuptools>=66.1" ]
 
 [project]
 name = "genutility"
-version = "0.0.122"
+version = "0.0.123"
 description = "A collection of various Python utilities"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -27,6 +27,15 @@ dynamic = [
   "optional-dependencies",
 ]
 urls.Homepage = "https://github.com/Dobatymo/genutility"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.14.1",
+  "types-pyopenssl>=24.1.0.20240722",
+  "types-requests>=2.32.0.20241016",
+  "types-simplejson>=3.19.0.20241221",
+  "types-toml>=0.10.8.20240310",
+]
 
 [tool.black]
 line-length = 120
@@ -82,15 +91,17 @@ skips = [
 ]
 
 [tool.mypy]
-exclude = [ ".venv" ]
+exclude = [ "build" ]
 ignore_missing_imports = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unreachable = true
 allow_redefinition = true
 strict_equality = true
+show_traceback = true
 warn_unused_configs = true
 no_implicit_optional = true
+show_error_codes = true
 
 [tool.pytest]
 ini_options.testpaths = [

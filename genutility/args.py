@@ -1,14 +1,17 @@
 import os
 import os.path
 import shlex
+import stat
 import sys
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from codecs import lookup
+from datetime import datetime
 from functools import wraps
 from math import isfinite
-from os import makedirs
 from pathlib import Path
 from typing import Any, Callable, Optional, Union
+
+from .os import islink
 
 
 def get_args(argparser: ArgumentParser) -> Namespace:
@@ -43,7 +46,7 @@ def get_args(argparser: ArgumentParser) -> Namespace:
     return argparser.parse_args(args)
 
 
-def arg_to_path(func: Callable[[Path], Path]) -> Callable:
+def arg_to_path(func: Callable[[Path], Path]) -> Callable[[str], Path]:
     @wraps(func)
     def inner(path):
         return func(Path(path))
@@ -67,6 +70,25 @@ def int_at_least(minimum: int) -> Callable[[str], int]:
 
 non_negative_int = int_at_least(0)
 positive_int = int_at_least(1)
+
+
+def datetime_iso(s: str) -> datetime:
+    """Parse an ISO 8601 datetime, including reduced-precision times."""
+    value = s
+    if value.endswith("Z"):
+        value = value[:-1] + "+00:00"
+
+    for fmt in ("%Y-%m-%dT%H", "%Y-%m-%dT%H:%M"):
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            pass
+
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError as e:
+        raise ArgumentTypeError(f"{s!r} is not a valid ISO 8601 datetime") from e
+
 
 _BYTE_SIZE_SUFFIXES = "KMGTPEZY"
 
@@ -225,11 +247,37 @@ def suffix_lower_raw(s: str) -> str:
     return lowercase(suffix_raw(s))
 
 
-@arg_to_path
-def existing_path(path: Path) -> Path:
-    """Checks if a path exists."""
+def _stat_path(path: Path, *, follow_symlinks: bool) -> Optional[os.stat_result]:
+    try:
+        return os.stat(path, follow_symlinks=follow_symlinks)
+    except FileNotFoundError:
+        return None
+    except OSError as e:
+        raise ArgumentTypeError(f"cannot inspect {path}: {e}") from e
 
-    if not path.exists():
+
+def _is_link(path: Path) -> bool:
+    try:
+        return islink(path)
+    except OSError as e:
+        raise ArgumentTypeError(f"cannot inspect {path}: {e}") from e
+
+
+def _path_stat(path: Path, follow_links: bool) -> Optional[os.stat_result]:
+    entry_stat = _stat_path(path, follow_symlinks=False)
+    if entry_stat is None:
+        return None
+
+    if _is_link(path):
+        if not follow_links:
+            raise ArgumentTypeError(f"{path} is a symbolic link, junction, or reparse point")
+        return _stat_path(path, follow_symlinks=True)
+
+    return entry_stat
+
+
+def _existing_path(path: Path, follow_links: bool) -> Path:
+    if _path_stat(path, follow_links) is None:
         msg = f"{path} does not exist"
         raise ArgumentTypeError(msg)
 
@@ -237,21 +285,44 @@ def existing_path(path: Path) -> Path:
 
 
 @arg_to_path
-def new_path(path: Path) -> Path:
-    """Checks if a path exists."""
+def existing_path(path: Path) -> Path:
+    """Checks if a path exists, following links."""
 
-    if path.exists():
+    return _existing_path(path, True)
+
+
+@arg_to_path
+def existing_path_nofollow(path: Path) -> Path:
+    """Checks if a path exists without allowing a link-like final component."""
+
+    return _existing_path(path, False)
+
+
+@arg_to_path
+def path_nofollow(path: Path) -> Path:
+    """Accepts an existing or missing path without allowing a link-like final component."""
+
+    _path_stat(path, False)
+    return path
+
+
+@arg_to_path
+def new_path(path: Path) -> Path:
+    """Checks that a path does not exist."""
+
+    entry_stat = _stat_path(path, follow_symlinks=False)
+    if entry_stat is not None:
+        if _is_link(path):
+            raise ArgumentTypeError(f"{path} is a symbolic link, junction, or reparse point")
         msg = f"{path} already exists"
         raise ArgumentTypeError(msg)
 
     return path
 
 
-@arg_to_path
-def is_dir(path: Path) -> Path:
-    """Checks if a path is an actual directory"""
-
-    if not path.is_dir():
+def _is_dir(path: Path, follow_links: bool) -> Path:
+    path_stat = _path_stat(path, follow_links)
+    if path_stat is None or not stat.S_ISDIR(path_stat.st_mode):
         msg = f"{path} is not a directory"
         raise ArgumentTypeError(msg)
 
@@ -259,17 +330,44 @@ def is_dir(path: Path) -> Path:
 
 
 @arg_to_path
-def abs_path(path: Path) -> Path:
-    """Checks if a path is an actual directory"""
+def is_dir(path: Path) -> Path:
+    """Checks if a path is a directory, following links."""
 
-    return path.resolve()
+    return _is_dir(path, True)
 
 
-def is_rel_path(path: str) -> str:
-    """Checks if a path is relative"""
+@arg_to_path
+def is_dir_nofollow(path: Path) -> Path:
+    """Checks if a path is a directory without allowing a link-like final component."""
 
-    if os.path.isabs(path):
-        msg = f"{path} is absolute"
+    return _is_dir(path, False)
+
+
+@arg_to_path
+def is_dir_or_new_nofollow(path: Path) -> Path:
+    """Accepts a directory or missing path without allowing a link-like final component."""
+
+    path_stat = _path_stat(path, False)
+    if path_stat is not None and not stat.S_ISDIR(path_stat.st_mode):
+        raise ArgumentTypeError(f"{path} is not a directory")
+
+    return path
+
+
+@arg_to_path
+def relative_path(path: Path) -> Path:
+    """Checks that a path is relative."""
+
+    if path.is_absolute():
+        raise ArgumentTypeError(f"{path} is absolute")
+
+    return path
+
+
+def _is_file(path: Path, follow_links: bool) -> Path:
+    path_stat = _path_stat(path, follow_links)
+    if path_stat is None or not stat.S_ISREG(path_stat.st_mode):
+        msg = f"{path} is not a file"
         raise ArgumentTypeError(msg)
 
     return path
@@ -277,13 +375,50 @@ def is_rel_path(path: str) -> str:
 
 @arg_to_path
 def is_file(path: Path) -> Path:
-    """Checks if a path is an actual file"""
+    """Checks if a path is a regular file, following links."""
 
-    if not path.is_file():
-        msg = f"{path} is not a file"
+    return _is_file(path, True)
+
+
+@arg_to_path
+def is_file_nofollow(path: Path) -> Path:
+    """Checks if a path is a regular file without allowing a link-like final component."""
+
+    return _is_file(path, False)
+
+
+@arg_to_path
+def is_file_or_new_nofollow(path: Path) -> Path:
+    """Accepts a regular file or missing path without allowing a link-like final component."""
+
+    path_stat = _path_stat(path, False)
+    if path_stat is not None and not stat.S_ISREG(path_stat.st_mode):
+        raise ArgumentTypeError(f"{path} is not a file")
+
+    return path
+
+
+def _is_file_or_dir(path: Path, follow_links: bool) -> Path:
+    path_stat = _path_stat(path, follow_links)
+    if path_stat is None or not (stat.S_ISREG(path_stat.st_mode) or stat.S_ISDIR(path_stat.st_mode)):
+        msg = f"{path} is not a file or directory"
         raise ArgumentTypeError(msg)
 
     return path
+
+
+@arg_to_path
+def is_file_or_dir(path: Path) -> Path:
+    """Checks if a path is a regular file or directory, following links."""
+
+    return _is_file_or_dir(path, True)
+
+
+@arg_to_path
+def is_file_or_dir_nofollow(path: Path) -> Path:
+    """Checks if a path is a regular file or directory without allowing a link-like final component."""
+
+    return _is_file_or_dir(path, False)
 
 
 @arg_to_path
@@ -292,72 +427,71 @@ def future_file(path: Path) -> Path:
     Checks if directory is writeable and file does not exist yet.
     """
 
-    if path.parent and not os.access(str(path.parent), os.W_OK):
+    new_path(path)
+
+    parent_stat = _path_stat(path.parent, True)
+    if parent_stat is None or not stat.S_ISDIR(parent_stat.st_mode):
+        msg = f"directory {path.parent} does not exist"
+        raise ArgumentTypeError(msg)
+    if not os.access(str(path.parent), os.W_OK):
         msg = f"cannot access directory {path.parent}"
         raise ArgumentTypeError(msg)
-    if path.is_file():
-        msg = f"file {path} already exists"
-        raise ArgumentTypeError(msg)
     return path
 
 
-@arg_to_path
-def out_dir(path: Path) -> Path:
-    """Tests if `path` is a directory. If not it tries to create one."""
-
-    if not path.is_dir():
-        try:
-            makedirs(path)
-        except OSError:
-            msg = f"Error: '{path}' is not a valid directory."
-            raise ArgumentTypeError(msg)
-
-    return path
-
-
-@arg_to_path
-def empty_dir(dirname: Path) -> Path:
-    """tests if directory is empty"""
-
+def _empty_dir(dirname: Path, follow_links: bool) -> Path:
     from .iter import is_empty
 
-    with os.scandir(dirname) as it:
-        if not is_empty(it):
-            msg = f"directory {dirname} is not empty"
-            raise ArgumentTypeError(msg)
-
-    return dirname
-
-
-@arg_to_path
-def empty_dir_create(dirname: Path) -> Path:
-    """tests if directory is empty"""
-
-    from .iter import is_empty
-
-    if dirname.exists():
+    _is_dir(dirname, follow_links)
+    try:
         with os.scandir(dirname) as it:
             if not is_empty(it):
                 msg = f"directory {dirname} is not empty"
                 raise ArgumentTypeError(msg)
-    else:
-        dirname.mkdir(parents=True)
+    except OSError as e:
+        raise ArgumentTypeError(f"cannot inspect directory {dirname}: {e}") from e
 
     return dirname
 
 
-def json_file(path: Union[str, Path]) -> Any:
+@arg_to_path
+def empty_dir(dirname: Path) -> Path:
+    """Checks if a directory is empty, following links."""
+
+    return _empty_dir(dirname, True)
+
+
+@arg_to_path
+def empty_dir_nofollow(dirname: Path) -> Path:
+    """Checks if a directory is empty without allowing a link-like final component."""
+
+    return _empty_dir(dirname, False)
+
+
+def _json_file(path: Union[str, Path], follow_links: bool) -> Any:
     from json import JSONDecodeError
 
     from .json import read_json
 
     try:
-        return read_json(path)
-    except JSONDecodeError as e:
-        raise ArgumentTypeError(f"JSONDecodeError: {e}")
+        return read_json(_is_file(Path(path), follow_links))
+    except (JSONDecodeError, OSError, UnicodeError) as e:
+        raise ArgumentTypeError(f"{type(e).__name__}: {e}") from e
 
 
-def base64(s: str) -> bytes:
+def json_file(path: Union[str, Path]) -> Any:
+    """Reads a JSON file, following links."""
+
+    return _json_file(path, True)
+
+
+def json_file_nofollow(path: Union[str, Path]) -> Any:
+    """Reads a JSON file without allowing a link-like final component."""
+
+    return _json_file(path, False)
+
+
+def base64_bytes(s: str) -> bytes:
     """Checks if `s` is a valid base64 and decodes it."""
     from base64 import b64decode
 
@@ -368,7 +502,13 @@ def base64(s: str) -> bytes:
         raise ArgumentTypeError(msg) from None
 
 
-def base32(s: str) -> bytes:
+def base64_str(s: str) -> str:
+    """Checks if `s` is valid base64 and returns it unchanged."""
+    base64_bytes(s)
+    return s
+
+
+def base32_bytes(s: str) -> bytes:
     """Checks if `s` is valid base32 and decodes it, accepting lowercase input."""
     from base64 import b32decode
 
@@ -377,6 +517,12 @@ def base32(s: str) -> bytes:
     except ValueError:
         msg = f"{s} is not valid base32"
         raise ArgumentTypeError(msg) from None
+
+
+def base32_str(s: str) -> str:
+    """Checks if `s` is valid base32 and returns it unchanged, accepting lowercase input."""
+    base32_bytes(s)
+    return s
 
 
 def hex_bytes(length: int) -> Callable[[str], bytes]:

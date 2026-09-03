@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Iterable, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, Literal, TypeVar, Union
 
 import pyarrow as pa
 from pyarrow import parquet as pq
@@ -28,12 +28,23 @@ pqmap = {
     "uint64": pa.uint64,
     "int32": pa.int32,
     "uint32": pa.uint32,
+    "int16": pa.int16,
+    "uint16": pa.uint16,
+    "float": pa.float64,
     "str": pa.string,
     "bool": pa.bool_,
 }
 
 
-def _to_pq_schema(d: Dict[str, Any], sort_keys: bool, outer: Callable[[list], T]) -> Union[T, pa.struct]:
+def _pq_type(name: str, float_bits: Literal[32, 64]) -> Callable[[], pa.DataType]:
+    if name == "float":
+        return pa.float32 if float_bits == 32 else pa.float64
+    return pqmap[name]
+
+
+def _to_pq_schema(
+    d: Dict[str, Any], sort_keys: bool, outer: Callable[[list], T], float_bits: Literal[32, 64]
+) -> Union[T, pa.struct]:
     fields = []
 
     if sort_keys:
@@ -43,18 +54,20 @@ def _to_pq_schema(d: Dict[str, Any], sort_keys: bool, outer: Callable[[list], T]
 
     for k in keys:
         if isinstance(d[k], dict):
-            fields.append((k, _to_pq_schema(d[k], sort_keys, pa.struct)))
+            fields.append((k, _to_pq_schema(d[k], sort_keys, pa.struct, float_bits)))
         elif isinstance(d[k], list):
             if d[k]:
                 if isinstance(d[k][0], dict):
-                    fields.append((k, pa.list_(_to_pq_schema(d[k][0], sort_keys, pa.struct))))
+                    fields.append((k, pa.list_(_to_pq_schema(d[k][0], sort_keys, pa.struct, float_bits))))
                 else:
-                    fields.append((k, pa.list_(pqmap[d[k][0]]())))
+                    fields.append((k, pa.list_(_pq_type(d[k][0], float_bits)())))
         else:
-            fields.append((k, pqmap[d[k]]()))
+            fields.append((k, _pq_type(d[k], float_bits)()))
 
     return outer(fields)
 
 
-def schema_simple_to_pq(schema: Dict[str, Any], sort_keys: bool = False) -> pa.schema:
-    return _to_pq_schema(schema, sort_keys, pa.schema)
+def schema_simple_to_pq(schema: Dict[str, Any], sort_keys: bool = False, float_bits: Literal[32, 64] = 64) -> pa.schema:
+    if float_bits not in (32, 64):
+        raise ValueError("float_bits must be 32 or 64")
+    return _to_pq_schema(schema, sort_keys, pa.schema, float_bits)

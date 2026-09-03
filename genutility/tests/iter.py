@@ -57,6 +57,7 @@ from genutility.iter import (
     retrier,
     reversedzip,
     split,
+    split_first,
     switch,
     switched_enumerate,
     triples,
@@ -322,6 +323,19 @@ class IterTest(MyTestCase):
     def test_split(self, it, size, truth):
         result = (tuple(i) for i in split(it, size))
         self.assertIterEqual(truth, result)
+
+    @parametrize(
+        ((1, 2, 3), (1, (2, 3))),
+        ((1,), (1, ())),
+    )
+    def test_split_first(self, it, truth):
+        first, rest = split_first(iter(it))
+        self.assertEqual(truth[0], first)
+        self.assertIterEqual(truth[1], rest)
+
+    def test_split_first_empty(self):
+        with self.assertRaises(EmptyIterable):
+            split_first(())
 
     @parametrize(
         (tuple(), tuple()),

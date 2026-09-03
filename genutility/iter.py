@@ -657,6 +657,17 @@ def split(it: Iterable[T], size: int) -> Sequence[Iterable[T]]:
     return tuple(every_n(it, size, pos) for it, pos in zip(copies, range(size)))
 
 
+def split_first(it: Iterable[T]) -> Tuple[T, Iterator[T]]:
+    """Return the first item and an iterator over the remaining items."""
+
+    iterator = iter(it)
+    try:
+        first = next(iterator)
+    except StopIteration:
+        raise EmptyIterable("Empty iterable") from None
+    return first, iterator
+
+
 def no_dupes(*its: Iterable[T]) -> Iterator[T]:
     """Merge `its` and removes all duplicates while preserving order.
     Alternatives names: ordered_unique
@@ -858,7 +869,7 @@ class CachedIterable(Generic[T]):
 
 def find_majority_element(it: Iterable[T]) -> Optional[T]:
     """Find most common element of `it` in constant space and linear time (under the assumption,
-    that there is indeed one majority element).
+    that there is indeed one majority element) using the Boyer–Moore majority vote algorithm.
     Returns `None` if the iterable is empty.
     """
 

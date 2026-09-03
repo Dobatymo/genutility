@@ -13,7 +13,7 @@ except PackageNotFoundError:
 else:
     import polars as pl
 
-    from genutility.polars import pl_index, pl_islice
+    from genutility.polars import pl_index, pl_islice, schema_simple_to_polars
 
 from genutility.test import MyTestCase, parametrize
 
@@ -42,6 +42,14 @@ class PolarsTest(MyTestCase):
         truth = list(islice(s, *args))
         result = pl_islice(df, *args)["a"].to_list()
         self.assertEqual(truth, result)
+
+    def test_schema_simple_to_polars(self):
+        schema = schema_simple_to_polars({"id": "int32", "value": "float", "nested": [{"name": "str"}]})
+        self.assertEqual(pl.Int32, schema["id"])
+        self.assertEqual(pl.UInt32, schema_simple_to_polars({"value": "uint32"})["value"])
+        self.assertEqual(pl.Float64, schema["value"])
+        self.assertEqual(pl.List(pl.Struct({"name": pl.String})), schema["nested"])
+        self.assertEqual(pl.Float32, schema_simple_to_polars({"value": "float"}, float_bits=32)["value"])
 
 
 if __name__ == "__main__":

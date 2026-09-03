@@ -19,12 +19,12 @@ repos:
     exclude: ^genutility\/tests\/markdown\.py$
     args: [--markdown-linebreak-ext=md]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.14.0
+  rev: v2.15.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix]
 - repo: https://github.com/tox-dev/pyproject-fmt
-  rev: v2.25.1
+  rev: v2.28.1
   hooks:
   - id: pyproject-fmt
     language_version: python3.13
@@ -38,7 +38,7 @@ repos:
   - id: pyupgrade
     args: [--py38-plus]
 - repo: https://github.com/bwhmather/ssort
-  rev: 0.16.0
+  rev: 0.17.0
   hooks:
   - id: ssort
     language_version: python3.13
@@ -68,66 +68,11 @@ repos:
     - flake8-noqa
     - flake8-simplify
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: v1.24.1
+  rev: v1.29.0
   hooks:
   - id: zizmor
     language_version: python3.13
     args: [--fix=safe, --offline]
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.10.1
-  hooks:
-  - id: mypy
-    args: [--install-types, --non-interactive, --show-error-codes, --show-traceback]
-    additional_dependencies:
-    - aiohttp==3.8.6
-    - aria2p==0.11.3
-    - av>=8.0
-    - beautifulsoup4==4.13.4
-    - bencode.py==4.0.0
-    - cryptography==44.0.3
-    - ctypes-windows-sdk==0.0.15; sys_platform=='win32'
-    - Flask==2.2.5
-    - gensim==4.2.0
-    - gmpy2==2.2.1
-    - hypothesis==6.79.4
-    - jsonschema==4.17.3
-    - lxml==5.4.0
-    - mistune==3.0.2
-    - msgpack==1.0.5
-    - netifaces==0.11.0
-    - networkx==2.6.3
-    - nltk==3.8.1
-    - numba==0.56.4
-    - numpy==1.21.6
-    - opencv-python==4.10.0.82
-    - pandas==1.3.5
-    - pdfminer==20191125
-    - piexif==1.1.3
-    - Pillow==9.5.0
-    - polars==0.18.4
-    - pymediainfo==6.1.0
-    - pymongo==4.7.3
-    - pyOpenSSL==24.3.0
-    - pypdf==4.3.1
-    - python-pptx==0.6.23
-    - pywin32==308; sys_platform=='win32'       # win32evtlog, winerror
-    - requests==2.31.0
-    - rhash
-    - ruamel.yaml==0.18.13
-    - scipy==1.7.3
-    - simple-salesforce==1.12.6
-    - simplejson==3.20.1
-    - sortedcontainers==2.4.0
-    - tensorflow==2.11.0
-    - tls-property==1.1.0
-    - toml==0.10.2
-    - twisted==23.8.0
-    - typing-extensions==4.7.1
-    - Unidecode==1.3.8
-    - werkzeug==2.2.3
-    - WMI==1.5.1; sys_platform=='win32'
-    - wxasync==0.49
-    - wxPython==4.1.1
 - repo: https://github.com/Yelp/detect-secrets
   rev: v1.5.0
   hooks:

@@ -108,6 +108,7 @@ class MemoryPath(MemoryPurePath):
         raise NotImplementedError
 
     def readlink(self) -> Self:
+        # Python 3.9+
         raise NotImplementedError
 
     # Querying file type and status

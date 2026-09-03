@@ -4,7 +4,7 @@ from copy import deepcopy
 from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List
 from typing import Mapping as MappingT
 from typing import MutableMapping as MutableMappingT
-from typing import Tuple, TypeVar, Union
+from typing import Optional, Tuple, TypeVar, Union
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -130,7 +130,7 @@ def itemgetter(it: Iterable[T]) -> Callable[[MappingT[T, U]], Iterator[U]]:
     return lambda d: (d[i] for i in it)
 
 
-def subdictdefault(d: MappingT[T, U], it: Iterable[T], default: V = None) -> Dict[T, Union[U, V]]:
+def subdictdefault(d: MappingT[T, U], it: Iterable[T], default: Optional[V] = None) -> Dict[T, Union[U, V, None]]:
     """Uses the elements of `it` as keys to extract a new sub-dictionary."""
 
     return {key: d.get(key, default) for key in it}
@@ -174,7 +174,11 @@ class NoOverwriteDict(UserDict):
         self.data[key] = value
 
 
-def _merge_schema(d1: dict, d2: dict) -> None:
+def _is_int_not_bool(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _merge_schema(d1: dict, d2: dict, int_to_float: bool = False, ignore_none: bool = False) -> None:
     """Merge `d2` into `d1`. `d2` stays unmodified."""
 
     a = d1.keys()
@@ -182,19 +186,42 @@ def _merge_schema(d1: dict, d2: dict) -> None:
 
     for k in a & b:
         if type(d1[k]) != type(d2[k]):  # noqa: E721
-            raise TypeError(f"Type of `{k}` changed from {type(d1[k])} to {type(d2[k])}")
+            if ignore_none and d2[k] is None:
+                continue
+            elif ignore_none and d1[k] is None:
+                d1[k] = deepcopy(d2[k])
+                continue
+            elif int_to_float and _is_int_not_bool(d1[k]) and isinstance(d2[k], float):
+                d1[k] = d2[k]
+            elif int_to_float and isinstance(d1[k], float) and _is_int_not_bool(d2[k]):
+                pass
+            else:
+                raise TypeError(f"Type of `{k}` changed from {type(d1[k])} to {type(d2[k])}")
 
         if isinstance(d1[k], list):
             if d1[k] and d2[k]:
-                if type(d1[k][0]) != type(d2[k][0]):  # noqa: E721
-                    raise TypeError(f"Type of list `{k}` changed from {type(d1[k][0])} to {type(d2[k][0])}")
-                if isinstance(d1[k][0], dict):
-                    _merge_schema(d1[k][0], d2[k][0])
+                left, right = d1[k][0], d2[k][0]
+                if ignore_none and right is None:
+                    continue
+                elif ignore_none and left is None:
+                    d1[k][0] = deepcopy(right)
+                elif int_to_float and _is_int_not_bool(left) and isinstance(right, float):
+                    d1[k][0] = right
+                elif int_to_float and isinstance(left, float) and _is_int_not_bool(right):
+                    pass
+                elif type(left) != type(right):  # noqa: E721
+                    raise TypeError(f"Type of list `{k}` changed from {type(left)} to {type(right)}")
+                elif isinstance(left, dict):
+                    _merge_schema(left, right, int_to_float, ignore_none)
+                elif _is_int_not_bool(left):
+                    d1[k][0] = max(left, right)
+            elif not d1[k] and d2[k]:
+                d1[k] = deepcopy(d2[k][:1])
 
         elif isinstance(d1[k], dict):
-            _merge_schema(d1[k], d2[k])
+            _merge_schema(d1[k], d2[k], int_to_float, ignore_none)
 
-        elif isinstance(d1[k], int):
+        elif _is_int_not_bool(d1[k]):
             d1[k] = max(d1[k], d2[k])
 
     for k in b - a:
@@ -211,8 +238,12 @@ def _get_intsize(num: int) -> str:
         return "int64"
     elif num >= 2**31:
         return "uint32"
-    else:
+    elif num >= 2**16:
         return "int32"
+    elif num >= 2**15:
+        return "uint16"
+    else:
+        return "int16"
 
 
 def _post_schema(d: dict) -> None:
@@ -220,20 +251,27 @@ def _post_schema(d: dict) -> None:
         if isinstance(d[k], dict):
             _post_schema(d[k])
         elif isinstance(d[k], list):
+            del d[k][1:]
             if d[k]:
                 if isinstance(d[k][0], dict):
                     _post_schema(d[k][0])
+                elif isinstance(d[k][0], bool):
+                    d[k][0] = "bool"
                 elif isinstance(d[k][0], int):
                     d[k][0] = _get_intsize(d[k][0])
                 else:
                     d[k][0] = type(d[k][0]).__name__
+        elif isinstance(d[k], bool):  # check needs to be special cased since `isinstance(True, int) is True`
+            d[k] = "bool"
         elif isinstance(d[k], int):
             d[k] = _get_intsize(d[k])
         else:
             d[k] = type(d[k]).__name__
 
 
-def get_schema_simple(d: Iterable[dict]) -> dict:
+def get_schema_simple(
+    d: Iterable[dict], errorfunc: Optional[Callable] = None, *, int_to_float: bool = False, ignore_none: bool = False
+) -> dict:
     """Returns a combined schema definition for the dicts provided by iterable `d`.
     - Keys are assumed to be optional.
     - Type unions are not supported. Changing field types will throw an exception.
@@ -243,9 +281,14 @@ def get_schema_simple(d: Iterable[dict]) -> dict:
     """
 
     schema: Dict[str, Any] = {}
-    for i in d:
-        _merge_schema(schema, i)
-
+    for i, schema2 in enumerate(d):
+        try:
+            _merge_schema(schema, schema2, int_to_float, ignore_none)
+        except Exception as e:
+            if errorfunc is None or not errorfunc(
+                e, i, schema, schema2, int_to_float=int_to_float, ignore_none=ignore_none
+            ):
+                raise
     _post_schema(schema)
     return schema
 

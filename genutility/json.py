@@ -198,6 +198,7 @@ class json_lines:
         self.f = stream
         self.doclose = doclose
         self.newline = "\n"
+        self.skip_broken_lines = False
 
         self.json_kwargs: JsonLoadKwargs = {
             "cls": cls,
@@ -272,17 +273,21 @@ with open("{file}", "r") as fr:
             _json = json
 
         linenum = start + 1
-        try:
-            for line in islice(self.f, start, stop):
-                line = line.rstrip().lstrip("\x00")  # fixme: strip \0 is only a temp fix!
-                if line:
+        for line in islice(self.f, start, stop):
+            line = line.rstrip().lstrip("\x00")  # fixme: strip \0 is only a temp fix!
+            if line:
+                try:
                     yield _json.loads(line, **self.json_kwargs, **self.json_cls_kw)
-                linenum += 1
-
-        except json.JSONDecodeError as e:
-            e.lineno = linenum
-            logger.error("JSON Lines parse error in line %s: %r", linenum, truncate(line, 100))
-            raise
+                except _json.JSONDecodeError as e:
+                    e.lineno = linenum
+                    name = getattr(self.f, "name", None)
+                    if name:
+                        logger.error("JSON Lines parse error in <%s> line %s: %r", name, linenum, truncate(line, 100))
+                    else:
+                        logger.error("JSON Lines parse error in line %s: %r", linenum, truncate(line, 100))
+                    if not self.skip_broken_lines:
+                        raise
+            linenum += 1
 
     def write(
         self,
