@@ -1,7 +1,8 @@
 import sys
-from collections.abc import AsyncIterator, Sized
+from collections.abc import AsyncIterator as AsyncIteratorABC
+from collections.abc import Sized
 from time import time
-from typing import Generic, Iterable, Iterator, Optional, Sequence, TextIO, TypeVar, Union
+from typing import AsyncIterator, Generic, Iterable, Iterator, Optional, Sequence, TextIO, TypeVar, Union
 
 from typing_extensions import Self
 
@@ -11,10 +12,9 @@ SizedT = TypeVar("SizedT", bound=Sized)
 
 
 class progress_content(Generic[SizedT]):
-
     class AsyncIterProgress:
         def __init__(
-            self, it: AsyncIterator[SizedT], length: Optional[int], refresh: Union[int, float], file: Optional[TextIO]
+            self, it: AsyncIterator[SizedT], length: Optional[int], refresh: float, file: Optional[TextIO]
         ) -> None:
             self.it = it.__aiter__()
             self.refresh = refresh
@@ -44,13 +44,13 @@ class progress_content(Generic[SizedT]):
 
             except StopAsyncIteration:
                 print(f"Finished {self.total} in {int(self.last - self.start)} seconds.", end="\r", file=self.file)
-                raise StopAsyncIteration
+                raise
 
     def __init__(
         self,
         it: Union[Iterable[SizedT], Sequence[SizedT], AsyncIterator[SizedT]],
         length: Optional[int] = None,
-        refresh: Union[int, float] = 1,
+        refresh: float = 1,
         file: Optional[TextIO] = sys.stdout,
     ) -> None:
         self.it = it
@@ -59,11 +59,11 @@ class progress_content(Generic[SizedT]):
         self.file = file
 
     def __iter__(self) -> Iterator[SizedT]:
-        assert not isinstance(self.it, AsyncIterator)
+        assert not isinstance(self.it, AsyncIteratorABC)
         return progressdata(self.it, self.length, self.refresh, file=self.file)
 
     def __aiter__(self) -> AsyncIterator[SizedT]:
-        assert isinstance(self.it, AsyncIterator)
+        assert isinstance(self.it, AsyncIteratorABC)
         return self.AsyncIterProgress(self.it, self.length, self.refresh, file=self.file)
 
 

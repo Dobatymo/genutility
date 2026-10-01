@@ -20,6 +20,8 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Utilities",
 ]
 dynamic = [
@@ -37,58 +39,12 @@ dev = [
   "types-toml>=0.10.8.20240310",
 ]
 
-[tool.black]
-line-length = 120
-
 [tool.ruff]
 line-length = 120
-lint.extend-select = [
-  "B",
-  "I",
-  "S",
-  "UP",
-]
-lint.ignore = [
-  "B011",
-  "B904",
-  "E402",
-  "S101",
-]
+lint.extend-select = [ "B", "C4", "DTZ", "I", "PIE", "RUF", "S", "SIM", "UP" ]
+lint.ignore = [ "B011", "S101", "SIM102", "SIM108" ]
+lint.per-file-ignores = { "stubs/**/*.py" = [ "UP" ], "stubs/**/*.pyi" = [ "UP" ] }
 lint.pyupgrade.keep-runtime-typing = true
-
-[tool.isort]
-profile = "black"
-line_length = 120
-known_third_party = [
-  "av",
-  "flask",
-  "gensim",
-  "msgpack",
-  "networkx",
-  "nltk",
-  "numba",
-  "numpy",
-  "pandas",
-  "polars",
-  "rasa",
-  "rich",
-  "scipy",
-  "scrapy",
-  "sklearn",
-  "tensorflow",
-  "toml",
-  "torch",
-  "twisted",
-  "unqlite",
-]
-src_paths = [
-  "genutility",
-]
-
-[tool.bandit]
-skips = [
-  "B101",
-]
 
 [tool.mypy]
 exclude = [ "build" ]

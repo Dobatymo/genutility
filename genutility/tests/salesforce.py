@@ -70,7 +70,7 @@ class SalesforceTest(MyTestCase):
     def test_receive(self):
         la = LiveAgent("sfdc", "org-id", "deploy-id", "button-id")
         la.key = "key"
-        la.affinity_token = "affinity_token"  # nosec
+        la.affinity_token = "affinity_token"  # noqa: S105
 
         with requests_mock.Mocker() as m:
             m.get("https://sfdc/chat/rest/System/Messages", json=Messages)
@@ -103,7 +103,7 @@ class SalesforceAsyncTest(IsolatedAsyncioTestCase):
     async def test_receive(self):
         la = LiveAgentAsync("sfdc", "org-id", "deploy-id", "button-id")
         la.key = "key"
-        la.affinity_token = "affinity_token"  # nosec
+        la.affinity_token = "affinity_token"  # noqa: S105
 
         with aioresponses() as m:
             m.get("https://sfdc/chat/rest/System/Messages", payload=Messages)

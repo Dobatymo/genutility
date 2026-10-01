@@ -4,9 +4,8 @@ from collections.abc import Iterable
 from contextlib import ExitStack
 from itertools import islice
 from operator import itemgetter
-from typing import Any, AnyStr, Callable, Generic
+from typing import Any, AnyStr, Callable, Generic, Iterator, List, MutableSequence, Optional, Tuple, TypeVar, Union
 from typing import Iterable as IterableT
-from typing import Iterator, List, MutableSequence, Optional, Tuple, TypeVar, Union
 
 from .file import copen
 from .func import identity
@@ -212,4 +211,4 @@ def external_sort_file(
     ) as fw:
         lines = external_sort(fr, temp_file_template, "t", sort_key, max_lines_temp, max_lines_final)
 
-        fw.writelines(map(lambda s: s + "\n", lines))
+        fw.writelines(s + "\n" for s in lines)

@@ -8,7 +8,7 @@ class RoutingObject:
     def __init__(self, value: T) -> None:
         self.value = value
 
-        self.subtree: Optional["NodeType"] = None
+        self.subtree: Optional[NodeType] = None
         self.distance_to_parent: Optional[float] = None
         self.covering_radius: Optional[float] = None
 

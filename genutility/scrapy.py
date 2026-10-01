@@ -1,18 +1,16 @@
 import dbm
 import gzip
 import logging
-import pickle  # nosec
+import pickle
 import warnings
-from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Callable, ContextManager, Iterator, Optional, Tuple
+from collections.abc import MutableMapping
+from datetime import datetime, timedelta, timezone
+from typing import Any, Callable, ContextManager, Iterator, Optional, Tuple
 
 import scrapy
 
 from .dbm import dbm_items
 from .stdio import print_terminal_progress_line
-
-if TYPE_CHECKING:
-    from collections.abc import MutableMapping
 
 
 def read_dbm_httpcache(
@@ -30,7 +28,7 @@ def read_dbm_httpcache(
             if key.endswith(b"_data"):
                 hash = key[:-5]
                 time = float(db[hash + b"_time"])
-                data = pickle.loads(value)  # nosec
+                data = pickle.loads(value)  # noqa: S301
 
                 if decompress:
                     ce = data["headers"].get(b"Content-Encoding", [])
@@ -49,7 +47,10 @@ def read_dbm_httpcache(
 def print_progress(spider: scrapy.Spider) -> None:
     queue = len(spider.crawler.engine.slot.scheduler)
     requests = len(spider.crawler.engine.slot.scheduler.df.fingerprints)
-    delta = datetime.utcnow() - spider.crawler.stats.get_value("start_time")
+    start_time = spider.crawler.stats.get_value("start_time")
+    if start_time.tzinfo is None:  # Scrapy versions before 2.11 stored local naive datetimes.
+        start_time = start_time.astimezone()
+    delta = datetime.now(timezone.utc) - start_time
     items = spider.crawler.stats.get_value("item_scraped_count", 0)
     files = spider.crawler.stats.get_value("file_status_count/downloaded", 0)
     warnings = spider.crawler.stats.get_value("log_count/ERROR", 0)

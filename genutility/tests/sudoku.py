@@ -42,7 +42,7 @@ class SudokuTest(MyTestCase):
         for name in tests:
             board = sudokus["boards"][name]
             s = SudokuBruteforce(board, sym_set, sym_free)
-            steps, backtracks = s.solve()
+            _steps, _backtracks = s.solve()
             self.assertTrue(is_valid_solution(s.square, sym_set))
 
 

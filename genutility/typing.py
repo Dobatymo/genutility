@@ -1,8 +1,23 @@
 import os
-from typing import Any, Container, Hashable, Iterable, List, Optional, Sequence, Sized, Tuple, Type, TypeVar, Union
+from typing import (
+    Any,
+    Container,
+    Hashable,
+    Iterable,
+    List,
+    Optional,
+    Protocol,
+    Sequence,
+    Sized,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
-from typing_extensions import Protocol  # typing.Protocol is available in Python 3.8+
-from typing_extensions import TypeGuard  # typing.Protocol is available in Python 3.10+
+from typing_extensions import (
+    TypeGuard,  # typing.Protocol is available in Python 3.10+
+)
 
 ExceptionsType = Union[Type[Exception], Tuple[Type[Exception], ...]]
 Number = Union[int, float]
@@ -18,9 +33,9 @@ class SizedIterable(Protocol[T_co], Sized, Iterable[T_co]):
 
 
 class Comparable(Protocol):
-    def __eq__(self, other: Any) -> bool: ...
+    def __eq__(self, other: object) -> bool: ...
 
-    def __ne__(self, other: Any) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
 
 
 class Orderable(Protocol):
@@ -34,7 +49,6 @@ class Orderable(Protocol):
 
 
 class Computable(Protocol):
-
     def __add__(self, other: Any) -> Any: ...
 
     def __sub__(self, other: Any) -> Any: ...
@@ -50,7 +64,6 @@ class Computable(Protocol):
 
 
 class MutableComputable(Protocol):
-
     def __add__(self, other: Any) -> Any: ...
 
     def __iadd__(self, other: Any) -> Any: ...

@@ -1,5 +1,6 @@
 import os
 import os.path
+from contextlib import suppress
 from io import BufferedIOBase, RawIOBase, TextIOBase, TextIOWrapper
 from mmap import mmap
 from os import SEEK_END, SEEK_SET
@@ -401,7 +402,7 @@ class LastLineFile:
     nl = "\n"
 
     def __init__(self, path, mode="rt+"):
-        self.f = open(path, mode)  # buffered
+        self.f = open(path, mode)  # buffered  # noqa: SIM115
         self.ll_pos = None
 
     def close(self):
@@ -464,10 +465,8 @@ class LastLineFile:
 
 class Tell:
     def __init__(self, fp: BufferedIoT) -> None:
-        try:
+        with suppress(AttributeError):
             assert not fp.seekable()
-        except AttributeError:
-            pass
 
         self._fp = fp
         self._pos = 0
@@ -590,7 +589,7 @@ class BufferedTell(response.addinfourl):  # fixme: untested!!!
                 return datab + dataf
         else:
             # return b""
-            raise Exception("Unbuffered read")
+            raise RuntimeError("Unbuffered read")
 
     def tell(self):
         return self._pos
@@ -803,10 +802,7 @@ def is_all_byte(fr: BinaryIoT, thebyte: bytes = b"\0", chunk_size: int = FILE_IO
     assert isinstance(thebyte, bytes)
 
     thebyte = thebyte * chunk_size
-    for data in simple_file_iter(fr, chunk_size):
-        if data != thebyte[: len(data)]:
-            return False
-    return True
+    return all(data == thebyte[: len(data)] for data in simple_file_iter(fr, chunk_size))
 
 
 def iter_lines(
@@ -858,9 +854,9 @@ def iter_stripped(
 def file_byte_reader(
     filename: PathType, inputblocksize: int, outputblocksize: int, DEBUG: bool = True
 ) -> Iterator[bytes]:
-    assert (inputblocksize % outputblocksize == 0) or (
-        outputblocksize % inputblocksize == 0
-    ), "Neither input nor output size is a multiple of the other"
+    assert (inputblocksize % outputblocksize == 0) or (outputblocksize % inputblocksize == 0), (
+        "Neither input nor output size is a multiple of the other"
+    )
 
     bytes_yielded = 0
     bytes = bytearray(max(inputblocksize, outputblocksize))

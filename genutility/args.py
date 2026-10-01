@@ -5,7 +5,7 @@ import stat
 import sys
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from codecs import lookup
-from datetime import datetime
+from datetime import date, datetime
 from functools import wraps
 from math import isfinite
 from pathlib import Path
@@ -80,7 +80,8 @@ def datetime_iso(s: str) -> datetime:
 
     for fmt in ("%Y-%m-%dT%H", "%Y-%m-%dT%H:%M"):
         try:
-            return datetime.strptime(s, fmt)
+            # A reduced-precision ISO value has no timezone from which to construct an aware datetime.
+            return datetime.strptime(s, fmt)  # noqa: DTZ007
         except ValueError:
             pass
 
@@ -88,6 +89,13 @@ def datetime_iso(s: str) -> datetime:
         return datetime.fromisoformat(value)
     except ValueError as e:
         raise ArgumentTypeError(f"{s!r} is not a valid ISO 8601 datetime") from e
+
+
+def date_iso(s: str) -> date:
+    try:
+        return date.fromisoformat(s)
+    except ValueError as e:
+        raise ArgumentTypeError("must be YYYY-MM-DD") from e
 
 
 _BYTE_SIZE_SUFFIXES = "KMGTPEZY"
@@ -548,7 +556,7 @@ def ascii(s: str) -> str:
         s.encode("ascii")
     except UnicodeEncodeError:
         msg = f"{s} is not valid ascii"
-        raise ArgumentTypeError(msg)
+        raise ArgumentTypeError(msg) from None
 
     return s
 

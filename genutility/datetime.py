@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from datetime import time as dtime
-from datetime import timedelta, timezone
 from typing import Optional, overload
 
 utcmin = datetime.min.replace(tzinfo=timezone.utc)
@@ -115,12 +114,10 @@ def between(dt, start=None, end=None):
 
     if start and end:
         if start < end:
-            return start <= dt and dt <= end
+            return start <= dt <= end
         else:
             return start <= dt or dt <= end
 
     if start and dt < start:
         return False
-    if end and dt > end:
-        return False
-    return True
+    return not (end and dt > end)

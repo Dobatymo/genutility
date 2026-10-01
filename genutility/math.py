@@ -201,7 +201,7 @@ class _PosInfInt:
 
     def __sub__(self, rhs) -> Self:
         if isinstance(rhs, _PosInfInt):
-            raise ArithmeticError("Cannot subtract inf from inf")
+            raise ArithmeticError("Cannot subtract inf from inf")  # noqa: TRY004
 
         return self
 
@@ -210,7 +210,7 @@ class _PosInfInt:
 
     def __eq__(self, rhs) -> bool:
         if isinstance(rhs, _PosInfInt):
-            raise ArithmeticError("Cannot compare inf with inf")
+            raise ArithmeticError("Cannot compare inf with inf")  # noqa: TRY004
 
         return False
 

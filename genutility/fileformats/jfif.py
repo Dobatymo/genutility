@@ -1,16 +1,17 @@
 import logging
 import mmap
 import re
+from _hashlib import HASH as Hashobj
 from struct import unpack
 from typing import IO, Iterator, Optional, Set, Tuple, Union
-
-from _hashlib import HASH as Hashobj
 
 from ..exceptions import ParseError
 from ..file import BufferedBinaryIoT, read_or_raise
 from ..string import backslash_escaped_ascii
 
 Segment = Union[Tuple[str, bytes], Tuple[str, bytes, bytes, bytes]]
+
+logger = logging.getLogger(__name__)
 
 segments = {
     # ISO/IEC 10918-1 : 1993(E), Table B.1
@@ -124,7 +125,7 @@ def iter_jpeg_fp(fr: IO[bytes], translate: bool = True) -> Iterator[Segment]:
             try:
                 info = segments[marker]
             except KeyError:
-                raise ParseError(f"Invalid segment marker: {backslash_escaped_ascii(marker)} at {mm.tell()}")
+                raise ParseError(f"Invalid segment marker: {backslash_escaped_ascii(marker)} at {mm.tell()}") from None
 
             name = info[0]
             hasdata = info[1]
@@ -153,7 +154,9 @@ def iter_jpeg_fp(fr: IO[bytes], translate: bool = True) -> Iterator[Segment]:
                     try:
                         info = segments[marker]
                     except KeyError:
-                        raise ParseError(f"Invalid segment marker: {backslash_escaped_ascii(marker)} at {start}")
+                        raise ParseError(
+                            f"Invalid segment marker: {backslash_escaped_ascii(marker)} at {start}"
+                        ) from None
 
                     name = info[0]
 
@@ -255,18 +258,18 @@ if __name__ == "__main__":
     for path in it:
         try:
             if args.hash:
-                hashobj = sha1()  # nosec
+                hashobj = sha1()  # noqa: S324
                 hash_raw_jpeg(path, hashobj)
                 print(hashsum_file_format(hashobj, path))
             else:
                 consume(iter_jpeg(path))
 
         except ParseError as e:
-            logging.debug("Parse error in %s: %s", path, e)
+            logger.debug("Parse error in %s: %s", path, e)
             invalid += 1
 
         except EOFError:
-            logging.debug("Truncated file %s", path)
+            logger.debug("Truncated file %s", path)
             invalid += 1
 
         else:

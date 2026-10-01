@@ -100,7 +100,7 @@ def make_comparable(d: Any) -> Any:
     if isinstance(d, (str, int, type(None))):
         return d
     elif isinstance(d, list):
-        return list(make_comparable(i) for i in d)
+        return [make_comparable(i) for i in d]
     elif isinstance(d, tuple):
         return tuple(make_comparable(i) for i in d)
     elif isinstance(d, dict):
@@ -141,7 +141,7 @@ class MyTestCase(TestCase):
             try:
                 self.assertAlmostEqual(a, b, msg=f"in iteration index {i}: {msg}")
             except TypeError:
-                raise AssertionError("Invalid types (probably different length iters)")  # from None
+                raise AssertionError("Invalid types (probably different length iters)") from None
 
     def assertAllEqual(self, args: Iterable, msg: Optional[str] = None) -> None:  # *args doesn't work in python2!?
         it = iter(args)

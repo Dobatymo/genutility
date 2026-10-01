@@ -75,7 +75,7 @@ def read_pdf(path: str, engine: str = "pdfminer") -> str:
             "tika": _read_pdf_tika,
         }[engine]
     except KeyError:
-        raise ValueError(f"Engine {engine} doesn't exist")
+        raise ValueError(f"Engine {engine} doesn't exist") from None
 
     return func(path)
 

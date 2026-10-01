@@ -4,9 +4,11 @@ without the profiler present.
 
 import logging
 
+logger = logging.getLogger(__name__)
+
 try:
-    profile = profile  # bind so it can be imported
-    logging.info("Running profiler")
+    profile = profile  # bind so it can be imported  # noqa: PLW0127
+    logger.info("Running profiler")
 
 except NameError:
 

@@ -100,29 +100,26 @@ class MyTestCaseTest(MyTestCase):
 class TestTest(MyTestCase):
     def test_closeable_tempfile(self):
         name = None
-        with self.assertRaises(ValueError):
-            with CloseableNamedTemporaryFile() as (f, name):
-                name = name
-                raise ValueError
+        with self.assertRaises(ValueError), CloseableNamedTemporaryFile() as (_f, temp_name):
+            name = temp_name
+            raise ValueError
         self.assertFalse(os.path.exists(name))
 
     def test_closeable_tempfile_eoferror(self):
         name = None
-        with self.assertRaises(EOFError):
-            with CloseableNamedTemporaryFile() as (f, name):
-                name = name
-                raise EOFError
+        with self.assertRaises(EOFError), CloseableNamedTemporaryFile() as (_f, temp_name):
+            name = temp_name
+            raise EOFError
         self.assertFalse(os.path.exists(name))
 
     @skipIf(not os.environ.get("INTERACTIVE"), "non-interactive mode")
     def test_closeable_tempfile_ctrlc(self):
         name = None
-        with self.assertRaises(KeyboardInterrupt):
-            with CloseableNamedTemporaryFile() as (f, name):
-                name = name
-                input(
-                    "Press ctrl-c to continue"
-                )  # this is pretty broken, it first raises EOFError and then shortly after KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt), CloseableNamedTemporaryFile() as (_f, temp_name):
+            name = temp_name
+            input(
+                "Press ctrl-c to continue"
+            )  # this is pretty broken, it first raises EOFError and then shortly after KeyboardInterrupt
         self.assertFalse(os.path.exists(name))
 
     def test_closeable_tempfile_rw_flush(self):

@@ -32,7 +32,7 @@ def choldate(L: np.ndarray, x: np.ndarray, sign: str) -> None:
     try:
         _sign = {"+": +1.0, "-": -1.0}[sign]
     except KeyError:
-        raise ValueError("Invalid sign")
+        raise ValueError("Invalid sign") from None
 
     return _choldate(L, x, _sign)
 

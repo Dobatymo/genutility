@@ -147,13 +147,12 @@ class RasaRestAsync(Rasa):
         if self.token:
             params.setdefault("token", self.token)
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=self.timeout, params=params) as r:
-                r.raise_for_status()
-                if raw:
-                    return await r.read()
-                else:
-                    return await r.json()
+        async with aiohttp.ClientSession() as session, session.get(url, timeout=self.timeout, params=params) as r:
+            r.raise_for_status()
+            if raw:
+                return await r.read()
+            else:
+                return await r.json()
 
     async def post_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
@@ -163,13 +162,14 @@ class RasaRestAsync(Rasa):
         if self.token:
             params.setdefault("token", self.token)
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, timeout=self.timeout, params=params, json=json) as r:
-                r.raise_for_status()
-                if raw:
-                    return await r.read()
-                else:
-                    return await r.json()
+        async with aiohttp.ClientSession() as session, session.post(
+            url, timeout=self.timeout, params=params, json=json
+        ) as r:
+            r.raise_for_status()
+            if raw:
+                return await r.read()
+            else:
+                return await r.json()
 
     async def put_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
@@ -179,16 +179,17 @@ class RasaRestAsync(Rasa):
         if self.token:
             params.setdefault("token", self.token)
 
-        async with aiohttp.ClientSession() as session:
-            async with session.put(url, timeout=self.timeout, params=params, json=json) as r:
-                r.raise_for_status()
-                if raw:
-                    return await r.read()
+        async with aiohttp.ClientSession() as session, session.put(
+            url, timeout=self.timeout, params=params, json=json
+        ) as r:
+            r.raise_for_status()
+            if raw:
+                return await r.read()
+            else:
+                if r.status == 204:
+                    return {}
                 else:
-                    if r.status == 204:
-                        return {}
-                    else:
-                        return await r.json()
+                    return await r.json()
 
     async def delete_request(
         self, url: str, params: Optional[JsonDict] = None, json: Optional[JsonDict] = None, raw: bool = False
@@ -198,16 +199,17 @@ class RasaRestAsync(Rasa):
         if self.token:
             params.setdefault("token", self.token)
 
-        async with aiohttp.ClientSession() as session:
-            async with session.delete(url, timeout=self.timeout, params=params, json=json) as r:
-                r.raise_for_status()
-                if raw:
-                    return await r.read()
+        async with aiohttp.ClientSession() as session, session.delete(
+            url, timeout=self.timeout, params=params, json=json
+        ) as r:
+            r.raise_for_status()
+            if raw:
+                return await r.read()
+            else:
+                if r.status == 204:
+                    return {}
                 else:
-                    if r.status == 204:
-                        return {}
-                    else:
-                        return await r.json()
+                    return await r.json()
 
 
 INCLUDE_EVENTS_ENUM = {"AFTER_RESTART", "ALL", "APPLIED", "NONE"}

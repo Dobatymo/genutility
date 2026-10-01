@@ -10,7 +10,7 @@ class StreamWatcher:
     def __init__(self, api: "TwitchAPI") -> None:
         self.api = api
         self.followed_names = api.get_followed()
-        self.followed_online = {userid: False for userid in self.followed_names.keys()}
+        self.followed_online = dict.fromkeys(self.followed_names.keys(), False)
 
     def watch(
         self, notify_started: Callable[[str, str, Optional[str]], None], notify_stopped: Callable[[str, str], None]

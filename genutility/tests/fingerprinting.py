@@ -13,7 +13,7 @@ class FingerprintingTest(MyTestCase):
         try:
             import cv2
         except ImportError:
-            raise SkipTest("Missing imports. pip install opencv-python")
+            raise SkipTest("Missing imports. pip install opencv-python") from None
 
         truth = cv2.HuMoments(cv2.moments(arr))
         result = hu_moments(np.expand_dims(arr, axis=-1))

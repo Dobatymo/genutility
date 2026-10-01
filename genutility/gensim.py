@@ -87,10 +87,10 @@ class KeyedVectors(KeyedVectorsOriginal):
 
     def add_word(self, word: str, weights: Optional[np.ndarray] = None, count: int = 1):
         if weights is None:
-            vocab_size, vector_size = self.vectors.shape
+            _vocab_size, vector_size = self.vectors.shape
             weights = np.random.randn(1, vector_size)
 
-        return list(self.add([(word, weights, count)]))[0]
+        return next(self.add([(word, weights, count)]))
 
     @classmethod
     def load_muse_format(
@@ -110,7 +110,7 @@ class KeyedVectors(KeyedVectorsOriginal):
             try:
                 return cls.load_a_format(islice(fin, limit), vs, vector_size, discard=discard)
             except DuplicateEntry as e:
-                raise ValueError(f"duplicate word '{e}' in {fname}")
+                raise ValueError(f"duplicate word '{e}' in {fname}") from e
 
     @classmethod
     def load_glove_format(
@@ -124,16 +124,16 @@ class KeyedVectors(KeyedVectorsOriginal):
             try:
                 return cls.load_a_format(islice(fin, limit), limit, vector_size, discard=discard)
             except DuplicateEntry as e:
-                raise ValueError(f"duplicate word '{e}' in {fname}")
+                raise ValueError(f"duplicate word '{e}' in {fname}") from e
 
     def get_keras_embedding(self, train_embeddings: bool = False, mask_zero: bool = True) -> "Embedding":  # noqa: F821
         try:
             from keras.layers import Embedding
         except ImportError:
-            raise ImportError("Please install Keras to use this function")
+            raise ImportError("Please install Keras to use this function") from None
 
         if mask_zero:
-            self.index_to_key = [None] + self.index_to_key
+            self.index_to_key = [None, *self.index_to_key]
             zero_vec = np.zeros((1, self.vector_size))
             self.vectors = np.concatenate([zero_vec, self.vectors], axis=0)
 

@@ -24,7 +24,7 @@ class Browscap:
                 yield self.convert_to_regex(row[0]), row[6]
 
     def match_v1(self, useragent):
-        data = list((re.compile(p, re.IGNORECASE), t) for p, t in self.iter_patterns())
+        data = [(re.compile(p, re.IGNORECASE), t) for p, t in self.iter_patterns()]
 
         with PrintStatementTime():
             for pattern, type in data:

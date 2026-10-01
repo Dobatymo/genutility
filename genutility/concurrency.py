@@ -4,6 +4,7 @@ import signal
 import threading
 from collections import deque
 from concurrent.futures._base import FINISHED
+from contextlib import suppress
 from multiprocessing import Pool
 from queue import Empty, Queue
 from types import TracebackType
@@ -74,10 +75,8 @@ class Worker(threading.Thread):
             else:
                 self.returns.put((state, self.TASK_COMPLETE, (id, ret)))
 
-            try:
+            with suppress(ValueError):  # if the task was canceled inbetween
                 self.tasks.task_done()
-            except ValueError:  # if the task was canceled inbetween
-                pass
 
         logger.debug("thread ended")
 
@@ -111,7 +110,7 @@ class ThreadPool:
                 if type_ == Worker.TASK_COMPLETE:
                     return result  # (id, ret)
                 else:
-                    id, e = result
+                    id, _ = result
                     return id, None  # maybe raise here?
             #  else: old result, ignore
 
@@ -229,7 +228,7 @@ class IterWorker(threading.Thread):
         threading.Thread.__init__(self)
         self.queue = taskqueue
         self.onstatechange = onstatechange
-        self.control: "Queue[int]" = Queue()
+        self.control: Queue[int] = Queue()
         self.state = self.STATE_WAITING
 
     @property
@@ -349,7 +348,7 @@ class ProgressThreadPool:
         self.failed = []
         self.lock = threading.Lock()
 
-        self.workers = list(ProgressWorker(self, self.waiting_queue) for i in range(concurrent))
+        self.workers = [ProgressWorker(self, self.waiting_queue) for i in range(concurrent)]
         for w in self.workers:
             w.daemon = True  # program will end even if threads are still running
             w.start()
@@ -395,7 +394,7 @@ class ProgressThreadPool:
 
     def get_waiting(self) -> List[TaskT]:
         with self.waiting_queue.mutex:
-            return list(task for task in self.waiting_queue.queue if task)
+            return [task for task in self.waiting_queue.queue if task]
 
     def get_completed(self) -> List[Any]:
         return self.completed
@@ -404,7 +403,7 @@ class ProgressThreadPool:
         return self.failed
 
     def get_running(self):  # no locks, inconsistent data
-        return list(task for task in (w.get() for w in self.workers) if task)
+        return list(filter(None, (worker.get() for worker in self.workers)))
 
 
 class BoundedIterator:
@@ -456,7 +455,7 @@ class BufferedIterable(Generic[T]):
     def __init__(self, it: Iterable[T], bufsize: int):
         self.iterable = it
         self.iterator = None
-        self.buffer: Deque[T] = deque([])
+        self.buffer: Deque[T] = deque()
         self.bufsize = bufsize
 
     def __next__(self) -> T:
@@ -473,7 +472,7 @@ class BufferedIterable(Generic[T]):
         try:
             return self.buffer.popleft()
         except IndexError:
-            raise StopIteration
+            raise StopIteration from None
 
     def __iter__(self) -> Iterator[T]:
         self.iterator = iter(self.iterable)
@@ -521,10 +520,8 @@ class CompletedFutures:
 def _ignore_sigint() -> None:
     """This need to be pickle'able to work with `multiprocessing.Pool`."""
 
-    try:
+    with suppress(ValueError):
         signal.signal(signal.SIGINT, signal.SIG_IGN)
-    except ValueError:  # ignore for threadpools as 'signal only works in main thread'
-        pass
 
 
 def parallel_map(
@@ -564,7 +561,7 @@ def parallel_map(
                     yield item
                     q.done()
             except GeneratorExit:
-                logging.warning("interrupted")
+                logger.warning("interrupted")
                 # q.timeout = 1  # does this help?
                 q.done()  # the semaphore in the bounded queue might block otherwise
                 q.stop()
@@ -638,11 +635,11 @@ class ThreadsafeList(list):  # untested!!!
         self.lock.release()
 
 
-def idsleeprandom(i):
+def idsleeprandom(i: T) -> T:
     import random
     import time
 
-    time.sleep(random.random())  # nosec
+    time.sleep(random.random())  # noqa: S311
     return i
 
 

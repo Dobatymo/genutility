@@ -1,10 +1,10 @@
 from collections import UserDict, defaultdict
 from collections.abc import Mapping, MutableMapping
+from contextlib import suppress
 from copy import deepcopy
-from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List
+from typing import Any, Callable, Dict, Hashable, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
 from typing import Mapping as MappingT
 from typing import MutableMapping as MutableMappingT
-from typing import Optional, Tuple, TypeVar, Union
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -26,9 +26,9 @@ def flatten(d: Union[Dict[T, U], List[U], Tuple[U, ...]]) -> Iterator[U]:
 def _flatten_keys(d: Dict[Any, Any], out: Dict[tuple, Any], path: tuple) -> None:
     for k, v in d.items():
         if isinstance(v, dict):
-            _flatten_keys(v, out, path + (k,))
+            _flatten_keys(v, out, (*path, k))
         else:
-            out[path + (k,)] = v
+            out[(*path, k)] = v
 
 
 def flatten_keys(d: Dict[Any, Any]) -> Dict[tuple, Any]:
@@ -87,10 +87,8 @@ def get_available(d: Dict[T, U], keys: Iterable[T]) -> Iterator[Tuple[T, U]]:
     """
 
     for key in keys:
-        try:
+        with suppress(KeyError):
             yield key, d[key]
-        except KeyError:
-            pass
 
 
 def subdict(d: MappingT[T, U], it: Iterable[T]) -> Dict[T, U]:
@@ -185,7 +183,7 @@ def _merge_schema(d1: dict, d2: dict, int_to_float: bool = False, ignore_none: b
     b = d2.keys()
 
     for k in a & b:
-        if type(d1[k]) != type(d2[k]):  # noqa: E721
+        if type(d1[k]) != type(d2[k]):
             if ignore_none and d2[k] is None:
                 continue
             elif ignore_none and d1[k] is None:
@@ -209,7 +207,7 @@ def _merge_schema(d1: dict, d2: dict, int_to_float: bool = False, ignore_none: b
                     d1[k][0] = right
                 elif int_to_float and isinstance(left, float) and _is_int_not_bool(right):
                     pass
-                elif type(left) != type(right):  # noqa: E721
+                elif type(left) != type(right):
                     raise TypeError(f"Type of list `{k}` changed from {type(left)} to {type(right)}")
                 elif isinstance(left, dict):
                     _merge_schema(left, right, int_to_float, ignore_none)
@@ -247,26 +245,26 @@ def _get_intsize(num: int) -> str:
 
 
 def _post_schema(d: dict) -> None:
-    for k in d:
-        if isinstance(d[k], dict):
-            _post_schema(d[k])
-        elif isinstance(d[k], list):
-            del d[k][1:]
-            if d[k]:
-                if isinstance(d[k][0], dict):
-                    _post_schema(d[k][0])
-                elif isinstance(d[k][0], bool):
-                    d[k][0] = "bool"
-                elif isinstance(d[k][0], int):
-                    d[k][0] = _get_intsize(d[k][0])
+    for k, value in d.items():
+        if isinstance(value, dict):
+            _post_schema(value)
+        elif isinstance(value, list):
+            del value[1:]
+            if value:
+                if isinstance(value[0], dict):
+                    _post_schema(value[0])
+                elif isinstance(value[0], bool):
+                    value[0] = "bool"
+                elif isinstance(value[0], int):
+                    value[0] = _get_intsize(value[0])
                 else:
-                    d[k][0] = type(d[k][0]).__name__
-        elif isinstance(d[k], bool):  # check needs to be special cased since `isinstance(True, int) is True`
+                    value[0] = type(value[0]).__name__
+        elif isinstance(value, bool):  # check needs to be special cased since `isinstance(True, int) is True`
             d[k] = "bool"
-        elif isinstance(d[k], int):
-            d[k] = _get_intsize(d[k])
+        elif isinstance(value, int):
+            d[k] = _get_intsize(value)
         else:
-            d[k] = type(d[k]).__name__
+            d[k] = type(value).__name__
 
 
 def get_schema_simple(

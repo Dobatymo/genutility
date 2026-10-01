@@ -1,7 +1,13 @@
-from typing import AbstractSet, Any, Dict, Optional, Sequence, Tuple, Type, TypeVar, Union
+from typing import AbstractSet, Any, Dict, NoReturn, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 T = TypeVar("T")
 U = TypeVar("U")
+
+
+def reraise(exc_info: Tuple[Any, Any, Any]) -> NoReturn:
+    """Re-raise an exception with its original traceback."""
+
+    raise exc_info[1].with_traceback(exc_info[2])
 
 
 class NotFound(LookupError):
@@ -146,7 +152,7 @@ def assert_choice_map(name: str, value: T, choices: Dict[T, U]) -> U:
     try:
         return choices[value]
     except KeyError:
-        raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices.keys()))))
+        raise ValueError("{} must be one of {}".format(name, ", ".join(map(str, choices.keys())))) from None
 
 
 def assert_type(name: str, value: Any, types: Union[Type[Any], Tuple[Type[Any], ...]]) -> None:

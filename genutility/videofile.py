@@ -3,7 +3,7 @@ from datetime import timedelta
 from fractions import Fraction
 from os import PathLike, fspath
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterator, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Iterator, List, Sequence, Tuple, Union
 
 import numpy as np
 from typing_extensions import Self
@@ -66,7 +66,7 @@ class VideoBase:
         raise NotImplementedError
 
     def save_frame_to_file(self, pos: float, outpath: PathLike) -> None:
-        frametime, frame = self._get_frame(int(self.native_duration * pos), native=True)
+        _frametime, frame = self._get_frame(int(self.native_duration * pos), native=True)
         self._frame_to_file(frame, outpath)
 
     def close(self) -> None:
@@ -122,7 +122,7 @@ class CvVideo(VideoBase):
         try:
             duration = timedelta(seconds=frame_count / fps)
         except ZeroDivisionError:
-            raise BadFile(f"Cannot open {path}")
+            raise BadFile(f"Cannot open {path}") from None
 
         self.native_duration = frame_count  # exclusive
         self.time_base = Fraction(1 / fps)
@@ -205,7 +205,7 @@ def object_attributes(obj):
 
 
 class AvVideo(VideoBase):
-    vcc_attrs = [
+    vcc_attrs: ClassVar[List[str]] = [
         "coded_height",
         "coded_width",
         "display_aspect_ratio",
@@ -228,7 +228,7 @@ class AvVideo(VideoBase):
         try:
             self.container = self.av.open(path, "r")
         except self.av.error.InvalidDataError:
-            raise BadFile(f"Cannot open {path}")
+            raise BadFile(f"Cannot open {path}") from None
 
         # why was this here in the first place?
         # if self.container.format.name == "matroska,webm":
@@ -296,7 +296,7 @@ class AvVideo(VideoBase):
                     offset_in_corrected_time_base, backward=True, any_frame=False, stream=self.vstream
                 )  # this can silently fail for broken files
             except self.av.error.PermissionError:
-                raise NoKeyFrame(f"Failed to seek to {offset} of {self.container.duration}.")
+                raise NoKeyFrame(f"Failed to seek to {offset} of {self.container.duration}.") from None
 
             try:
                 for vframe in self.container.decode(self.vstream):  # can raise

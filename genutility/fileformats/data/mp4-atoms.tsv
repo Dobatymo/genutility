@@ -1,314 +1,338 @@
-fourcc	container or leaf	box or fullbox	description	spec
-Cr8r	cont	?	?	?
-FIEL	cont	?	?	?
-FXTC	cont	?	?	?
-ID32	leaf	fullbox	ID3 version 2 container	id3v2
-NCDT	cont	?	?	Nikon
-NCHD	leaf	?	?	Nikon
-NCTG	leaf	?	?	Nikon
-NCTH	leaf	?	?	Nikon
-NCVW	leaf	?	?	Nikon
-SDLN	cont	?	User-data XXX	Samsung
-UITS	cont	?	Unique Identifier Technology Solution	Universal Music Group
-Xtra	leaf	?	?	?
-aeLK	cont	?	?	?
-ainf	cont	?	Asset information to identify, license and play	DECE
-albc	leaf	?	?	?
-albm	leaf	fullbox	Album	3GPP
-alis	leaf	fullbox	Alias box	QuickTime
-alou	cont	?	Album loudness	ISO
-altr	leaf	?	?	?
-angl	cont	?	Angle	Apple
-auth	leaf	fullbox	Author	3GPP
-auxC	leaf	?	Image Properties for Auxiliary Images	HEIF
-auxl	leaf	?	?	?
-avcn	cont	?	AVC NAL Unit Storage Box	DECE
-beam	leaf	?	User-data XXX	WhatsApp
-bitr	cont	box	Bitrate Box	3GPP
-bloc	cont	?	Base location and purchase location for license acquisition	DECE
-bpcc	cont	?	Bits per component	JPEG2000
-buff	cont	?	Buffering information	NALu Video
-bxml	cont	?	Binary XML container	ISO
-ccid	cont	?	OMA DRM Content ID	OMA DRM 2.1
-cclv	leaf	?	Content colour volume	HEIF
-cdef	cont	?	type and ordering of the components within the codestream	JPEG2000
-cdep	leaf	?	?	?
-cdsc	leaf	?	?	?
-chan	cont	fullbox	Audio Channel Layout Atom	QuickTime
-chap	leaf	?	Chapter list	QT
-chnl	cont	fullbox	Channel Layout	ISO
-chpl	leaf	fullbox	chapter list box	adobe
-clap	leaf	box	Clean Aperture	HEIF
-clef	leaf	fullbox	Track Clean Aperture Dimensions	QT
-clfn	leaf	?	Clip file name	Apple
-clid	cont	?	Clip identifier	Apple
-clip	cont	?	Reserved / clipping region	ISO / QT
-clli	leaf	?	Content light level	HEIF
-clsf	leaf	fullbox	Classification	3GPP
-cmap	cont	?	mapping between a palette and codestream components	JPEG2000
-cmid	cont	?	Camera identifier	Apple
-cmnm	cont	?	Camera name	Apple
-cmov	cont	?	?	?
-co64	leaf	fullbox	64-bit chunk offset	ISO
-coin	cont	?	Content Information Box	DECE
-coll	leaf	fullbox	Collection	3GPP
-colr	leaf	box	specifies the colourspace of the image	JPEG2000
-cprt	leaf	fullbox	Copyright	ISO
-crgn	cont	?	Reserved / Visual clipping region definition	ISO / QT
-crhd	cont	?	Reserved for ClockReferenceStream header	MP4v1
-crtt	leaf	?	Creation time information	HEIF
-cslg	leaf	fullbox	Composition to decode timeline mapping	ISO
-ctab	cont	?	Reserved / Track color-table	ISO / QT
-ctts	leaf	fullbox	Composition time to sample	ISO
-cvru	cont	?	OMA DRM Cover URI	OMA DRM 2.1
-d263	cont	box	H263 Specific Box	3GPP
-damr	cont	box	AMR Specific Box	3GPP
-date	leaf	?	Date and time	Apple
-dawp	cont	box	AMRWP Specific Box	3GPP
-dcfD	cont	?	Marlin DCF Duration	OMArlin
-dimg	leaf	box	?	?
-dimm	leaf	box	hint immediate Bytes Sent	ISO
-dinf	cont	?	Data information	ISO
-dmax	leaf	box	hint longest packet	ISO
-dmed	leaf	box	hint media Bytes Sent	ISO
-dmix	cont	fullbox	Down Mix Instructions	?
-dpnd	leaf	?	MPEG4 reference track	Unknown
-dref	cont	fullbox	Data reference	ISO
-drep	leaf	box	hint repeated Bytes Sent	ISO
-dscp	leaf	fullbox	Description	3GPP
-dsgd	cont	?	DVB Sample Group Description Box	DVB
-dstg	cont	?	DVB Sample to Group Box	DVB
-edts	cont	?	Edit lists	ISO
-elng	leaf	fullbox	Extended language tag	QT
-elst	leaf	fullbox	Edit list atom	ISO
-emsg	cont	?	Event message	DASH
-enca	cont	box	Encrypted Audio Sample Entry	3GPP
-enct	cont	box	Encrypted Text Sample Entry	3GPP
-encv	cont	box	Encrypted Video Sample Entry	3GPP
-enof	leaf	?	Track Encoded Pixels Dimensions	QT
-esds	cont	fullbox	Elementary Stream Descriptor Atom	QuickTime # int32 version
-evti	cont	?	Event information	ATSC 3.0
-fdel	cont	?	File delivery information (item info extension)	ISO
-fdsa	cont	box	FD sample	?
-feci	cont	?	FEC Informatiom	ISO
-fecr	leaf	fullbox	FEC Reservoir Box	ISO
-fiin	cont	fullbox	FD Item Information	ISO
-fire	cont	fullbox	File Reservoir	ISO
-fpar	cont	fullbox	File Partition Box	ISO
-free	leaf	box	Free space	ISO
-frma	cont	box	Original format box	ISO
-ftyp	leaf	box	File type	ISO
-gitn	cont	fullbox	Group ID to name	ISO
-gmhd	cont	?	Base media information header	QT
-gmin	leaf	?	Base media information atom	QT
-gnre	leaf	fullbox	Genre	3GPP
-grpi	cont	?	OMA DRM Group ID	OMA DRM 2.0
-grpl	cont	?	?	?
-hdlr	leaf	fullbox	Handler Reference Box	ISO
-hinf	cont	box	hint information	ISO
-hint	leaf	?	Hint reference track	Unknown
-hmhd	leaf	fullbox	Hint media header	ISO
-hnti	cont	box	Hint information	ISO
-hpix	cont	?	Hipix Rich Picture (user-data or meta-data)	Hipix
-htcb	leaf	?	HTC binary tags	QuickTime
-hvcC	leaf	?	?	?
-icnu	cont	?	OMA DRM Icon URI	OMA DRM 2.0
-idat	leaf	box	Item data	ISO
-ihdr	cont	?	Image Header	JPEG2000
-iinf	cont	fullbox	Item Information Box	ISO
-iloc	leaf	fullbox	Item location	ISO
-ilst	leaf	box	metadata item list atom	contains non-standard atoms like \xa9too
-imap	cont	?	Reserved / Track input map	ISO / QT
-imif	cont	?	IPMP Information box	ISO
-infe	leaf	fullbox	Item information entry	ISO
-infu	cont	?	OMA DRM Info URL	OMA DRM 2.0
-iods	leaf	?	Object Descriptor container box	MP4v1
-ipco	cont	?	?	?
-iphd	cont	?	reserved for IPMP Stream header	MP4v1
-ipma	leaf	?	ItemPropertyAssociation	?
-ipmc	cont	?	IPMP Control Box	ISO
-ipro	cont	?	Item protection	ISO
-iprp	cont	?	?	?
-iref	cont	fullbox	Item reference	ISO
-irot	leaf	?	Image Rotation	HEIF
-ispe	leaf	?	Image spatial Extents	HEIF
-jP  	cont	?	JPEG 2000 Signature	JPEG2000
-jp2c	cont	?	JPEG 2000 contiguous codestream	JPEG2000
-jp2h	cont	?	Header	JPEG2000
-jp2i	cont	?	intellectual property information	JPEG2000
-keys	leaf	fullbox	Metadata Item Keys Atom	QuickTime
-kmat	cont	?	Reserved / Compressed visual track matte	ISO / QT
-kywd	leaf	fullbox	Keywords	3GPP
-leva	cont	?	Leval assignment	ISO
-load	leaf	box	Reserved / Track pre-load definitions	ISO / QT
-loci	leaf	fullbox	Location information	3GPP
-loop	cont	?	Looping behavior	WhatsApp
-lrcu	cont	?	OMA DRM Lyrics URI	OMA DRM 2.1
-ludt	cont	?	Loudness	ISO
-m7hd	cont	?	Reserved for MPEG7Stream header	MP4v1
-manu	cont	?	Manufacturer	Apple
-matt	cont	?	Reserved / Visual track matte	ISO / QT
-maxr	leaf	box	hint maxrate	ISO
-mdat	leaf	?	Media data container	ISO
-mdcv	leaf	?	Mastering display colour volume	HEIF
-mdhd	leaf	fullbox	Media header, overall information about the media	ISO
-mdia	cont	box	Media information	ISO
-mdri	cont	?	Mutable DRM information	OMA DRM 2.0
-meco	cont	?	Metadata container	ISO
-mehd	cont	?	Movie extends header	ISO
-mere	cont	?	Metabox relation	ISO
-meta	cont	fullbox	Metadata container	ISO
-mfhd	leaf	fullbox	Movie fragment header	ISO
-mfra	cont	box	Movie fragment random access	ISO
-mfro	cont	fullbox	Movie fragment random access offset	ISO
-minf	cont	box	Media information container	ISO
-mjhd	cont	?	Reserved for MPEG-J Stream header	MP4v1
-modl	cont	?	Model	Apple
-moof	cont	?	Movie fragment	ISO
-moov	cont	box	Movie	ISO
-mp4a	cont	box	MP4 Audio Sample Entry	3GPP
-mp4v	cont	box	MP4 Visual Sample Entry	3GPP
-mpod	leaf	?	OD reference track	Unknown
-mvcg	cont	?	Multiview group	NALu Video
-mvci	cont	?	Multiview Information	NALu Video
-mvex	cont	box	Movie extends box	ISO
-mvhd	leaf	fullbox	Movie header	ISO
-mvra	cont	?	Multiview relation attribute	NALu Video
-name	leaf	?	?	?
-ndrm	cont	?	?	?
-nmhd	leaf	fullbox	Null media header	ISO
-npck	leaf	box	hint Packets Sent	ISO
-nump	leaf	box	hint Packets Sent	ISO
-ochd	cont	?	Reserved for ObjectContentInfoStream header	MP4v1
-odaf	cont	?	OMA DRM Access Unit Format	OMA DRM 2.0
-odda	cont	?	OMA DRM Content Object	OMA DRM 2.0
-odhd	cont	?	Reserved for ObjectDescriptorStream header	MP4v1
-odhe	cont	?	OMA DRM Discrete Media Headers	OMA DRM 2.0
-odrb	cont	?	OMA DRM Rights Object	OMA DRM 2.0
-odrm	cont	?	OMA DRM Container	OMA DRM 2.0
-odtt	cont	?	OMA DRM Transaction Tracking	OMA DRM 2.0
-ohdr	cont	?	OMA DRM Common headers	OMA DRM 2.0
-orie	cont	?	Orientation	3GPP
-padb	cont	fullbox	Padding bits	ISO
-paen	cont	box	Partition entry	ISO
-pasp	leaf	box	Pixel Aspect Ratio	HEIF
-payt	leaf	box	hint payload ID	ISO
-pclr	cont	?	palette which maps a single component in index space to a multiple- component image	JPEG2000
-pdin	leaf	fullbox	Progressive download information	ISO
-perf	leaf	fullbox	Performer	3GPP
-pitm	leaf	fullbox	Primary item reference	ISO
-pixi	leaf	?	Pixel Information	HEIF
-pmax	leaf	box	hint largest packet	ISO
-pnot	cont	?	Reserved / Preview container	ISO / QT
-prft	cont	fullbox	Producer reference time box	ISO
-prof	leaf	fullbox	Track Production Aperture Dimensions	QuickTime
-pssh	cont	?	Protection system specific header	ISO Common Encryption
-rdp 	leaf	box	RTP movie hint information	?
-reel	cont	?	Reel	Apple
-res 	cont	?	Resolution	JPEG2000
-resc	cont	?	Resolution captured	JPEG2000
-resd	cont	?	Resolution displayed	JPEG2000
-rinf	cont	?	Restricted information	ISO
-rloc	leaf	?	Relative Location	HEIF
-rmda	cont	?	?	QuickTime
-rmra	cont	?	?	QuickTime
-rrtp	leaf	?	Required reference types	HEIF
-rsrc	leaf	fullbox	resource type	QuickTime
-rtng	leaf	fullbox	Rating	3GPP
-s263	cont	box	H263 Sample Entry	3GPP
-saio	cont	fullbox	Sample auxiliary information offsets	ISO
-saiz	cont	fullbox	Sample auxiliary information sizes	ISO
-samr	cont	box	AMR Sample Entry	3GPP
-sawb	cont	box	AMR Sample Entry	3GPP
-sawp	cont	box	AMRWP Sample Entry	3GPP
-sbgp	leaf	fullbox	Sample to group	ISO
-scen	cont	?	Scene	Apple
-schi	cont	box	Scheme Information Box	ISO
-schm	cont	fullbox	Scheme Type Box	ISO
-sdep	cont	?	Sample dependency	NALu Video
-sdhd	cont	?	Reserved for SceneDescriptionStream header	MP4v1
-sdp 	leaf	box	RTP track SDP hint information	?
-sdtp	leaf	fullbox	Independent and Disposable Samples Box	ISO
-sdvp	cont	?	SD Profile Box	SDV
-segr	cont	box	File delivery session group	ISO
-senc	cont	?	Sample encryption data	ISO Common Encryption
-sgpd	leaf	fullbox	Sample group definition	ISO
-shot	cont	?	Shot	Apple
-sidx	cont	fullbox	Segment Index Box	3GPP
-sinf	cont	box	Protection scheme information	ISO
-skip	leaf	box	Free space	ISO
-slno	cont	?	Serial number	Apple
-smhd	leaf	fullbox	Sound media header	ISO
-smrd	leaf	?	User-data XXX	Samsung
-smta	leaf	?	User-data XXX	Samsung
-spdb	cont	box	Service Protection Description	3GPP # version but no flags?
-srat	cont	fullbox	Sampling Rate Box	ISO
-srmb	cont	?	System Renewability Message	DVB
-srmc	cont	?	System Renewability Message container	DVB
-srpp	cont	fullbox	SRTP Process Box	ISO
-ssix	cont	fullbox	Sub-sample index	ISO
-stbl	cont	box	Sample table	ISO
-stco	leaf	fullbox	Sample table chunk offset 	ISO
-stdp	cont	fullbox	Sample degradation priority	ISO
-ster	leaf	?	?	?
-sthd	cont	fullbox	Subtitle Media Header Box	ISO
-stps	leaf	?	PartialSyncSamples	quicktime
-strd	cont	box	Sub-track definition	ISO
-stri	cont	fullbox	Sub-track information	ISO
-strk	cont	box	Sub track	ISO
-stsc	leaf	fullbox	Sample table sample-to-chunk	ISO
-stsd	leaf	fullbox	Sample Description Box	ISO
-stsg	leaf	fullbox	Sub-track sample grouping	ISO
-stsh	leaf	fullbox	Sample table shadow sync	ISO
-stss	leaf	fullbox	Sample table sync	ISO
-stsz	leaf	fullbox	Sample table sizes	ISO
-stts	leaf	fullbox	Sample table time-to-sample	ISO
-styp	leaf	box	Segment type	3GPP
-stz2	cont	fullbox	compact sample sizes (framing)	ISO
-subs	leaf	fullbox	Sub-sample information	ISO
-swtc	cont	?	Multiview Group Relation	NALu Video
-sync	leaf	?	Synchronization	QT
-tapt	cont	box	Track aperture mode dimensions	QuickTime
-text	leaf	?	Text media information header	QT
-tfad	cont	?	Track fragment adjustment box	3GPP
-tfdt	cont	fullbox	Track fragment decode time	ISO
-tfhd	cont	fullbox	Track fragment header	ISO
-tfma	cont	?	Track fragment media adjustment box	3GPP
-tfra	cont	fullbox	Track fragment random access	ISO
-thmb	leaf	fullbox	Thumbnail	3GPP
-tibr	cont	?	Tier Bit rate	NALu Video
-tiri	cont	?	Tier Information	NALu Video
-titl	leaf	fullbox	Title	3GPP
-tkhd	leaf	fullbox	Track header	ISO
-tlou	cont	?	Track loudness	ISO
-tmax	leaf	box	hint max relative time	ISO
-tmcd	leaf	?	Time code	QT
-tmin	leaf	box	hint min relative time	ISO
-totl	leaf	box	hint Bytes Sent incl RTP	ISO
-tpay	leaf	box	hint Bytes Sent excl RTP	ISO
-tpyl	leaf	box	hint Bytes Sent excl RTP	ISO
-traf	cont	box	Track fragment	ISO
-trak	cont	box	Track	ISO
-tref	cont	box	Track reference	ISO
-trep	cont	fullbox	Track Extension Properties Box	ISO
-trex	leaf	?	Track extends defaults	ISO
-trgr	leaf	fullbox	Track grouping information	ISO
-trik	cont	?	Facilitates random access and trick play modes	DECE
-trpy	leaf	box	hint Bytes Sent incl RTP	ISO
-trun	cont	fullbox	Track fragment run	ISO
-tsel	leaf	fullbox	Track selection	ISO/3GPP
-tsyn	leaf	?	?	?
-txas	leaf	?	Track exclude from autoselection	QT
-udes	leaf	?	?	?
-udta	cont	box	User data box	"ISO can contain non-standard tag like b""\xa9mod"", \xa9enc, \xa9TIM"
-uinf	cont	?	a tool by which a vendor may provide access to additional information associated with a UUID	JPEG2000
-ulst	cont	?	a list of UUID’s	JPEG2000
-urat	leaf	fullbox	User rating	3GPP
-url 	leaf	fullbox	URL	JPEG2000
-urn 	leaf	fullbox	URN	?
-uuid	leaf	uuidbox	user-extension box	ISO
-vmhd	leaf	fullbox	Video media header	ISO
-vwdi	cont	?	Multiview Scene Information	NALu Video
-wide	cont	?	Expansion space reservation	QT
-xml 	cont	?	XML container	ISO/JPEG2000
-yrrc	leaf	fullbox	Year recorded	3GPP
+fourcc	grammar	box or fullbox	description	spec	profile	parent	parser	versions
+Cr8r	container	?	?	?	*	*	Cr8r	-
+FIEL	container	?	?	?	*	*	FIEL	-
+FXTC	container	?	?	?	*	*	FXTC	-
+ID32	payload	fullbox	ID3 version 2 container	id3v2	*	*	ID32	-
+NCDT	container	?	?	Nikon	*	*	NCDT	-
+NCHD	payload	?	?	Nikon	*	*	NCHD	-
+NCTG	payload	?	?	Nikon	*	*	NCTG	-
+NCTH	payload	?	?	Nikon	*	*	NCTH	-
+NCVW	payload	?	?	Nikon	*	*	NCVW	-
+SDLN	container	?	User-data XXX	Samsung	*	*	SDLN	-
+UITS	container	?	Unique Identifier Technology Solution	Universal Music Group	*	*	UITS	-
+Xtra	payload	?	?	?	*	*	Xtra	-
+aeLK	container	?	?	?	*	*	aeLK	-
+ainf	container	?	Asset information to identify, license and play	DECE	*	*	ainf	-
+albc	payload	?	?	?	*	*	albc	-
+albm	payload	fullbox	Album	3GPP	*	*	albm	-
+alis	payload	fullbox	Alias box	QuickTime	*	*	alis	-
+alou	payload	fullbox	Album loudness	ISO	*	*	alou	-
+altr	payload	?	?	?	*	*	altr	-
+angl	container	?	Angle	Apple	*	*	angl	-
+auth	payload	fullbox	Author	3GPP	*	*	auth	-
+auxC	payload	fullbox	Image Properties for Auxiliary Images	HEIF	*	*	auxC	-
+auxi	payload	fullbox	Auxiliary type information	HEIF	*	*	auxi	-
+auxl	payload	box	Auxiliary track reference	HEIF	*	tref	auxl	-
+avc1	sample-entry:visual	box	AVC visual sample entry	ISO / QTFF	*	stsd	-	-
+avcn	container	?	AVC NAL Unit Storage Box	DECE	*	*	avcn	-
+beam	payload	?	User-data XXX	WhatsApp	*	*	beam	-
+bitr	container	box	Bitrate Box	3GPP	*	*	bitr	-
+bloc	container	?	Base location and purchase location for license acquisition	DECE	*	*	bloc	-
+bpcc	container	?	Bits per component	JPEG2000	*	*	bpcc	-
+buff	container	?	Buffering information	NALu Video	*	*	buff	-
+bxml	payload	fullbox	Binary XML box	ISO	*	*	bxml	-
+ccid	container	?	OMA DRM Content ID	OMA DRM 2.1	*	*	ccid	-
+cclv	payload	box	Content colour volume	HEIF	*	*	cclv	-
+ccst	payload	fullbox	Coding constraints	HEIF	*	*	ccst	-
+cdef	container	?	type and ordering of the components within the codestream	JPEG2000	*	*	cdef	-
+cdep	payload	?	?	?	*	*	cdep	-
+cdsc	payload:inherit-version	box	Content description reference	ISO / HEIF	isobmff	*	iref_parser	-
+chan	payload	fullbox	Audio Channel Layout Atom	QuickTime	*	*	chan	-
+chap	payload	?	Chapter list	QT	*	*	chap	-
+chnl	payload	fullbox	Channel Layout	ISO	*	*	chnl	-
+chpl	payload	fullbox	chapter list box	adobe	*	*	chpl	-
+clap	payload	box	Clean Aperture	HEIF	*	*	clap	-
+clef	payload	fullbox	Track Clean Aperture Dimensions	QT	*	*	clef	-
+clfn	payload	?	Clip file name	Apple	*	*	clfn	-
+clid	container	?	Clip identifier	Apple	*	*	clid	-
+clip	container	box	Reserved / clipping region	QTFF	quicktime	*	clip	-
+clli	payload	box	Content light level	HEIF	*	*	clli	-
+clsf	payload	fullbox	Classification	3GPP	*	*	clsf	-
+cmap	container	?	mapping between a palette and codestream components	JPEG2000	*	*	cmap	-
+cmid	container	?	Camera identifier	Apple	*	*	cmid	-
+cmnm	container	?	Camera name	Apple	*	*	cmnm	-
+cmov	container	?	?	?	*	*	cmov	-
+co64	payload	fullbox	64-bit chunk offset	ISO	*	*	co64	-
+coin	container	?	Content Information Box	DECE	*	*	coin	-
+coll	payload	fullbox	Collection	3GPP	*	*	coll	-
+colr	payload	box	specifies the colourspace of the image	JPEG2000	*	*	colr	-
+cprt	payload	fullbox	Copyright	ISO	*	*	cprt	-
+crgn	payload	box	Reserved / Visual clipping region definition	QTFF	quicktime	clip	crgn	-
+crhd	container	?	Reserved for ClockReferenceStream header	MP4v1	*	*	crhd	-
+crtt	payload	?	Creation time information	HEIF	*	*	crtt	-
+cslg	payload	fullbox	Composition to decode timeline mapping	ISO	*	*	cslg	-
+ctab	payload	box	Reserved / Track color-table	QTFF	quicktime	*	ctab	-
+ctts	payload	fullbox	Composition time to sample	ISO	*	*	ctts	-
+data	payload	box	Data atom	QuickTime / ISO	quicktime	ilst	data	-
+cvru	container	?	OMA DRM Cover URI	OMA DRM 2.1	*	*	cvru	-
+d263	container	box	H263 Specific Box	3GPP	*	*	d263	-
+damr	container	box	AMR Specific Box	3GPP	*	*	damr	-
+date	payload	?	Date and time	Apple	*	*	date	-
+dawp	container	box	AMRWP Specific Box	3GPP	*	*	dawp	-
+dcfD	container	?	Marlin DCF Duration	OMArlin	*	*	dcfD	-
+dimg	payload:inherit-version	box	Derived image item reference	HEIF	*	iref	iref_parser	-
+dimm	payload	box	hint immediate Bytes Sent	ISO	*	*	dimm	-
+dinf	container	box	Data information	ISO	*	*	dinf	-
+dmax	payload	box	hint longest packet	ISO	*	*	dmax	-
+dmed	payload	box	hint media Bytes Sent	ISO	*	*	dmed	-
+dmix	container	fullbox	Down Mix Instructions	?	*	*	dmix	-
+dpnd	payload	?	MPEG4 reference track	Unknown	*	*	dpnd	-
+dref	container	fullbox	Data reference	ISO	*	*	dref	-
+drep	payload	box	hint repeated Bytes Sent	ISO	*	*	drep	-
+dscp	payload	fullbox	Description	3GPP	*	*	dscp	-
+dsgd	container	?	DVB Sample Group Description Box	DVB	*	*	dsgd	-
+dstg	container	?	DVB Sample to Group Box	DVB	*	*	dstg	-
+edts	container	box	Edit lists	ISO	*	*	edts	-
+elng	payload	fullbox	Extended language tag	QT	*	*	elng	0
+elst	payload	fullbox	Edit list atom	ISO	*	*	elst	-
+emsg	container	?	Event message	DASH	*	*	emsg	-
+enca	sample-entry:audio	box	Encrypted Audio Sample Entry	3GPP	*	*	-	-
+enct	payload	box	Encrypted Text Sample Entry	3GPP	*	*	-	-
+encv	sample-entry:visual	box	Encrypted Video Sample Entry	3GPP	*	*	-	-
+enof	payload	fullbox	Track Encoded Pixels Dimensions	QTFF	quicktime	*	enof	-
+esds	payload	fullbox	Elementary Stream Descriptor Atom	QuickTime # int32 version	*	*	esds	-
+evti	container	?	Event information	ATSC 3.0	*	*	evti	-
+fdel	container	?	File delivery information (item info extension)	ISO	*	*	fdel	-
+fdsa	container	box	FD sample	?	*	*	fdsa	-
+feci	payload	box	FEC Information	ISO	*	*	feci	-
+fecr	payload	fullbox	FEC Reservoir Box	ISO	*	*	fecr	0,1
+fiin	container	fullbox	FD Item Information	ISO	*	*	fiin	-
+fire	payload	fullbox	File Reservoir	ISO	*	*	fire	-
+fpar	payload	fullbox	File Partition Box	ISO	*	*	fpar	-
+free	payload	box	Free space	ISO	*	*	free	-
+frma	payload	box	Original format box	ISO	*	*	frma	-
+ftyp	payload	box	File type	ISO	*	*	ftyp	-
+gitn	payload	fullbox	Group ID to name	ISO	*	*	gitn	-
+gmhd	container	box	Base media information header	QTFF	quicktime	*	gmhd	-
+gmin	payload	fullbox	Base media information atom	QTFF	quicktime	gmhd	gmin	-
+gnre	payload	fullbox	Genre	3GPP	*	*	gnre	-
+grpi	container	?	OMA DRM Group ID	OMA DRM 2.0	*	*	grpi	-
+grpl	container	box	Groups list	HEIF	*	*	grpl	-
+hdlr	payload	fullbox	Handler Reference Box	ISO	*	*	hdlr	-
+hinf	container	box	hint information	ISO	*	*	hinf	-
+hint	payload	?	Hint reference track	Unknown	*	*	hint	-
+hmhd	payload	fullbox	Hint media header	ISO	*	*	hmhd	-
+hnti	container	box	Hint information	ISO	*	*	hnti	-
+hpix	container	?	Hipix Rich Picture (user-data or meta-data)	Hipix	*	*	hpix	-
+htcb	payload	?	HTC binary tags	QuickTime	*	*	htcb	-
+hvcC	payload	box	HEVC configuration property	HEIF	*	*	hvcC	-
+icnu	container	?	OMA DRM Icon URI	OMA DRM 2.0	*	*	icnu	-
+idat	payload	box	Item data	ISO	*	*	idat	-
+ihdr	container	?	Image Header	JPEG2000	*	*	ihdr	-
+iinf	container	fullbox	Item Information Box	ISO	*	*	iinf	-
+iloc	payload	fullbox	Item location	ISO	*	*	iloc	-
+ilst	item-list:legacy-code	box	metadata item list atom	contains non-standard atoms like \xa9too	*	*	-	-
+ilst	item-list	box	Metadata item list atom	ISO	isobmff	meta	-	-
+ilst	item-list:legacy-code	box	Metadata item list atom	QTFF	quicktime	meta	-	-
+imap	payload	box	Reserved / Track input map	QTFF	quicktime	*	imap	-
+imif	payload	box	IPMP Information box	ISO	*	*	imif	-
+infe	payload	fullbox	Item information entry	ISO	*	*	infe	-
+infu	container	?	OMA DRM Info URL	OMA DRM 2.0	*	*	infu	-
+iods	payload	?	Object Descriptor container box	MP4v1	*	*	iods	-
+ipco	container	box	Item property container	HEIF	*	*	ipco	-
+iphd	container	?	reserved for IPMP Stream header	MP4v1	*	*	iphd	-
+ipma	payload	fullbox	Item property association	HEIF	*	*	ipma	-
+ipmc	payload	box	IPMP Control Box	ISO	*	*	ipmc	-
+ipro	container	fullbox	Item protection	ISO	*	*	ipro	-
+iprp	container	box	Item properties	HEIF	*	*	iprp	-
+iref	container	fullbox	Item reference	ISO	*	*	iref	0,1
+irot	payload	box	Image Rotation	HEIF	*	*	irot	-
+ispe	payload	fullbox	Image spatial Extents	HEIF	*	*	ispe	-
+jP  	container	?	JPEG 2000 Signature	JPEG2000	*	*	jP	-
+jp2c	container	?	JPEG 2000 contiguous codestream	JPEG2000	*	*	jp2c	-
+jp2h	container	?	Header	JPEG2000	*	*	jp2h	-
+jp2i	container	?	intellectual property information	JPEG2000	*	*	jp2i	-
+keys	payload	fullbox	Metadata Item Keys Atom	QuickTime	quicktime	meta	keys	-
+ctry	payload	fullbox	Country list atom	QTFF	quicktime	meta	ctry	-
+lang	payload	fullbox	Language list atom	QTFF	quicktime	meta	lang	-
+mhdr	payload	fullbox	Metadata header atom	QTFF	quicktime	meta	mhdr	-
+itif	payload	box	Item information atom	QTFF	quicktime	ilst	itif	-
+kmat	payload	box	Reserved / Compressed visual track matte	QTFF	quicktime	*	kmat	-
+kywd	payload	fullbox	Keywords	3GPP	*	*	kywd	-
+leva	payload	fullbox	Level assignment	ISO	*	*	leva	-
+load	payload	box	Reserved / Track pre-load definitions	ISO / QT	*	*	load	-
+loci	payload	fullbox	Location information	3GPP	*	*	loci	-
+loop	container	?	Looping behavior	WhatsApp	*	*	loop	-
+lrcu	container	?	OMA DRM Lyrics URI	OMA DRM 2.1	*	*	lrcu	-
+ludt	container	box	Loudness	ISO	*	*	ludt	-
+m7hd	container	?	Reserved for MPEG7Stream header	MP4v1	*	*	m7hd	-
+manu	container	?	Manufacturer	Apple	*	*	manu	-
+matt	payload	box	Reserved / Visual track matte	QTFF	quicktime	*	matt	-
+maxr	payload	box	hint maxrate	ISO	*	*	maxr	-
+mdat	payload	box	Media data	ISO	*	*	mdat	-
+mdcv	payload	box	Mastering display colour volume	HEIF	*	*	mdcv	-
+mdhd	payload	fullbox	Media header, overall information about the media	ISO	*	*	mdhd	-
+mdia	container	box	Media information	ISO	*	*	mdia	-
+mdri	container	?	Mutable DRM information	OMA DRM 2.0	*	*	mdri	-
+meco	container	box	Metadata container	ISO	*	*	meco	-
+mehd	payload	fullbox	Movie extends header	ISO	*	*	mehd	-
+mere	payload	fullbox	Metabox relation	ISO	*	*	mere	-
+meta	container	fullbox	Metadata container	ISO	isobmff	*	meta	0
+meta	container	box	Metadata atom	QuickTime	quicktime	*	meta	-
+mfhd	payload	fullbox	Movie fragment header	ISO	*	*	mfhd	-
+mfra	container	box	Movie fragment random access	ISO	*	*	mfra	-
+mfro	payload	fullbox	Movie fragment random access offset	ISO	*	*	mfro	-
+minf	container	box	Media information container	ISO	*	*	minf	-
+mjhd	container	?	Reserved for MPEG-J Stream header	MP4v1	*	*	mjhd	-
+modl	container	?	Model	Apple	*	*	modl	-
+moof	container	box	Movie fragment	ISO	*	*	moof	-
+moov	container	box	Movie	ISO	*	*	moov	-
+mp4a	sample-entry:audio	box	MP4 Audio Sample Entry	3GPP	*	*	-	-
+mp4v	sample-entry:visual	box	MP4 Visual Sample Entry	3GPP	*	*	-	-
+mpod	payload	?	OD reference track	Unknown	*	*	mpod	-
+mvcg	container	?	Multiview group	NALu Video	*	*	mvcg	-
+mvci	container	?	Multiview Information	NALu Video	*	*	mvci	-
+mvex	container	box	Movie extends box	ISO	*	*	mvex	-
+mvhd	payload	fullbox	Movie header	ISO	*	*	mvhd	-
+mvra	container	?	Multiview relation attribute	NALu Video	*	*	mvra	-
+name	payload	box	Name atom	QTFF	quicktime	ilst	name	-
+ndrm	container	?	?	?	*	*	ndrm	-
+nmhd	payload	fullbox	Null media header	ISO	*	*	nmhd	-
+npck	payload	box	hint Packets Sent	ISO	*	*	npck	-
+nump	payload	box	hint Packets Sent	ISO	*	*	nump	-
+ochd	container	?	Reserved for ObjectContentInfoStream header	MP4v1	*	*	ochd	-
+odaf	container	?	OMA DRM Access Unit Format	OMA DRM 2.0	*	*	odaf	-
+odda	container	?	OMA DRM Content Object	OMA DRM 2.0	*	*	odda	-
+odhd	container	?	Reserved for ObjectDescriptorStream header	MP4v1	*	*	odhd	-
+odhe	container	?	OMA DRM Discrete Media Headers	OMA DRM 2.0	*	*	odhe	-
+odrb	container	?	OMA DRM Rights Object	OMA DRM 2.0	*	*	odrb	-
+odrm	container	?	OMA DRM Container	OMA DRM 2.0	*	*	odrm	-
+odtt	container	?	OMA DRM Transaction Tracking	OMA DRM 2.0	*	*	odtt	-
+ohdr	container	?	OMA DRM Common headers	OMA DRM 2.0	*	*	ohdr	-
+orie	container	?	Orientation	3GPP	*	*	orie	-
+padb	payload	fullbox	Padding bits	ISO	*	*	padb	-
+paen	container	box	Partition entry	ISO	*	*	paen	-
+pasp	payload	box	Pixel Aspect Ratio	HEIF	*	*	pasp	-
+payt	payload	box	hint payload ID	ISO	*	*	payt	-
+pclr	container	?	palette which maps a single component in index space to a multiple- component image	JPEG2000	*	*	pclr	-
+pdin	payload	fullbox	Progressive download information	ISO	*	*	pdin	-
+perf	payload	fullbox	Performer	3GPP	*	*	perf	-
+pitm	payload	fullbox	Primary item reference	ISO	*	*	pitm	-
+pixi	payload	fullbox	Pixel Information	HEIF	*	*	pixi	-
+pmax	payload	box	hint largest packet	ISO	*	*	pmax	-
+pnot	payload	box	Reserved / Preview atom	QTFF	quicktime	*	pnot	-
+prft	payload	fullbox	Producer reference time box	ISO	*	*	prft	-
+prof	payload	fullbox	Track Production Aperture Dimensions	QuickTime	*	*	prof	-
+pssh	payload	fullbox	Protection system specific header	ISO Common Encryption	*	*	pssh	-
+rdp 	payload	box	RTP movie hint information	?	*	*	rdp	-
+reel	container	?	Reel	Apple	*	*	reel	-
+res 	container	?	Resolution	JPEG2000	*	*	res	-
+resc	container	?	Resolution captured	JPEG2000	*	*	resc	-
+resd	container	?	Resolution displayed	JPEG2000	*	*	resd	-
+rinf	container	box	Restricted information	ISO	*	*	rinf	-
+rloc	payload	fullbox	Relative Location	HEIF	*	*	rloc	-
+rmda	container	box	Reference movie descriptor atom	QTFF	quicktime	rmra	rmda	-
+rmra	container	box	Reference movie atom	QTFF	quicktime	moov	rmra	-
+rrtp	payload	?	Required reference types	HEIF	*	*	rrtp	-
+rsrc	payload	fullbox	resource type	QuickTime	*	*	rsrc	-
+rtng	payload	fullbox	Rating	3GPP	*	*	rtng	-
+s263	sample-entry:visual	box	H263 Sample Entry	3GPP	*	*	-	-
+saio	payload	fullbox	Sample auxiliary information offsets	ISO	*	*	saio	-
+saiz	payload	fullbox	Sample auxiliary information sizes	ISO	*	*	saiz	-
+samr	sample-entry:audio	box	AMR Sample Entry	3GPP	*	*	-	-
+sawb	sample-entry:audio	box	AMR Sample Entry	3GPP	*	*	-	-
+sawp	sample-entry:audio	box	AMRWP Sample Entry	3GPP	*	*	-	-
+sbgp	payload	fullbox	Sample to group	ISO	*	*	sbgp	-
+scen	container	?	Scene	Apple	*	*	scen	-
+schi	container	box	Scheme Information Box	ISO	*	*	schi	-
+schm	container	fullbox	Scheme Type Box	ISO	*	*	schm	-
+sdep	container	?	Sample dependency	NALu Video	*	*	sdep	-
+sdhd	container	?	Reserved for SceneDescriptionStream header	MP4v1	*	*	sdhd	-
+sdp 	payload	box	RTP track SDP hint information	?	*	*	sdp	-
+sdtp	payload	fullbox	Independent and Disposable Samples Box	ISO	*	*	sdtp	-
+sdvp	container	?	SD Profile Box	SDV	*	*	sdvp	-
+segr	payload	box	File delivery session group	ISO	*	*	segr	-
+senc	payload	fullbox	Sample encryption data	ISO Common Encryption	*	*	senc	-
+sgpd	payload	fullbox	Sample group definition	ISO	*	*	sgpd	-
+shot	container	?	Shot	Apple	*	*	shot	-
+sidx	payload	fullbox	Segment Index Box	3GPP	*	*	sidx	-
+sinf	container	box	Protection scheme information	ISO	*	*	sinf	-
+skip	payload	box	Free space	ISO	*	*	skip	-
+slno	container	?	Serial number	Apple	*	*	slno	-
+smhd	payload	fullbox	Sound media header	ISO	*	*	smhd	-
+smrd	payload	?	User-data XXX	Samsung	*	*	smrd	-
+smta	payload	?	User-data XXX	Samsung	*	*	smta	-
+spdb	container	box	Service Protection Description	3GPP # version but no flags?	*	*	spdb	-
+srat	payload	fullbox	Sampling Rate Box	ISO	*	*	srat	-
+srmb	container	?	System Renewability Message	DVB	*	*	srmb	-
+srmc	container	?	System Renewability Message container	DVB	*	*	srmc	-
+srpp	payload	fullbox	SRTP Process Box	ISO	*	*	srpp	-
+ssix	payload	fullbox	Sub-sample index	ISO	*	*	ssix	-
+stbl	container	box	Sample table	ISO	*	*	stbl	-
+stco	payload	fullbox	Sample table chunk offset 	ISO	*	*	stco	-
+stdp	payload	fullbox	Sample degradation priority	ISO	*	*	stdp	0
+ster	payload	?	?	?	*	*	ster	-
+sthd	payload	fullbox	Subtitle Media Header Box	ISO	*	*	sthd	-
+stps	payload	fullbox	Partial sync sample	QTFF	quicktime	*	stps	-
+strd	payload	box	Sub-track definition	ISO	*	strk	strd	-
+stri	payload	fullbox	Sub-track information	ISO	*	*	stri	-
+strk	container	box	Sub track	ISO	*	*	strk	-
+stsc	payload	fullbox	Sample table sample-to-chunk	ISO	*	*	stsc	-
+stsd	entry-list	fullbox	Sample Description Box; contains sample entries	ISO	*	*	stsd	-
+stsg	payload	fullbox	Sub-track sample grouping	ISO	*	*	stsg	-
+stsh	payload	fullbox	Sample table shadow sync	ISO	*	*	stsh	-
+stss	payload	fullbox	Sample table sync	ISO	*	*	stss	-
+stsz	payload	fullbox	Sample table sizes	ISO	*	*	stsz	-
+stts	payload	fullbox	Sample table time-to-sample	ISO	*	*	stts	-
+styp	payload	box	Segment type	3GPP	*	*	styp	-
+stz2	payload	fullbox	Compact sample sizes (framing)	ISO	*	*	stz2	-
+subs	payload	fullbox	Sub-sample information	ISO	*	*	subs	-
+swtc	container	?	Multiview Group Relation	NALu Video	*	*	swtc	-
+sync	payload	box	Synchronization track reference	QTFF	quicktime	tref	sync	-
+tapt	container	box	Track aperture mode dimensions	QuickTime	*	*	tapt	-
+text	payload	box	Text media information atom	QTFF	quicktime	gmhd	text	-
+tfad	container	?	Track fragment adjustment box	3GPP	*	*	tfad	-
+tfdt	payload	fullbox	Track fragment decode time	ISO	*	*	tfdt	-
+tfhd	payload	fullbox	Track fragment header	ISO	*	*	tfhd	-
+tfma	container	?	Track fragment media adjustment box	3GPP	*	*	tfma	-
+tfra	payload	fullbox	Track fragment random access	ISO	*	*	tfra	-
+thmb	payload	fullbox	Thumbnail	3GPP	*	*	-	-
+thmb	payload:inherit-version	box	Thumbnail track reference	HEIF	*	tref	iref_parser	-
+tibr	container	?	Tier Bit rate	NALu Video	*	*	tibr	-
+tiri	container	?	Tier Information	NALu Video	*	*	tiri	-
+titl	payload	fullbox	Title	3GPP	*	*	titl	-
+tkhd	payload	fullbox	Track header	ISO	*	*	tkhd	-
+tlou	payload	fullbox	Track loudness	ISO	*	*	tlou	-
+tmax	payload	box	hint max relative time	ISO	*	*	tmax	-
+tmcd	payload	box	Timecode track reference or sample entry	QTFF	quicktime	*	tmcd	-
+tmin	payload	box	hint min relative time	ISO	*	*	tmin	-
+totl	payload	box	hint Bytes Sent incl RTP	ISO	*	*	totl	-
+tpay	payload	box	hint Bytes Sent excl RTP	ISO	*	*	tpay	-
+tpyl	payload	box	hint Bytes Sent excl RTP	ISO	*	*	tpyl	-
+traf	container	box	Track fragment	ISO	*	*	traf	-
+trak	container	box	Track	ISO	*	*	trak	-
+tref	container	box	Track reference	ISO	*	*	tref	-
+trep	container	fullbox	Track Extension Properties Box	ISO	*	*	trep	-
+trex	payload	fullbox	Track extends defaults	ISO	*	*	trex	-
+trgr	container	box	Track grouping information	ISO	*	*	trgr	-
+trik	container	?	Facilitates random access and trick play modes	DECE	*	*	trik	-
+trpy	payload	box	hint Bytes Sent incl RTP	ISO	*	*	trpy	-
+trun	payload	fullbox	Track fragment run	ISO	*	*	trun	-
+tsel	payload	fullbox	Track selection	ISO/3GPP	*	*	tsel	-
+tsyn	payload	?	?	?	*	*	tsyn	-
+txas	payload	box	Track exclude from autoselection	QTFF	quicktime	trak	txas	-
+udes	payload	?	?	?	*	*	udes	-
+udta	container	box	User data box	"ISO can contain non-standard tag like b""\xa9mod"", \xa9enc, \xa9TIM"	*	*	udta	-
+uinf	container	?	a tool by which a vendor may provide access to additional information associated with a UUID	JPEG2000	*	*	uinf	-
+ulst	container	?	a list of UUID’s	JPEG2000	*	*	ulst	-
+urat	payload	fullbox	User rating	3GPP	*	*	urat	-
+url 	payload	fullbox	URL	JPEG2000	*	*	url	-
+urn 	payload	fullbox	URN	?	*	*	urn	-
+uuid	payload	uuidbox	user-extension box	ISO	*	*	uuid	-
+vmhd	payload	fullbox	Video media header	ISO	*	*	vmhd	-
+vwdi	container	?	Multiview Scene Information	NALu Video	*	*	vwdi	-
+wide	payload	box	Expansion space reservation	QTFF	quicktime	*	wide	-
+xml 	payload	fullbox	XML box	ISO	*	*	xml	-
+imir	payload	box	Image mirroring	HEIF	*	*	imir	-
+lsel	payload	box	Layer selection	HEIF	*	*	lsel	-
+md5i	payload	fullbox	MD5 integrity box	HEIF	*	*	md5i	-
+lhvC	payload	box	L-HEVC configuration property	HEIF	*	*	lhvC	-
+oinf	payload	box	Operating points information property	HEIF	*	*	oinf	-
+tols	payload	box	Target output layer set property	HEIF	*	*	tols	-
+avcC	payload	box	AVC configuration property	HEIF	*	*	avcC	-
+jpgC	payload	box	JPEG configuration property	HEIF	*	*	jpgC	-
+assp	payload	fullbox	Alternative startup sequence properties	ISO	*	*	assp	-
+cinf	container	box	Complete track information	ISO	*	*	cinf	-
+kind	payload	fullbox	Track kind	ISO	*	*	kind	-
+stvi	container	fullbox	Stereo video	ISO	*	*	stvi	-
+yrrc	payload	fullbox	Year recorded	3GPP	*	*	yrrc	-

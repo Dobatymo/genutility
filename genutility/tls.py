@@ -37,7 +37,7 @@ def load_keyfile(filename: str, encoding: str = "PEM") -> PrivateKey:
             "DER": load_der_private_key,
         }[encoding]
     except KeyError:
-        raise ValueError("Invalid encoding")
+        raise ValueError("Invalid encoding") from None
 
     with open(filename, "rb") as fr:
         password = None

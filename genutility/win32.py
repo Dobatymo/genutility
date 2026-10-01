@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from math import nan
 from typing import Iterator, List, Tuple
 
@@ -7,6 +6,8 @@ import win32evtlog
 import winerror
 import wmi
 from typing_extensions import Self
+
+from .datetime import datetime_from_utc_timestamp
 
 logger = logging.getLogger(__name__)
 
@@ -155,9 +156,9 @@ def event_logs(server: str = "localhost", source: str = "System") -> Iterator[di
             if events:
                 for event in events:
                     ret = {f: getattr(event, f) for f in fields}
-                    # does that work for different time zones?
-                    ret["TimeGenerated"] = datetime.fromtimestamp(event.TimeGenerated.timestamp())
-                    ret["TimeWritten"] = datetime.fromtimestamp(event.TimeWritten.timestamp())
+                    # EVENTLOGRECORD stores both fields as seconds since the Unix epoch in UTC.
+                    ret["TimeGenerated"] = datetime_from_utc_timestamp(event.TimeGenerated.timestamp())
+                    ret["TimeWritten"] = datetime_from_utc_timestamp(event.TimeWritten.timestamp())
                     if ret["StringInserts"]:
                         ret["StringInserts"] = ", ".join(ret["StringInserts"]).replace("\r\n", "\n")
                     if not ret["StringInserts"]:

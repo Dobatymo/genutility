@@ -47,8 +47,8 @@ from genutility.args import (
 
 class ArgsTest(TestCase):
     def test_datetime_iso(self):
-        self.assertEqual(datetime(2026, 8, 1, 0), datetime_iso("2026-08-01T00"))
-        self.assertEqual(datetime(2026, 8, 1, 0, 30), datetime_iso("2026-08-01T00:30"))
+        self.assertEqual(datetime.fromisoformat("2026-08-01T00"), datetime_iso("2026-08-01T00"))
+        self.assertEqual(datetime.fromisoformat("2026-08-01T00:30"), datetime_iso("2026-08-01T00:30"))
         self.assertEqual(
             datetime(2026, 8, 1, 0, 30, tzinfo=timezone.utc),
             datetime_iso("2026-08-01T00:30Z"),
@@ -292,7 +292,7 @@ class ArgsTest(TestCase):
                     "1k",
                     "1R",
                     "1_000",
-                    "١K",
+                    "١K",  # noqa: RUF001
                     "K",
                 ):
                     with self.subTest(base=base, value=value), self.assertRaises(ArgumentTypeError) as cm:

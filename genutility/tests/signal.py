@@ -1,7 +1,9 @@
-import time
+import os
+import signal
+import subprocess
+import sys
 from unittest.mock import Mock
 
-from genutility.os import interrupt
 from genutility.signal import HandleKeyboardInterrupt
 from genutility.test import MyTestCase
 
@@ -10,18 +12,12 @@ class SignalTest(MyTestCase):
     def __init__(self, *args, **kwargs):
         MyTestCase.__init__(self, *args, **kwargs)
 
-    @staticmethod
-    def busywait():
-        for _i in range(10):
-            time.sleep(0.1)
-
     def call(self, raise_after, a, b, c, d):
         try:
             with HandleKeyboardInterrupt(raise_after):
                 try:
                     a()
-                    interrupt()
-                    self.busywait()
+                    signal.raise_signal(signal.SIGINT)
                     b()
                 except KeyboardInterrupt:
                     c()
@@ -34,14 +30,60 @@ class SignalTest(MyTestCase):
         c = Mock()
         try:
             a()
-            interrupt()
-            self.busywait()
+            signal.raise_signal(signal.SIGINT)
             b()
         except KeyboardInterrupt:
             c()
         a.assert_called_with()
         b.assert_not_called()
         c.assert_called_with()
+
+    def test_real_ctrl_c_event_in_isolated_process(self):
+        code = """
+import os
+import sys
+import time
+from genutility.os import interrupt
+from genutility.signal import HandleKeyboardInterrupt
+
+manager = HandleKeyboardInterrupt()
+try:
+    with manager:
+        print("ready", flush=True)
+        if os.name == "nt":
+            from cwinsdk.um.consoleapi import PHANDLER_ROUTINE, SetConsoleCtrlHandler
+
+            SetConsoleCtrlHandler(PHANDLER_ROUTINE(), False)
+        interrupt()
+
+        deadline = time.monotonic() + 5
+        while manager.signal_received is None and time.monotonic() < deadline:
+            time.sleep(0.01)
+        if manager.signal_received is None:
+            sys.exit("SIGINT was not delivered")
+        print("continued", flush=True)
+except KeyboardInterrupt:
+    print("handled", flush=True)
+"""
+        options = {
+            "stdin": subprocess.DEVNULL,
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.PIPE,
+            "text": True,
+            "timeout": 10,
+        }
+        if sys.platform == "win32":
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = 0  # SW_HIDE
+            options["creationflags"] = subprocess.CREATE_NEW_CONSOLE
+            options["startupinfo"] = startupinfo
+
+        result = subprocess.run([sys.executable, "-c", code], **options)
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("continued", result.stdout.splitlines())
+        self.assertIn("handled", result.stdout.splitlines())
 
     def test_raise_after_true(self):
         a = Mock()

@@ -4,11 +4,22 @@ import logging
 import re
 import time
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Coroutine, Dict, Generic, Iterable, Iterator, List
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Coroutine,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from typing import Mapping as MappingT
-from typing import Optional
 from typing import Sequence as SequenceT
-from typing import Tuple, TypeVar, Union
 
 import aiohttp
 import requests
@@ -173,7 +184,7 @@ class MySalesforce:
                     else:
                         yield row
             else:
-                raise RuntimeError("Cannot reconnect Salesforce session after partial query")
+                raise RuntimeError("Cannot reconnect Salesforce session after partial query") from None
 
     def _search(self, s):
         try:
@@ -216,7 +227,7 @@ class MySalesforce:
         Warning: `object_name` is not escaped!
         """
 
-        query_str = f"SELECT QualifiedApiName, DataType, Label FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{object_name}'"  # nosec
+        query_str = f"SELECT QualifiedApiName, DataType, Label FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '{object_name}'"  # noqa: S608
 
         return self._query(query_str)
 
@@ -379,7 +390,7 @@ class LiveAgentBase(Generic[ReturnTGet, ReturnTPost]):
                     custom_detail.setdefault("transcriptFields", [])
                     custom_detail.setdefault("entityMaps", [])
             except KeyError as e:
-                raise ValueError(f"slots is missing fields: {e}")
+                raise ValueError(f"slots is missing fields: {e}") from e
 
             prechat_details = slots
 
@@ -680,13 +691,14 @@ class LiveAgentAsync(LiveAgentBase[Coroutine[Any, Any, JsonDict], Coroutine[Any,
         headers.setdefault("X-LIVEAGENT-API-VERSION", self.api_version)
         timeout = timeout or self.timeout
 
-        async with aiohttp.ClientSession(trust_env=self.trust_env) as session:
-            async with session.get(self.urljoin(endpoint), headers=headers, params=params, timeout=timeout) as r:
-                r.raise_for_status()
-                if r.status == 204:
-                    return {}
-                else:
-                    return await r.json()
+        async with aiohttp.ClientSession(trust_env=self.trust_env) as session, session.get(
+            self.urljoin(endpoint), headers=headers, params=params, timeout=timeout
+        ) as r:
+            r.raise_for_status()
+            if r.status == 204:
+                return {}
+            else:
+                return await r.json()
 
     async def post_request(
         self, endpoint: str, headers: JsonDict, json: Optional[JsonDict] = None, timeout: Optional[float] = None
@@ -696,10 +708,11 @@ class LiveAgentAsync(LiveAgentBase[Coroutine[Any, Any, JsonDict], Coroutine[Any,
         headers.setdefault("X-LIVEAGENT-SEQUENCE", self.sequence)
         timeout = timeout or self.timeout
 
-        async with aiohttp.ClientSession(trust_env=self.trust_env) as session:
-            async with session.post(self.urljoin(endpoint), headers=headers, json=json, timeout=timeout) as r:
-                r.raise_for_status()
-                return await r.read()
+        async with aiohttp.ClientSession(trust_env=self.trust_env) as session, session.post(
+            self.urljoin(endpoint), headers=headers, json=json, timeout=timeout
+        ) as r:
+            r.raise_for_status()
+            return await r.read()
 
     # high level
 

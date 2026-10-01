@@ -1,11 +1,23 @@
 import sys
 from collections.abc import Mapping, Sequence
 from time import sleep
-from typing import Any, Callable, Dict, Iterable, Iterator, List
+from typing import (
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    TextIO,
+    Tuple,
+    TypedDict,
+    Union,
+)
 from typing import Mapping as MappingT
-from typing import Optional
 from typing import Sequence as SequenceT
-from typing import Set, TextIO, Tuple, TypedDict, Union
 
 from aria2p import Client
 from aria2p.client import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_TIMEOUT, ClientException
@@ -64,12 +76,12 @@ class AriaDownloader:
     Tries to respect other users of the same instance and doesn't interfere with them.
     """
 
-    default_global_options = {
+    default_global_options: ClassVar[Dict[str, Union[int, bool]]] = {
         "max-concurrent-downloads": 5,
         "remote-time": True,
     }
 
-    default_options = {
+    default_options: ClassVar[Dict[str, Union[int, bool]]] = {
         "max-connection-per-server": 1,
         "split": 5,
         "always-resume": True,
@@ -108,11 +120,11 @@ class AriaDownloader:
         except ClientException as e:
             if e.code == 1:
                 # either our code is bad, or some external actor removed our gid from aria
-                raise InconsistentState(e.message)
+                raise InconsistentState(e.message) from e
             else:
                 raise
         except ConnectionError as e:
-            raise ExternalProcedureUnavailable(e)
+            raise ExternalProcedureUnavailable(str(e)) from e
 
     def pause_all(self) -> None:
         for gid in self.gids:

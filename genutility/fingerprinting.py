@@ -6,6 +6,8 @@ from PIL import Image, ImageFilter
 # from .numba import opjit
 from .numpy import rgb_to_hsi, rgb_to_ycbcr, unblock
 
+logger = logging.getLogger(__name__)
+
 # fingerprinting aka perceptual hashing
 
 
@@ -42,7 +44,7 @@ def hu_moments(channels: np.ndarray) -> np.ndarray:
     def loop():
         M00 = M(0, 0)
         if not np.all(M00 > 0.0):
-            logging.error("M00: %s", M00)
+            logger.error("M00: %s", M00)
             raise ValueError("Failed to calculate moments. Single color pictures are not supported yet.")
 
         M10 = M(1, 0)

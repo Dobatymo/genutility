@@ -23,6 +23,8 @@ from .os_shared import _usagetuple, _volumeinfotuple
 
 PathType = Union[str, os.PathLike]
 
+logger = logging.getLogger(__name__)
+
 
 class FileAttributes(IntFlag):
     READONLY = winnt.FILE_ATTRIBUTE_READONLY
@@ -134,7 +136,7 @@ def _get_appdata_dir(roaming: bool = False) -> str:
     try:
         result = SHGetKnownFolderPath(rfid, Flags, Token, byref(Path))
     except OSError:
-        logging.error(f"SHGetKnownFolderPath result: {result & 0xFFFFFFFF:X}")
+        logger.error(f"SHGetKnownFolderPath result: {result & 0xFFFFFFFF:X}")
         raise
 
     ret = cast(Path, c_wchar_p).value
@@ -193,7 +195,7 @@ def _volume_info_windows(path: str) -> _volumeinfotuple:
 
 
 def _interrupt_windows() -> None:
-    os.kill(os.getpid(), signal.CTRL_C_EVENT)  # fixme: verify: works on win 10 but not on win 7
+    os.kill(0, signal.CTRL_C_EVENT)
 
 
 def _filemanager_cmd_windows(path: str) -> str:

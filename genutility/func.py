@@ -1,6 +1,6 @@
 import logging
 import os.path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import partial, reduce, wraps
 from sys import stdout
 from time import sleep
@@ -32,8 +32,6 @@ def identity(x: T) -> T:
 
 def nop() -> None:
     """Function which does absolutely nothing (aka pass, noop)."""
-
-    pass
 
 
 def partial_decorator(*args: Any, **kwargs: Any) -> Callable:
@@ -264,7 +262,7 @@ class RunScheduled:
         self.lastrun: Optional[datetime] = None
 
     def __call__(self, *args, **kwargs) -> None:
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         if self.lastrun is None or now - self.lastrun > self.delta:
             self.func(*args, **kwargs)
             self.lastrun = now

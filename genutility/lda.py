@@ -53,7 +53,7 @@ class LDADocument(Collection[int]):
         return len(self.words)
 
     def __repr__(self) -> str:
-        return f"LDADocument({repr(self.words)})"
+        return f"LDADocument({self.words!r})"
 
 
 class LDABase:
@@ -115,8 +115,8 @@ class LDABase:
         returns: float[K]
         """
 
-        """ The full term for left would be:
-            left = (self.nmk[m, :] + self.α) / (self.nm[m] + self.αsum) # [K]
+        """The full term for `left` would be:
+            left = (document_topic_counts + topic_prior) / (document_count + prior_sum)  # [K]
             however, the denominator can be dropped, because it doesn't depend on `k`
             and we only care about proportionality.
             It is done so in: 'A Theoretical and Practical Implementation Tutorial
@@ -291,9 +291,7 @@ class LDA(LDABase):
         )  # [M] total document counts, not necessary for sampling, but useful for theta and phi calculation
 
         # note: VariableRowMatrix(0) is slower than a dict here for some reason
-        self.topics: TopicsMapping = (
-            {}
-        )  # `z`, sparse document-word topics matrix (because rows can have different lengths)
+        self.topics: TopicsMapping = {}  # `z`, sparse document-word topics matrix (because rows can have different lengths)
 
     def initialize_topics(self) -> None:
         self._validate(self.M, self.K, self.V)

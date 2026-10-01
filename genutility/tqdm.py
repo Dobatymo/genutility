@@ -5,13 +5,11 @@ from threading import Lock
 from types import TracebackType
 from typing import Any, Iterable, Iterator, MutableMapping, Optional, Sequence, TextIO, Tuple, Type, TypeVar, Union
 
+from tqdm import tqdm
 from typing_extensions import Self
 
-from tqdm import tqdm
-
-from .callbacks import BaseTask
+from .callbacks import BaseTask, _Default
 from .callbacks import Progress as _Progress
-from .callbacks import _Default
 
 T = TypeVar("T")
 
@@ -89,7 +87,7 @@ class TqdmProcess:
         self,
         iterable: Optional[Iterable] = None,
         desc: Optional[str] = None,
-        total: Union[int, float, None] = None,
+        total: Union[float, None] = None,
         transient: bool = False,
         file: Optional[TextIO] = None,
         ncols: Optional[int] = None,

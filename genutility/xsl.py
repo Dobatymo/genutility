@@ -1,11 +1,11 @@
-from lxml import etree  # nosec
+from lxml import etree
 
 
 def xml_xslt_to_xhtml(path_xml: str, path_xslt: str, path_xhtml: str) -> None:
     """Only use with trusted xml data"""
 
-    xml = etree.parse(path_xml)  # nosec
-    xslt = etree.parse(path_xslt)  # nosec
+    xml = etree.parse(path_xml)
+    xslt = etree.parse(path_xslt)
     transform = etree.XSLT(xslt)
     newdom = transform(xml)
     with open(path_xhtml, "wb") as xhtml:

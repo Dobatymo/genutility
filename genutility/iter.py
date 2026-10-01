@@ -2,6 +2,7 @@ import logging
 import random
 import sys
 from collections import deque
+from contextlib import suppress
 from functools import partial
 from heapq import heappop, heappush, heapreplace
 from itertools import chain, combinations, count, groupby, islice, product, repeat, starmap, tee, zip_longest
@@ -46,7 +47,7 @@ def one(it: Iterator[T]) -> T:
     try:
         ret = next(it)
     except StopIteration:
-        raise EmptyIterable()
+        raise EmptyIterable() from None
     try:
         next(it)
     except StopIteration:
@@ -61,7 +62,7 @@ def iterrandrange(a: int, b: int) -> Iterator[int]:
     """Yields a stream of non-cryptographic random numbers between `a` (inclusive) and `b` (exclusive)."""
 
     while True:
-        yield randrange(a, b)  # nosec
+        yield randrange(a, b)  # noqa: S311
 
 
 def repeatfunc(func: Callable[..., T], times: Optional[int] = None, *args: Any) -> Iterator[T]:
@@ -77,10 +78,8 @@ def repeatfunc(func: Callable[..., T], times: Optional[int] = None, *args: Any) 
 
 def _lstr(it: Any, length: Optional[int] = None) -> Tuple[Optional[int], str]:
     if length is None:
-        try:
+        with suppress(TypeError):
             length = len(it)  # type: ignore[arg-type]
-        except TypeError:
-            pass
 
     if length is not None:
         lstr = f"/{length}"
@@ -523,14 +522,14 @@ def iter_except(
             yield next(iterator)
         except StopIteration:
             return
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             try:
                 if exception_callbacks[type(e)](
                     iterator, e
                 ):  # use if x. and not if not x, so None doesn't raise, if user forgets to returns correct value
                     raise
             except KeyError:
-                raise e
+                raise e from None
             if return_on_exception:
                 return
 
@@ -546,7 +545,7 @@ def list_except(it: Iterable[T], catch: ExceptionsType = Exception) -> Tuple[Opt
 
     try:
         for i in it:
-            ret.append(i)
+            ret.append(i)  # noqa: PERF402
     except catch as e:
         exc = e
 
@@ -582,7 +581,7 @@ def decompress(selectors: Iterable[bool], data: Iterator[T], default: Optional[T
             else:
                 yield default
     except StopIteration:  # exception converted because StopIterations raised in generators will cause RuntimeErrors
-        raise IteratorExhausted
+        raise IteratorExhausted from None
 
 
 def first_not_none(it: Iterable[T], default: Optional[T] = None) -> Optional[T]:
@@ -700,7 +699,7 @@ def retrier(
     if jitter_dist == "uniform":
 
         def rand(waittime, jitter):
-            return waittime + random.uniform(-jitter, jitter)  # nosec
+            return waittime + random.uniform(-jitter, jitter)  # noqa: S311
 
     elif jitter_dist == "normal":
 
@@ -869,7 +868,7 @@ class CachedIterable(Generic[T]):
 
 def find_majority_element(it: Iterable[T]) -> Optional[T]:
     """Find most common element of `it` in constant space and linear time (under the assumption,
-    that there is indeed one majority element) using the Boyer–Moore majority vote algorithm.
+    that there is indeed one majority element) using the Boyer-Moore majority vote algorithm.
     Returns `None` if the iterable is empty.
     """
 

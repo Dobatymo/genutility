@@ -1,7 +1,8 @@
+from contextlib import suppress
 from logging import Formatter, LogRecord
 from logging import basicConfig as _basicConfig
 from logging import root as _root
-from typing import Any, Dict, Literal, Optional, Type
+from typing import Any, Dict, Literal, Optional
 
 from .datetime import datetime_from_utc_timestamp
 
@@ -31,7 +32,7 @@ class IsoDatetimeFormatter(Formatter):
     def __init__(
         self,
         fmt: Optional[str] = None,
-        datefmt: Type[None] = None,
+        datefmt: Optional[str] = None,
         style: Literal["%", "{", "$"] = "%",
         validate: bool = True,
         sep: str = "T",
@@ -44,7 +45,7 @@ class IsoDatetimeFormatter(Formatter):
         self.timespec = timespec
         self.aslocal = aslocal
 
-    def formatTime(self, record: LogRecord, datefmt: Type[None]) -> str:
+    def formatTime(self, record: LogRecord, datefmt: Optional[str] = None) -> str:
         return datetime_from_utc_timestamp(record.created, aslocal=self.aslocal).isoformat(self.sep, self.timespec)
 
 
@@ -65,10 +66,8 @@ class OverwriteFormatter(Formatter):
 
     def format(self, record: LogRecord) -> str:
         for k, v in self.map.items():
-            try:
+            with suppress(AttributeError):
                 setattr(record, v, getattr(record, k))
-            except AttributeError:
-                pass
 
         return Formatter.format(self, record)
 

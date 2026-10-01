@@ -55,7 +55,7 @@ def key_to_hash(key: Any) -> str:
     from hashlib import md5
 
     binary = dumps(key)
-    return md5(binary).hexdigest()  # nosec
+    return md5(binary).hexdigest()  # noqa: S324
 
 
 def read_msgpack(path: PathType) -> Any:

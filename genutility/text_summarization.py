@@ -1,4 +1,5 @@
 from operator import itemgetter
+from typing import ClassVar, List
 
 import spacy
 
@@ -30,14 +31,14 @@ class QueryBasedParagraphExtraction:
         try:
             return max(it, key=itemgetter(0))[1]
         except ValueError:
-            raise NoParagraphsFound()
+            raise NoParagraphsFound() from None
 
 
 from .test import MyTestCase
 
 
 class TextSummarizationTests(MyTestCase):
-    text = [
+    text: ClassVar[List[str]] = [
         """Copyright laws are changing all over the world. Be sure to check the
 copyright laws for your country before downloading or redistributing
 this or any other Project Gutenberg eBook.

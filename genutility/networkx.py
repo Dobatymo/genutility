@@ -1,14 +1,10 @@
 from itertools import chain
-from typing import TYPE_CHECKING
+from typing import Sequence, TypeVar
 
+import numpy as np
 from networkx import Graph, connected_components
 
-if TYPE_CHECKING:
-    from typing import Sequence, TypeVar
-
-    import numpy as np
-
-    T = TypeVar("T")
+T = TypeVar("T")
 
 
 def complete_weighted_bipartite_graph(first: Sequence[T], second: Sequence[T], weights: np.ndarray) -> Graph:

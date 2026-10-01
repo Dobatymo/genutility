@@ -27,7 +27,7 @@ def encode_binary(boolit: Union[str, Iterator[bool]], pad: str = "0") -> bytes:
 def _str2bool_it(s: Iterable[str]) -> Iterator[bool]:
     for chunk in s:
         for c in chunk:
-            yield True if c == "1" else False
+            yield c == "1"
 
 
 def decode_binary(key: bytes, tostring: bool = False) -> Union[str, Iterator[bool]]:

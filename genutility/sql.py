@@ -81,16 +81,19 @@ def upsert(cursor: Cursor, primary: dict, values: dict, table: str) -> bool:
     if not primary:
         raise ValueError("Empty primary mapping would result in an empty WHERE condition which would affect all rows")
 
-    set_str = ",".join(f"{k}=?" for k in values.keys())
-    where_str = " AND ".join(f"{k}=?" for k in primary.keys())
+    set_str = ",".join(f"{k}=?" for k in values)
+    where_str = " AND ".join(f"{k}=?" for k in primary)
 
-    cursor.execute(f"UPDATE {table} SET {set_str} WHERE {where_str}", chain(values.values(), primary.values()))  # nosec
+    cursor.execute(
+        f"UPDATE {table} SET {set_str} WHERE {where_str}",  # noqa: S608
+        chain(values.values(), primary.values()),
+    )
 
     if cursor.rowcount == 0:
         into_str = ",".join(chain(primary.keys(), values.keys()))
         values_str = ",".join(repeat("?", len(primary) + len(values)))
         cursor.execute(
-            f"INSERT INTO {table} ({into_str}) VALUES ({values_str})",  # nosec
+            f"INSERT INTO {table} ({into_str}) VALUES ({values_str})",  # noqa: S608
             chain(primary.values(), values.values()),
         )
         return True
@@ -149,24 +152,23 @@ def import_csv_to_sqlite(connection: Connection, path: str, tablename: str, over
 
     tablename = quote_identifier(tablename)
 
-    with CursorContext(connection) as cursor:
-        with copen(path, "rt", encoding="utf-8") as csvfile:
-            fr = csv.reader(csvfile)
-            columns = next(fr)
-            types = next(fr)
-            assert len(columns) == len(types)
+    with CursorContext(connection) as cursor, copen(path, "rt", encoding="utf-8") as csvfile:
+        fr = csv.reader(csvfile)
+        columns = next(fr)
+        types = next(fr)
+        assert len(columns) == len(types)
 
-            if overwrite:
-                query = f"DROP TABLE IF EXISTS {tablename}"
-                cursor.execute(query)
-
-            zipped = zip(columns, mapmap(str_to_sqlitetype, types))
-            typedcolsstr = ", ".join(quote_identifier(col) + " " + typ for col, typ in zipped)
-            query = f"CREATE TABLE {tablename} ({typedcolsstr})"
+        if overwrite:
+            query = f"DROP TABLE IF EXISTS {tablename}"
             cursor.execute(query)
 
-            valueparamsstr = ", ".join(repeat("?", len(columns)))
-            query = f"INSERT INTO {tablename} VALUES ({valueparamsstr})"  # nosec
-            cursor.executemany(query, fr)
+        zipped = zip(columns, mapmap(str_to_sqlitetype, types))
+        typedcolsstr = ", ".join(quote_identifier(col) + " " + typ for col, typ in zipped)
+        query = f"CREATE TABLE {tablename} ({typedcolsstr})"
+        cursor.execute(query)
+
+        valueparamsstr = ", ".join(repeat("?", len(columns)))
+        query = f"INSERT INTO {tablename} VALUES ({valueparamsstr})"  # noqa: S608
+        cursor.executemany(query, fr)
 
     connection.commit()

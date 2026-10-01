@@ -67,7 +67,7 @@ class MemoryPurePath:
 
 
 class MemoryPath(MemoryPurePath):
-    __slots__ = ("_data", "_children")
+    __slots__ = ("_children", "_data")
 
     _data: Optional[bytes]
     children: "Optional[List[MemoryPath]]"

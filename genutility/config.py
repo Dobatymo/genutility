@@ -42,7 +42,7 @@ def _load(*names: str) -> Dict[str, Any]:
             try:
                 modpath = spec.submodule_search_locations[0]  # type: ignore
             except (TypeError, IndexError):
-                raise FileNotFoundError
+                raise FileNotFoundError from None
 
         return read_toml(os.path.join(modpath, configfilename))
     except (ImportError, FileNotFoundError):
@@ -54,7 +54,7 @@ def _load(*names: str) -> Dict[str, Any]:
     except FileNotFoundError:
         raise FileNotFoundError(
             f"{configfilename} could not be found in application data, module path or current directory"
-        )
+        ) from None
 
 
 def load(*names: str, json_schema: Optional[Union[dict, str]] = None) -> Dict[str, Any]:

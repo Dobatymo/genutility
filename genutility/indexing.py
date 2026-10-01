@@ -79,7 +79,7 @@ def window_combinations_indices(size: int, window_size: int) -> Iterator[Tuple[i
     if window_size > size:
         raise ValueError("window size cannot exceed size")
 
-    for a in range(0, size - 1):
+    for a in range(size - 1):
         end = min(a + window_size, size)
         for b in range(a + 1, end):
             yield a, b
@@ -91,7 +91,7 @@ def _combination_indices(start: int, sizes: Sequence[int]) -> Iterator[Tuple[int
     if len(sizes) > 1:
         for i in range(start, sizes[0]):
             for j in _combination_indices(i, sizes[1:]):
-                yield (i,) + j
+                yield (i, *j)
     else:
         yield from map(obj2tuple, range(start, sizes[0]))
 

@@ -1,10 +1,9 @@
 import hashlib
 import zlib
+from _hashlib import HASH as Hashobj
 from functools import partial
 from pathlib import Path
 from typing import IO, Callable, Optional, Union
-
-from _hashlib import HASH as Hashobj
 
 from .file import PathType, blockfileiter, iterfilelike, read_file
 
@@ -144,7 +143,7 @@ def ed2k_hash_file_v2(path: Path) -> str:
     if filesize < ed2k_chunksize:
         return md4_hash_data(read_file(path, "rb")).hexdigest()
 
-    ed2k_hashes = list(md4_hash_data(data).digest() for data in blockfileiter(path, "rb", chunk_size=ed2k_chunksize))
+    ed2k_hashes = [md4_hash_data(data).digest() for data in blockfileiter(path, "rb", chunk_size=ed2k_chunksize)]
 
     if filesize % ed2k_chunksize == 0:
         ed2k_hashes.append(md4_hash_data(b"").digest())

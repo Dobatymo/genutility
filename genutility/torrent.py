@@ -144,7 +144,7 @@ def iter_fastresume(path: Path) -> Iterator[FileProperties]:
 
 
 def pieces_field(pieces: Iterable[bytes]) -> bytes:
-    return b"".join(sha1(piece).digest() for piece in pieces)  # nosec
+    return b"".join(sha1(piece).digest() for piece in pieces)  # noqa: S324
 
 
 def create_torrent_info_dict(
@@ -175,7 +175,7 @@ def create_torrent_info_dict(
         }
 
     elif path.is_dir():
-        files = list(p for p in path.rglob("*") if p.is_file())
+        files = [p for p in path.rglob("*") if p.is_file()]
 
         if sort == "name":
             files = sorted(files, key=lambda path: path.parts)
@@ -207,7 +207,7 @@ def create_torrent_info_dict(
 
 
 def torrent_info_hash(d: dict) -> str:
-    return sha1(BENCODE_BINARY.encode(d)).hexdigest()  # nosec
+    return sha1(BENCODE_BINARY.encode(d)).hexdigest()  # noqa: S324
 
 
 def get_torrent_hash(path: Path) -> str:
@@ -248,13 +248,13 @@ def scrape(tracker_url: str, hashes: List[str], timeout: Optional[float] = 120.0
         try:
             tmp = gzip.decompress(tmp)
         except gzip.BadGzipFile:
-            raise ParseError("Failed to parse scrape response", data=data)
+            raise ParseError("Failed to parse scrape response", data=data) from None
         tmp = dec.decode(tmp)
 
     try:
         files = tmp["files"]
     except KeyError:
-        raise ParseError("Missing `files` key in scrape response", data=tmp)
+        raise ParseError("Missing `files` key in scrape response", data=tmp) from None
 
     if len(files) < len(hashes):
         logger.warning("Less hashes returned (%s) than requested (%s)", len(files), len(hashes))

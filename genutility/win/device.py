@@ -457,7 +457,8 @@ Drives:
 
 def format_doc_string(**sub):
     def decorator(func):
-        func.__doc__ = func.__doc__.format(**sub)
+        if func.__doc__ is not None:
+            func.__doc__ = func.__doc__.format(**sub)
         return func
 
     return decorator
@@ -906,7 +907,7 @@ class Drive(WindowsHandle, StorageMixin):
         try:
             ProtocolData = mapping[request_value]
         except KeyError:
-            raise ValueError(f"Unsupported request_value: {request_value}")
+            raise ValueError(f"Unsupported request_value: {request_value}") from None
 
         class DUMMY(Structure):
             _fields_ = [("spq", winioctl.STORAGE_PROPERTY_QUERY_SIZE(psd_size)), ("pd", ProtocolData)]
@@ -1280,7 +1281,7 @@ def enum_device_paths(
 
 
 def enum_disks():
-    device_infos, device_paths = enum_device_paths(interface_class=winioctl.GUID_DEVINTERFACE_DISK)
+    _device_infos, device_paths = enum_device_paths(interface_class=winioctl.GUID_DEVINTERFACE_DISK)
     for device_path in device_paths:
         out = {"DevicePath": device_path}
         with Drive.from_raw_path(device_path, "") as drive:
@@ -1291,7 +1292,7 @@ def enum_disks():
 
 
 def enum_cdrom():
-    device_infos, device_paths = enum_device_paths(interface_class=winioctl.GUID_DEVINTERFACE_CDROM)
+    _device_infos, device_paths = enum_device_paths(interface_class=winioctl.GUID_DEVINTERFACE_CDROM)
     for device_path in device_paths:
         out = {"DevicePath": device_path}
         with Drive.from_raw_path(device_path, "") as drive:
@@ -1314,7 +1315,7 @@ if __name__ == "__main__":
     try:
         drive = Drive.from_drive_type_and_index("PhysicalDrive", args.driveindex, "r")
     except PermissionError:
-        logging.warning("Opening drive with read access failed. Using no access.")
+        logger.warning("Opening drive with read access failed. Using no access.")
         drive = Drive.from_drive_type_and_index("PhysicalDrive", args.driveindex, "")
 
     with drive as d:

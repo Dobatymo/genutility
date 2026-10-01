@@ -7,20 +7,20 @@ def randstr(length: int, charset: str) -> str:
     of length `length`.
     """
 
-    return "".join(choice(charset) for i in range(length))  # nosec
+    return "".join(choice(charset) for i in range(length))  # noqa: S311
 
 
 def randbytes(size: int) -> bytes:
     """Returns (noncryptographic) random bytes of length `length`."""
 
-    return bytes(randrange(0, 256) for _ in range(size))  # nosec
+    return bytes(randrange(0, 256) for _ in range(size))  # noqa: S311
 
 
 def rgb_colors() -> Iterator[Tuple[int, int, int]]:
     """Yields a stream of (noncryptographic) random RGB color tuples."""
 
     while True:
-        rgb = randrange(0, 256**3)  # nosec
+        rgb = randrange(0, 256**3)  # noqa: S311
         rg, b = divmod(rgb, 256)
         r, g = divmod(rg, 256)
         yield (r, g, b)
@@ -38,4 +38,4 @@ def prob_false(probability: float) -> bool:
     if probability in (0, 1):
         return not bool(probability)  # for weird open interval edge cases
 
-    return probability < random()  # random() -> [0.0, 1.0) # nosec
+    return probability < random()  # random() -> [0.0, 1.0) # nosec  # noqa: S311

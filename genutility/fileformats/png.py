@@ -1,13 +1,14 @@
 import logging
 import re
 import zlib
+from _hashlib import HASH as Hashobj
 from struct import pack, unpack
 from typing import Callable, Iterator, Optional, Tuple
 
-from _hashlib import HASH as Hashobj
-
 from ..exceptions import ParseError
 from ..file import BufferedBinaryIoT, read_or_raise
+
+logger = logging.getLogger(__name__)
 
 png_sig = b"\x89PNG\r\n\x1a\n"
 chunk_type_p = re.compile(rb"^[a-zA-Z]{4}$")
@@ -196,11 +197,11 @@ if __name__ == "__main__":
             consume(iter_png(path))
 
         except ParseError as e:
-            logging.debug("ParseError in %s: %s", path, e)
+            logger.debug("ParseError in %s: %s", path, e)
             invalid += 1
 
         except EOFError:
-            logging.debug("EOFError in %s", path)
+            logger.debug("EOFError in %s", path)
             invalid += 1
 
         else:

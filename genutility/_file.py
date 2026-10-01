@@ -8,7 +8,7 @@ from .file import _check_arguments
 class CloseableNamedTemporaryFile:
     def __init__(self, mode: str = "w+b", encoding: Optional[str] = None) -> None:
         encoding = _check_arguments(mode, encoding)
-        self.f = NamedTemporaryFile(mode=mode, encoding=encoding, delete=False)
+        self.f = NamedTemporaryFile(mode=mode, encoding=encoding, delete=False)  # noqa: SIM115
 
     def __enter__(self):
         self.f.__enter__()

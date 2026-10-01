@@ -17,7 +17,7 @@ from genutility.test import MyTestCase, parametrize
 try:
     # `"md4" not in hashlib.algorithms_available` seems not to work very consistently
     # https://github.com/python/cpython/issues/91257
-    hashlib.new("md4")  # nosec: B324
+    hashlib.new("md4")  # noqa: S324
 except ValueError:
     MD4_NOT_AVAILABLE = True
 else:

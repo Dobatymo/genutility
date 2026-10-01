@@ -76,10 +76,8 @@ class GenericDb:
         fields = ", ".join(self._get_fields(only, no))
         _derived = self._filtered_derived(derived_keys, "not-null" if ignore_null else "all")
         conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
-        latest_col, latest_dir, latest_agg = self.latest_order_by()
-        sql = (
-            f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {latest_col} {latest_dir} LIMIT 1"  # nosec
-        )
+        latest_col, latest_dir, _latest_agg = self.latest_order_by()
+        sql = f"SELECT {fields} FROM {self.table} WHERE {conditions} ORDER BY {latest_col} {latest_dir} LIMIT 1"  # noqa: S608
         return sql
 
     def __init__(self, dbpath: Union[str, os.PathLike], table: str, debug: bool = True, allow_add: bool = True) -> None:
@@ -104,7 +102,7 @@ class GenericDb:
             self.connection.set_trace_callback(self.trace)
 
         # verify columns
-        sql = f"SELECT c.name FROM pragma_table_info({self.table}) c"  # nosec
+        sql = f"SELECT c.name FROM pragma_table_info({self.table}) c"  # noqa: S608
         self.cursor.execute(sql)
         file_cols = {name for (name,) in self.cursor.fetchall()}
         db_cols = {n: t for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived)}
@@ -236,7 +234,7 @@ class GenericDb:
                 n for n, t, v in chain(self._primary, self._auto, self._mandatory, self._derived) if n not in no
             )
 
-        sql = f"SELECT {fields} FROM {self.table}"  # nosec
+        sql = f"SELECT {fields} FROM {self.table}"  # noqa: S608
         self.cursor.execute(sql)
         return iterfetch(self.cursor)
 
@@ -299,14 +297,14 @@ class GenericDb:
         join_on = " AND ".join(f"c.{n} = t.{n}" for n in affected_fields)
         join_group_by = ", ".join(f"t.{n}" for n in affected_fields)
 
-        latest_col, latest_dir, latest_agg = self.latest_order_by()
+        latest_col, _latest_dir, latest_agg = self.latest_order_by()
         sql = f"""
             WITH conditions ({self.order_col}, {group_by}) AS (VALUES {values})  -- create table with order key and match values
             SELECT {select}
             FROM {self.table} t INNER JOIN conditions c ON {join_on}
             GROUP BY {join_group_by} HAVING {latest_col} = {latest_agg}({latest_col})  -- select only the latest entry from each group
             ORDER BY c.{self.order_col}  -- order rows according to input order
-        """  # nosec
+        """  # noqa: S608
 
         args = tuple(chain.from_iterable(self._args_many(mandatory, derived, ignore_null)))
 
@@ -324,7 +322,7 @@ class GenericDb:
         values = ", ".join(v for n, t, v in chain(self._auto, self._mandatory, _derived))
 
         if replace:
-            sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"
+            sql = f"REPLACE INTO {self.table} ({fields}) VALUES ({values})"  # noqa: S608
         else:
             condition = " AND ".join(f"{n} IS excluded.{n}" for n, t, v in self._mandatory)
             set_affected = (f"{n}=excluded.{n}" for n in affected_fields)
@@ -333,9 +331,7 @@ class GenericDb:
                 for n, t, v in self._filtered_derived(derived_names, "null")
             )
             update_set = ", ".join(chain(set_affected, set_unaffected))
-            sql = (
-                f"INSERT INTO {self.table} ({fields}) VALUES ({values}) ON CONFLICT DO UPDATE SET {update_set}"  # nosec
-            )
+            sql = f"INSERT INTO {self.table} ({fields}) VALUES ({values}) ON CONFLICT DO UPDATE SET {update_set}"  # noqa: S608
 
         return sql
 
@@ -388,7 +384,7 @@ class GenericDb:
         values = ", ".join(v for n, t, v in chain(self._auto, self._mandatory, _derived))
         conditions = " AND ".join(f"{n} IS ?" for n, t, v in chain(self._mandatory, _derived))
 
-        sql = f"REPLACE INTO {self.table} ({fields}) SELECT {values} WHERE NOT EXISTS (SELECT 1 FROM {self.table} WHERE {conditions})"  # nosec
+        sql = f"REPLACE INTO {self.table} ({fields}) SELECT {values} WHERE NOT EXISTS (SELECT 1 FROM {self.table} WHERE {conditions})"  # noqa: S608
         args = self._args(mandatory, derived, ignore_null) * 2
 
         return self.cursor.execute(sql, args).rowcount == 1
@@ -404,13 +400,13 @@ class GenericDb:
         """
 
     def __len__(self) -> int:
-        sql = f"SELECT count(*) FROM {self.table}"  # nosec
+        sql = f"SELECT count(*) FROM {self.table}"  # noqa: S608
         self.cursor.execute(sql)
         (result,) = fetchone(self.cursor)
         return result
 
     def __bool__(self) -> bool:
-        sql = f"SELECT EXISTS (SELECT 1 FROM {self.table})"  # nosec
+        sql = f"SELECT EXISTS (SELECT 1 FROM {self.table})"  # noqa: S608
         self.cursor.execute(sql)
         (result,) = fetchone(self.cursor)
         return result == 1
@@ -534,7 +530,7 @@ class FileDbHistory(GenericFileDb):
 
     def normalize_mandatory(self, mandatory: Sequence) -> Sequence:
         path, filesize, mod_date = mandatory
-        drive, path = os.path.splitdrive(mandatory[0])
+        _drive, path = os.path.splitdrive(mandatory[0])
         path = normalize_seps(os.path.normpath(path))
         return path, filesize, mod_date
 

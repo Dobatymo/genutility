@@ -141,7 +141,7 @@ this is a new paragraph.
 Red Green 
 <URL>
 Wikipedia
-wiki text"""  # noqa: W291 # keep the space after Red Green
+wiki text"""  # keep the space after Red Green
 
         result = markdown2plaintext(value)
         self.assertEqual(result, truth)

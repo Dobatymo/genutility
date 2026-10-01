@@ -1,4 +1,8 @@
+import logging
+
 from .mp4 import enumerate_atoms
+
+logger = logging.getLogger(__name__)
 
 
 class NoExifFound(Exception):
@@ -37,7 +41,6 @@ def heif_get_exif(path: str) -> bytes:
 
 
 if __name__ == "__main__":
-    import logging
     from argparse import ArgumentParser
 
     import piexif
@@ -60,11 +63,11 @@ if __name__ == "__main__":
         try:
             data = heif_get_exif(path)
         except NoExifFound:
-            logging.info("%s: No Exif Found", relpath)
+            logger.info("%s: No Exif Found", relpath)
         except ValueError:
-            logging.exception(relpath)
+            logger.exception(relpath)
         except AssertionError as e:
-            logging.error("%s: AssertionError: %s", relpath, e)
+            logger.error("%s: AssertionError: %s", relpath, e)
         else:
             exif = piexif.load(data)
             print(

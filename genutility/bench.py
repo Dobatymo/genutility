@@ -5,7 +5,7 @@ from typing_extensions import Self
 
 
 class MeasureMemory:
-    __slots__ = ("total", "snapshot")
+    __slots__ = ("snapshot", "total")
 
     total: Optional[int]
 

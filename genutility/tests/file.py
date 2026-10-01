@@ -2,8 +2,13 @@ import os.path
 import tempfile
 from os import scandir
 
-from genutility.file import write_file  # not tested, used to set up the tests
-from genutility.file import OpenFileAndDeleteOnError, blockfilesiter, equal_files, is_all_byte
+from genutility.file import (
+    OpenFileAndDeleteOnError,
+    blockfilesiter,
+    equal_files,
+    is_all_byte,
+    write_file,  # not tested, used to set up the tests
+)
 from genutility.test import MyTestCase, parametrize
 
 
@@ -51,9 +56,8 @@ class FileTest(MyTestCase):
             pass
         self.assertEqual(os.path.isfile(path), True)
 
-        with self.assertRaises(RuntimeError):
-            with OpenFileAndDeleteOnError(path, "wb"):
-                raise RuntimeError()
+        with self.assertRaises(RuntimeError), OpenFileAndDeleteOnError(path, "wb"):
+            raise RuntimeError()
         self.assertEqual(os.path.isfile(path), False)
 
     def test_blockfilesiter(self):

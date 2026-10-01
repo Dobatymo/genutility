@@ -15,6 +15,8 @@ PAL_VIDEO_FPS = 30.0
 
 DEFAULT_ENCODING = "utf-8-sig"
 
+logger = logging.getLogger(__name__)
+
 
 def ntsc_to_pal(num) -> float:
     return num * NTSC_PROG_FPS / PAL_PROG_FPS
@@ -67,7 +69,7 @@ class SRTFile:
         self.state = 0
         self.linenum = 0
         self.sub_num = 0
-        self.fp = open(filename, mode, encoding=encoding, errors="replace")
+        self.fp = open(filename, mode, encoding=encoding, errors="replace")  # noqa: SIM115
         self.overwrite_index = overwrite_index
 
     def close(self) -> None:
@@ -104,7 +106,7 @@ class SRTFile:
                 else:
                     self.sub.append(line)
         except ValueError:
-            raise MalformedFile(f"Error in line {self.linenum}: srt malformed: {line!r}")
+            raise MalformedFile(f"Error in line {self.linenum}: srt malformed: {line!r}") from None
 
     def read_subtitle(self) -> Subtitle:
         self.sub = Subtitle()
@@ -190,7 +192,7 @@ def compare_srt_and_txt(srt_file, txt_file) -> Iterator[Tuple[str, str]]:
                     while start <= len(line):
                         srtpart = next(srtiter)
                         txtpart = line[start : start + len(srtpart)]
-                        logging.debug(f"Compare '{txtpart}' '{srtpart}'")
+                        logger.debug(f"Compare '{txtpart}' '{srtpart}'")
                         if txtpart != srtpart:
                             # print("{} - {}".format(sub.start, sub.end))
                             yield (txtpart, srtpart)

@@ -1,6 +1,6 @@
 import importlib
 import logging
-import pickle  # nosec
+import pickle
 from typing import Any, Iterable, Iterator, Optional, Tuple
 
 from ._files import PathType
@@ -16,7 +16,7 @@ def read_pickle(path: PathType) -> Any:
     """
 
     with copen(path, "rb") as fr:
-        return pickle.load(fr)  # nosec
+        return pickle.load(fr)  # noqa: S301
 
 
 def write_pickle(result: Any, path: PathType, protocol: Optional[int] = None, safe: bool = False) -> None:
@@ -36,7 +36,7 @@ def read_iter(path: PathType) -> Iterator[Any]:
     """
 
     with copen(path, "rb") as fr:
-        unpickler = pickle.Unpickler(fr)  # nosec
+        unpickler = pickle.Unpickler(fr)  # noqa: S301
         while fr.peek(1):
             yield unpickler.load()
 
@@ -61,7 +61,7 @@ def key_to_hash(key: Any, protocol: Optional[int] = None) -> str:
     from hashlib import md5
 
     binary = pickle.dumps(key, protocol=protocol)
-    return md5(binary).hexdigest()  # nosec
+    return md5(binary).hexdigest()  # noqa: S324
 
 
 def unpickle(path: PathType, requirements: Iterable[Tuple[str, Optional[str]]] = ()) -> Any:
@@ -113,4 +113,4 @@ def unpickle(path: PathType, requirements: Iterable[Tuple[str, Optional[str]]] =
         setattr(__main__, name, type)
 
     with copen(path, "rb") as fr:
-        return pickle.load(fr)  # nosec
+        return pickle.load(fr)  # noqa: S301

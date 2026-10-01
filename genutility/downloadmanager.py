@@ -51,9 +51,7 @@ class DownloadManager:
         total_done = sum(t.downloaded for t in self.done)
         total_error = sum(t.downloaded for t in self.error)
 
-        return "Queued: {}, active: {}, done: {}, error: {}\nDownload active: {}, done: {}, error: {}".format(
-            len(self.queue), len(self.active), len(self.done), len(self.error), total_active, total_done, total_error
-        )
+        return f"Queued: {len(self.queue)}, active: {len(self.active)}, done: {len(self.done)}, error: {len(self.error)}\nDownload active: {total_active}, done: {total_done}, error: {total_error}"
 
     def _enqueue(self, task: DownloadTask, priority: Any) -> None:
         self.queue.append(task)
@@ -104,7 +102,7 @@ class DownloadManager:
                     bytes_range = response.headers.get("Content-Range")  # 'bytes 0-10/46239'
                     raise RuntimeError(f"Range requests are not supported yet: {bytes_range}")
 
-                with open(task.path, "wb", buffering=self.chunksize) as fw:
+                with open(task.path, "wb", buffering=self.chunksize) as fw:  # noqa: ASYNC230
                     async for data in stream.iter_any():
                         task.downloaded += len(data)
                         fw.write(data)

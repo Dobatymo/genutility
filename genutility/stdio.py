@@ -9,6 +9,8 @@ from typing_extensions import Self
 
 from .typing import ExceptionsType
 
+logger = logging.getLogger(__name__)
+
 T = TypeVar("T")
 _terminal_width = get_terminal_size((80, 30)).columns
 
@@ -50,15 +52,15 @@ def safe_input(s: str, block: int = 10) -> str:
         raise
 
 
-def info_print(msg: Optional[str] = None, args: tuple = tuple(), exception: Optional[Exception] = None) -> None:
+def info_print(msg: Optional[str] = None, args: tuple = (), exception: Optional[Exception] = None) -> None:
     # not (msg or exception) this doesn't do anything
 
     if exception and msg:
-        logging.exception(msg % args, exc_info=exception)
+        logger.exception(msg % args, exc_info=exception)
         # logging.exception(msg, *args, exc_info=exception) this fails for some weird reason
     else:
         if exception:
-            logging.exception("Unhandled exception", exc_info=exception)
+            logger.exception("Unhandled exception", exc_info=exception)
         if msg:
             print(msg % args)
 
@@ -102,24 +104,24 @@ def confirm(msg: str, yesno: bool = True) -> bool:
         return input_type(msg + " (anything, nothing): ", type=bool)  # bool cannot throw if given string I think...
 
 
-def waitquit(msg=None, args=tuple(), exception: Optional[Exception] = None):  # fixme: ferutility.printing breaks this
+def waitquit(msg=None, args=(), exception: Optional[Exception] = None):  # fixme: ferutility.printing breaks this
     info_print(msg, args, exception)
     input("Press enter to exit...")
     sys.exit(msg or exception)
 
 
-def waitcontinue(msg=None, args=tuple(), exception: Optional[Exception] = None):
+def waitcontinue(msg=None, args=(), exception: Optional[Exception] = None):
     info_print(msg, args, exception)
     input("Press enter to continue...")
 
 
-def errorquit(msg=None, args=tuple(), exception: Optional[Exception] = None):
+def errorquit(msg=None, args=(), exception: Optional[Exception] = None):
     info_print(msg, args, exception)
     sys.exit(msg or exception)
 
 
 def print_terminal_progress_line(out: str, file=None) -> None:
-    columns, lines = os.get_terminal_size()
+    columns, _lines = os.get_terminal_size()
     if len(out) >= columns:
         out = out[: columns - 4] + "..."
     print(out, end="\r", file=file)

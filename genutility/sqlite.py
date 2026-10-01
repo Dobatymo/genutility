@@ -15,6 +15,8 @@ from .string import build_multiple_replace
 
 _is_win = platform.system() == "Windows"
 
+logger = logging.getLogger(__name__)
+
 
 def compile_options() -> List[str]:
     with sqlite3.connect(":memory:") as conn:
@@ -105,7 +107,7 @@ def safe_batch_executer(
             cursor.executemany(query_str, queries_batch)
             cursor.execute("COMMIT TRANSACTION")
         except sqlite3.IntegrityError:
-            logging.info("Skipping batch")
+            logger.info("Skipping batch")
             cursor.execute("ROLLBACK TRANSACTION")
         except sqlite3.OperationalError:
             raise
@@ -113,7 +115,7 @@ def safe_batch_executer(
     try:
         safe_for_loop(source, sqlexec)
     except KeyboardInterrupt:
-        logging.info("Batch execution safely interrupted")
+        logger.info("Batch execution safely interrupted")
 
 
 _percent_encode = build_multiple_replace({"%": "%25", "?": "%3f", "#": "%23"})

@@ -18,6 +18,7 @@ from typing_extensions import Self
 
 from ._files import BaseDirEntry, MyDirEntryT, PathType, entrysuffix, to_dos_device_path
 from .datetime import datetime_from_utc_timestamp
+from .exceptions import reraise
 from .file import FILE_IO_BUFFER_SIZE, equal_files, iterfilelike
 from .iter import is_empty
 from .ops import logical_implication
@@ -127,7 +128,7 @@ class WindowsIllegalFilename(IllegalFilename):
 
 
 class FileProperties:
-    __slots__ = ("relpath", "size", "isdir", "abspath", "id", "modtime", "hash")
+    __slots__ = ("abspath", "hash", "id", "isdir", "modtime", "relpath", "size")
 
     def __init__(
         self,
@@ -163,7 +164,7 @@ class FileProperties:
     def __iter__(self) -> tuple:
         return iter(self.values())
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return self.values() == other.values()
 
     def __repr__(self) -> str:
@@ -665,7 +666,7 @@ def safe_filename(filename: str, replacement: str = "") -> str:
     MAC = mac_illegal_chars
     bad = set.union(WIN, UNIX, MAC)
 
-    safe_filename_translation_table = str.maketrans({c: replacement for c in bad})
+    safe_filename_translation_table = str.maketrans(dict.fromkeys(bad, replacement))
 
     return filename.translate(safe_filename_translation_table)  # fixme: return callable which accepts only filename
 
@@ -995,7 +996,7 @@ def shutil_onerror_remove_readonly(func, path, exc_info):
         make_writeable(path, stats)
         func(path)
     else:
-        raise
+        reraise(exc_info)
 
 
 def _rmtree(
@@ -1024,8 +1025,8 @@ def _rmtree(
 
     elif onerror is None:
 
-        def onerror(*args):
-            raise
+        def onerror(_func, _path, exc_info):
+            reraise(exc_info)
 
     try:
         with os.scandir(path) as scandir_it:
@@ -1038,7 +1039,7 @@ def _rmtree(
                     except OSError:
                         onerror(os.path.islink, fullname, sys.exc_info())
                         continue
-                    yield from _rmtree(fullname, onerror)
+                    yield from _rmtree(fullname, onerror=onerror, follow_junctions=follow_junctions)
                 else:
                     try:
                         os.unlink(fullname)

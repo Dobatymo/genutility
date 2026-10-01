@@ -1,7 +1,6 @@
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import Any, Dict, Hashable
+from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple, Union
 from typing import Iterable as IterableT
-from typing import Iterator, List, Optional, Tuple, Union
 
 
 class SequenceTree(MutableMapping):
@@ -40,7 +39,7 @@ class SequenceTree(MutableMapping):
                 yield [], v
             else:
                 for a, b in self.iter_node(v):
-                    yield [k] + a, b
+                    yield [k, *a], b
 
     @classmethod
     def fromtree(cls, tree: dict, endkey: Hashable = "_") -> "SequenceTree":
@@ -104,7 +103,7 @@ class SequenceTree(MutableMapping):
         for key, value in node.items():
             if key != self.endkey:
                 try:
-                    ret = self._popitem(value, branch + (key,))
+                    ret = self._popitem(value, (*branch, key))
                     break
                 except KeyError:
                     pass
@@ -172,7 +171,7 @@ class SequenceTree(MutableMapping):
     def _keys(self, node: Dict[Hashable, Any], branch: Tuple[Hashable, ...]) -> Iterator[Tuple[Hashable, ...]]:
         for key, value in node.items():
             if key != self.endkey:
-                yield from self._keys(value, branch + (key,))
+                yield from self._keys(value, (*branch, key))
             else:
                 yield branch
 
@@ -184,7 +183,7 @@ class SequenceTree(MutableMapping):
     ) -> Iterator[Tuple[Tuple[Hashable, ...], Any]]:
         for key, value in node.items():
             if key != self.endkey:
-                yield from self._items(value, branch + (key,))
+                yield from self._items(value, (*branch, key))
             else:
                 yield branch, value
 

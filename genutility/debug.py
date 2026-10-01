@@ -8,6 +8,8 @@ from typing_extensions import ParamSpec
 T = TypeVar("T")
 P = ParamSpec("P")
 
+logger = logging.getLogger(__name__)
+
 
 def printr(*objs: Any, end: str = "\n", depth: int = 0) -> None:
     for i, obj in enumerate(objs, 1):
@@ -117,7 +119,7 @@ def log_call(s: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
 
     def dec(func: Callable[P, T]) -> Callable[P, T]:
         def inner(*args: P.args, **kwargs: P.kwargs) -> T:
-            logging.debug(s.format(name=func.__name__, args=args, kwargs=kwargs))
+            logger.debug(s.format(name=func.__name__, args=args, kwargs=kwargs))
             return func(*args, **kwargs)
 
         return inner
@@ -130,15 +132,15 @@ def log_wrap_call(func: Callable[P, T]) -> Callable[P, T]:
 
     @wraps(func)
     def inner(*args: P.args, **kwargs: P.kwargs) -> T:
-        logging.debug("START %s(%s)", func.__name__, args_str(args, kwargs))
+        logger.debug("START %s(%s)", func.__name__, args_str(args, kwargs))
 
         try:
             ret = func(*args, **kwargs)
         except BaseException:
-            logging.exception("RAISED %s(%s)", func.__name__, args_str(args, kwargs))
+            logger.exception("RAISED %s(%s)", func.__name__, args_str(args, kwargs))
             raise
 
-        logging.debug("END %s(%s)", func.__name__, args_str(args, kwargs))
+        logger.debug("END %s(%s)", func.__name__, args_str(args, kwargs))
         return ret
 
     return inner
@@ -151,7 +153,7 @@ def log_methodcall(func: Callable[P, T]) -> Callable[P, T]:
     def inner(self, *args: P.args, **kwargs: P.kwargs) -> T:
         classname = self.__class__.__name__
         # classname = type(self).__name__ ?
-        logging.debug("%s.%s(%s)", classname, func.__name__, args_str(args, kwargs))
+        logger.debug("%s.%s(%s)", classname, func.__name__, args_str(args, kwargs))
         return func(self, *args, **kwargs)
 
     return inner
@@ -164,9 +166,9 @@ def log_methodcall_result(func: Callable[P, T]) -> Callable[P, T]:
     def inner(self, *args: P.args, **kwargs: P.kwargs) -> T:
         classname = self.__class__.__name__
         # classname = type(self).__name__ ?
-        logging.debug("%s.%s(%s)", classname, func.__name__, args_str(args, kwargs))
+        logger.debug("%s.%s(%s)", classname, func.__name__, args_str(args, kwargs))
         res = func(self, *args, **kwargs)
-        logging.debug("%s.%s => %s", classname, func.__name__, res)
+        logger.debug("%s.%s => %s", classname, func.__name__, res)
         return res
 
     return inner

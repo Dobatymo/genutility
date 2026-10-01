@@ -351,7 +351,7 @@ class NumpyTest(MyTestCase):
     )
     def test_batchtopk(self, arr, k, axis, reverse, truth):
         arr, truth = np.array(arr), np.array(truth)
-        indices, probs = batchtopk(arr, k, axis, reverse)
+        _indices, probs = batchtopk(arr, k, axis, reverse)
         np.testing.assert_equal(truth, probs)
 
     @parametrize(

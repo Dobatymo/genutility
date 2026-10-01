@@ -2,19 +2,24 @@ from ctypes import FormatError, GetLastError, WinError, byref, sizeof
 from ctypes.wintypes import DWORD, USHORT
 from errno import EACCES
 
-from cwinsdk.um.fileapi import INVALID_FILE_SIZE, CreateFileW, GetCompressedFileSizeW
+from cwinsdk.shared.winerror import ERROR_SHARING_VIOLATION
+from cwinsdk.um.fileapi import INVALID_FILE_SIZE, OPEN_EXISTING, CreateFileW, GetCompressedFileSizeW
 from cwinsdk.um.handleapi import INVALID_HANDLE_VALUE
-from cwinsdk.um.winbase import GetFileInformationByHandleEx, OpenFileById
-from cwinsdk.um.winioctl import FSCTL_SET_COMPRESSION
-from cwinsdk.um.winnt import COMPRESSION_FORMAT_DEFAULT, COMPRESSION_FORMAT_NONE, FILE_SHARE_READ, FILE_SHARE_WRITE
-from cwinsdk.windows import ERROR_SHARING_VIOLATION  # structs; enums
-from cwinsdk.windows import (
+from cwinsdk.um.minwinbase import FILE_INFO_BY_HANDLE_CLASS
+from cwinsdk.um.winbase import (
     FILE_ID_DESCRIPTOR,
     FILE_ID_INFO,
     FILE_ID_TYPE,
-    FILE_INFO_BY_HANDLE_CLASS,
+    GetFileInformationByHandleEx,
+    OpenFileById,
+)
+from cwinsdk.um.winioctl import FSCTL_SET_COMPRESSION
+from cwinsdk.um.winnt import (
+    COMPRESSION_FORMAT_DEFAULT,
+    COMPRESSION_FORMAT_NONE,
+    FILE_SHARE_READ,
+    FILE_SHARE_WRITE,
     GENERIC_READ,
-    OPEN_EXISTING,
 )
 
 from .device import EMPTY_BUFFER, MyDeviceIoControl

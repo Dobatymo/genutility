@@ -15,7 +15,7 @@ from genutility.test import MyTestCase, parametrize
 
 
 class JsonTest(MyTestCase):
-    @parametrize(("", tuple()), ('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1])))
+    @parametrize(("", ()), ('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1])))
     def test_json_lines_from_stream(self, content, truth):
         stream = StringIO(content)
         with json_lines.from_stream(stream) as fr:
@@ -23,7 +23,7 @@ class JsonTest(MyTestCase):
 
         self.assertEqual(truth, result)
 
-    @parametrize(("", tuple()), ('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1])))
+    @parametrize(("", ()), ('{"asd": 1}\n["asd", 1]\n', ({"asd": 1}, ["asd", 1])))
     def test_read_json_lines(self, content, truth):
         with CloseableNamedTemporaryFile(mode="wt", encoding="utf-8") as (f, fname):
             f.write(content)

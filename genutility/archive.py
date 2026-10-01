@@ -67,9 +67,9 @@ def iter_tar(
         file = fspath(file)
 
     if isinstance(file, str):
-        cls = tarfile.open(name=file, mode=newmode + "|*")
+        cls = tarfile.open(name=file, mode=newmode + "|*")  # noqa: SIM115
     else:
-        cls = tarfile.open(fileobj=file, mode=newmode + "|*")
+        cls = tarfile.open(fileobj=file, mode=newmode + "|*")  # noqa: SIM115
 
     with cls as tf:
         for ti in tf:
@@ -137,7 +137,7 @@ def iter_dir(
         for entry in scan:
             if entry.is_file(follow_symlinks=follow_symlinks):
                 ext = entrysuffix(entry).lower()
-                iter_archive = archive_funcs.get(ext, None)
+                iter_archive = archive_funcs.get(ext)
                 if archives and iter_archive:
                     for name, fr in iter_archive(entry.path, mode, encoding, errors, newline):
                         yield entry.path + joiner + name, fr

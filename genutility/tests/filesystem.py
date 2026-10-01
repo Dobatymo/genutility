@@ -1,4 +1,5 @@
 import os.path
+import tempfile
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from types import TracebackType
 from typing import Optional, Type
@@ -107,38 +108,37 @@ class FilesystemTest(MyTestCase):
             "empty.mp4",
         ]
 
-        results = list(entry.name for entry in scandir_rec("testfiles", rec=True))
+        results = [entry.name for entry in scandir_rec("testfiles", rec=True)]
         self.assertUnorderedSeqEqual(base + rec, results)
 
-        results = list(entry.name for entry in scandir_rec("testfiles", rec=False))
+        results = [entry.name for entry in scandir_rec("testfiles", rec=False)]
         self.assertUnorderedSeqEqual(base, results)
 
     def test_scandir_rec_simple_path(self):
-        results = list(entry.name for entry in scandir_rec_simple(Path("testfiles"), rec=False))
+        results = [entry.name for entry in scandir_rec_simple(Path("testfiles"), rec=False)]
         self.assertUnorderedSeqEqual(
             ["joined.pdf", "quadrant-0.png", "quadrant-1.png", "quadrant-2.png", "quadrant-3.png"], results
         )
 
     def test_scandir_rec_links(self):
-        base = Path("testtemp/scandir")
-        base.mkdir(parents=False, exist_ok=True)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir)
+            (base / "dir").mkdir()
+            (base / "dir" / "file.ext").touch()
+            with HandleSymlinkErrors(self):
+                (base / "dir-symlink").symlink_to("dir")
+            with HandleSymlinkErrors(self):
+                (base / "file-symlink.ext").symlink_to(
+                    os.path.join("dir", "file.ext")
+                )  # note: correct pathsep is really important here
 
-        (base / "dir").mkdir(exist_ok=True)
-        (base / "dir" / "file.ext").touch()
-        with HandleSymlinkErrors(self):
-            (base / "dir-symlink").symlink_to("dir")
-        with HandleSymlinkErrors(self):
-            (base / "file-symlink.ext").symlink_to(
-                os.path.join("dir", "file.ext")
-            )  # note: correct pathsep is really important here
+            truth = ["dir", "dir-symlink", "file-symlink.ext", "file.ext"]
+            results = [entry.name for entry in scandir_rec(base, rec=True, files=True, dirs=True, prevent_loops=True)]
+            self.assertUnorderedSeqEqual(truth, results)
 
-        truth = ["dir", "dir-symlink", "file-symlink.ext", "file.ext"]
-        results = list(entry.name for entry in scandir_rec(base, rec=True, files=True, dirs=True, prevent_loops=True))
-        self.assertUnorderedSeqEqual(truth, results)
-
-        truth = ["dir", "dir-symlink", "file-symlink.ext", "file.ext", "file.ext"]
-        results = list(entry.name for entry in scandir_rec(base, rec=True, files=True, dirs=True, prevent_loops=False))
-        self.assertUnorderedSeqEqual(truth, results)
+            truth = ["dir", "dir-symlink", "file-symlink.ext", "file.ext", "file.ext"]
+            results = [entry.name for entry in scandir_rec(base, rec=True, files=True, dirs=True, prevent_loops=False)]
+            self.assertUnorderedSeqEqual(truth, results)
 
 
 if __name__ == "__main__":

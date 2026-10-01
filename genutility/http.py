@@ -10,6 +10,7 @@ from email.utils import parsedate_to_datetime
 from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib import request
 from urllib.error import URLError
+from urllib.parse import urlsplit
 
 from typing_extensions import Self
 
@@ -150,7 +151,7 @@ def get_redirect_url(url, headers=None):
             raise NoRedirect(f"Unexpected status code: {r.status_code}", response=r)
 
     except KeyError:  # Location not provided. is this really raised?
-        raise HTTPError("Location header not found", response=r)
+        raise HTTPError("Location header not found", response=r) from None
 
 
 class URLRequest:
@@ -173,7 +174,12 @@ class URLRequest:
         if not openfunc:
             openfunc = URLRequestBuilder(cookiejar, basicauth).getfunc()
 
-        req = request.Request(url, data=None, headers=headers)
+        scheme = urlsplit(url).scheme.lower()
+        if scheme not in {"http", "https"}:
+            raise ValueError(f"Unsupported URL scheme {scheme!r}; only http and https are supported")
+
+        # The URL scheme is restricted to HTTP(S) above before constructing the request.
+        req = request.Request(url, data=None, headers=headers)  # noqa: S310
         self.response = openfunc(req, timeout=timeout, context=context)
         self.headers = self.response.info()
 
@@ -202,15 +208,15 @@ class URLRequest:
         with FileLike(self) as fp:
             try:
                 return fp.read()
-            except URLError:
-                raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
+            except URLError as e:
+                raise TimeOut(f"Timed out after {self.timeout}s", response=self.response) from e
 
     def _json(self) -> JsonObject:
         with FileLike(self) as fp:
             try:
                 return json.load(fp)
-            except URLError:
-                raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
+            except URLError as e:
+                raise TimeOut(f"Timed out after {self.timeout}s", response=self.response) from e
 
     def _download(
         self,
@@ -264,13 +270,13 @@ class URLRequest:
                 # https://www.ietf.org/mail-archive/web/httpbisa/current/msg27484.html
                 transferred = copyfilelike(self.response, out, content_length, report=report)
 
-        except (socket.timeout, URLError):
+        except (socket.timeout, URLError) as e:
             logger.warning(f"Timeout after {self.timeout}s at {self.response.geturl()}: {self.headers}")
-            raise TimeOut(f"Timed out after {self.timeout}s", response=self.response)
+            raise TimeOut(f"Timed out after {self.timeout}s", response=self.response) from e
 
         except ConnectionResetError as e:
             logger.warning("Connection was reset during download: %s", str(e))
-            raise DownloadInterrupted("Connection was reset during download")
+            raise DownloadInterrupted("Connection was reset during download") from e
 
         except FileNotFoundError:
             # can be raised on windows for example when the file path is too long

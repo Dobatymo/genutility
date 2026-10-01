@@ -1,6 +1,8 @@
 import logging
 from math import sqrt
 
+logger = logging.getLogger(__name__)
+
 
 # was: FindWidthToHeightRatio
 def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=None):
@@ -60,9 +62,9 @@ def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=No
         f_squared = -((k3 * m3y - m1y) * (k2 * m2y - m1y) + (k3 * m3x - m1x) * (k2 * m2x - m1x)) / ((k3 - 1) * (k2 - 1))
 
     try:
-        logging.info(f"Focal length: {sqrt(f_squared)}")
+        logger.info(f"Focal length: {sqrt(f_squared)}")
     except ValueError:
-        logging.warning(
+        logger.warning(
             f"estimating FL failed, {[(m1x, m1y), (m2x, m2y), (m3x, m3y), (m4x, m4y)]}, k2: {k2}, k3: {k3}, f^2: {f_squared}"
         )
 
@@ -73,7 +75,7 @@ def perspective_rectangle_aspect_ratio(corners, principal_point, focal_length=No
             / (sqr(k3 - 1) + sqr(k3 * m3y - m1y) / f_squared + sqr(k3 * m3x - m1x) / f_squared)
         )
     except ValueError:
-        logging.warning(
+        logger.warning(
             f"estimating AR failed, {[(m1x, m1y), (m2x, m2y), (m3x, m3y), (m4x, m4y)]}, k2: {k2}, k3: {k3}, f^2: {f_squared}"
         )
         return -1

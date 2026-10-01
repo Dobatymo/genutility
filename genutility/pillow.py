@@ -17,7 +17,7 @@ def multiline_textsize(text: str, ttf: ImageFont, spacing: int = 4) -> Tuple[int
 
     for line in lines:
         # _, _, w, h = ttf.getbbox(line)
-        left, top, right, bottom = ttf.getbbox(line)
+        _left, _top, right, bottom = ttf.getbbox(line)
         # assert left == 0, left
         # assert top == 0, top
         width = max(width, right)
@@ -90,7 +90,7 @@ def write_text(
     alignment: str = "TL",
     fillcolor: Color = (255, 255, 255),
     outlinecolor: Color = (0, 0, 0),
-    fontsize: Union[float, int] = 0.03,
+    fontsize: float = 0.03,
     padding: Union[float, Tuple[int, int]] = (5, 5),
 ) -> None:
     if alignment not in {"TL", "TC", "TR", "BL", "BC", "BR"}:

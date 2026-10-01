@@ -19,7 +19,7 @@ class Sub:
     sep = "|"
 
     def __init__(self, path, mode="r", encoding="utf-8-sig"):
-        self.fp = open(path, mode, encoding=encoding)
+        self.fp = open(path, mode, encoding=encoding)  # noqa: SIM115
         self.current_line = 0
 
     def _readline(self):
@@ -29,8 +29,8 @@ class Sub:
         start, end, text = line.split("}", 2)
         try:
             start, end = int(start[1:]), int(end[1:])
-        except Exception:
-            MalformedFile(f"Error in line {self.current_line}: sub malformed: {line}")
+        except (TypeError, ValueError):
+            raise MalformedFile(f"Error in line {self.current_line}: sub malformed: {line}") from None
 
         return Subtitle(start, end, text.split(self.sep))
 

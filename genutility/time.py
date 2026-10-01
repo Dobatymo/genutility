@@ -21,7 +21,7 @@ def iter_timer(it: Iterator[T]) -> Iterator[Tuple[T, float]]:
 
 
 class TakeAtleast:
-    __slots__ = ("delta", "wait_on_error", "now")
+    __slots__ = ("delta", "now", "wait_on_error")
     delta: float
     wait_on_error: bool
     now: Optional[float]
@@ -52,7 +52,7 @@ class TakeAtleast:
 
 
 class DeltaTime:
-    __slots__ = ("start", "end")
+    __slots__ = ("end", "start")
     start: Optional[float]
     end: float
 
@@ -79,7 +79,7 @@ class DeltaTime:
 
 
 class PrintStatementTime:
-    __slots__ = ("tpl", "start", "delta", "interrupted")
+    __slots__ = ("delta", "interrupted", "start", "tpl")
     tpl: str
     start: Optional[float]
     delta: Optional[float]
@@ -115,7 +115,7 @@ class PrintStatementTime:
 
 
 class MeasureTime:
-    __slots__ = ("delta", "start", "interrupted")
+    __slots__ = ("delta", "interrupted", "start")
     delta: Optional[float]
     start: Optional[float]
     interrupted: Optional[bool]

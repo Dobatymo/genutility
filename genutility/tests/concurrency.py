@@ -1,9 +1,12 @@
+import logging
 import threading
 import time
 
 from genutility.concurrency import NotThreadSafe, ThreadPool, gather_all_unsorted, gather_any
 from genutility.test import MyTestCase
 from genutility.time import MeasureTime, iter_timer
+
+logger = logging.getLogger(__name__)
 
 TIME_DELTA = 0.2  # seconds
 
@@ -84,8 +87,7 @@ class ConcurrencyTest(MyTestCase):
 
 
 if __name__ == "__main__":
-    import logging
     import unittest
 
-    logging.warning("These unittests are time critical, they might fail if the system is under heavy load")
+    logger.warning("These unittests are time critical, they might fail if the system is under heavy load")
     unittest.main()

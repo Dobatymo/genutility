@@ -26,7 +26,7 @@ def pl_index(df: pl.DataFrame, indices: np.ndarray, index_col: str = "index") ->
     )
 
 
-def pl_islice(df: pl.DataFrame, start: Optional[int], stop: Union[int, None, Type[_Unset]] = _Unset) -> pl.DataFrame:
+def pl_islice(df: pl.DataFrame, start: Optional[int], stop: Union[int, Type[_Unset], None] = _Unset) -> pl.DataFrame:
     if start is None and stop is None:
         return df
     elif stop is _Unset:

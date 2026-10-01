@@ -7,10 +7,26 @@ from itertools import islice
 from pathlib import Path
 from traceback import TracebackException
 from types import ModuleType
-from typing import IO, Any, Callable, Dict, FrozenSet, Iterable, Iterator, Optional, Sequence, Tuple, Type, Union
+from typing import (
+    IO,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    FrozenSet,
+    Iterable,
+    Iterator,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypedDict,
+    Union,
+)
 
-from typing_extensions import Self  # typing.Self is available in Python 3.11+
-from typing_extensions import TypedDict  # typing.TypedDict is available in Python 3.8+
+from typing_extensions import (
+    Self,  # typing.Self is available in Python 3.11+
+)
 
 from .atomic import sopen
 from .datetime import datetime_from_utc_timestamp_ms, now
@@ -370,19 +386,19 @@ def write_json_lines(
     default: Optional[Callable] = None,
     safe: bool = False,
 ) -> Iterator[Any]:
-    with sopen(path, "wt", encoding="utf-8", safe=safe) as fw:
-        with json_lines.from_stream(fw, ensure_ascii=ensure_ascii, sort_keys=sort_keys, default=default) as fw:
-            for obj in it:
-                fw.write(obj)
-                yield obj
+    with sopen(path, "wt", encoding="utf-8", safe=safe) as fw, json_lines.from_stream(
+        fw, ensure_ascii=ensure_ascii, sort_keys=sort_keys, default=default
+    ) as writer:
+        for obj in it:
+            writer.write(obj)
+            yield obj
 
 
 def jl_to_csv(jlpath: PathStr, csvpath: str, keyfunc: Callable[[JsonDict], Sequence[str]], mode: str = "xt") -> None:
-    with json_lines.from_path(jlpath, "rt") as fr:
-        with open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
-            fw = csv.writer(csvfile)
-            for obj in fr:
-                fw.writerow(keyfunc(obj))
+    with json_lines.from_path(jlpath, "rt") as fr, open(csvpath, mode, encoding="utf-8", newline="") as csvfile:
+        fw = csv.writer(csvfile)
+        for obj in fr:
+            fw.writerow(keyfunc(obj))
 
 
 def key_to_hash(
@@ -391,7 +407,7 @@ def key_to_hash(
     from hashlib import md5
 
     binary = json.dumps(key, ensure_ascii=ensure_ascii, sort_keys=sort_keys, default=default).encode("utf-8")
-    return md5(binary).hexdigest()  # nosec
+    return md5(binary).hexdigest()  # noqa: S324
 
 
 class JsonLinesFormatter(logging.Formatter):
@@ -406,7 +422,7 @@ class JsonLinesFormatter(logging.Formatter):
             logger.warning({"msg": "Hello world!", "level": "greeting"})
     """
 
-    myfields = {
+    myfields: ClassVar[Dict[str, Callable]] = {
         "datetime": now,  # requires non-default json serializer
         "datetime-str": lambda: now().isoformat(),  # note: lambda required
     }

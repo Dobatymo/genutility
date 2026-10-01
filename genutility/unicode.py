@@ -4,7 +4,7 @@ from sys import maxunicode
 from tempfile import gettempdir
 from unicodedata import category
 
-from .cache import cache  # nosec
+from .cache import cache
 
 
 @cache(Path(gettempdir()) / "unicode_categories.{protocol}.pkl", ignoreargs=True)

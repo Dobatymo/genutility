@@ -1,4 +1,5 @@
 import re
+from typing import ClassVar, Set
 
 import mistune
 from mistune.inline_parser import AUTO_EMAIL
@@ -76,8 +77,8 @@ class PlaintextRenderer(mistune.BaseRenderer):
     headers, and keeps the contents of superscript spans.
     """
 
-    _raw_tokens = {"block_code", "block_html", "codespan", "inline_html", "text"}
-    _children_tokens = {
+    _raw_tokens: ClassVar[Set[str]] = {"block_code", "block_html", "codespan", "inline_html", "text"}
+    _children_tokens: ClassVar[Set[str]] = {
         "block_quote",
         "block_text",
         "emphasis",
@@ -89,7 +90,7 @@ class PlaintextRenderer(mistune.BaseRenderer):
         "table_cell",
         "table_row",
     }
-    _newline_tokens = {"linebreak", "softbreak", "thematic_break"}
+    _newline_tokens: ClassVar[Set[str]] = {"linebreak", "softbreak", "thematic_break"}
 
     def render_token(self, token, state):
         token_type = token["type"]
@@ -102,20 +103,20 @@ class PlaintextRenderer(mistune.BaseRenderer):
             return "\n"
         if token_type in {"heading", "paragraph"}:
             return self.render_tokens(token["children"], state) + "\n\n"
-        if token_type == "list":  # nosec B105
+        if token_type == "list":  # noqa: S105
             return self.render_tokens(token["children"], state) + "\n"
-        if token_type == "list_item":  # nosec B105
+        if token_type == "list_item":  # noqa: S105
             return self.render_tokens(token["children"], state) + " "
-        if token_type == "table_head":  # nosec B105
+        if token_type == "table_head":  # noqa: S105
             return ""
-        if token_type == "auto_link":  # nosec B105
+        if token_type == "auto_link":  # noqa: S105
             return "<URL>"
-        if token_type == "auto_email":  # nosec B105
+        if token_type == "auto_email":  # noqa: S105
             return "<EMAIL>"
         if token_type in {"image", "link"}:
             attrs = token.get("attrs") or {}
             return attrs.get("title") or self.render_tokens(token["children"], state)
-        if token_type == "blank_line":  # nosec B105
+        if token_type == "blank_line":  # noqa: S105
             return ""
 
         raise AttributeError(f'No renderer "{token_type}"')

@@ -19,7 +19,7 @@ def intersect_columns(*dfs: DataFrame, sort=False) -> Tuple[DataFrame, ...]:
     else:
         good = list(goodset)
     dfs = tuple(df[good] for df in dfs)
-    assert len(set(map(lambda df: tuple(df.columns), dfs))) == 1
+    assert len({tuple(df.columns) for df in dfs}) == 1
 
     return dfs
 

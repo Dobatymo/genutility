@@ -71,12 +71,11 @@ nulllogger.addHandler(logging.NullHandler())
 
 
 class IteratorWithException:
-
     def __next__(self):
         try:
             func = self.ret[self.pos]
         except IndexError:
-            raise StopIteration
+            raise StopIteration from None
         try:
             return func()
         finally:
@@ -106,7 +105,7 @@ class IterTest(MyTestCase):
 
     def test_iterrandrange(self):
         result = set(islice(iterrandrange(0, 10), 100))
-        truth = set(range(0, 10))
+        truth = set(range(10))
         self.assertLessEqual(result, truth)
 
     def test_iterrandrange_2(self):
@@ -338,7 +337,7 @@ class IterTest(MyTestCase):
             split_first(())
 
     @parametrize(
-        (tuple(), tuple()),
+        ((), ()),
         ((1, 1, 1), (1,)),
         ((1, 1, 2, 2, 3, 3), (1, 2, 3)),
         ((3, 3, 2, 2, 1, 1), (3, 2, 1)),
@@ -370,13 +369,13 @@ class IterTest(MyTestCase):
         self.assertIterEqual(truth, result)
 
     def test_iter_except(self):
-        result = tuple(iter_except(iter(tuple()), {}))
-        truth = tuple()
+        result = tuple(iter_except(iter(()), {}))
+        truth = ()
         self.assertEqual(truth, result)
 
     def test_iter_except_ignore(self):
-        result = tuple(iter_except_ignore(iter(tuple()), {}))
-        truth = tuple()
+        result = tuple(iter_except_ignore(iter(()), {}))
+        truth = ()
         self.assertEqual(truth, result)
 
     def test_iter_except_gen(self):
@@ -440,8 +439,8 @@ class IterTest(MyTestCase):
 
     @parametrize(
         ([], []),
-        (range(0), tuple()),
-        (range(1), tuple()),
+        (range(0), ()),
+        (range(1), ()),
         (range(2), ((0, 1),)),
         (range(3), ((0, 1), (1, 2))),
         (range(4), ((0, 1), (1, 2), (2, 3))),
@@ -464,9 +463,9 @@ class IterTest(MyTestCase):
         self.assertIterEqual(truth, result)
 
     @parametrize(
-        (tuple(), tuple()),
-        (range(1), tuple()),
-        (range(2), tuple()),
+        ((), ()),
+        (range(1), ()),
+        (range(2), ()),
         (range(3), ((0, 1, 2),)),
         (range(4), ((0, 1, 2), (1, 2, 3))),
     )
@@ -497,7 +496,7 @@ class IterTest(MyTestCase):
         self.assertIterEqual(truth, result)
 
     @parametrize(
-        (tuple(), True),
+        ((), True),
         ((1,), True),
         ((1, 1), True),
         ((1, 1, 1), True),
@@ -551,7 +550,7 @@ class IterTest(MyTestCase):
         self.assertIsInstance(it, Generator)
         with self.assertRaises(StopIteration):
             next(it)
-        self.assertEqual(tuple(empty()), tuple())
+        self.assertEqual(tuple(empty()), ())
 
     @parametrize(
         (([True, False], [True, False], [True, False]), True),
@@ -663,7 +662,7 @@ class IterTest(MyTestCase):
         self.assertEqual(truth, result)
 
     @parametrize(
-        (tuple(), tuple()),
+        ((), ()),
         ((1, 1, 1), (1,)),
         ((1, 1, 2, 2, 3, 3), (1, 2, 3)),
         ((3, 3, 2, 2, 1, 1), (3, 2, 1)),
@@ -675,7 +674,7 @@ class IterTest(MyTestCase):
         self.assertIterEqual(truth, result)
 
     @parametrize(
-        (tuple(), None),
+        ((), None),
         ((1,), 1),
         ((1, 1), 1),
         ((1, 1, 2), 1),
@@ -695,7 +694,7 @@ class IterTest(MyTestCase):
         ([1, 2, 3, 4, 5], [(1, 2), (4, 5)]),
     )
     def test_pairwise_skip(self, seq, truth):
-        func = lambda x: x == 3  # noqa: E731
+        func = lambda x: x == 3
         result = pairwise_skip(seq, func)
         self.assertIterEqual(truth, result)
 

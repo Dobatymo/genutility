@@ -93,7 +93,7 @@ class Rar:
     def set_compression(self, level: Union[int, bool]) -> None:
         """level: 0 store, 1 fastest, 2 fast, 3 normal, 4 good, 5 best (default: 3)"""
 
-        if level not in range(0, 6) and level is not False:
+        if level not in range(6) and level is not False:
             raise ValueError("Invalid parameter: Set compression level (0-store...3-default...5-best)")
         self.options["compression"].value = level
 
@@ -142,16 +142,16 @@ class Rar:
     def _execute(self, args: List[str]) -> str:
         cmd = [self.exe, *args]
         try:
-            ret = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=os.getcwd())  # nosec
+            ret = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=os.getcwd())  # noqa: S603
         except subprocess.CalledProcessError as e:
             output = force_decode(e.output)
             raise RarError(
                 f"Calling `{e.cmd}` failed with error code {e.returncode}", e.returncode, e.cmd, output
-            )  # should use only stderr
+            ) from e  # should use only stderr
 
         return force_decode(ret)
 
-    def test(self, password: str = "-") -> None:  # nosec
+    def test(self, password: str = "-") -> None:  # noqa: S107
         self._execute(["t", f"-p{password}", self.archive])
 
     def get_flag_str(self) -> str:
@@ -201,7 +201,7 @@ def create_rar_from_folder(
                     r.add_file(entry.path)
             r.create()
         except RarError as e:
-            logger.error(f"{str(e)}\n{e.output}")
+            logger.error(f"{e!s}\n{e.output}")
             return False
 
     return True
@@ -227,7 +227,7 @@ def create_rar_from_file(
             r.add_file(path.name)
             r.create()
         except RarError as e:
-            logger.error(f"{str(e)}\n{e.output}")
+            logger.error(f"{e!s}\n{e.output}")
             return False
 
     return True

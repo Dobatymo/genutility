@@ -1,17 +1,19 @@
 import platform
 from typing import NamedTuple
 
-_usagetuple = NamedTuple("usage", [("total", int), ("used", int), ("free", int)])
-_volumeinfotuple = NamedTuple(
-    "volumeinfo",
-    [
-        ("VolumeName", str),
-        ("VolumeSerialNumber", int),
-        ("MaximumComponentLength", int),
-        ("FileSystemFlags", int),
-        ("FileSystemName", str),
-    ],
-)
+
+class _usagetuple(NamedTuple):
+    total: int
+    used: int
+    free: int
+
+
+class _volumeinfotuple(NamedTuple):
+    VolumeName: str
+    VolumeSerialNumber: int
+    MaximumComponentLength: int
+    FileSystemFlags: int
+    FileSystemName: str
 
 
 def is_os_64bit():

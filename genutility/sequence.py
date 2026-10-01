@@ -71,7 +71,7 @@ def batch(seq: Sequence[T], size: int) -> Iterator[Sequence[T]]:
 
     seqlen = len(seq)
 
-    for i in range(0, (seqlen + size - 1) // size):
+    for i in range((seqlen + size - 1) // size):
         yield seq[i * size : (i + 1) * size]
 
 

@@ -8,19 +8,16 @@ from typing import IO, Any, Callable, Dict, Iterable, Iterator, List, Optional, 
 from rich.console import Console, Group, JustifyMethod, OverflowMethod, Style
 from rich.highlighter import Highlighter
 from rich.markdown import Markdown
-from rich.progress import BarColumn
+from rich.progress import BarColumn, ProgressColumn, ProgressType, RenderableType, TaskID, TimeElapsedColumn
 from rich.progress import Progress as _RichProgress
-from rich.progress import ProgressColumn, ProgressType, RenderableType
 from rich.progress import Task as RichTask
-from rich.progress import TaskID, TimeElapsedColumn
 from rich.table import Column
 from rich.text import Text
 from typing_extensions import Self
 
 from ._files import PathType
-from .callbacks import BaseTask
+from .callbacks import BaseTask, _Default
 from .callbacks import Progress as _Progress
-from .callbacks import _Default
 from .file import copen
 from .typing import SizedIterable
 
@@ -324,18 +321,17 @@ class StdoutFile:
 
 class StdoutFileNoStyle(StdoutFile):
     def __init__(self, *args, **kwargs) -> None:
-        _kwargs = dict(
-            encoding="utf-8",
-            markup=False,
-            highlight=False,
-            soft_wrap=True,
-        )
+        _kwargs = {
+            "encoding": "utf-8",
+            "markup": False,
+            "highlight": False,
+            "soft_wrap": True,
+        }
         _kwargs.update(kwargs)
         super().__init__(*args, **_kwargs)
 
 
 class MarkdownHighlighter(Highlighter):
-
     def highlight(self, text: Text) -> None:
         """Not called"""
 

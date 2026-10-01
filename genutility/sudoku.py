@@ -182,7 +182,7 @@ class SudokuBruteforce(Sudoku):
             }[strategy]
 
         except KeyError:
-            raise ValueError("Invalid strategy")
+            raise ValueError("Invalid strategy") from None
 
         i = 0
         backtrack: List[Tuple[int, T]] = []
@@ -201,7 +201,7 @@ class SudokuBruteforce(Sudoku):
                     try:
                         j, num = backtrack.pop()
                     except IndexError:
-                        raise Unsolvable
+                        raise Unsolvable from None
 
                     num = candidate_func(j, num)
                     self.square[j] = num

@@ -270,7 +270,7 @@ def backslashcontrol_unescape(s: str) -> str:
 
 
 def are_parentheses_matched(s: str, open: str = "([{", close: str = ")]}") -> bool:
-    stack = list()
+    stack = []
     parentheses = dict(chain(switched_enumerate(open), switched_enumerate(close)))
     assert len(parentheses) == len(open) + len(close)
 

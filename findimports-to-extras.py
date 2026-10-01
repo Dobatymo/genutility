@@ -4,6 +4,8 @@ from itertools import chain
 from pathlib import Path
 from typing import Dict, Set
 
+logger = logging.getLogger(__name__)
+
 global_modules = ["typing_extensions", "cwinsdk"]
 
 modmap = {
@@ -134,8 +136,8 @@ def main(path: Path) -> None:
                     continue
 
                 modname = line[:-1].split(".")
-                if not modname[0] == "genutility":
-                    logging.warning("Invalid module: %s", modname)
+                if modname[0] != "genutility":
+                    logger.warning("Invalid module: %s", modname)
                     continue
 
                 module = ".".join(modname[:2])
@@ -161,9 +163,9 @@ def main(path: Path) -> None:
         changes = True
         while changes:
             changes = False
-            for k in extras.keys():
+            for k, deps in extras.items():
                 new_dep = set()
-                for dep in extras[k]:
+                for dep in deps:
                     if dep.startswith("genutility."):
                         changes = True
                         new_dep.update(extras[dep])
@@ -198,17 +200,14 @@ def main(path: Path) -> None:
 
         requirements = sorted(set(chain.from_iterable(sorted_extras.values())) | set(install), key=lowercase)
         with open("requirements.txt", "w", encoding="utf-8") as fw:
-            for package in requirements:
-                fw.write(package + "\n")
+            fw.writelines(package + "\n" for package in requirements)
 
         with open("requirements-test.txt", "w", encoding="utf-8") as fw:
-            for package in requirements_test:
-                fw.write(package + "\n")
+            fw.writelines(package + "\n" for package in requirements_test)
 
-        requirements_dev = sorted(["black", "isort", "flake8", "bandit[toml]>=1.7.5"], key=lowercase)
+        requirements_dev = ["ruff==0.16.8"]
         with open("requirements-ci.txt", "w", encoding="utf-8") as fw:
-            for package in requirements_dev:
-                fw.write(package + "\n")
+            fw.writelines(package + "\n" for package in requirements_dev)
 
 
 if __name__ == "__main__":

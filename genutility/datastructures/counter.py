@@ -6,7 +6,6 @@ H2 = TypeVar("H2", bound=Hashable)
 
 
 class MultiCounter(Generic[H1, H2]):
-
     def _add(self, name: H1, item: H2) -> None:
         self.counts[name][item] = self.counts[name].get(item, 0)
 

@@ -48,7 +48,7 @@ def histogram_2d(arr: np.ndarray, levels: int) -> np.ndarray:
     if len(arr.shape) < 2:
         raise ValueError("arr must be at least 2-dimensional")
 
-    newshape = arr.shape[:-2] + (arr.shape[-2] * arr.shape[-1],)
+    newshape = (*arr.shape[:-2], arr.shape[-2] * arr.shape[-1])
     flattened = np.reshape(arr, newshape)
 
     return bincount_batch(flattened, -1, levels)
@@ -64,7 +64,7 @@ def block_histogram_2d(arr: np.ndarray, by: int, bx: int, levels: int) -> np.nda
     invy = arr.shape[-2] // by
     blocks = unblock(arr, invx, invy)
     block_hists = histogram_1d(blocks, levels)
-    return block_hists.reshape(arr.shape[:-2] + (invy, invx, -1))
+    return block_hists.reshape((*arr.shape[:-2], invy, invx, -1))
 
 
 def image_histogram(arr: np.ndarray, levels: int = 256) -> np.ndarray:

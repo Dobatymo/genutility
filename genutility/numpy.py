@@ -112,10 +112,7 @@ def is_square(A: np.ndarray) -> bool:
     if len(A.shape) != 2:
         return False
 
-    if A.shape[0] != A.shape[1]:
-        return False
-
-    return True
+    return A.shape[0] == A.shape[1]
 
 
 def batch_vTAv(A: np.ndarray, v: np.ndarray) -> np.ndarray:
@@ -554,7 +551,7 @@ def _viterbi_dense_masked(
     assert N == N1 == N2
 
     assert (batch_size, T) == mask.shape
-    assert (N,) == p_trans0.shape
+    assert p_trans0.shape == (N,)
 
     trellis = np.zeros((T, batch_size, N), dtype=p_emit.dtype)
     states = np.zeros((T, batch_size, N), dtype=np.intp)
@@ -625,7 +622,7 @@ def viterbi_sparse(p_emit: Sequence[np.ndarray], p_trans: Sequence[np.ndarray]) 
 
     T = len(p_emit)
 
-    assert T - 1 == len(p_trans)
+    assert len(p_trans) == T - 1
 
     trellis = [p_emit[0]]
     states = [None]

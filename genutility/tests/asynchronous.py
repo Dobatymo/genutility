@@ -1,8 +1,6 @@
-import sys
-from unittest import IsolatedAsyncioTestCase, skipIf
+from unittest import IsolatedAsyncioTestCase
 
 
-@skipIf(sys.version_info < (3, 9), "requires Python 3.9+")
 class ProgressContentTest(IsolatedAsyncioTestCase):
     def test_sync(self):
         from genutility.asynchronous import progress_content
