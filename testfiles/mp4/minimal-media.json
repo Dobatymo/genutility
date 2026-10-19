@@ -1,0 +1,1144 @@
+{
+  "recorded_at": "2026-10-20T00:51:17+08:00",
+  "ffmpeg": "ffmpeg version 8.1.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+  "ffmpeg_version_output": [
+    "ffmpeg version 8.1.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "built with gcc 16.1.0 (Rev2, Built by MSYS2 project)",
+    "configuration: --enable-gpl --enable-version3 --enable-shared --disable-w32threads --disable-autodetect --enable-cairo --enable-fontconfig --enable-iconv --enable-gnutls --enable-lcms2 --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-liboapv --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libsvtjpegxs --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-libshaderc --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-openal --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint --enable-whisper",
+    "libavutil      60. 26.102 / 60. 26.102",
+    "libavcodec     62. 28.102 / 62. 28.102",
+    "libavformat    62. 12.102 / 62. 12.102",
+    "libavdevice    62.  3.102 / 62.  3.102",
+    "libavfilter    11. 14.102 / 11. 14.102",
+    "libswscale      9.  5.102 /  9.  5.102",
+    "libswresample   6.  3.102 /  6.  3.102",
+    "",
+    "Exiting with exit code 0"
+  ],
+  "ffmpeg_binary_sha256": "9be30133edcc5786f16e632d57e2dab5b259fea9a5243ba99758ca3adc110bd9",
+  "platform": {
+    "system": "Windows",
+    "version": "10.0.26200",
+    "machine": "AMD64"
+  },
+  "python": "3.8.10",
+  "ffmpeg_distribution": {
+    "package": "ffmpeg-8.1.2-full_build-shared.7z",
+    "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-8.1.2-full_build-shared.7z",
+    "published_archive_sha256": "cba748035c21ce1431d0823c7a3a711f38616f89f87a265dceddf9b7f6749d2d",
+    "source_commit": "38b88335f9"
+  },
+  "files": [
+    {
+      "file": "ffmpeg/minimal-qt.mov",
+      "muxer": "mov",
+      "codec": "raw",
+      "options": [],
+      "bytes": 636,
+      "sha256": "8ae03a792bf0502a5121b9cc483acad684f3714708cca53217255345619fcb7c",
+      "streams": [
+        {
+          "codec_name": "rawvideo",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "qt  ",
+      "compatible_brands": [
+        "qt  "
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-isom.mp4",
+      "muxer": "mp4",
+      "codec": "av1",
+      "options": [],
+      "bytes": 708,
+      "sha256": "5ee0835a3afd244207f1b4c32bf473e89468afece72543683f7b5aa3323bd327",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "av01",
+        "iso2",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-iso2.mp4",
+      "muxer": "mp4",
+      "codec": "mpeg4",
+      "options": [
+        "-brand",
+        "iso2"
+      ],
+      "bytes": 756,
+      "sha256": "c5f4a9cd5ddbf38a8115aefa8a30d3e0bc30b46987f96c587575a347a74dff3c",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "iso2",
+      "compatible_brands": [
+        "iso2",
+        "iso2",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-iso4.mp4",
+      "muxer": "mp4",
+      "codec": "av1",
+      "options": [
+        "-movflags",
+        "+negative_cts_offsets"
+      ],
+      "bytes": 712,
+      "sha256": "c0e61c0786b8b680c7761661258ecba3ee1b937428c127bba41c68decf6cd0c8",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "iso4",
+      "compatible_brands": [
+        "iso4",
+        "av01",
+        "isom",
+        "iso2",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-iso5.mp4",
+      "muxer": "mp4",
+      "codec": "av1",
+      "options": [
+        "-movflags",
+        "+frag_keyframe+empty_moov+default_base_moof+skip_trailer"
+      ],
+      "bytes": 810,
+      "sha256": "e23c736c0af595bebb4d53fb8fffb470e2c097538b47be4b5ee7d705e0a21fff",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "iso5",
+      "compatible_brands": [
+        "iso5",
+        "iso6",
+        "av01",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-iso6.mp4",
+      "muxer": "mp4",
+      "codec": "av1",
+      "options": [
+        "-movflags",
+        "+frag_keyframe+empty_moov+default_base_moof+negative_cts_offsets+skip_trailer"
+      ],
+      "bytes": 806,
+      "sha256": "b4587efe4146376e1fc926dcbaa4f3f474174acef91f88db5c9d2c60d1961533",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "iso6",
+      "compatible_brands": [
+        "iso6",
+        "av01",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-dash.mp4",
+      "muxer": "mp4",
+      "codec": "av1",
+      "options": [
+        "-movflags",
+        "+dash+global_sidx+frag_keyframe+empty_moov+default_base_moof+skip_trailer"
+      ],
+      "bytes": 866,
+      "sha256": "18e1bf913f7cfc133352c520338f05fd82f612b0d6a6f87d501626d69cf7daaa",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "iso5",
+      "compatible_brands": [
+        "iso5",
+        "iso6",
+        "av01",
+        "mp41",
+        "dash"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-cmaf.mp4",
+      "muxer": "mp4",
+      "codec": "av1",
+      "options": [
+        "-movflags",
+        "+cmaf+skip_trailer"
+      ],
+      "bytes": 814,
+      "sha256": "41782bc21c22d90f169a14df668aa151fb112a01160b6e082130a4ab3981f679",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "iso6",
+      "compatible_brands": [
+        "iso6",
+        "cmfc",
+        "av01",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-mp41.mp4",
+      "muxer": "mp4",
+      "codec": "mpeg4",
+      "options": [
+        "-brand",
+        "mp41",
+        "-skip_iods",
+        "0",
+        "-iods_video_profile",
+        "1"
+      ],
+      "bytes": 780,
+      "sha256": "32373915cce9e7ad64bd38e39b3fc469af031c60c8772c19ed1d2c5ca71e7f12",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "mp41",
+      "compatible_brands": [
+        "mp41",
+        "iso2",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-mp42.mp4",
+      "muxer": "mp4",
+      "codec": "mpeg4",
+      "options": [
+        "-brand",
+        "mp42",
+        "-skip_iods",
+        "0",
+        "-iods_video_profile",
+        "1"
+      ],
+      "bytes": 780,
+      "sha256": "0c5728dae98d9f610d459ccc905e1c3ccae1625098162eecc2a5184e4a8bab9e",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "mp42",
+      "compatible_brands": [
+        "mp42",
+        "iso2",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-avc1.mp4",
+      "muxer": "mp4",
+      "codec": "avc",
+      "options": [
+        "-brand",
+        "avc1"
+      ],
+      "bytes": 723,
+      "sha256": "c73918b184516fad73df0a75311428aed17318cb7cbf5e96a7173b3a951b9108",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "avc1",
+      "compatible_brands": [
+        "avc1",
+        "iso2",
+        "avc1",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-3gp4.3gp",
+      "muxer": "3gp",
+      "codec": "mpeg4",
+      "options": [],
+      "bytes": 695,
+      "sha256": "de0f0fca0097af18e47abe8f48818e10bfc8cd8b46233bb4912f37697531ff86",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "3gp4",
+      "compatible_brands": [
+        "3gp4",
+        "isom",
+        "iso2"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-3gp6.3gp",
+      "muxer": "3gp",
+      "codec": "avc",
+      "options": [],
+      "bytes": 662,
+      "sha256": "47ca8098576d969ce55c25d4a01ee6b60889854d92826cdcf72a986cfe8d3431",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "3gp6",
+      "compatible_brands": [
+        "3gp6",
+        "isom",
+        "iso2",
+        "avc1"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-3gs6.3gp",
+      "muxer": "3gp",
+      "codec": "avc",
+      "options": [
+        "-brand",
+        "3gs6"
+      ],
+      "bytes": 662,
+      "sha256": "0b4e14e36dd7b72d1b7dda0a0d752d0cc758b734a8a62261225a1cf792a4bbf2",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "3gs6",
+      "compatible_brands": [
+        "3gs6",
+        "isom",
+        "iso2",
+        "avc1"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-3g2a.3g2",
+      "muxer": "3g2",
+      "codec": "mpeg4",
+      "options": [],
+      "bytes": 695,
+      "sha256": "51fc49b1d820461b734b27297a4bea126b8c9d39e86fbbf60bf0da118cd5c635",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "3g2a",
+      "compatible_brands": [
+        "3g2a",
+        "isom",
+        "iso2"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-3g2b.3g2",
+      "muxer": "3g2",
+      "codec": "avc",
+      "options": [],
+      "bytes": 662,
+      "sha256": "1927a4472ad731d62b96c847332ec13520ecea924bfedc5dea0586b4f0caa369",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "3g2b",
+      "compatible_brands": [
+        "3g2b",
+        "isom",
+        "iso2",
+        "avc1"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-m4v.m4v",
+      "muxer": "ipod",
+      "codec": "mpeg4",
+      "options": [],
+      "bytes": 756,
+      "sha256": "a96be424e6e74628579fa712ca4e36676fce637b38e2db78915d18fee917345a",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "M4V ",
+      "compatible_brands": [
+        "M4V ",
+        "isom",
+        "iso2"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-m4a.m4a",
+      "muxer": "ipod",
+      "codec": "audio",
+      "options": [],
+      "bytes": 722,
+      "sha256": "d4371e40f2548a543746407f422fac95c2972e015a271cc3f32b07ae7977070c",
+      "streams": [
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "nb_frames": "2",
+          "sample_rate": "8000",
+          "channels": 1
+        }
+      ],
+      "packets": 2,
+      "decoded_audio_silent": true,
+      "major_brand": "M4A ",
+      "compatible_brands": [
+        "M4A ",
+        "isom",
+        "iso2"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-isml.mp4",
+      "muxer": "ismv",
+      "codec": "avc",
+      "options": [
+        "-movflags",
+        "+skip_trailer"
+      ],
+      "bytes": 875,
+      "sha256": "41a2912c994969680889130ad99c8cedf7001102637c695f11c4ce2aa2a0ec27",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "isml",
+      "compatible_brands": [
+        "isml",
+        "piff"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-f4v.mp4",
+      "muxer": "f4v",
+      "codec": "avc",
+      "options": [],
+      "bytes": 723,
+      "sha256": "a45343318e6dd430c91f99a31a00b1a9d31a5c68b42e224d5b11eac1006c669f",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "f4v ",
+      "compatible_brands": [
+        "f4v ",
+        "isom",
+        "iso2",
+        "avc1"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-msnv.mp4",
+      "muxer": "psp",
+      "codec": "mpeg4",
+      "options": [],
+      "bytes": 1452,
+      "sha256": "27de73a8adcc3314348fd027c91b8ece5123d12184ab43f24c7a91b1a5072349",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "nb_frames": "2",
+          "sample_rate": "8000",
+          "channels": 1
+        }
+      ],
+      "packets": 3,
+      "decoded_audio_silent": true,
+      "decoded_max_rgb": 0,
+      "major_brand": "MSNV",
+      "compatible_brands": [
+        "MSNV",
+        "isom",
+        "iso2"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-avif.avif",
+      "muxer": "avif",
+      "codec": "av1",
+      "options": [],
+      "bytes": 303,
+      "sha256": "314243665962f3e15a39551615e302f2a61e125ea97eeb410955e023906d9969",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "avif",
+      "compatible_brands": [
+        "avif",
+        "mif1",
+        "miaf",
+        "MA1A"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-avif-ma1b.avif",
+      "muxer": "avif",
+      "codec": "av1-color",
+      "options": [],
+      "bytes": 307,
+      "sha256": "60d89fdaae555c7dd295e9917e40661c950b7f96de449fd9ead851407525d2d7",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "avif",
+      "compatible_brands": [
+        "avif",
+        "mif1",
+        "miaf",
+        "MA1B"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-avis.avif",
+      "muxer": "avif",
+      "codec": "animated-av1",
+      "options": [],
+      "bytes": 1018,
+      "sha256": "1b3ba609679e8e7ff9184f6dca7487287caee90516f25540a39233df2ef1c0af",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        },
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "2"
+        }
+      ],
+      "packets": 3,
+      "decoded_max_rgb": 0,
+      "major_brand": "avis",
+      "compatible_brands": [
+        "avis",
+        "avif",
+        "msf1",
+        "iso8",
+        "mif1",
+        "miaf",
+        "MA1A"
+      ]
+    },
+    {
+      "file": "ffmpeg-derived/minimal-heic.heic",
+      "muxer": "mp4",
+      "codec": "hevc",
+      "options": [],
+      "bytes": 343,
+      "sha256": "aabc912bcb09334c12df99fddb4657d6cd2feef0ae30c66915457f1d977f98f1",
+      "streams": [
+        {
+          "codec_name": "hevc",
+          "codec_type": "video",
+          "width": 16,
+          "height": 16,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "heic",
+      "compatible_brands": [
+        "heic",
+        "mif1"
+      ]
+    },
+    {
+      "file": "ffmpeg-derived/minimal-mjp2.mj2",
+      "muxer": "mov",
+      "codec": "jpeg2000",
+      "options": [],
+      "bytes": 815,
+      "sha256": "600a3538330e69658f764700a8c66851f97984a97b3954c632de0a8dac6b36c8",
+      "streams": [
+        {
+          "codec_name": "jpeg2000",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "mjp2",
+      "compatible_brands": [
+        "mjp2"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-unknown-brand.mp4",
+      "muxer": "mp4",
+      "codec": "av1",
+      "options": [
+        "-brand",
+        "zzzz"
+      ],
+      "bytes": 708,
+      "sha256": "9f009bc15f542bfa0f69c7caff17100cd01cb739e39ac496c6f2beac3a9b68c1",
+      "streams": [
+        {
+          "codec_name": "av1",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_max_rgb": 0,
+      "major_brand": "zzzz",
+      "compatible_brands": [
+        "zzzz",
+        "av01",
+        "iso2",
+        "mp41"
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-qt-pcm.mov",
+      "muxer": "mov",
+      "codec": "raw-pcm",
+      "options": [],
+      "bytes": 595,
+      "sha256": "4de911c62c21ec10b761b17d428c7c81005815990fd4a6e28144c175802eb866",
+      "streams": [
+        {
+          "codec_name": "pcm_u8",
+          "codec_type": "audio",
+          "sample_rate": "8000",
+          "channels": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "decoded_audio_hex": "80",
+      "major_brand": "qt  ",
+      "compatible_brands": [
+        "qt  "
+      ]
+    },
+    {
+      "file": "ffmpeg/minimal-qt-video-audio.mov",
+      "muxer": "mov",
+      "codec": "raw-av",
+      "options": [
+        "-map",
+        "0:v",
+        "-map",
+        "1:a"
+      ],
+      "bytes": 1079,
+      "sha256": "622faddd688dce500108b29d4dd25e93cd24aa1c74eaa96ab9f3b313076f6050",
+      "streams": [
+        {
+          "codec_name": "rawvideo",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        },
+        {
+          "codec_name": "pcm_u8",
+          "codec_type": "audio",
+          "sample_rate": "8000",
+          "channels": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 2,
+      "decoded_audio_hex": "80",
+      "major_brand": "qt  ",
+      "compatible_brands": [
+        "qt  "
+      ],
+      "decoded_max_rgb": 0
+    },
+    {
+      "file": "ffmpeg/minimal-qt-audio-video.mov",
+      "muxer": "mov",
+      "codec": "raw-av",
+      "options": [
+        "-map",
+        "1:a",
+        "-map",
+        "0:v"
+      ],
+      "bytes": 1079,
+      "sha256": "2e9c9c2e7fc9ac699779a3e929066f6ce40349d73d97c5b206aa3ee2e38ddf6d",
+      "streams": [
+        {
+          "codec_name": "pcm_u8",
+          "codec_type": "audio",
+          "sample_rate": "8000",
+          "channels": 1,
+          "nb_frames": "1"
+        },
+        {
+          "codec_name": "rawvideo",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 2,
+      "decoded_audio_hex": "80",
+      "major_brand": "qt  ",
+      "compatible_brands": [
+        "qt  "
+      ],
+      "decoded_max_rgb": 0
+    },
+    {
+      "file": "ffmpeg/minimal-hvc1.mp4",
+      "muxer": "mp4",
+      "codec": "hevc",
+      "options": [],
+      "bytes": 800,
+      "sha256": "daef320d8c48e2367e84fda5832aa97ab8671131edb7455118a5717555ba4dba",
+      "streams": [
+        {
+          "codec_name": "hevc",
+          "codec_type": "video",
+          "width": 16,
+          "height": 16,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_rgb": 0
+    },
+    {
+      "file": "ffmpeg/minimal-hev1.mp4",
+      "muxer": "mp4",
+      "codec": "hevc",
+      "options": [
+        "-tag:v",
+        "hev1"
+      ],
+      "bytes": 800,
+      "sha256": "1239cc33db16aa9358c8fb82c9edd8d230ac16110002778ec71d4b7fe735f555",
+      "streams": [
+        {
+          "codec_name": "hevc",
+          "codec_type": "video",
+          "width": 16,
+          "height": 16,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_rgb": 0
+    },
+    {
+      "file": "ffmpeg/minimal-avc3.mp4",
+      "muxer": "mp4",
+      "codec": "avc",
+      "options": [
+        "-tag:v",
+        "avc3"
+      ],
+      "bytes": 723,
+      "sha256": "f346fc57c952938c4dac6fe1ef2ee0ee9e0955fd9c0c4f2df9ec0cbe714dbc38",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "iso2",
+        "avc1",
+        "mp41"
+      ],
+      "decoded_max_rgb": 0
+    },
+    {
+      "file": "ffmpeg/minimal-vp9.mp4",
+      "muxer": "mp4",
+      "codec": "vp9",
+      "options": [],
+      "bytes": 719,
+      "sha256": "1c8702cc7aa874af54d2d79d9a21fbbaa6089c14c4d4f8271b7fca858521dce7",
+      "streams": [
+        {
+          "codec_name": "vp9",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_rgb": 0
+    },
+    {
+      "file": "ffmpeg/minimal-opus.mp4",
+      "muxer": "mp4",
+      "codec": "opus",
+      "options": [],
+      "bytes": 639,
+      "sha256": "09b60e9833117e5cf6dd576a0ba49aef63807b213a857a1583ccfbecf50c0133",
+      "streams": [
+        {
+          "codec_name": "opus",
+          "codec_type": "audio",
+          "nb_frames": "2",
+          "sample_rate": "48000",
+          "channels": 1
+        }
+      ],
+      "packets": 2,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_amplitude": 0.0
+    },
+    {
+      "file": "ffmpeg/minimal-flac.mp4",
+      "muxer": "mp4",
+      "codec": "flac",
+      "options": [
+        "-strict",
+        "-2"
+      ],
+      "bytes": 686,
+      "sha256": "b2c576e873ff3f54900666b20942ebaf640e7014d918738f0d2b7d58d820dbe3",
+      "streams": [
+        {
+          "codec_name": "flac",
+          "codec_type": "audio",
+          "nb_frames": "2",
+          "sample_rate": "48000",
+          "channels": 1
+        }
+      ],
+      "packets": 2,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_amplitude": 0.0
+    },
+    {
+      "file": "ffmpeg/minimal-ac3.mp4",
+      "muxer": "mp4",
+      "codec": "ac3",
+      "options": [],
+      "bytes": 1397,
+      "sha256": "53dfc7d9d966ead818fe464c602e0d1eb8be9ff72bcfff73ca9f548e9540df7b",
+      "streams": [
+        {
+          "codec_name": "ac3",
+          "codec_type": "audio",
+          "nb_frames": "2",
+          "sample_rate": "48000",
+          "channels": 1
+        }
+      ],
+      "packets": 2,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "dby1",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_amplitude": 5.916378995607374e-06
+    },
+    {
+      "file": "ffmpeg/minimal-eac3.mp4",
+      "muxer": "mp4",
+      "codec": "eac3",
+      "options": [],
+      "bytes": 1399,
+      "sha256": "e5878cbdcd772cafadb841a0057393cf0e8bf891413d6085cad659aeebdd1c2e",
+      "streams": [
+        {
+          "codec_name": "eac3",
+          "codec_type": "audio",
+          "nb_frames": "2",
+          "sample_rate": "48000",
+          "channels": 1
+        }
+      ],
+      "packets": 2,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "dby1",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_amplitude": 5.916378995607374e-06
+    },
+    {
+      "file": "ffmpeg/minimal-cenc.mp4",
+      "muxer": "mp4",
+      "codec": "avc",
+      "options": [
+        "-encryption_scheme",
+        "cenc-aes-ctr",
+        "-encryption_key",
+        "000102030405060708090a0b0c0d0e0f",
+        "-encryption_kid",
+        "101112131415161718191a1b1c1d1e1f"
+      ],
+      "bytes": 873,
+      "sha256": "48a9e1e27294447a6ac62bd35d0961e2bad9e37485c64f3a68cbae66b22c14c5",
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 2,
+          "height": 2,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "major_brand": "isom",
+      "compatible_brands": [
+        "isom",
+        "iso2",
+        "avc1",
+        "mp41"
+      ],
+      "decoded_max_rgb": 0
+    },
+    {
+      "file": "ffmpeg-derived/minimal-unknown-boxes.mp4",
+      "muxer": "mp4",
+      "codec": "mpeg4",
+      "options": [
+        "-brand",
+        "mp42"
+      ],
+      "bytes": 784,
+      "sha256": "9e1526aba5af482286f16c1a0b7ae859bd44b1d33abbca0c65bfb45ddfa75784",
+      "streams": [
+        {
+          "codec_name": "mpeg4",
+          "codec_type": "video",
+          "width": 1,
+          "height": 1,
+          "nb_frames": "1"
+        }
+      ],
+      "packets": 1,
+      "major_brand": "mp42",
+      "compatible_brands": [
+        "mp42",
+        "iso2",
+        "mp41"
+      ],
+      "decoded_max_rgb": 0
+    }
+  ],
+  "scope": "Smallest among tested practical recipes, not a proof of global byte minimality. HEIF and MJ2 require explicit box construction after FFmpeg encoding."
+}

@@ -1,0 +1,2 @@
+# Comparison-only dependency; pymp4 pins construct==2.8.8.
+pymp4==1.4.0

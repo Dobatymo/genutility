@@ -1,0 +1,401 @@
+fourcc	grammar	box or fullbox	description	spec	profile	parent	parser	versions	layout
+Cr8r	leaf	box	Adobe creator metadata	Adobe	*	*	Cr8r	-
+fiel	leaf	box	Field coding information	QT	quicktime	*	fiel	-
+FXTC	container	?	?	?	*	*	FXTC	-
+ID32	leaf	fullbox	ID3 version 2 container	id3v2	*	*	ID32	-
+NCDT	container	box	Nikon QuickTime metadata container	Nikon	*	*	NCDT	-
+NCHD	leaf	box	Maker note version	Nikon	*	*	NCHD	-
+NCTG	leaf	box	Nikon tags	Nikon	*	*	NCTG	-
+NCTH	leaf	box	Thumbnail image	Nikon	*	*	NCTH	-
+NCVW	leaf	box	Preview image	Nikon	*	*	NCVW	-
+SDLN	leaf	box	Play mode	Samsung	*	udta	SDLN	-
+UITS	container	?	Unique Identifier Technology Solution	Universal Music Group	*	*	UITS	-
+Xtra	leaf	box	Microsoft Xtra metadata	?	*	*	Xtra	-
+aeLK	container	?	?	?	*	*	aeLK	-
+ainf	container	fullbox	Asset information to identify, license and play	DECE	*	*	-	-	i32:profile_version,cstring:APID
+albc	leaf	fullbox	Album collection entity group	HEIF	*	grpl	albc	-
+albm	leaf	fullbox	Album	3GPP	*	*	albm	0
+alis	leaf	fullbox	Alias box	QuickTime	*	*	alis	-
+alou	leaf	fullbox	Album loudness	ISO	*	*	alou	-
+altr	leaf	fullbox	Alternative entity group	HEIF	*	grpl	altr	-
+angl	leaf	box	Angle	Apple	*	*	angl	-
+auth	leaf	fullbox	Author	3GPP	*	*	auth	0
+auxC	leaf	fullbox	Image Properties for Auxiliary Images	HEIF	*	*	auxC	-
+auxi	leaf	fullbox	Auxiliary type information	HEIF	*	*	auxi	-
+auxl	leaf	box	Auxiliary track reference	HEIF	*	tref	trackref_parser	-
+auxl	leaf:inherit-version	box	Auxiliary item reference	HEIF	isobmff	iref	iref_parser	-
+avc1	sample-entry:visual	box	AVC visual sample entry	ISO / QTFF	*	stsd	-	-
+avcn	leaf	box	AVC NAL Unit Storage Box	DECE	*	*	avcn	-
+beam	leaf	?	User-data XXX	WhatsApp	*	udta	beam	-
+bitr	leaf	box	Bitrate Box	3GPP	*	*	bitr	-
+bloc	leaf	fullbox	Base location and purchase location for license acquisition	DECE	*	*	bloc	-
+bpcc	leaf	box	Bits per component	JPEG2000	*	*	bpcc	-
+buff	leaf	box	Buffering information	NALu Video	*	*	buff	-
+bxml	leaf	fullbox	Binary XML box	ISO	*	*	bxml	-
+ccid	leaf	fullbox	OMA DRM Content ID	OMA DRM 2.1	*	*	ccid	-
+cclv	leaf	box	Content colour volume	HEIF	*	*	cclv	-
+ccst	leaf	fullbox	Coding constraints	HEIF	*	*	ccst	-
+cdef	leaf	box	type and ordering of the components within the codestream	JPEG2000	*	*	cdef	-
+cdep	leaf	box	Structural dependency	QT	quicktime	tref	cdep	-
+cdsc	leaf	box	Content description track reference	ISO / HEIF	isobmff	tref	trackref_parser	-
+cdsc	leaf:inherit-version	box	Content description item reference	ISO / HEIF	isobmff	iref	iref_parser	-
+chan	leaf	fullbox	Audio Channel Layout Atom	QuickTime	*	*	chan	-
+chap	leaf	box	Chapter list	QT	quicktime	tref	chap	-
+chnl	leaf	fullbox	Channel Layout	ISO	*	*	chnl	-
+chpl	leaf	fullbox	chapter list box	adobe	*	*	chpl	-
+clap	leaf	box	Clean Aperture	HEIF	*	*	clap	-
+clef	leaf	fullbox	Track Clean Aperture Dimensions	QT	*	*	clef	-
+clfn	leaf	box	Clip file name	Apple	*	*	clfn	-
+clid	leaf	box	Clip identifier	Apple	*	*	clid	-
+clip	container	box	Reserved / clipping region	QTFF	quicktime	*	clip	-
+clli	leaf	box	Content light level	HEIF	*	*	clli	-
+clsf	leaf	fullbox	Classification	3GPP	*	*	clsf	0
+cmap	leaf	box	mapping between a palette and codestream components	JPEG2000	*	*	cmap	-
+cmid	leaf	box	Camera identifier	Apple	*	*	cmid	-
+cmnm	leaf	box	Camera name	Apple	*	*	cmnm	-
+cmov	container	box	Compressed movie	QT	*	*	cmov	-
+co64	leaf	fullbox	64-bit chunk offset	ISO	*	*	-	0	u32:_entry_count,u64[_entry_count]:chunk_offsets
+coin	leaf	fullbox	Content Information Box	DECE	*	*	coin	-
+coll	leaf	fullbox	Collection	3GPP	*	*	coll	-
+colr	leaf	box	specifies the colourspace of the image	JPEG2000	*	*	colr	-
+cprt	leaf	fullbox	Copyright	ISO	*	*	cprt	0
+crgn	leaf	box	Reserved / Visual clipping region definition	QTFF	quicktime	clip	crgn	-
+crhd	leaf	fullbox	Reserved for ClockReferenceStream header	MP4v1	*	*	crhd	-
+crtt	leaf	fullbox	Creation time information	HEIF	*	*	crtt	-
+cslg	leaf	fullbox	Composition to decode timeline mapping	ISO	*	*	cslg	-
+ctab	leaf	box	Reserved / Track color-table	QTFF	quicktime	*	ctab	-
+ctts	leaf	fullbox	Composition time to sample	ISO	*	*	ctts	0,1
+data	leaf	box	Data atom	QuickTime / ISO	quicktime	ilst	data	-
+cvru	leaf	fullbox	OMA DRM Cover URI	OMA DRM 2.1	*	*	cvru	-
+d263	container	box	H263 Specific Box	3GPP	*	*	-	-	bytes[4]:vendor,u8:decoder_version,u8:level,u8:codec_profile
+damr	leaf	box	AMR Specific Box	3GPP	*	*	damr	-
+date	leaf	box	Date and time	Apple	*	*	date	-
+dawp	leaf	box	AMRWP Specific Box	3GPP	*	*	dawp	-
+dcfD	container	box	Marlin DCF Duration	OMArlin	*	*	dcfD	-
+dimg	leaf:inherit-version	box	Derived image item reference	HEIF	*	iref	iref_parser	-
+dimm	leaf	box	hint immediate Bytes Sent	ISO	*	*	dimm	-
+dinf	container	box	Data information	ISO	*	*	dinf	-
+dmax	leaf	box	hint longest packet	ISO	*	*	dmax	-
+dmed	leaf	box	hint media Bytes Sent	ISO	*	*	dmed	-
+dmix	leaf	fullbox	Down Mix Instructions	ISO	*	*	dmix	-
+dpnd	leaf	box	MPEG-4 dependency track reference	ISO14496-14:2003 5.2 / Amd1:2010	isobmff	tref	trackref_parser	-
+dref	entry-list	fullbox	Data reference	ISO	*	*	-	0	u32:entry_count
+drep	leaf	box	hint repeated Bytes Sent	ISO	*	*	drep	-
+dscp	leaf	fullbox	Description	3GPP	*	*	dscp	0
+dsgd	leaf	fullbox	DVB Sample Group Description Box	DVB	*	*	dsgd	-
+dstg	leaf	fullbox	DVB Sample to Group Box	DVB	*	*	dstg	-
+edts	container	box	Edit lists	ISO	*	*	edts	-
+elng	leaf	fullbox	Extended language tag	QT	*	*	elng	0
+elst	leaf	fullbox	Edit list atom	ISO	*	*	elst	-
+emsg	leaf	fullbox	Event message	DASH	*	*	emsg	-
+enca	sample-entry:audio	box	Encrypted Audio Sample Entry	3GPP	*	*	-	-
+enct	leaf	box	Encrypted Text Sample Entry	3GPP	*	*	-	-
+encv	sample-entry:visual	box	Encrypted Video Sample Entry	3GPP	*	*	-	-
+enof	leaf	fullbox	Track Encoded Pixels Dimensions	QTFF	quicktime	*	enof	-
+esds	leaf	fullbox	Elementary Stream Descriptor Box	ISO14496-14:2003 5.6.1 / QTFF	*	*	-	0
+evti	leaf	fullbox	Event information	ATSC 3.0	*	*	evti	-
+fdsa	container	box	FD sample	ISO	*	*	fdsa	-
+feci	leaf	box	FEC Information	ISO	*	*	feci	-
+fecr	leaf	fullbox	FEC Reservoir Box	ISO	*	*	fecr	0,1
+fiin	container	fullbox	FD Item Information	ISO	*	*	fiin	0	u16:entry_count
+fire	leaf	fullbox	File Reservoir	ISO	*	*	fire	-
+fpar	leaf	fullbox	File Partition Box	ISO	*	*	fpar	0,1
+free	leaf	box	Free space	ISO	*	*	free	-
+frma	leaf	box	Original format box	ISO	*	*	-	-	bytes[4]:data_format
+ftyp	leaf	box	File type	ISO	*	*	-	-	bytes[4]:major_brand,u32:minor_version,fourcc[]:compatible_brands
+gitn	leaf	fullbox	Group ID to name	ISO	*	*	gitn	-
+gmhd	container	box	Base media information header	QTFF	quicktime	*	gmhd	-
+gmin	leaf	fullbox	Base media information atom	QTFF	quicktime	gmhd	gmin	-
+gnre	leaf	fullbox	Genre	3GPP	*	*	gnre	0
+grpi	leaf	fullbox	OMA DRM Group ID	OMA DRM 2.0	*	*	grpi	-
+grpl	container	box	Groups list	HEIF	*	*	grpl	-
+hdlr	leaf	fullbox	Handler Reference Box	ISO	*	*	hdlr	0	-
+hinf	container	box	hint information	ISO	*	*	hinf	-
+hint	leaf	box	Hint track reference	ISO	isobmff	tref	hint	-
+hmhd	leaf	fullbox	Hint media header	ISO	*	*	hmhd	-
+hnti	container	box	Hint information	ISO	*	*	hnti	-
+hpix	leaf	box	Hipix Rich Picture (user-data or meta-data)	Hipix	*	*	hpix	-
+htcb	leaf	box	HTC binary tags	QuickTime	*	*	htcb	-
+hvcC	leaf	box	HEVC configuration property	HEIF	*	*	hvcC	-
+icnu	leaf	fullbox	OMA DRM Icon URI	OMA DRM 2.0	*	*	icnu	-
+idat	leaf	box	Item data	ISO	*	*	idat	-
+ihdr	leaf	box	Image Header	JPEG2000	*	*	ihdr	-
+iinf	entry-list:infe	fullbox	Item Information Box	ISO	*	*	iinf	0,1
+iloc	leaf	fullbox	Item location	ISO	*	*	iloc	0,1,2
+ilst	item-list:legacy-code	box	metadata item list atom	contains non-standard atoms like \xa9too	*	*	-	-
+ilst	item-list	box	Metadata item list atom	ISO	isobmff	meta	-	-
+ilst	item-list:legacy-code	box	Metadata item list atom	QTFF	quicktime	meta	-	-
+imap	leaf	box	Reserved / Track input map	QTFF	quicktime	*	imap	-
+imif	leaf	box	IPMP Information box	ISO	*	*	imif	-
+infe	leaf	fullbox	Item information entry	ISO	*	*	infe	0,1,2,3
+infu	leaf	fullbox	OMA DRM Info URL	OMA DRM 2.0	*	*	infu	-
+iods	leaf	fullbox	Object Descriptor Box	ISO14496-14:2003 5.1	*	moov	-	0
+ipco	container	box	Item property container	HEIF	*	*	ipco	-
+iphd	leaf	fullbox	reserved for IPMP Stream header	MP4v1	*	*	iphd	-
+ipma	leaf	fullbox	Item property association	HEIF	*	*	ipma	-
+ipmc	leaf	box	IPMP Control Box	ISO	*	*	ipmc	-
+ipro	container	fullbox	Item protection	ISO	*	*	ipro	0	u16:protection_count
+iprp	container	box	Item properties	HEIF	*	*	iprp	-
+iref	container	fullbox	Item reference	ISO	*	*	iref	0,1
+iloc	leaf:inherit-version	box	Item location reference	ISO	*	iref	iref_parser	-
+irot	leaf	box	Image Rotation	HEIF	*	*	irot	-
+ispe	leaf	fullbox	Image spatial Extents	HEIF	*	*	ispe	-
+jP  	leaf	box	JPEG 2000 Signature	JPEG2000	*	*	jP	-
+jp2c	leaf	box	JPEG 2000 contiguous codestream	JPEG2000	*	*	jp2c	-
+jp2h	container	box	Header	JPEG2000	*	*	jp2h	-
+jp2i	leaf	box	intellectual property information	JPEG2000	*	*	jp2i	-
+keys	leaf	fullbox	Metadata Item Keys Atom	QuickTime	quicktime	meta	keys	-
+ctry	leaf	fullbox	Country list atom	QTFF	quicktime	meta	ctry	-
+lang	leaf	fullbox	Language list atom	QTFF	quicktime	meta	lang	-
+mhdr	leaf	fullbox	Metadata header atom	QTFF	quicktime	meta	mhdr	-
+itif	leaf	box	Item information atom	QTFF	quicktime	ilst	itif	-
+kmat	leaf	box	Reserved / Compressed visual track matte	QTFF	quicktime	*	kmat	-
+kywd	leaf	fullbox	Keywords	3GPP	*	*	kywd	-
+leva	leaf	fullbox	Level assignment	ISO	*	*	leva	-
+load	leaf	box	Reserved / Track pre-load definitions	ISO / QT	*	*	load	-
+loci	leaf	fullbox	Location information	3GPP	*	*	loci	0
+loop	container	?	Looping behavior	WhatsApp	*	*	loop	-
+lrcu	leaf	fullbox	OMA DRM Lyrics URI	OMA DRM 2.1	*	*	lrcu	-
+ludt	container	box	Loudness	ISO	*	*	ludt	-
+m7hd	leaf	fullbox	Reserved for MPEG7Stream header	MP4v1	*	*	m7hd	-
+manu	leaf	box	Manufacturer	Apple	*	*	manu	-
+matt	leaf	box	Reserved / Visual track matte	QTFF	quicktime	*	matt	-
+maxr	leaf	box	hint maxrate	ISO	*	*	maxr	-
+mdat	leaf	box	Media data	ISO	*	*	mdat	-
+mdcv	leaf	box	Mastering display colour volume	HEIF	*	*	mdcv	-
+mdhd	leaf	fullbox	Media header, overall information about the media	ISO	*	*	mdhd	-
+mdia	container	box	Media information	ISO	*	*	mdia	-
+mdri	container	box	Mutable DRM information	OMA DRM 2.0	*	*	mdri	-
+meco	container	box	Metadata container	ISO	*	*	meco	-
+mehd	leaf	fullbox	Movie extends header	ISO	*	*	mehd	-
+mere	leaf	fullbox	Metabox relation	ISO	*	*	mere	-
+meta	container	fullbox	Metadata container	ISO	isobmff	*	meta	0
+meta	container	box	Metadata atom	QuickTime	quicktime	*	meta	-
+mfhd	leaf	fullbox	Movie fragment header	ISO	*	*	-	0	u32:sequence_number
+mfra	container	box	Movie fragment random access	ISO	*	*	mfra	-
+mfro	leaf	fullbox	Movie fragment random access offset	ISO	*	*	mfro	-
+minf	container	box	Media information container	ISO	*	*	minf	-
+mjhd	leaf	fullbox	Reserved for MPEG-J Stream header	MP4v1	*	*	mjhd	-
+modl	leaf	box	Model	Apple	*	*	modl	-
+moof	container	box	Movie fragment	ISO	*	*	moof	-
+moov	container	box	Movie	ISO	*	*	moov	-
+mp4a	sample-entry:audio	box	MP4 Audio Sample Entry	ISO14496-14:2003 5.6.1 / 3GPP	*	*	-	-
+mp4v	sample-entry:visual	box	MP4 Visual Sample Entry	ISO14496-14:2003 5.6.1 / 3GPP	*	*	-	-
+mpod	leaf	box	Object descriptor track reference	ISO14496-14:2003 5.2	isobmff	tref	trackref_parser	-
+mvcg	container	fullbox	Multiview group	NALu Video	*	*	mvcg	0	-
+mvci	container	fullbox	Multiview Information	NALu Video	*	*	mvci	-
+mvex	container	box	Movie extends box	ISO	*	*	mvex	-
+mvhd	leaf	fullbox	Movie header	ISO	*	*	mvhd	-
+mvra	leaf	fullbox	Multiview relation attribute	NALu Video	*	*	mvra	-
+name	leaf	box	Name atom	QTFF	quicktime	ilst	name	-
+ndrm	container	?	?	?	*	*	ndrm	-
+nmhd	leaf	fullbox	Null media header	ISO	*	*	nmhd	-
+npck	leaf	box	hint Packets Sent	ISO	*	*	npck	-
+nump	leaf	box	hint Packets Sent	ISO	*	*	nump	-
+ochd	leaf	fullbox	Reserved for ObjectContentInfoStream header	MP4v1	*	*	ochd	-
+odaf	leaf	fullbox	OMA DRM Access Unit Format	OMA DRM 2.0	*	*	-	-	-
+odda	leaf	fullbox	OMA DRM Content Object	OMA DRM 2.0	*	*	odda	-
+odhd	leaf	fullbox	Reserved for ObjectDescriptorStream header	MP4v1	*	*	odhd	-
+odhe	container	fullbox	OMA DRM Discrete Media Headers	OMA DRM 2.0	*	odrm	odhe	-	u8:content_type_length,bytes[content_type_length]
+odrb	leaf	fullbox	OMA DRM Rights Object	OMA DRM 2.0	*	*	odrb	-
+odrm	container	fullbox	OMA DRM Container	OMA DRM 2.0	*	*	odrm	-
+odtt	leaf	fullbox	OMA DRM Transaction Tracking	OMA DRM 2.0	*	*	odtt	-
+ohdr	container	fullbox	OMA DRM Common headers	OMA DRM 2.0	*	*	ohdr	-	u8,u8,u64,u16:content_id_length,u16:rights_issuer_url_length,u16:textual_headers_length,bytes[content_id_length],bytes[rights_issuer_url_length],bytes[textual_headers_length]
+orie	leaf	fullbox	Orientation	3GPP	*	*	orie	-
+padb	leaf	fullbox	Padding bits	ISO	*	*	padb	-
+paen	container	box	Partition entry	ISO	*	*	paen	-
+pasp	leaf	box	Pixel Aspect Ratio	HEIF	*	*	pasp	-
+payt	leaf	box	hint payload ID	ISO	*	*	payt	-
+pclr	leaf	box	palette which maps a single component in index space to a multiple- component image	JPEG2000	*	*	pclr	-
+pdin	leaf	fullbox	Progressive download information	ISO	*	*	pdin	-
+perf	leaf	fullbox	Performer	3GPP	*	*	perf	0
+pitm	leaf	fullbox	Primary item reference	ISO	*	*	pitm	0,1
+pixi	leaf	fullbox	Pixel Information	HEIF	*	*	pixi	-
+pmax	leaf	box	hint largest packet	ISO	*	*	pmax	-
+pnot	leaf	box	Reserved / Preview atom	QTFF	quicktime	*	pnot	-
+prft	leaf	fullbox	Producer reference time box	ISO	*	*	-	0	u32:reference_track_ID,u64:ntp_timestamp,u32:media_time
+prft	leaf	fullbox	Producer reference time box	ISO	*	*	-	1	u32:reference_track_ID,u64:ntp_timestamp,u64:media_time
+prof	leaf	fullbox	Track Production Aperture Dimensions	QuickTime	*	*	prof	-
+pssh	leaf	fullbox	Protection system specific header	ISO Common Encryption	*	*	pssh	-
+rref	leaf	fullbox	Required reference types	HEIF	*	*	rref	-
+reel	leaf	box	Reel	Apple	*	*	reel	-
+res 	leaf	box	Resolution	JPEG2000	*	*	res	-
+resc	leaf	box	Resolution captured	JPEG2000	*	*	resc	-
+resd	leaf	box	Resolution displayed	JPEG2000	*	*	resd	-
+rinf	container	box	Restricted information	ISO	*	*	rinf	-
+rloc	leaf	fullbox	Relative Location	HEIF	*	*	rloc	-
+rmda	container	box	Reference movie descriptor atom	QTFF	quicktime	rmra	rmda	-
+rmra	container	box	Reference movie atom	QTFF	quicktime	moov	rmra	-
+rsrc	leaf	fullbox	resource type	QuickTime	*	*	rsrc	-
+rtng	leaf	fullbox	Rating	3GPP	*	*	rtng	0
+s263	sample-entry:visual	box	H263 Sample Entry	3GPP	*	*	-	-
+saio	leaf	fullbox	Sample auxiliary information offsets	ISO	*	*	saio	-
+saiz	leaf	fullbox	Sample auxiliary information sizes	ISO	*	*	saiz	-
+samr	sample-entry:audio	box	AMR Sample Entry	3GPP	*	*	-	-
+sawb	sample-entry:audio	box	AMR Sample Entry	3GPP	*	*	-	-
+sawp	sample-entry:audio	box	AMRWP Sample Entry	3GPP	*	*	-	-
+sbgp	leaf	fullbox	Sample to group	ISO	*	*	sbgp	-
+scen	leaf	box	Scene	Apple	*	*	scen	-
+schi	container	box	Scheme Information Box	ISO	*	*	schi	-
+schm	leaf	fullbox	Scheme Type Box	ISO	*	*	schm	0
+sdep	leaf	fullbox	Sample dependency	NALu Video	*	*	sdep	-
+sdhd	leaf	fullbox	Reserved for SceneDescriptionStream header	MP4v1	*	*	sdhd	-
+sdp 	leaf	box	RTP track SDP hint information	ISO	*	hnti	sdp	-
+sdtp	leaf	fullbox	Independent and Disposable Samples Box	ISO	*	*	sdtp	-
+sdvp	container	?	SD Profile Box	SDV	*	*	sdvp	-
+segr	leaf	box	File delivery session group	ISO	*	*	segr	-
+senc	leaf	fullbox	Sample encryption data	ISO Common Encryption	*	*	senc	-
+sgpd	leaf	fullbox	Sample group definition	ISO	*	*	sgpd	-
+shot	leaf	box	Shot	Apple	*	*	shot	-
+sidx	leaf	fullbox	Segment Index Box	3GPP	*	*	sidx	-
+sinf	container	box	Protection scheme information	ISO	*	*	sinf	-
+skip	leaf	box	Free space	ISO	*	*	skip	-
+slno	leaf	box	Serial number	Apple	*	*	slno	-
+smhd	leaf	fullbox	Sound media header	ISO	*	*	smhd	-
+smrd	leaf	?	User-data XXX	Samsung	*	udta	smrd	-
+smta	container	fullbox	Samsung capture metadata	Samsung	*	udta	smta	-
+spdb	container	box	Service Protection Description	3GPP # version but no flags?	*	*	spdb	-
+srat	leaf	fullbox	Sampling Rate Box	ISO	*	*	srat	-
+srmb	leaf	fullbox	System Renewability Message	DVB	*	*	srmb	-
+srmc	container	fullbox	System Renewability Message container	DVB	*	*	srmc	-
+srpp	leaf	fullbox	SRTP Process Box	ISO	*	*	srpp	-
+ssix	leaf	fullbox	Sub-sample index	ISO	*	*	ssix	-
+stbl	container	box	Sample table	ISO	*	*	stbl	-
+stco	leaf	fullbox	Sample table chunk offset 	ISO	*	*	-	0	u32:_entry_count,u32[_entry_count]:chunk_offsets
+stdp	leaf	fullbox	Sample degradation priority	ISO	*	*	stdp	0
+ster	leaf	fullbox	Stereo entity group	HEIF	*	grpl	ster	-
+sthd	leaf	fullbox	Subtitle Media Header Box	ISO	*	*	sthd	-
+stps	leaf	fullbox	Partial sync sample	QTFF	quicktime	*	stps	-
+strd	leaf	box	Sub-track definition	ISO	*	strk	strd	-
+stri	leaf	fullbox	Sub-track information	ISO	*	*	stri	-
+strk	container	box	Sub track	ISO	*	*	strk	-
+stsc	leaf	fullbox	Sample table sample-to-chunk	ISO	*	*	stsc	0
+stsd	entry-list	fullbox	Sample Description Box; contains sample entries	ISO	*	*	-	0,1	u32:entry_count
+stsg	leaf	fullbox	Sub-track sample grouping	ISO	*	*	stsg	-
+stsh	leaf	fullbox	Sample table shadow sync	ISO	*	*	stsh	-
+stss	leaf	fullbox	Sample table sync	ISO	*	*	stss	-
+stsz	leaf	fullbox	Sample table sizes	ISO	*	*	stsz	-
+stts	leaf	fullbox	Sample table time-to-sample	ISO	*	*	stts	0
+styp	leaf	box	Segment type	3GPP	*	*	-	-	bytes[4]:major_brand,u32:minor_version,fourcc[]:compatible_brands
+stz2	leaf	fullbox	Compact sample sizes (framing)	ISO	*	*	stz2	-
+subs	leaf	fullbox	Sub-sample information	ISO	*	*	subs	-
+swtc	container	fullbox	Multiview Group Relation	NALu Video	*	*	swtc	0	u32:num_entries,u32[num_entries]
+sync	leaf	box	Synchronization track reference	ISO14496-14:2003 3.3/5.2 / QTFF	*	tref	trackref_parser	-
+tapt	container	box	Track aperture mode dimensions	QuickTime	*	*	tapt	-
+text	leaf	box	Text media information atom	QTFF	quicktime	gmhd	text	-
+tfad	container	box	Track fragment adjustment box	3GPP	*	*	tfad	-
+tfdt	leaf	fullbox	Track fragment decode time	ISO	*	*	-	0	u32:baseMediaDecodeTime
+tfdt	leaf	fullbox	Track fragment decode time	ISO	*	*	-	1	u64:baseMediaDecodeTime
+tfhd	leaf	fullbox	Track fragment header	ISO	*	*	tfhd	-
+tfma	leaf	fullbox	Track fragment media adjustment box	3GPP	*	*	tfma	-
+tfra	leaf	fullbox	Track fragment random access	ISO	*	*	tfra	-
+thmb	leaf	fullbox	Thumbnail	3GPP	*	*	-	-
+thmb	leaf	box	Thumbnail track reference	HEIF	*	tref	trackref_parser	-
+thmb	leaf:inherit-version	box	Thumbnail item reference	HEIF	isobmff	iref	iref_parser	-
+tibr	leaf	box	Tier Bit rate	NALu Video	*	*	tibr	-
+tiri	leaf	box	Tier Information	NALu Video	*	*	tiri	-
+titl	leaf	fullbox	Title	3GPP	*	*	titl	0
+tkhd	leaf	fullbox	Track header	ISO	*	*	tkhd	-
+tlou	leaf	fullbox	Track loudness	ISO	*	*	tlou	-
+tmax	leaf	box	hint max relative time	ISO	*	*	tmax	-
+tmcd	leaf	box	Timecode track reference or sample entry	QTFF	quicktime	*	tmcd	-
+tmin	leaf	box	hint min relative time	ISO	*	*	tmin	-
+totl	leaf	box	hint Bytes Sent incl RTP	ISO	*	*	totl	-
+tpay	leaf	box	hint Bytes Sent excl RTP	ISO	*	*	tpay	-
+tpyl	leaf	box	hint Bytes Sent excl RTP	ISO	*	*	tpyl	-
+traf	container	box	Track fragment	ISO	*	*	traf	-
+trak	container	box	Track	ISO	*	*	trak	-
+tref	container	box	Track reference	ISO	*	*	tref	-
+trep	container	fullbox	Track Extension Properties Box	ISO	*	*	trep	0	u32:track_id
+trex	leaf	fullbox	Track extends defaults	ISO	*	*	trex	-
+trgr	container	box	Track grouping information	ISO	*	*	trgr	-
+trik	leaf	fullbox	Facilitates random access and trick play modes	DECE	*	*	trik	-
+trpy	leaf	box	hint Bytes Sent incl RTP	ISO	*	*	trpy	-
+trun	leaf	fullbox	Track fragment run	ISO	*	*	trun	-
+tsel	leaf	fullbox	Track selection	ISO/3GPP	*	*	tsel	-
+tsyn	leaf	fullbox	Time-synchronized capture entity group	HEIF	*	grpl	tsyn	-
+txas	leaf	box	Track exclude from autoselection	QTFF	quicktime	trak	txas	-
+udes	leaf	fullbox	User description	HEIF	*	*	udes	-
+udta	container:zero-terminator	box	User data box	"ISO can contain non-standard tag like b""\xa9mod"", \xa9enc, \xa9TIM"	*	*	udta	-
+uinf	container	box	a tool by which a vendor may provide access to additional information associated with a UUID	JPEG2000	*	*	uinf	-
+ulst	leaf	box	a list of UUID’s	JPEG2000	*	*	ulst	-
+urat	leaf	fullbox	User rating	3GPP	*	*	urat	-
+url 	leaf	fullbox	URL	ISO	*	*	url	0	-
+urn 	leaf	fullbox	URN	ISO	isobmff	dref	urn	0	-
+uuid	leaf	uuidbox	user-extension box	ISO	*	*	-	-	bytes[16]:uuid
+vmhd	leaf	fullbox	Video media header	ISO	*	*	vmhd	-
+vwdi	leaf	box	Multiview Scene Information	NALu Video	*	*	vwdi	-
+wide	leaf	box	Expansion space reservation	QTFF	quicktime	*	wide	-
+xml 	leaf	fullbox	XML box	ISO	*	*	xml	-
+imir	leaf	box	Image mirroring	HEIF	*	*	imir	-
+lsel	leaf	box	Layer selection	HEIF	*	*	lsel	-
+md5i	leaf	fullbox	MD5 integrity box	HEIF	*	*	md5i	-
+lhvC	leaf	box	L-HEVC configuration property	HEIF	*	*	lhvC	-
+oinf	leaf	box	Operating points information property	HEIF	*	*	oinf	-
+tols	leaf	box	Target output layer set property	HEIF	*	*	tols	-
+avcC	leaf	box	AVC configuration property	HEIF	*	*	avcC	-
+jpgC	leaf	box	JPEG configuration property	HEIF	*	*	jpgC	-
+assp	leaf	fullbox	Alternative startup sequence properties	ISO	*	*	assp	-
+cinf	container	box	Complete track information	ISO	*	*	cinf	-
+kind	leaf	fullbox	Track kind	ISO	*	*	kind	-
+stvi	container	fullbox	Stereo video	ISO	*	*	stvi	0	u32,u32,u32:length,bytes[length]
+yrrc	leaf	fullbox	Year recorded	3GPP	*	*	yrrc	0
+rrtp	sample-entry:hint	box	RTP reception hint sample entry	ISO	isobmff	stsd	-	-
+rtp 	leaf	box	RTP movie hint information	ISO	*	udta	rtp	-
+dpnd	leaf:inherit-version	box	Item dependency reference	HEIF	*	iref	iref_parser	-
+ipir	leaf	box	IPI declaration track reference	ISO14496-14:2003 5.2	isobmff	tref	trackref_parser	-
+mp4s	container	box	MPEG-4 systems sample entry	ISO14496-14:2003 5.6.1	*	stsd	-	-	bytes[6],u16:data_reference_index
+m4ae	sample-entry:audio	box	MP4 audio enhancement sample entry	ISO14496-14:2003/Amd1:2010 5.6.1	*	stsd	-	-
+damr	leaf	box	3GPP configuration	3GPP TS26.244:18.0.0 6.7	*	samr	-	-	bytes[4]:vendor,u8:decoder_version,u16:mode_set,u8:mode_change_period,u8:frames_per_sample
+damr	leaf	box	3GPP configuration	3GPP TS26.244:18.0.0 6.7	*	sawb	-	-	bytes[4]:vendor,u8:decoder_version,u16:mode_set,u8:mode_change_period,u8:frames_per_sample
+dawp	leaf	box	3GPP configuration	3GPP TS26.244:18.0.0 6.10	*	sawp	-	-	bytes[4]:vendor,u8:decoder_version
+bitr	leaf	box	3GPP configuration	3GPP TS26.244:18.0.0 6.8	*	d263	-	-	u32:max_bitrate,u32:avg_bitrate
+sqcp	sample-entry:audio	box	QCELP sample entry	3GPP2 C.S0050-0:1.0 8.4.4	*	stsd	-	-	-
+sevc	sample-entry:audio	box	EVRC sample entry	3GPP2 C.S0050-0:1.0 8.4.3	*	stsd	-	-	-
+ssmv	sample-entry:audio	box	SMV sample entry	3GPP2 C.S0050-0:1.0 8.4.5	*	stsd	-	-	-
+dqcp	leaf	box	3GPP2 configuration	3GPP2 C.S0050-0:1.0 8.4.4.2	*	sqcp	-	-	bytes[4]:vendor,u8:decoder_version,u8:frames_per_sample
+devc	leaf	box	3GPP2 configuration	3GPP2 C.S0050-0:1.0 8.4.3.2	*	sevc	-	-	bytes[4]:vendor,u8:decoder_version,u8:frames_per_sample
+dsmv	leaf	box	3GPP2 configuration	3GPP2 C.S0050-0:1.0 8.4.5.2	*	ssmv	-	-	bytes[4]:vendor,u8:decoder_version,u8:frames_per_sample
+titl	leaf	fullbox	3GPP asset information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:title
+dscp	leaf	fullbox	3GPP asset information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:description
+cprt	leaf	fullbox	3GPP asset information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:copyright
+perf	leaf	fullbox	3GPP asset information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:performer
+auth	leaf	fullbox	3GPP asset information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:author
+gnre	leaf	fullbox	3GPP asset information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:genre
+albm	leaf	fullbox	3GPP asset information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:album,u8?:track_number
+rtng	leaf	fullbox	3GPP asset or track information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	bytes[4]:rating_entity,bytes[4]:rating_criteria,language:language,text:rating_info
+clsf	leaf	fullbox	3GPP asset or track information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	bytes[4]:classification_entity,u16:classification_table,language:language,text:classification_info
+yrrc	leaf	fullbox	3GPP asset or track information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	u16:year
+loci	leaf	fullbox	3GPP asset or track information	3GPP TS26.244:18.0.0 8.2	*	udta	-	0	language:language,text:name,u8:role,i32:longitude_fixed,i32:latitude_fixed,i32:altitude_fixed,text:astronomical_body,text:additional_notes
+tsel	leaf	fullbox	3GPP asset or track information	3GPP TS26.244:18.0.0 7.3	*	udta	-	0	i32:switch_group,fourcc[]:attributes
+mjp2	sample-entry:visual	box	Motion JPEG 2000 sample entry	ISO15444-3:2007 6.1.2	*	stsd	-	-	-
+raw 	sample-entry:media	box	Uncompressed video or PCM audio sample entry	QTFF / ISO15444-3:2007 6.1.2	*	stsd	-	-	-
+twos	sample-entry:audio	box	Motion JPEG 2000 PCM sample entry	ISO15444-3:2007 6.1.2	*	stsd	-	-	-
+fiel	leaf	box	Motion JPEG 2000 sample metadata	ISO15444-3:2007 6.1.2	*	mjp2	-	-	i8:field_count,i8:field_order
+orfo	leaf	box	Motion JPEG 2000 sample metadata	ISO15444-3:2007 6.1.2	*	mjp2	-	-	i8:original_field_count,i8:original_field_order
+jp2p	leaf	fullbox	Motion JPEG 2000 sample metadata	ISO15444-3:2007 6.1.2	*	mjp2	-	0	fourcc[]:compatible_brands
+jp2x	leaf	box	Motion JPEG 2000 sample metadata	ISO15444-3:2007 6.1.2	*	mjp2	-	-	-
+jsub	leaf	box	Motion JPEG 2000 sample metadata	ISO15444-3:2007 6.1.2	*	mjp2	-	-	u8:horizontal_sub,u8:vertical_sub,u8:horizontal_offset,u8:vertical_offset
+ihdr	leaf	box	JPEG 2000 image header	ITU-T T.800:2002 I.5.3.1	*	jp2h	-	-	u32:height,u32:width,u16:component_count,u8:bits_per_component,u8:compression_type,u8:unknown_colourspace,u8:intellectual_property
+bpcc	leaf	box	JPEG 2000 component depths	ITU-T T.800:2002 I.5.3.2	*	jp2h	-	-	u8[]:bits_per_component
+res 	container	box	JPEG 2000 resolution superbox	ITU-T T.800:2015 I.5.3.7	*	jp2h	-	-	-
+resc	leaf	box	JPEG 2000 capture/display resolution	ITU-T T.800:2015 I.5.3.7	*	res 	-	-	u16:vertical_numerator,u16:vertical_denominator,u16:horizontal_numerator,u16:horizontal_denominator,i8:vertical_exponent,i8:horizontal_exponent
+resd	leaf	box	JPEG 2000 capture/display resolution	ITU-T T.800:2015 I.5.3.7	*	res 	-	-	u16:vertical_numerator,u16:vertical_denominator,u16:horizontal_numerator,u16:horizontal_denominator,i8:vertical_exponent,i8:horizontal_exponent
+colr	leaf	box	JPEG 2000 colour specification	ITU-T T.800:2002 I.5.3.3	*	jp2h	jp2_colr	-	-
+av01	sample-entry:visual	box	AV1 visual sample entry	AV1-ISOBMFF 2.2	*	stsd	-	-
+hvc1	sample-entry:visual	box	HEVC visual sample entry	ISO14496-15	*	stsd	-	-
+hev1	sample-entry:visual	box	HEVC visual sample entry	ISO14496-15	*	stsd	-	-
+avc3	sample-entry:visual	box	AVC visual sample entry with in-band parameter sets	ISO14496-15	*	stsd	-	-
+vp09	sample-entry:visual	box	VP9 visual sample entry	VP Codec ISOBMFF binding	*	stsd	-	-
+Opus	sample-entry:audio	box	Opus audio sample entry	Opus ISOBMFF 4.3	*	stsd	-	-
+fLaC	sample-entry:audio	box	FLAC audio sample entry	FLAC ISOBMFF	*	stsd	-	-
+ac-3	sample-entry:audio	box	AC-3 audio sample entry	ETSI TS102366 Annex F	*	stsd	-	-
+ec-3	sample-entry:audio	box	Enhanced AC-3 audio sample entry	ETSI TS102366 Annex F	*	stsd	-	-
+av1C	leaf	box	AV1 codec configuration	AV1-ISOBMFF 2.3	*	*	-	-
+vpcC	leaf	fullbox	VP codec configuration	VP Codec ISOBMFF binding	*	*	-	1
+dOps	leaf	box	Opus codec configuration	Opus ISOBMFF 4.3.2	*	*	-	-
+dfLa	leaf	fullbox	FLAC codec configuration	FLAC ISOBMFF	*	*	-	0
+dac3	leaf	box	AC-3 codec configuration	ETSI TS102366 Annex F	*	*	-	-
+dec3	leaf	box	Enhanced AC-3 codec configuration	ETSI TS102366 Annex F	*	*	-	-
+btrt	leaf	box	Bit rate box	ISO	*	*	-	-
+tenc	leaf	fullbox	Track encryption parameters	ISO23001-7	*	schi	-	0,1

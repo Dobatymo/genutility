@@ -98,7 +98,7 @@ def read_or_raise(fin, size):
     """
 
     data = fin.read(size)
-    if len(data) == 0:  # fixme: add `and size != 0`?
+    if size != 0 and len(data) == 0:
         raise Empty
     elif len(data) != size:
         raise EOFError

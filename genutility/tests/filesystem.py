@@ -107,6 +107,8 @@ class FilesystemTest(MyTestCase):
             "com.apple.quicktime.artwork.mp4",
             "empty.mp4",
         ]
+        # The MP4 corpus has its own inventory checks; include it using pathlib as the reference walker.
+        rec.extend(path.name for path in Path("testfiles/mp4").rglob("*") if path.is_file())
 
         results = [entry.name for entry in scandir_rec("testfiles", rec=True)]
         self.assertUnorderedSeqEqual(base + rec, results)

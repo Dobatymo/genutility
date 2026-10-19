@@ -77,7 +77,6 @@
     "file": [],
     "fileformats": [
         "importlib-resources>=5; python_version<'3.9'",
-        "pandas",
         "piexif",
         "rich"
     ],
