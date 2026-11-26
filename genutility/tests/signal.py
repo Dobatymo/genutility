@@ -78,7 +78,9 @@ except KeyboardInterrupt:
             options["creationflags"] = subprocess.CREATE_NEW_CONSOLE
             options["startupinfo"] = startupinfo
 
-        result = subprocess.run([sys.executable, "-c", code], **options)
+        result = subprocess.run(  # noqa: S603 - runs fixed test code in a child interpreter
+            [sys.executable, "-c", code], check=False, **options
+        )
 
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("continued", result.stdout.splitlines())

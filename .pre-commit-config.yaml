@@ -38,7 +38,7 @@ repos:
   - id: ssort
     language_version: python3.13
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.8
+  rev: v0.17.6
   hooks:
   - id: ruff-check
     args: [--fix]

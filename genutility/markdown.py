@@ -42,8 +42,13 @@ def markdown_urls(s: str, ignore_trailing_dot: bool = True) -> str:
 
 def _parse_auto_link(inline, m, state):
     text = m.group(0)
+    if getattr(state, "brackets", None):
+        close = text.find("]")
+        if close >= 0:
+            state.append_token({"type": "text", "raw": text[:close]})
+            return m.start() + close
     if state.in_link:
-        inline.process_text(text, state)
+        state.append_token({"type": "text", "raw": text})
     else:
         state.append_token({"type": "auto_link", "raw": text[1:-1] if text.startswith("<") else text})
     return m.end()
@@ -52,7 +57,7 @@ def _parse_auto_link(inline, m, state):
 def _parse_auto_email(inline, m, state):
     text = m.group(0)
     if state.in_link:
-        inline.process_text(text, state)
+        state.append_token({"type": "text", "raw": text})
     else:
         state.append_token({"type": "auto_email", "raw": text[1:-1]})
     return m.end()

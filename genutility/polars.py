@@ -40,6 +40,9 @@ def pl_islice(df: pl.DataFrame, start: Optional[int], stop: Union[int, Type[_Uns
 
 
 plmap = {
+    "NoneType": pl.Null,
+    "int8": pl.Int8,
+    "uint8": pl.UInt8,
     "int64": pl.Int64,
     "uint64": pl.UInt64,
     "int32": pl.Int32,
@@ -52,30 +55,55 @@ plmap = {
 }
 
 
-def _to_polars_schema(d: Dict[str, Any], sort_keys: bool, float_bits: Literal[32, 64]) -> Dict[str, Any]:
-    fields = {}
+def _to_polars_dtype(
+    value: Any,
+    sort_keys: bool,
+    float_bits: Literal[32, 64],
+    min_int_bits: Optional[Literal[8, 16, 32, 64]],
+) -> Any:
+    if isinstance(value, dict):
+        return pl.Struct(_to_polars_schema(value, sort_keys, float_bits, min_int_bits))
+    elif isinstance(value, list):
+        return pl.List(_to_polars_dtype(value[0], sort_keys, float_bits, min_int_bits) if value else pl.Null)
+    elif value == "float":
+        return pl.Float32 if float_bits == 32 else pl.Float64
+
+    dtype = plmap[value]
+    if min_int_bits is not None and value.startswith(("int", "uint")):
+        unsigned = value.startswith("uint")
+        bits = int(value[4:] if unsigned else value[3:])
+        if bits < min_int_bits:
+            dtype = plmap[f"{'uint' if unsigned else 'int'}{min_int_bits}"]
+    return dtype
+
+
+def _to_polars_schema(
+    d: Dict[str, Any],
+    sort_keys: bool,
+    float_bits: Literal[32, 64],
+    min_int_bits: Optional[Literal[8, 16, 32, 64]],
+) -> Dict[str, Any]:
     keys = sorted(d) if sort_keys else d
-    for k in keys:
-        value = d[k]
-        if isinstance(value, dict):
-            fields[k] = pl.Struct(_to_polars_schema(value, sort_keys, float_bits))
-        elif isinstance(value, list):
-            if value:
-                item = value[0]
-                if isinstance(item, dict):
-                    fields[k] = pl.List(pl.Struct(_to_polars_schema(item, sort_keys, float_bits)))
-                else:
-                    fields[k] = pl.List(pl.Float32 if item == "float" and float_bits == 32 else plmap[item])
-        else:
-            fields[k] = pl.Float32 if value == "float" and float_bits == 32 else plmap[value]
-    return fields
+    return {key: _to_polars_dtype(d[key], sort_keys, float_bits, min_int_bits) for key in keys}
 
 
 def schema_simple_to_polars(
-    schema: Dict[str, Any], sort_keys: bool = False, float_bits: Literal[32, 64] = 64
+    schema: Dict[str, Any],
+    sort_keys: bool = False,
+    float_bits: Literal[32, 64] = 64,
+    *,
+    min_int_bits: Optional[Literal[8, 16, 32, 64]] = None,
 ) -> pl.Schema:
-    """Convert a simple schema to a Polars ``Schema``."""
+    """Convert a simple schema to a Polars ``Schema``.
+
+    ``NoneType`` and empty lists are retained as Null and List(Null).
+    ``min_int_bits`` sets a minimum integer width throughout nested schemas,
+    preserving signedness and larger widths. By default, integer widths are
+    unchanged.
+    """
 
     if float_bits not in (32, 64):
         raise ValueError("float_bits must be 32 or 64")
-    return pl.Schema(_to_polars_schema(schema, sort_keys, float_bits))
+    if min_int_bits not in (None, 8, 16, 32, 64):
+        raise ValueError("min_int_bits must be None, 8, 16, 32 or 64")
+    return pl.Schema(_to_polars_schema(schema, sort_keys, float_bits, min_int_bits))

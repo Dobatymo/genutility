@@ -567,7 +567,7 @@ _PARSERS = {
         jp2_colr,
     )
 }
-_ATOMS_RESOURCE = files("genutility.fileformats").joinpath("data", "isobmff-atoms.tsv")
+_ATOMS_RESOURCE = files("genutility.fileformats").joinpath("data").joinpath("isobmff-atoms.tsv")
 
 
 class AtomDefinition(NamedTuple):

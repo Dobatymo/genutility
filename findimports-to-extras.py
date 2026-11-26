@@ -86,6 +86,8 @@ MANUAL_FIXES_ADD = {
     "genutility.tests": [
         "scipy<1.13; python_version>='3.9' and python_version<'3.13'",  # for gensim
         "scipy>=1.14.1; python_version>='3.13'",
+        # PyArrow 26 requires NumPy 2; setup-python 3.11 and 3.12 preinstall NumPy 1.26.
+        "pyarrow<26; python_version<'3.13'",
     ],
     "genutility.toml": ["toml"],
     "genutility.twisted": ["twisted"],

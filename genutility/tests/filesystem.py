@@ -91,7 +91,14 @@ class FilesystemTest(MyTestCase):
             pass
 
     def test_scandir_rec(self):
-        base = ["joined.pdf", "quadrant-0.png", "quadrant-1.png", "quadrant-2.png", "quadrant-3.png"]
+        base = [
+            "__init__.py",
+            "joined.pdf",
+            "quadrant-0.png",
+            "quadrant-1.png",
+            "quadrant-2.png",
+            "quadrant-3.png",
+        ]
         rec = [
             "01.txt",
             "02.txt",
@@ -110,7 +117,9 @@ class FilesystemTest(MyTestCase):
         # The MP4 corpus has its own inventory checks; include it using pathlib as the reference walker.
         rec.extend(path.name for path in Path("testfiles/mp4").rglob("*") if path.is_file())
 
-        results = [entry.name for entry in scandir_rec("testfiles", rec=True)]
+        results = [
+            entry.name for entry in scandir_rec("testfiles", rec=True) if "__pycache__" not in Path(entry.path).parts
+        ]
         self.assertUnorderedSeqEqual(base + rec, results)
 
         results = [entry.name for entry in scandir_rec("testfiles", rec=False)]
@@ -119,7 +128,8 @@ class FilesystemTest(MyTestCase):
     def test_scandir_rec_simple_path(self):
         results = [entry.name for entry in scandir_rec_simple(Path("testfiles"), rec=False)]
         self.assertUnorderedSeqEqual(
-            ["joined.pdf", "quadrant-0.png", "quadrant-1.png", "quadrant-2.png", "quadrant-3.png"], results
+            ["__init__.py", "joined.pdf", "quadrant-0.png", "quadrant-1.png", "quadrant-2.png", "quadrant-3.png"],
+            results,
         )
 
     def test_scandir_rec_links(self):

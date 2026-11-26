@@ -1,5 +1,5 @@
 from operator import itemgetter
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Mapping, Optional
 
 import pandas as pd
 import requests
@@ -19,8 +19,20 @@ def wikidata_to_dataframe(result: Dict[str, Any]) -> pd.DataFrame:
     return pd.DataFrame.from_records(gen(), columns=cols)
 
 
-def query_wikidata(query: str, timeout: Optional[float] = 120.0) -> Dict[str, Any]:
+def query_wikidata(
+    query: str,
+    timeout: Optional[float] = 120.0,
+    *,
+    headers: Optional[Mapping[str, str]] = None,
+    session: Optional[requests.Session] = None,
+) -> Dict[str, Any]:
+    """Query Wikidata with optional request headers and a caller-owned session.
+
+    Headers can set a descriptive User-Agent or override session defaults.
+    The caller remains responsible for closing a supplied session.
+    """
     url = "https://query.wikidata.org/sparql"
-    r = requests.get(url, params={"format": "json", "query": query}, timeout=timeout)
+    client = requests if session is None else session
+    r = client.get(url, params={"format": "json", "query": query}, timeout=timeout, headers=headers)
     r.raise_for_status()
     return r.json()
