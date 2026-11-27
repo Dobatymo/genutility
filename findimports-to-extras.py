@@ -21,7 +21,7 @@ modmap = {
     "cv2": "opencv-python",
     "cwinsdk": "ctypes-windows-sdk>=0.0.15; sys_platform=='win32'",
     "flask": "flask>=0.12.3",
-    "gensim": "gensim>=4.0.0",
+    "gensim": "gensim>=4.0.0; python_version<'3.14'",  # Gensim 4.4.0 fails to build on Python 3.14.
     "msgpack": "msgpack>=0.6.0",
     "nltk": "nltk>=3.6.1",
     "numba": "numba; python_version<'3.11'",
@@ -193,6 +193,9 @@ def main(path: Path) -> None:
                     raise ValueError(f"Recursive solver failed for {k}: {vals}")
 
         sorted_extras = {k[11:]: v for k, v in sorted_extras.items() if not k.startswith("genutility._")}
+
+        # The download manager's GUI demo is not exercised by the tests.
+        sorted_extras["tests"] = [dep for dep in sorted_extras["tests"] if dep not in {"wxasync", "wxPython>=4"}]
 
         with open("extras_require.json", "w", encoding="utf-8") as fw:
             json.dump(sorted_extras, fw, indent="    ")

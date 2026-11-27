@@ -94,7 +94,7 @@
     ],
     "func": [],
     "gensim": [
-        "gensim>=4.0.0",
+        "gensim>=4.0.0; python_version<'3.14'",
         "keras",
         "numpy"
     ],
@@ -165,7 +165,7 @@
         "numpy"
     ],
     "nlp": [
-        "gensim>=4.0.0",
+        "gensim>=4.0.0; python_version<'3.14'",
         "keras",
         "nltk>=3.6.1",
         "numpy"
@@ -295,7 +295,7 @@
         "datasets",
         "evaluate",
         "flask>=0.12.3",
-        "gensim>=4.0.0",
+        "gensim>=4.0.0; python_version<'3.14'",
         "gmpy2",
         "hypothesis",
         "importlib-metadata>=1.4",
@@ -315,6 +315,7 @@
         "Pillow>=9.2.0",
         "polars>=1.18; python_version>='3.9'",
         "py7zr>=0.20.2",
+        "pyarrow",
         "pyarrow<26; python_version<'3.13'",
         "pypdf>=3.1.0,!=5.0.0",
         "pywin32; sys_platform=='win32'",

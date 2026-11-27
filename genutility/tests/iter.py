@@ -4,7 +4,7 @@ from operator import add
 from os import devnull
 from unittest.mock import Mock
 
-from hypothesis import given, strategies
+from hypothesis import HealthCheck, given, settings, strategies
 
 from genutility.iter import (
     EmptyIterable,
@@ -168,6 +168,7 @@ class IterTest(MyTestCase):
         result = reversedzip(*its)
         self.assertIterEqual(result, truth)
 
+    @settings(suppress_health_check=[HealthCheck.too_slow])
     @given(strategies.lists(strategies.integers()), strategies.lists(strategies.integers()))
     def test_reversedzip_2(self, it1, it2):
         result = list(reversedzip(*reversedzip(*reversedzip(*reversedzip(it1, it2)))))

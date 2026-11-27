@@ -1,12 +1,14 @@
 from itertools import islice
 from string import ascii_letters
-from typing import Dict, Iterable, Iterator, List, Optional, Sequence, TextIO, Union
+from typing import TYPE_CHECKING, Dict, Iterable, Iterator, List, Optional, Sequence, TextIO, Union
 
 from nltk.tokenize import word_tokenize as tokenize
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 
 from .file import PathOrTextIO
-from .gensim import KeyedVectors
+
+if TYPE_CHECKING:
+    from .gensim import KeyedVectors
 
 english_word_chars = set(ascii_letters) | {"-", "'"}
 
@@ -17,7 +19,7 @@ def resembles_english_word(word: str) -> bool:
     return all(t in english_word_chars for t in word)
 
 
-def gensim_indexer(embeddings: KeyedVectors, doc: str, ignore: bool = True) -> Iterator[int]:
+def gensim_indexer(embeddings: "KeyedVectors", doc: str, ignore: bool = True) -> Iterator[int]:
     for word in tokenize(doc):
         try:
             yield embeddings.vocab[word.lower()].index
@@ -28,7 +30,7 @@ def gensim_indexer(embeddings: KeyedVectors, doc: str, ignore: bool = True) -> I
                 raise
 
 
-def batch_gensim_indexer(embeddings: KeyedVectors, docs: Iterable[str], ignore: bool = True) -> Iterator[List[int]]:
+def batch_gensim_indexer(embeddings: "KeyedVectors", docs: Iterable[str], ignore: bool = True) -> Iterator[List[int]]:
     for doc in docs:
         yield list(gensim_indexer(embeddings, doc, ignore))
 
